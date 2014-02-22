@@ -1,9 +1,7 @@
-; ex: set syn=asm68k: 
+; vim: set syn=asm68k :
 
-; This is my working copy v2, started 2014-02-20.
-; Disassembly of v2.00 uncracked from back2roots.
-; Previous disassembly had preprocessor enabled, which found some useful strings
-; in the code area, but messed up some code.
+; Disassembly of K240 v2.000, uncracked version from back2roots.org.
+; This is the main game executable on Disk 2.
 
 ; USEFUL RESOURCES: http://68k.hax.com
 ; http://www.textfiles.com/programming/AMIGA/mapamiga.txt
