@@ -396,28 +396,51 @@ SAVEDATA4_BUILDINGS: ; 33600 bytes
 ; [2]   BYTE  Under construction(?)
 ; [4-5] ????  Coords?
 ; [6-11] ???? Extra coords for large buildings / animation frames
-; [12]  BYTE  Time-to-Fire (number of ticks before turret can fire again)
+; [12]  BYTE  Time-to-Fire (ticks before turret/landingpad can activate)
+;    Construction Yard: ID number
 ; [13]  ????
 	DS.L	$00000000		;00552: 00000000
 BUFFER_11: ; 27564 bytes ; probably game strings
 	DS.L	$00000000		;00556: 00000000
 SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ; 750 bytes x 24 asteroids. Asteroid format is as follows:
+; [0-3]     LONG     HANGAR  Pointer to hangar?
+; [24]      BYTE     Asteroid engine (set true when a power shortage happens)
+;   also checked for 26 by shipyard?
 ; [60-79]   WORD[10] ORELEFT (Un-mined ore in asteroid)
-; [89]      BYTE     b2 (Gravity Nullifier enabled)
-; [92]      BYTE     Unrest? Power shortage?
-;   byte 1: If 0, Mine operates at 40% efficiency
-;   byte 2: If 0, Deep Bore Mine and Seismic Penetrator operate at 40% efficiency
+; [88]      BYTE     
+; [89]      BYTE     On/Off for buildings
+;   bit 2: Gravity Nullifier
+;   bit 3: Asteroid Engines
+; [92]      BYTE     Unrest? Power shortage? Worker shortage?
+;   bit 1: If 0, Mine operates at 40% efficiency
+;   bit 2: If 0, Deep Bore Mine and Seismic Penetrator operate at 40% efficiency
+;   bit 3: If 0, Construction Yard operates at 40% efficiency
+; [168-169] WORD     ??? (Must be nonzero for landing pad)
+;   Decrements when landing pad triggers. maybe number of ships in asteroid
 ; [182-201] WORD[10] OREMINED (Ore in asteroid's stores)
 ; [202-203] WORD     ORETOTAL (Total amount of ore stored)
-; [718-719] WORD     POWER??  (Certain buildings won't run if this is too high)
-;   3+: Gravity Nullifier
+; [204-363] BYTE[8]x20   Assault Fighters in hangar?
+;   [0] BYTE  Armour (other bytes must be 1 for fleet, 6 for hardpoints?)
+; [364-523] BYTE[8]x20   Combat Eagles in hangar?
+; [524-683] BYTE[8]x20   Scout Ships in hangar?
+; [686-687] WORD     ???
+; [718-719] WORD     POWERSHORTAGE  (Certain buildings won't run if this is too high)
+;   double-check these figures to avoid off-by-one errors
+;   1+: Asteroid Engines
+;   3+: Gravity Nullifier (clears 89 bit 2)
+;   5+: Anti-Missile Pod
 ;   6+: Seismic Penetrator
 ;   8+: Deep Bore Mine
 ;   9+: Mine
+;   11+: Construction Yard
+;   13+: Repair Facility
 ;   14+: Turret (any)
 ; [720-721] ??? possibly power produced by CPU
 ; [722-727] WORD[3]  CPUFAW (Food/Air/Water produced by CPU)
+; [734]     BYTE     ???
+; [742-745] BYTE[4]  ???
+; [746-747] WORD     ????
 	DS.L	$00000000		;0055a: 00000000
 BUFFER_13: ; 4752 bytes
 	DS.L	$00000000		;0055e: 00000000
@@ -4831,7 +4854,7 @@ LAB_0282:
 	MULU	#$000a,D0		;03c4a: c0fc000a
 	LEA	LAB_1108,A0		;03c4e: 41f90001b27a
 	MOVE.L	6(A0,D0.W),D0		;03c54: 20300006
-	ADD.L	D0,CASH		;03c58: d1b90002de64
+	ADD.L	D0,CASH_GENERAL		;03c58: d1b90002de64
 	BRA.W	LAB_027B		;03c5e: 6000fefe
 LAB_0283:
 	CMPI.B	#$02,D2			;03c62: 0c020002
@@ -4844,9 +4867,9 @@ LAB_0283:
 	MULU	#$000a,D1		;03c7e: c2fc000a
 	LEA	LAB_1108,A1		;03c82: 43f90001b27a
 	MOVE.L	6(A1,D1.W),D2		;03c88: 24311006
-	SUB.L	D2,CASH		;03c8c: 95b90002de64
+	SUB.L	D2,CASH_GENERAL		;03c8c: 95b90002de64
 	BPL.S	LAB_0285		;03c92: 6a12
-	ADD.L	D2,CASH		;03c94: d5b90002de64
+	ADD.L	D2,CASH_GENERAL		;03c94: d5b90002de64
 LAB_0284:
 	MOVEQ	#17,D0			;03c9a: 7011
 	JSR	LAB_105E		;03c9c: 4eb90001a50c
@@ -5390,7 +5413,7 @@ LAB_02C2:
 	DBF	D1,LAB_02C2		;0444e: 51c9fffc
 ;
 	MOVE.W	(A7)+,LAB_12DC		;04452: 33df0002e44c
-	MOVE.L	#$0003d090,CASH 	;04458: Initialize cash to 250,000
+	MOVE.L	#$0003d090,CASH_GENERAL 	;04458: Initialize cash to 250,000
 	LEA	SAVEDATA2_000_CARGO,A0		;04462: 41f900020a88
 	MOVEQ	#9,D1			;04468: 
 LAB_02C3:
@@ -8547,7 +8570,7 @@ LAB_0472:
 	SF	12(A0)			;06a84: 51e8000c
 	CMPI.B	#$1a,D0			;06a88: 0c00001a
 	BNE.S	LAB_0475		;06a8c: 6628
-	LEA	LAB_12C6,A1		;06a8e: 43f90002e186
+	LEA	SHIPYARDS,A1		;06a8e: 43f90002e186
 	MOVEQ	#0,D5			;06a94: 7a00
 LAB_0473:
 	TST.B	(A1)			;06a96: 4a11
@@ -8579,12 +8602,13 @@ LAB_0476:
 	ADDA.L	D5,A1			;06adc: d3c5
 	MOVEQ	#0,D5			;06ade: 7a00
 	MOVE.W	4(A1),D5		;06ae0: 3a290004
-	CMP.L	LAB_1277,D5		;06ae4: bab90002de68
+	CMP.L	CASH_BUILDINGS,D5		;06ae4: bab90002de68
 	BLE.S	LAB_0477		;06aea: 6f08
 	MOVE.W	#$009a,D0		;06aec: 303c009a
 	BRA.W	LAB_047D		;06af0: 600000ac
 LAB_0477:
-	SUB.L	D5,LAB_1277		;06af4: 9bb90002de68
+; building armour increases by 10
+	SUB.L	D5,CASH_BUILDINGS		;06af4: 9bb90002de68
 	MOVE.B	D0,0(A0)		;06afa: 11400000
 	MOVE.B	6(A1),1(A0)		;06afe: 116900060001
 	TST.B	BP_06_BUILDINGARMOUR		;06b04: 4a390002e430
@@ -8971,7 +8995,7 @@ LAB_04A0:
 LAB_04A1:
 	MOVEQ	#0,D0			;06fe6: 7000
 	MOVE.B	12(A0),D0		;06fe8: 1028000c
-	LEA	LAB_12C6,A1		;06fec: 43f90002e186
+	LEA	SHIPYARDS,A1		;06fec: 43f90002e186
 	ADD.W	D0,D0			;06ff2: d040
 	MOVE.W	D0,D1			;06ff4: 3200
 	ASL.W	#2,D1			;06ff6: e541
@@ -9766,9 +9790,9 @@ LAB_0505:
 	BSR.W	LAB_04E0		;0789c: 6100fc84
 	MOVE.L	A0,-(A7)		;078a0: 2f08
 	ADDQ.L	#4,A0			;078a2: 5888
-	MOVE.L	CASH,D0		;078a4: 20390002de64
-	ADD.L	LAB_1277,D0		;078aa: d0b90002de68
-	ADD.L	LAB_1278,D0		;078b0: d0b90002de6c
+	MOVE.L	CASH_GENERAL,D0		;078a4: 20390002de64
+	ADD.L	CASH_BUILDINGS,D0		;078aa: d0b90002de68
+	ADD.L	CASH_SHIPS,D0		;078b0: d0b90002de6c
 	ADD.L	LAB_1279,D0		;078b6: d0b90002de70
 	ADD.L	LAB_127A,D0		;078bc: d0b90002de74
 	CMPI.L	#$00989680,D0		;078c2: 10,000,000
@@ -11481,7 +11505,7 @@ LAB_05C5:
 	BEQ.S	LAB_05C6		;09040: 6712
 	MOVE.L	D2,TEMP_003		;09042: 23c20001c8ce
 	SF	LAB_114D		;09048: 51f90001cb01
-	ADD.L	D2,CASH		;0904e: d5b90002de64
+	ADD.L	D2,CASH_GENERAL		;0904e: d5b90002de64
 LAB_05C6:
 	LEA	LAB_133F,A0		;09054: 41f90002e9c0
 	MOVEA.L	BUFFER_01,A1		;0905a: 22790000052e
@@ -12113,7 +12137,7 @@ LAB_060E:
 LAB_060F:
 	MOVEQ	#0,D2			;0998e: 7400
 	MOVE.B	12(A3),D2		;09990: 142b000c
-	LEA	LAB_12C6,A2		;09994: 45f90002e186
+	LEA	SHIPYARDS,A2		;09994: 45f90002e186
 	ADD.W	D2,D2			;0999a: d442
 	MOVE.W	D2,D3			;0999c: 3602
 	ASL.W	#2,D3			;0999e: e543
@@ -12220,7 +12244,7 @@ LAB_0618:
 	BSR.W	LAB_04C4		;09b0e: 6100d802
 	MOVE.W	LAB_062D,D0		;09b12: 303900009d9c
 	ADD.W	D0,D0			;09b18: d040
-	LEA	LAB_11B1,A1		;09b1a: 43f90001d812
+	LEA	HARDPOINTCOSTS,A1		;09b1a: 43f90001d812
 	MOVE.W	0(A1,D0.W),D0		;09b20: 30310000
 	EXT.L	D0			;09b24: 48c0
 	LEA	LAB_1144,A0		;09b26: 41f90001c8f0
@@ -12301,7 +12325,7 @@ LAB_0620:
 	MOVEQ	#0,D2			;09c62: 7400
 	MOVE.W	LAB_12A7,D2		;09c64: 34390002e088
 	MOVE.B	12(A3),D2		;09c6a: 142b000c
-	LEA	LAB_12C6,A2		;09c6e: 45f90002e186
+	LEA	SHIPYARDS,A2		;09c6e: 45f90002e186
 	ADD.W	D2,D2			;09c74: d442
 	MOVE.W	D2,D3			;09c76: 3602
 	ASL.W	#2,D3			;09c78: e543
@@ -12328,7 +12352,7 @@ LAB_0621:
 	SF	FLAG_12E4		;09ca8: 51f90002e454
 	RTS				;09cae: 4e75
 LAB_0622:
-	LEA	LAB_11B1,A0		;09cb0: 41f90001d812
+	LEA	HARDPOINTCOSTS,A0		;09cb0: 41f90001d812
 	MOVEM.W	LAB_0071,D0-D1		;09cb6: 4cb9000300000760
 	MOVEQ	#7,D4			;09cbe: 7807
 LAB_0623:
@@ -12515,7 +12539,7 @@ LAB_0638:
 	BSR.W	LAB_04C4		;09f0c: 6100d404
 	MOVE.W	LAB_064B,D0		;09f10: 30390000a178
 	ADD.W	D0,D0			;09f16: d040
-	LEA	LAB_11B1,A1		;09f18: 43f90001d812
+	LEA	HARDPOINTCOSTS,A1		;09f18: 43f90001d812
 	MOVE.W	0(A1,D0.W),D0		;09f1e: 30310000
 	EXT.L	D0			;09f22: 48c0
 	LEA	LAB_1144,A0		;09f24: 41f90001c8f0
@@ -12609,7 +12633,7 @@ LAB_063F:
 	SF	FLAG_12E4		;0a084: 51f90002e454
 	RTS				;0a08a: 4e75
 LAB_0640:
-	LEA	LAB_11B1,A0		;0a08c: 41f90001d812
+	LEA	HARDPOINTCOSTS,A0		;0a08c: 41f90001d812
 	MOVEM.W	LAB_0071,D0-D1		;0a092: 4cb9000300000760
 	MOVEQ	#7,D4			;0a09a: 7807
 LAB_0641:
@@ -12803,7 +12827,7 @@ LAB_0652:
 	MOVE.W	14(A0),LAB_1193		;0a30c: 33e8000e0001d7a0
 	MOVE.W	10(A0),LAB_1199		;0a314: 33e8000a0001d7ac
 	LEA	LAB_11A3,A1		;0a31c: 43f90001d7c6
-	LEA	LAB_11B1,A2		;0a322: 45f90001d812
+	LEA	HARDPOINTCOSTS,A2		;0a322: 45f90001d812
 	LEA	LAB_11A6,A3		;0a328: 47f90001d7d2
 	MOVE.W	#$009e,D0		;0a32e: 303c009e
 	MOVE.W	D0,(A3)			;0a332: 3680
@@ -12969,7 +12993,7 @@ LAB_0661:
 	BSR.W	LAB_04C4		;0a564: 6100cdac
 	MOVE.W	LAB_067D,D0		;0a568: 30390000a872
 	ADD.W	D0,D0			;0a56e: d040
-	LEA	LAB_11B1,A1		;0a570: 43f90001d812
+	LEA	HARDPOINTCOSTS,A1		;0a570: 43f90001d812
 	MOVE.W	0(A1,D0.W),D0		;0a576: 30310000
 	EXT.L	D0			;0a57a: 48c0
 	LEA	LAB_1144,A0		;0a57c: 41f90001c8f0
@@ -13108,7 +13132,7 @@ LAB_0671:
 	SF	FLAG_12E4		;0a77e: 51f90002e454
 	RTS				;0a784: 4e75
 LAB_0672:
-	LEA	LAB_11B1,A0		;0a786: 41f90001d812
+	LEA	HARDPOINTCOSTS,A0		;0a786: 41f90001d812
 	MOVEM.W	LAB_0071,D0-D1		;0a78c: 4cb9000300000760
 	MOVEQ	#7,D4			;0a794: 7807
 LAB_0673:
@@ -13211,7 +13235,7 @@ LAB_0682:
 LAB_0683:
 	MOVEQ	#0,D2			;0a8aa: 7400
 	MOVE.B	12(A3),D2		;0a8ac: 142b000c
-	LEA	LAB_12C6,A2		;0a8b0: 45f90002e186
+	LEA	SHIPYARDS,A2		;0a8b0: 45f90002e186
 	ADD.W	D2,D2			;0a8b6: d442
 	MOVE.W	D2,D3			;0a8b8: 3602
 	ASL.W	#2,D3			;0a8ba: e543
@@ -13297,7 +13321,7 @@ LAB_0686:
 	MOVE.W	#$00aa,D0		;0a9fa: 303c00aa
 	MOVE.B	#$0b,LAB_12F9		;0a9fe: 13fc000b0002e472
 	MOVE.L	LAB_11A0,D1		;0aa06: 22390001d7be
-	CMP.L	LAB_1278,D1		;0aa0c: b2b90002de6c
+	CMP.L	CASH_SHIPS,D1		;0aa0c: b2b90002de6c
 	BMI.S	LAB_0688		;0aa12: 6b2e
 	MOVE.B	#$07,LAB_12F9		;0aa14: 13fc00070002e472
 	MOVE.W	#$00a9,D0		;0aa1c: 303c00a9
@@ -13348,7 +13372,7 @@ LAB_068D:
 	MOVEA.L	BUFFER_00,A6		;0aaca: 2c790000052a
 	BSR.W	LAB_03BE		;0aad0: 6100aab2
 	MOVEQ	#4,D3			;0aad4: 7604
-	LEA	CASH,A2		;0aad6: 45f90002de64
+	LEA	CASH_GENERAL,A2		;0aad6: 45f90002de64
 	LEA	LAB_1178,A4		;0aadc: 49f90001d504
 	MOVEQ	#72,D1			;0aae2: 7248
 LAB_068E:
@@ -13432,7 +13456,7 @@ LAB_0694:
 	MOVE.W	D1,D2			;0abfc: 3401
 	ASL.W	#3,D2			;0abfe: e742
 	ADDA.W	D2,A1			;0ac00: d2c2
-	LEA	CASH,A2		;0ac02: 45f90002de64
+	LEA	CASH_GENERAL,A2		;0ac02: 45f90002de64
 	MOVE.W	D1,D3			;0ac08: 3601
 	ASL.W	#2,D3			;0ac0a: e543
 	ADDA.W	D3,A2			;0ac0c: d4c3
@@ -13491,15 +13515,15 @@ LAB_069E:
 	MOVE.L	D0,(A2)			;0ac8a: 2480
 	SUB.L	LAB_06A2,D0		;0ac8c: 90b90000acce
 	BEQ.W	LAB_068D		;0ac92: 6700fe30
-	SUB.L	D0,CASH		;0ac96: 91b90002de64
+	SUB.L	D0,CASH_GENERAL		;0ac96: 91b90002de64
 	BMI.S	LAB_069F		;0ac9c: 6b0c
 	MOVEQ	#2,D0			;0ac9e: 7002
 	JSR	LAB_105E		;0aca0: 4eb90001a50c
 	BRA.W	LAB_068D		;0aca6: 6000fe1c
 LAB_069F:
-	MOVE.L	CASH,D0		;0acaa: 20390002de64
+	MOVE.L	CASH_GENERAL,D0		;0acaa: 20390002de64
 	MOVEQ	#0,D1			;0acb0: 7200
-	MOVE.L	D1,CASH		;0acb2: 23c10002de64
+	MOVE.L	D1,CASH_GENERAL		;0acb2: 23c10002de64
 	ADD.L	D0,(A2)			;0acb8: d192
 	BRA.W	LAB_068D		;0acba: 6000fe08
 LAB_06A0:
@@ -16930,7 +16954,7 @@ LAB_0838:
 	LEA	14(A0),A0		;0d8c0: 41e8000e
 	DBF	D0,LAB_0838		;0d8c4: loop
 ; 
-	CMPI.L	#$00007530,CASH	        ;0d8c8: 30,000CR (new colony price)
+	CMPI.L	#$00007530,CASH_GENERAL	        ;0d8c8: 30,000CR (new colony price)
 	BPL.S	LAB_0839		;0d8d2: if not enough cash
 	MOVE.W	#$011e,D0		;0d8d4: not established: lack of money
 	MOVE.L	LAB_1289,D1		;0d8d8: 
@@ -16940,7 +16964,7 @@ LAB_0838:
 	BSR.W	LAB_05C2		;0d8e4: 6100b6ec
 	BRA.S	LAB_083A		;0d8e8: return -1
 LAB_0839: ; if colony can be placed, do so
-	SUBI.L	#$00007530,CASH	        ;0d8ea: pay for new colony
+	SUBI.L	#$00007530,CASH_GENERAL	        ;0d8ea: pay for new colony
 	MOVE.W	#$011d,D0		;0d8f4: str001f: colony established
 	MOVE.L	LAB_1289,D1		;0d8f8: 22390002ded4
 	MOVEQ	#0,D2			;0d8fe: 7400
@@ -18157,12 +18181,12 @@ LAB_08D0:
 	CMPI.B	#$42,D0			;0e6fe: 0c000042
 	BMI.S	LAB_08D2		;0e702: 6b1e
 	BNE.S	LAB_08D1		;0e704: 660c
-	ADDI.L	#$00001388,CASH	        ;0e706: add 5,000 cash
+	ADDI.L	#$00001388,CASH_GENERAL	        ;0e706: add 5,000 cash
 	BRA.S	LAB_08D2		;0e710: 6010
 LAB_08D1:
 	CMPI.B	#$43,D0			;0e712: 0c000043
 	BNE.S	LAB_08D2		;0e716: 660a
-	ADDI.L	#$00002710,CASH	        ;0e718: add 10,000 cash
+	ADDI.L	#$00002710,CASH_GENERAL	        ;0e718: add 10,000 cash
 LAB_08D2:
 	TST.B	8(A6)			;0e722: 4a2e0008
 	BEQ.W	LAB_08D5		;0e726: 67000082
@@ -18239,12 +18263,12 @@ LAB_08DA:
 	CMPI.B	#$42,D0			;0e816: 0c000042
 	BMI.S	LAB_08DC		;0e81a: 6b1e
 	BNE.S	LAB_08DB		;0e81c: 660c
-	ADDI.L	#$00001388,CASH   	;0e81e: add 5,000 cash
+	ADDI.L	#$00001388,CASH_GENERAL   	;0e81e: add 5,000 cash
 	BRA.S	LAB_08DC		;0e828: 6010
 LAB_08DB:
 	CMPI.B	#$43,D0			;0e82a: 0c000043
 	BNE.S	LAB_08DC		;0e82e: 660a
-	ADDI.L	#$00002710,CASH	        ;0e830: add 10,000 cash
+	ADDI.L	#$00002710,CASH_GENERAL	        ;0e830: add 10,000 cash
 LAB_08DC:
 	TST.B	8(A6)			;0e83a: 4a2e0008
 	BEQ.S	LAB_08DD		;0e83e: 6744
@@ -21355,7 +21379,7 @@ LAB_0A6D:
 	MOVEM.L	D0/D5-D6/A3-A4,-(A7)	;10e82: 48e78618
 	MOVEQ	#5,D5			;10e86: 7a05
 	LEA	42(A6),A3		;10e88: 47ee002a
-	LEA	LAB_11C6,A4		;10e8c: 49f90001e7a4
+	LEA	HARDPOINTARMOUR,A4		;10e8c: 49f90001e7a4
 	MOVE.W	50(A6),D0		;10e92: 302e0032
 LAB_0A6E:
 	MOVE.B	(A3)+,D6		;10e96: 1c1b
@@ -25055,7 +25079,7 @@ LAB_0C47:
 	DBF	D7,Loop_0C45		;13e24: 
 LAB_0C48:
 	ADDA.L	#$00000050,A4		;13e28: +80
-	ADDA.L	#$000008c4,A6		;13e2e: +2244 (next asteroidmap)
+	ADDA.L	#$000008c4,A6		;13e2e: +2244 (next asteroidmap?)
 	LEA	750(A5),A5		;13e34: next asteroid
 	ADDA.L	#$00000578,A1		;13e38: +1400
 	DBF	D0,Loop_0C44		;13e3e: 51c8ff86
@@ -25121,7 +25145,8 @@ LAB_0C4D:
 LAB_0C4E:
 	RTS				;13f04: 4e75
 GravityNullifier:
-; Possibly switches its gravity control off during an outage?
+; Switches itself off during a power shortage.
+; Doesn't switch itself back on when power is restored, unlike Asteroid Engines.
 	CMPI.W	#$0003,718(A5)		;13f06:
 	BMI.S	Return_0C50		;13f0c: if ast[718] >= 3:
 	BCLR	#2,89(A5)		;13f0e:   ast[89][2]==0
@@ -25492,13 +25517,15 @@ MineOre: ; mine one ore and attempt to move to stores
 Return_0C7C:
 	RTS				;14328: 
 AsteroidEngines:
+; Switches itself off during a power shortage.
+; Switches itself back on when power is restored.
 	CMPI.W	#$0001,718(A5)		;1432a: 0c6d000102ce
-	BMI.S	LAB_0C7E		;14330: 6b0c
-	BCLR	#3,89(A5)		;14332: 08ad00030059
-	ST	24(A5)			;14338: 50ed0018
+	BMI.S	LAB_0C7E		;14330: if 1 or higher:
+	BCLR	#3,89(A5)		;14332: switch off
+	ST	24(A5)			;14338: this doesn't reset when power returns
 	RTS				;1433c: 4e75
 LAB_0C7E:
-	BSET	#3,89(A5)		;1433e: 
+	BSET	#3,89(A5)		;1433e: switch on
 	RTS				;14344: 4e75
 StoreOre: ; occurs after ore is extracted from any mine type
 ; a3 variable for relevant ore store, a5 current asteroid, a4 SAVEDATA6_BLDGTOTAL
@@ -25529,120 +25556,133 @@ OreOverflow: ; no room to store ore ore
 	RTS				;14382: 
 ConstructionYard:
 	CMPI.W	#$000b,718(A5)		;14384: 0c6d000b02ce
-	BPL.S	LAB_0C83		;1438a: 6a36
-	TST.W	14(A4)			;1438c: 4a6c000e
-	BEQ.S	LAB_0C83		;14390: 6730
-	BTST	#3,92(A5)		;14392: 082d0003005c
-	BNE.S	LAB_0C82		;14398: 660e
-	MOVEQ	#10,D0			;1439a: 700a
-	JSR	GetRand		;1439c: 4eb900000c0c
-	CMPI.B	#$04,D0			;143a2: 0c000004
-	BPL.S	LAB_0C83		;143a6: 6a1a
+	BPL.S	Return_0C83		;1438a: 
+	TST.W	14(A4)			;1438c: Weapons Factory?
+	BEQ.S	Return_0C83		;14390: 
+	BTST	#3,92(A5)		;14392: operates at 40% efficiency in some case
+	BNE.S	LAB_0C82		;14398: 
+	MOVEQ	#10,D0			;1439a: 
+	JSR	GetRand		        ;1439c: 
+	CMPI.B	#$04,D0			;143a2: 
+	BPL.S	Return_0C83		;143a6: 
 LAB_0C82:
-	MOVEQ	#0,D2			;143a8: 7400
-	MOVE.B	12(A0),D2		;143aa: 1428000c
-	LEA	LAB_12C6,A2		;143ae: 45f90002e186
-	ADD.W	D2,D2			;143b4: d442
-	MOVE.W	D2,D3			;143b6: 3602
-	ASL.W	#2,D3			;143b8: e543
-	ADD.W	D3,D2			;143ba: d443
-	ADDA.W	D2,A2			;143bc: d4c2
-	TST.B	(A2)+			;143be: 4a1a
-	BGT.S	LAB_0C84		;143c0: 6e02
-LAB_0C83:
-	RTS				;143c2: 4e75
+	MOVEQ	#0,D2			;143a8: 
+	MOVE.B	12(A0),D2		;143aa: 
+	LEA	SHIPYARDS,A2		;143ae: construction yards
+	ADD.W	D2,D2			;143b4: 
+	MOVE.W	D2,D3			;143b6: 
+	ASL.W	#2,D3			;143b8: 
+	ADD.W	D3,D2			;143ba: 
+	ADDA.W	D2,A2			;143bc: 
+	TST.B	(A2)+			;143be: if yards+(ID*10)
+	BGT.S	LAB_0C84		;143c0:
+Return_0C83:
+	RTS				;143c2:
 LAB_0C84:
-	MOVE.B	(A2)+,D0		;143c4: 101a
-	EXT.W	D0			;143c6: 4880
-	CMPI.B	#$32,D0			;143c8: 0c000032
-	BMI.S	LAB_0C85		;143cc: 6b04
-	SUBI.W	#$0030,D0		;143ce: 04400030
+	MOVE.B	(A2)+,D0		;143c4: d0 = yard[1]
+	EXT.W	D0			;143c6: 
+	CMPI.B	#$32,D0			;143c8: 
+	BMI.S	LAB_0C85		;143cc: 
+	SUBI.W	#$0030,D0		;143ce: ship id
 LAB_0C85:
-	MULU	#$0018,D0		;143d2: c0fc0018
-	LEA	TERRANSHIPSTATS_00,A1		;143d6: 43f90001e544
-	ADDA.L	D0,A1			;143dc: d3c0
-	MOVEQ	#0,D3			;143de: 7600
-	MOVE.W	12(A1),D3		;143e0: 3629000c
-	LEA	LAB_11B1,A3		;143e4: 47f90001d812
-	MOVEQ	#5,D0			;143ea: 7005
-LAB_0C86:
-	MOVE.B	(A2)+,D2		;143ec: 141a
-	BMI.S	LAB_0C87		;143ee: 6b0c
-	EXT.W	D2			;143f0: 4882
-	ADD.W	D2,D2			;143f2: d442
-	MOVE.W	0(A3,D2.W),D2		;143f4: 34332000
-	EXT.L	D2			;143f8: 48c2
-	ADD.L	D2,D3			;143fa: d682
+	MULU	#$0018,D0		;143d2: 
+	LEA	TERRANSHIPSTATS_00,A1	;143d6: 
+	ADDA.L	D0,A1			;143dc: 
+	MOVEQ	#0,D3			;143de: 
+	MOVE.W	12(A1),D3		;143e0: d3 = cost
+	LEA	HARDPOINTCOSTS,A3		;143e4: 
+	MOVEQ	#5,D0			;143ea: 6.times do:
+Loop_0C86: ; add hardpoint cost to total cost
+	MOVE.B	(A2)+,D2		;143ec: yard[n]
+	BMI.S	LAB_0C87		;143ee: if yard[n] >=0:
+	EXT.W	D2			;143f0: 
+	ADD.W	D2,D2			;143f2: 
+	MOVE.W	0(A3,D2.W),D2		;143f4: 
+	EXT.L	D2			;143f8: 
+	ADD.L	D2,D3			;143fa:
 LAB_0C87:
-	DBF	D0,LAB_0C86		;143fc: 51c8ffee
-	MOVEQ	#0,D0			;14400: 7000
-	MOVE.B	3(A1),D0		;14402: 10290003
-	DIVU	D0,D3			;14406: 86c0
-	EXT.L	D3			;14408: 48c3
-	CMP.L	LAB_1278,D3		;1440a: b6b90002de6c
-	BPL.S	LAB_0C83		;14410: 6ab0
-	MOVEA.L	A5,A0			;14412: 204d
-	LEA	182(A5),A5		;14414: 4bed00b6
-	MOVE.B	5(A1),D0		;14418: 10290005
-	CMP.B	(A2),D0			;1441c: b012
-	BMI.S	LAB_0C88		;1441e: 6b0e
-	MOVE.B	4(A1),D1		;14420: 12290004
-	EXT.W	D1			;14424: 4881
-	ADD.W	D1,D1			;14426: d241
-	TST.W	0(A5,D1.W)		;14428: 4a751000
-	BEQ.S	LAB_0C83		;1442c: 6794
+	DBF	D0,Loop_0C86		;143fc: 
+	MOVEQ	#0,D0			;14400: 
+	MOVE.B	3(A1),D0		;14402: build time
+	DIVU	D0,D3			;14406: divide total cost by build time
+	EXT.L	D3			;14408: 
+	CMP.L	CASH_SHIPS,D3		;1440a: Check if you have 
+	BPL.S	Return_0C83		;14410: if you can afford the payment:
+; Ship cost is deducted on a daily basis while the ship is being built
+; (e.g. an Assault Fighter, costing 6,000 credits, costs 300/day for 20 days).
+; Minor glitch: You have to have cost+1 in ship money to spend it.
+; e.g. if you have exactly 300 in ship funds, you can't make a 300 credit payment
+; until you have 301 in ship funds.
+	MOVEA.L	A5,A0			;14412: 
+	LEA	182(A5),A5		;14414: a5 = store
+	MOVE.B	5(A1),D0		;14418: d0 = ore 1 cost
+	CMP.B	(A2),D0			;1441c: 
+	BMI.S	LAB_0C88		;1441e: if (day <= ore1cost):
+	MOVE.B	4(A1),D1		;14420:   d1 = that ore
+	EXT.W	D1			;14424: 
+	ADD.W	D1,D1			;14426: 
+	TST.W	0(A5,D1.W)		;14428: 
+	BEQ.S	Return_0C83		;1442c:   if that ore is in stores:
 LAB_0C88:
-	MOVE.B	7(A1),D0		;1442e: 10290007
-	CMP.B	(A2),D0			;14432: b012
-	BMI.S	LAB_0C89		;14434: 6b1c
-	MOVE.B	6(A1),D2		;14436: 14290006
-	EXT.W	D2			;1443a: 4882
-	ADD.W	D2,D2			;1443c: d442
-	TST.W	0(A5,D2.W)		;1443e: 4a752000
-	BEQ.W	LAB_0C83		;14442: 6700ff7e
-	SUBQ.W	#1,0(A5,D1.W)		;14446: 53751000
-	SUBQ.W	#1,0(A5,D2.W)		;1444a: 53752000
-	SUBQ.W	#2,202(A0)		;1444e: 556800ca
-LAB_0C89:
-	SUB.L	D3,LAB_1278		;14452: 97b90002de6c
-	BPL.S	LAB_0C8A		;14458: 6a06
-	CLR.L	LAB_1278		;1445a: 42b90002de6c
+	MOVE.B	7(A1),D0		;1442e: d0 = ore 2 cost
+	CMP.B	(A2),D0			;14432: 
+	BMI.S	LAB_0C89		;14434: if (day <= ore2cost):
+	MOVE.B	6(A1),D2		;14436:   d2 = that ore
+	EXT.W	D2			;1443a: 
+	ADD.W	D2,D2			;1443c: 
+	TST.W	0(A5,D2.W)		;1443e: 
+	BEQ.W	Return_0C83		;14442:   if that ore is in stores too:
+	SUBQ.W	#1,0(A5,D1.W)		;14446: deduct ore1 from store
+	SUBQ.W	#1,0(A5,D2.W)		;1444a: deduct ore2 from store
+	SUBQ.W	#2,202(A0)		;1444e: deduct 2 from store total
+; One of each ore is deducted each day, meaning that the ore for a ship is taken
+; at the start of production. However, if one or both of the ores are unavailable,
+; or the cash payment is unavailable, then no ores or cash are deducted and
+; no progress is made that day.
+;
+; BUG: Testing, with 2 selenium and 10 crystalite stored, the Construction Yard
+; says "yards need more selenium", but it builds anyway. Probably an
+; off-by-one error in that screen but not the construction code.
+LAB_0C89: ; take money
+	SUB.L	D3,CASH_SHIPS		;14452:
+	BPL.S	LAB_0C8A		;14458:
+	CLR.L	CASH_SHIPS		;1445a: Ensure cash can't go negative
 LAB_0C8A:
-	SUBQ.B	#1,(A2)			;14460: 5312
-	BNE.S	LAB_0C8E		;14462: 6658
-	MOVEQ	#0,D0			;14464: 7000
-	MOVE.B	-7(A2),D0		;14466: 102afff9
-	MOVEQ	#0,D1			;1446a: 7200
-	MOVE.B	0(A1),D1		;1446c: 12290000
-	MOVE.L	-6(A2),D2		;14470: 242afffa
-	MOVE.W	-2(A2),D3		;14474: 362afffe
-	MOVE.B	1(A1),D4		;14478: 18290001
-	MOVEQ	#5,D5			;1447c: 7a05
-	LEA	-6(A2),A3		;1447e: 47eafffa
-	LEA	LAB_11C6,A4		;14482: 49f90001e7a4
-LAB_0C8B:
-	MOVE.B	(A3)+,D6		;14488: 1c1b
-	BMI.S	LAB_0C8C		;1448a: 6b08
-	EXT.W	D6			;1448c: 4886
-	ADD.W	D6,D6			;1448e: dc46
-	ADD.W	0(A4,D6.W),D1		;14490: d2746000
+	SUBQ.B	#1,(A2)			;14460: a2 = ore1paid--
+	BNE.S	Return_0C8E		;14462: if ore1paid was 1: ; first run
+	MOVEQ	#0,D0			;14464: 
+	MOVE.B	-7(A2),D0		;14466: d0 = shipID
+	MOVEQ	#0,D1			;1446a: 
+	MOVE.B	0(A1),D1		;1446c: d1 = armor
+	MOVE.L	-6(A2),D2		;14470: d2 = hardpoint1-4
+	MOVE.W	-2(A2),D3		;14474: d3 = hardpoint5-6
+	MOVE.B	1(A1),D4		;14478: d4 = speed
+	MOVEQ	#5,D5			;1447c: d5 = 6.times do:
+	LEA	-6(A2),A3		;1447e: a3 = hardpoint1
+	LEA	HARDPOINTARMOUR,A4	;14482: a4 = HARDPOINTARMOUR
+Loop_0C8B: ; 5.times do:
+	MOVE.B	(A3)+,D6		;14488: d6 = hardpoint1
+	BMI.S	LAB_0C8C		;1448a: if filled:
+	EXT.W	D6			;1448c: 
+	ADD.W	D6,D6			;1448e: 
+	ADD.W	0(A4,D6.W),D1		;14490: ; add armour from hardpoints
 LAB_0C8C:
-	DBF	D5,LAB_0C8B		;14494: 51cdfff2
-	CMPI.B	#$08,D0			;14498: 0c000008
-	BEQ.S	LAB_0C8F		;1449c: 6720
-	BSR.W	LAB_0CA7		;1449e: 610002ea
-	MOVE.B	3(A1),(A2)		;144a2: 14a90003
-	SUBQ.B	#1,-8(A2)		;144a6: 532afff8
-	BGT.S	LAB_0C8E		;144aa: 6e10
+	DBF	D5,Loop_0C8B		;14494: 
+	CMPI.B	#$08,D0			;14498: 
+	BEQ.S	LAB_0C8F		;1449c: if not orbital space dock:
+	BSR.W	LAB_0CA7		;1449e: 
+	MOVE.B	3(A1),(A2)		;144a2: 
+	SUBQ.B	#1,-8(A2)		;144a6: 
+	BGT.S	Return_0C8E		;144aa: 
 LAB_0C8D:
 	MOVEQ	#0,D0			;144ac: 7000
 	MOVE.L	D0,-8(A2)		;144ae: 2540fff8
 	MOVE.L	D0,-4(A2)		;144b2: 2540fffc
 	MOVE.W	D0,(A2)			;144b6: 3480
 	ST	-8(A2)			;144b8: 50eafff8
-LAB_0C8E:
+Return_0C8E:
 	RTS				;144bc: 4e75
-LAB_0C8F:
+LAB_0C8F: ; if orbital space dock
 	BTST	#4,90(A0)		;144be: 08280004005a
 	BNE.S	LAB_0C8D		;144c4: 66e6
 	MOVEM.L	D1-D3/A2,-(A7)		;144c6: 48e77020
@@ -25684,7 +25724,7 @@ LAB_0C93:
 	BNE.S	LAB_0C94		;14532: 6606
 	MOVE.L	#$00030d40,D3		;14534: 263c00030d40
 LAB_0C94:
-	LEA	LAB_11B1,A3		;1453a: 47f90001d812
+	LEA	HARDPOINTCOSTS,A3		;1453a: 47f90001d812
 	MOVEQ	#5,D0			;14540: 7005
 	LEA	736(A5),A2		;14542: 45ed02e0
 LAB_0C95:
@@ -25701,7 +25741,7 @@ LAB_0C96:
 	MOVE.B	3(A1),D0		;1455c: 10290003
 	DIVU	D0,D3			;14560: 86c0
 	EXT.L	D3			;14562: 48c3
-	CMP.L	LAB_1278,D3		;14564: b6b90002de6c
+	CMP.L	CASH_SHIPS,D3		;14564: b6b90002de6c
 	BPL.W	LAB_0C9D		;1456a: 6a000126
 	LEA	182(A5),A0		;1456e: 41ed00b6
 	TST.B	743(A5)			;14572: 4a2d02e7
@@ -25733,9 +25773,9 @@ LAB_0C98:
 	SUBQ.W	#1,202(A5)		;145c2: 536d00ca
 	SUBQ.B	#1,744(A5)		;145c6: 532d02e8
 LAB_0C99:
-	SUB.L	D3,LAB_1278		;145ca: 97b90002de6c
+	SUB.L	D3,CASH_SHIPS		;145ca: 97b90002de6c
 	BPL.S	LAB_0C9A		;145d0: 6a06
-	CLR.L	LAB_1278		;145d2: 42b90002de6c
+	CLR.L	CASH_SHIPS		;145d2: 42b90002de6c
 LAB_0C9A:
 	SUBQ.B	#1,742(A5)		;145d8: 532d02e6
 	BEQ.W	LAB_0C9F		;145dc: 670000d0
@@ -25761,7 +25801,7 @@ LAB_0C9A:
 	MOVE.B	1(A1),D4		;14628: 18290001
 	MOVEQ	#5,D5			;1462c: 7a05
 	LEA	736(A5),A3		;1462e: 47ed02e0
-	LEA	LAB_11C6,A4		;14632: 49f90001e7a4
+	LEA	HARDPOINTARMOUR,A4		;14632: 49f90001e7a4
 LAB_0C9B:
 	MOVE.B	(A3)+,D6		;14638: 1c1b
 	EXT.W	D6			;1463a: 4886
@@ -25830,6 +25870,7 @@ LAB_0CA2:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;1470a: 4cdf7fff
 	RTS				;1470e: 4e75
 LandingPad:
+; need to work on this
 	TST.W	168(A5)			;14710: 
 	BEQ.S	Return_0CA5		;14714: if ast[168]:
 	TST.B	12(A0)			;14716: 
@@ -25837,19 +25878,20 @@ LandingPad:
 	MOVE.L	0(A5),D0		;1471c: 
 	BEQ.S	Return_0CA5		;14720:     if ast[0]:
 	MOVEA.L	D0,A6			;14722: 
-LAB_0CA4:
+Loop_0CA4:
 	CMPI.B	#$1a,24(A6)		;14724: ast[24] == 26
-	BEQ.S	LAB_0CA6		;1472a: 670c
-	MOVE.L	0(A6),D2		;1472c: 242e0000
-	BEQ.S	Return_0CA5		;14730: 6704
-	MOVEA.L	D2,A6			;14732: 2c42
-	BRA.S	LAB_0CA4		;14734: 60ee
+	BEQ.S	LAB_0CA6		;1472a: if ast[24] != 26
+	MOVE.L	0(A6),D2		;1472c: 
+	BEQ.S	Return_0CA5		;14730: if hangar[0]:
+	MOVEA.L	D2,A6			;14732:   a6 = the address in a6
+	BRA.S	Loop_0CA4		;14734: Loop
 Return_0CA5:
 	RTS				;14736: 4e75
 LAB_0CA6:
-	MOVE.W	4(A0),D0		;14738: 30280004
+; a0 = building, a5=asteroid, a6=hangar
+	MOVE.W	4(A0),D0		;14738: get coords
 	EXT.L	D0			;1473c: 48c0
-	DIVU	#$0044,D0		;1473e: 80fc0044
+	DIVU	#$0044,D0		;1473e: coords/44
 	MOVE.W	D0,D1			;14742: 3200
 	SWAP	D0			;14744: 4840
 	ASR.W	#2,D0			;14746: e440
@@ -25870,21 +25912,22 @@ LAB_0CA6:
 	ST	12(A1)			;14780: 50e9000c
 	SUBQ.W	#1,168(A5)		;14784: 536d00a8
 	RTS				;14788: 4e75
+;
 LAB_0CA7:
 	LEA	204(A0),A0		;1478a: 41e800cc
 	SUBQ.B	#1,D0			;1478e: 5300
-	BMI.S	LAB_0CA9		;14790: 6b18
+	BMI.S	Return_0CA9		;14790: 6b18
 	CMPI.B	#$03,D0			;14792: 0c000003
-	BPL.S	LAB_0CA9		;14796: 6a12
-	MULU	#$00a0,D0		;14798: c0fc00a0
+	BPL.S	Return_0CA9		;14796: 6a12
+	MULU	#$00a0,D0		;14798: x20
 	ADDA.W	D0,A0			;1479c: d0c0
-	MOVEQ	#19,D5			;1479e: 7a13
-LAB_0CA8:
+	MOVEQ	#19,D5			;1479e: 20.times do:
+Loop_0CA8:
 	TST.B	(A0)			;147a0: 4a10
 	BEQ.S	LAB_0CAA		;147a2: 6708
 	ADDQ.L	#8,A0			;147a4: 5088
-	DBF	D5,LAB_0CA8		;147a6: 51cdfff8
-LAB_0CA9:
+	DBF	D5,Loop_0CA8		;147a6: 51cdfff8
+Return_0CA9:
 	RTS				;147aa: 4e75
 LAB_0CAA:
 	MOVE.B	D1,(A0)+		;147ac: 10c1
@@ -25902,12 +25945,12 @@ LAB_0CAB:
 	MULU	#$00a0,D0		;147c6: c0fc00a0
 	ADDA.W	D0,A2			;147ca: d4c0
 	ADDA.L	#$00000098,A2		;147cc: d5fc00000098
-	MOVEQ	#19,D4			;147d2: 7813
-LAB_0CAC:
+	MOVEQ	#19,D4			;147d2: 20.times do:
+Loop_0CAC:
 	TST.B	(A2)			;147d4: 4a12
 	BNE.S	LAB_0CAE		;147d6: 660a
 	SUBQ.L	#8,A2			;147d8: 518a
-	DBF	D4,LAB_0CAC		;147da: 51ccfff8
+	DBF	D4,Loop_0CAC		;147da: 51ccfff8
 LAB_0CAD:
 	MOVEQ	#-1,D0			;147de: 70ff
 	RTS				;147e0: 4e75
@@ -25943,6 +25986,7 @@ LAB_0CAE:
 	MOVE.L	D0,-(A2)		;14844: 2500
 	MOVEQ	#0,D0			;14846: 7000
 	RTS				;14848: 4e75
+;
 LAB_0CAF:
 	LEA	60(A5),A1		;1484a: 43ed003c
 	MOVE.W	2(A1),D1		;1484e: 32290002
@@ -25989,7 +26033,7 @@ LAB_0CB4:
 	BSR.S	LAB_0CB3		;148ba: 61dc
 	MOVE.L	D0,D7			;148bc: 2e00
 	MOVE.W	684(A5),D6		;148be: 3c2d02ac
-	BEQ.W	LAB_0CBF		;148c2: 670000d2
+	BEQ.W	Return_0CBF		;148c2: 670000d2
 	CMPI.W	#$001e,D6		;148c6: 0c46001e
 	BGT.S	LAB_0CB6		;148ca: 6e48
 	TST.B	LAB_12E3		;148cc: 4a390002e453
@@ -26062,9 +26106,9 @@ LAB_0CBD:
 	MOVE.W	D7,D6			;1498a: 3c07
 LAB_0CBE:
 	MOVE.W	D6,684(A5)		;1498c: 3b4602ac
-	BPL.S	LAB_0CBF		;14990: 6a04
+	BPL.S	Return_0CBF		;14990: 6a04
 	CLR.W	684(A5)			;14992: 426d02ac
-LAB_0CBF:
+Return_0CBF:
 	RTS				;14996: 4e75
 LAB_0CC0:
 	MOVE.W	684(A5),D0		;14998: 302d02ac
@@ -26302,32 +26346,32 @@ LAB_0CDF:
 	RTS				;14c66: 
 ;
 LAB_0CE0:
-	MOVE.L	CASH,D1		        ;14c68: 22390002de64
-	ADD.L	LAB_1277,D1		;14c6e: d2b90002de68
-	ADD.L	LAB_1278,D1		;14c74: d2b90002de6c
+	MOVE.L	CASH_GENERAL,D1		        ;14c68: 22390002de64
+	ADD.L	CASH_BUILDINGS,D1		;14c6e: d2b90002de68
+	ADD.L	CASH_SHIPS,D1		;14c74: d2b90002de6c
 	ADD.L	LAB_1279,D1		;14c7a: d2b90002de70
 	ADD.L	LAB_127A,D1		;14c80: d2b90002de74
-	CMP.L	CASH,D0	        	;14c86: b0b90002de64
+	CMP.L	CASH_GENERAL,D0	        	;14c86: b0b90002de64
 	BGT.S	LAB_0CE1		;14c8c: 
-	SUB.L	D0,CASH		        ;14c8e: pay cash
+	SUB.L	D0,CASH_GENERAL		        ;14c8e: pay cash
 	RTS				;14c94: 
 LAB_0CE1:
-	SUB.L	CASH,D0	        	;14c96: 90b90002de64
-	CLR.L	CASH		        ;14c9c: 42b90002de64
-	CMP.L	LAB_1277,D0		;14ca2: b0b90002de68
+	SUB.L	CASH_GENERAL,D0	        	;14c96: 90b90002de64
+	CLR.L	CASH_GENERAL		        ;14c9c: 42b90002de64
+	CMP.L	CASH_BUILDINGS,D0		;14ca2: b0b90002de68
 	BGT.S	LAB_0CE2		;14ca8: 6e08
-	SUB.L	D0,LAB_1277		;14caa: 91b90002de68
+	SUB.L	D0,CASH_BUILDINGS		;14caa: 91b90002de68
 	RTS				;14cb0: 4e75
 LAB_0CE2:
-	SUB.L	LAB_1277,D0		;14cb2: 90b90002de68
-	CLR.L	LAB_1277		;14cb8: 42b90002de68
-	CMP.L	LAB_1278,D0		;14cbe: b0b90002de6c
+	SUB.L	CASH_BUILDINGS,D0		;14cb2: 90b90002de68
+	CLR.L	CASH_BUILDINGS		;14cb8: 42b90002de68
+	CMP.L	CASH_SHIPS,D0		;14cbe: b0b90002de6c
 	BGT.S	LAB_0CE3		;14cc4: 6e08
-	SUB.L	D0,LAB_1278		;14cc6: 91b90002de6c
+	SUB.L	D0,CASH_SHIPS		;14cc6: 91b90002de6c
 	RTS				;14ccc: 4e75
 LAB_0CE3:
-	SUB.L	LAB_1278,D0		;14cce: 90b90002de6c
-	CLR.L	LAB_1278		;14cd4: 42b90002de6c
+	SUB.L	CASH_SHIPS,D0		;14cce: 90b90002de6c
+	CLR.L	CASH_SHIPS		;14cd4: 42b90002de6c
 	CMP.L	LAB_1279,D0		;14cda: b0b90002de70
 	BGT.S	LAB_0CE4		;14ce0: 6e08
 	SUB.L	D0,LAB_1279		;14ce2: 91b90002de70
@@ -26714,7 +26758,7 @@ LAB_0D16:
 LAB_0D17:
 	ADD.W	D0,D0			;150e8: d040
 	ADDI.W	#$0064,D0		;150ea: +100
-	ADD.L	D0,CASH		        ;150ee: d1b90002de64
+	ADD.L	D0,CASH_GENERAL		        ;150ee: d1b90002de64
 	CMPI.B	#$14,172(A5)		;150f4: 0c2d001400ac
 	BMI.S	LAB_0D18		;150fa: 6b42
 	SF	172(A5)			;150fc: 51ed00ac
@@ -26892,12 +26936,12 @@ LAB_0D2E:
 	ADDA.W	4(A0),A6		;15346: dce80004
 	BSET	#6,1(A6)		;1534a: 08ee00060001
 	CMPA.L	CURRENTASTEROID,A5		;15350: bbf90002de54
-	BNE.W	LAB_0D2F		;15356: 66000086
-	MOVEQ	#16,D0			;1535a: 7010
+	BNE.W	Return_0D2F		;15356: 66000086
+	MOVEQ	#16,D0			;1535a: random: 0-16
 	JSR	GetRand		;1535c: 4eb900000c0c
-	MOVE.B	D0,D2			;15362: 1400
-	ASL.W	#8,D2			;15364: e142
-	MOVEQ	#32,D0			;15366: 7020
+	MOVE.B	D0,D2			;15362: 
+	ASL.W	#8,D2			;15364: 
+	MOVEQ	#32,D0			;15366: random: 0-31
 	JSR	GetRand		;15368: 4eb900000c0c
 	MOVE.B	D0,D2			;1536e: 1400
 	LEA	LAB_11EF,A2		;15370: 45f90001ea30
@@ -26929,7 +26973,7 @@ LAB_0D2E:
 	JSR	LAB_08A9		;153cc: 4eb90000e1f8
 	MOVE.W	#$0014,38(A0)		;153d2: 317c00140026
 	JSR	LAB_105D		;153d8: 4eb90001a4f8
-LAB_0D2F:
+Return_0D2F:
 	RTS				;153de: 4e75
 LAB_0D30:
 	ADDA.W	4(A0),A6		;153e0: dce80004
@@ -26961,8 +27005,8 @@ LAB_0D34:
 	TST.W	46(A4)			;15426: 4a6c002e
 	BEQ.S	LAB_0D39		;1542a: 6738
 	MOVEQ	#90,D6			;1542c: 7c5a
-	CMPI.W	#$0005,ALIENID		;1542e: 0c7900050002defe
-	BPL.S	LAB_0D3A		;15436: 6a32
+	CMPI.W	#$0005,ALIENID		;1542e: 
+	BPL.S	LAB_0D3A		;15436: If not Rigellian/Swixaran:
 LAB_0D35:
 	MOVEQ	#99,D7			;15438: 7e63
 LAB_0D36:
@@ -27117,7 +27161,7 @@ LAB_0D4C:
 	RTS				;15604: 4e75
 LAB_0D4D:
 	BSR.S	LAB_0D4B		;15606: 61da
-	BMI.S	LAB_0D4E		;15608: 6b16
+	BMI.S	Return_0D4E		;15608: 6b16
 	ADDQ.B	#1,81(A0)		;1560a: 52280051
 	MOVE.L	A0,D1			;1560e: 2208
 	MOVE.W	#$0127,D0		;15610: 303c0127
@@ -27125,7 +27169,7 @@ LAB_0D4D:
 	MOVEQ	#1,D3			;15616: 7601
 	MOVEQ	#12,D4			;15618: 780c
 	JSR	LAB_05C2		;1561a: 4eb900008fd2
-LAB_0D4E:
+Return_0D4E:
 	RTS				;15620: 4e75
 LAB_0D4F:
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;15622: 20790000055a
@@ -27144,7 +27188,7 @@ LAB_0D50:
 LAB_0D51:
 	BSR.W	LAB_0B63		;1564a: 6100d1fa
 	MOVE.W	D2,D0			;1564e: 3002
-	BEQ.S	LAB_0D53		;15650: 671a
+	BEQ.S	Return_0D53		;15650: 671a
 	ADD.W	D2,D2			;15652: d442
 	ADD.W	D2,D2			;15654: d442
 	LEA	LAB_1220,A0		;15656: 41f90001f8b6
@@ -27155,25 +27199,25 @@ LAB_0D52:
 	BEQ.S	LAB_0D54		;15666: 6706
 	SUBQ.W	#1,D0			;15668: 5340
 	BNE.S	LAB_0D52		;1566a: 66f2
-LAB_0D53:
+Return_0D53:
 	RTS				;1566c: 4e75
 LAB_0D54:
-	CMPI.W	#$0006,ALIENID		;1566e: 0c7900060002defe
-	BNE.S	LAB_0D55		;15676: 661a
+	CMPI.W	#$0006,ALIENID		;1566e: 
+	BNE.S	LAB_0D55		;15676: If Swixaran:
 	CMPA.L	LAB_1274,A1		;15678: b3f90002de5c
 	BNE.S	LAB_0D55		;1567e: 6612
 	BTST	#2,LAB_130F		;15680: 083900020002e489
 	BEQ.S	LAB_0D55		;15688: 6708
 	BCLR	#4,89(A1)		;1568a: 08a900040059
 	RTS				;15690: 4e75
-LAB_0D55:
-	MOVEQ	#0,D1			;15692: 7200
-	MOVE.W	#$0129,D0		;15694: 303c0129
-	MOVE.L	#$00002710,D2		;15698: 243c00002710
-	MOVEQ	#5,D3			;1569e: 7605
-	MOVEQ	#9,D4			;156a0: 7809
-	JSR	LAB_05C2		;156a2: 4eb900008fd2
-	RTS				;156a8: 4e75
+LAB_0D55: ; not swixaran
+	MOVEQ	#0,D1			;15692:
+	MOVE.W	#$0129,D0		;15694: decimal 297
+	MOVE.L	#$00002710,D2		;15698: decimal 10,000
+	MOVEQ	#5,D3			;1569e: 
+	MOVEQ	#9,D4			;156a0: 
+	JSR	LAB_05C2		;156a2: 
+	RTS				;156a8: 
 LAB_0D56:
 	BSR.W	LAB_0D4B		;156aa: 6100ff36
 	BMI.S	LAB_0D58		;156ae: 6b2c
@@ -27739,99 +27783,105 @@ Return_0D98:
 	RTS				;15dda: 4e75
 ;
 RepairFacility: ; repair facility
+; Only triggers every eight days.
+; Building armour appears only to increase building hit points by 10
 	CMPI.W	#$0013,718(A5)		;15ddc: 0c6d001302ce
-	BPL.W	LAB_0DA0		;15de2: 6a000072
+	BPL.W	Return_0DA0		;15de2: 6a000072
 	MOVE.B	CLOCK_12E7,D0		;15de6: 10390002e457
 	ANDI.B	#$07,D0			;15dec: 02000007
-	BNE.W	LAB_0DA0		;15df0: 66000064
-	MOVEQ	#99,D0			;15df4: 7063
-LAB_0D9A:
-	MOVEQ	#0,D1			;15df6: 7200
-	MOVE.B	0(A1),D1		;15df8: 12290000
-	SUBQ.W	#1,D1			;15dfc: 5341
-	MULU	#$000a,D1		;15dfe: c2fc000a
-	LEA	TERRAN_BUILDING_STATS,A0		;15e02: 41f90001c3e4
-	ADDA.L	D1,A0			;15e08: d1c1
-	MOVE.B	6(A0),D1		;15e0a: 12280006
-	TST.B	BP_06_BUILDINGARMOUR		;15e0e: 4a390002e430
-	BEQ.S	LAB_0D9B		;15e14: 6704
-	ADDQ.B	#8,D1			;15e16: 5001
-	ADDQ.B	#2,D1			;15e18: 5401
+	BNE.W	Return_0DA0		;15df0: 66000064
+	MOVEQ	#99,D0			;15df4: 100.times do: ; for each building
+Loop_0D9A:
+	MOVEQ	#0,D1			;15df6:
+	MOVE.B	0(A1),D1		;15df8: buildingID
+	SUBQ.W	#1,D1			;15dfc:
+	MULU	#$000a,D1		;15dfe: 
+	LEA	TERRAN_BUILDING_STATS,A0;15e02:
+	ADDA.L	D1,A0			;15e08: 
+	MOVE.B	6(A0),D1		;15e0a: d1 = hit points
+	TST.B	BP_06_BUILDINGARMOUR	;15e0e: 
+	BEQ.S	LAB_0D9B		;15e14: if building armour:
+	ADDQ.B	#8,D1			;15e16: 
+	ADDQ.B	#2,D1			;15e18: +10
 LAB_0D9B:
-	CMP.B	1(A1),D1		;15e1a: b2290001
-	BEQ.S	LAB_0D9C		;15e1e: 6704
-	ADDQ.B	#1,1(A1)		;15e20: 52290001
+	CMP.B	1(A1),D1		;15e1a: 
+	BEQ.S	LAB_0D9C		;15e1e: 
+	ADDQ.B	#1,1(A1)		;15e20: restore 1HP up to maximum
 LAB_0D9C:
-	LEA	14(A1),A1		;15e24: 43e9000e
-	DBF	D0,LAB_0D9A		;15e28: 51c8ffcc
-	LEA	204(A5),A0		;15e2c: 41ed00cc
-	LEA	TERRANSHIPSTATS_11,A1		;15e30: 43f90001e55c
-	MOVEQ	#2,D6			;15e36: 7c02
-LAB_0D9D:
-	MOVE.B	0(A1),D1		;15e38: 12290000
-	MOVEQ	#19,D5			;15e3c: 7a13
-LAB_0D9E:
-	TST.B	(A0)			;15e3e: 4a10
-	BEQ.S	LAB_0D9F		;15e40: 6706
-	CMP.B	(A0),D1			;15e42: b210
-	BEQ.S	LAB_0D9F		;15e44: 6702
-	ADDQ.B	#1,(A0)			;15e46: 5210
+	LEA	14(A1),A1		;15e24: next building
+	DBF	D0,Loop_0D9A		;15e28:
+;
+	LEA	204(A5),A0		;15e2c:
+	LEA	TERRANSHIPSTATS_11,A1	;15e30:
+	MOVEQ	#2,D6			;15e36: 3.times do:
+Loop_0D9D:
+	MOVE.B	0(A1),D1		;15e38: d1 = max armour of ship n
+	MOVEQ	#19,D5			;15e3c: 20.times do:
+Loop_0D9E:
+	TST.B	(A0)			;15e3e: 
+	BEQ.S	LAB_0D9F		;15e40: if current armour > 0:
+	CMP.B	(A0),D1			;15e42: 
+	BEQ.S	LAB_0D9F		;15e44:   if armour below maximum:
+	ADDQ.B	#1,(A0)			;15e46:     add one armour
 LAB_0D9F:
-	ADDQ.L	#8,A0			;15e48: 5088
-	DBF	D5,LAB_0D9E		;15e4a: 51cdfff2
-	LEA	24(A1),A1		;15e4e: 43e90018
-	DBF	D6,LAB_0D9D		;15e52: 51ceffe4
-LAB_0DA0:
+	ADDQ.L	#8,A0			;15e48: 
+	DBF	D5,Loop_0D9E		;15e4a: 
+	LEA	24(A1),A1		;15e4e: next ship schematic
+	DBF	D6,Loop_0D9D		;15e52: 
+Return_0DA0:
 	RTS				;15e56: 4e75
-LAB_0DA1:
+;
+AlienTech_0DA1: ; alien building?
+; some mechanic which works differently by alien
 	MOVE.B	CLOCK_12E7,D0		;15e58: 10390002e457
 	ANDI.B	#$0f,D0			;15e5e: 0200000f
-	BNE.S	LAB_0DA6		;15e62: 6678
+	BNE.S	Return_0DA6		;15e62: 6678
 	MOVEA.L	LAB_1289,A0		;15e64: 20790002ded4
 	TST.B	96(A0)			;15e6a: 4a280060
-	BEQ.S	LAB_0DA6		;15e6e: 676c
+	BEQ.S	Return_0DA6		;15e6e: 676c
 	MOVEQ	#0,D2			;15e70: 7400
 	ADDQ.B	#1,97(A0)		;15e72: 52280061
 	MOVE.B	97(A0),D2		;15e76: 14280061
-	BEQ.S	LAB_0DA6		;15e7a: 6760
+	BEQ.S	Return_0DA6		;15e7a: 6760
 	MOVEA.L	LAB_1288,A4		;15e7c: 28790002ded0
 	MOVE.W	ALIENID,D0		;15e82: 30390002defe
-	CMPI.W	#$0001,D0		;15e88: 0c400001
-	BNE.S	LAB_0DA2		;15e8c: 660e
-	MOVE.W	42(A4),D7		;15e8e: 3e2c002a
-	BSR.W	LAB_0E7F		;15e92: 610017ac
-	ADD.W	10(A2),D7		;15e96: de6a000a
-	BRA.S	LAB_0DA5		;15e9a: 6020
-LAB_0DA2:
-	CMPI.W	#$0002,D0		;15e9c: 0c400002
-	BNE.S	LAB_0DA3		;15ea0: 6606
-	MOVE.W	32(A4),D7		;15ea2: 3e2c0020
-	BRA.S	LAB_0DA5		;15ea6: 6014
+	CMPI.W	#$0001,D0		;15e88: 
+	BNE.S	LAB_0DA2		;15e8c: If Kll'Kp'Qua:
+	MOVE.W	42(A4),D7		;15e8e: 
+	BSR.W	LAB_0E7F		;15e92: 
+	ADD.W	10(A2),D7		;15e96: 
+	BRA.S	Loop_0DA5		;15e9a: 
+LAB_0DA2: 
+	CMPI.W	#$0002,D0		;15e9c: 
+	BNE.S	LAB_0DA3		;15ea0: If Ore Eaters:
+	MOVE.W	32(A4),D7		;15ea2: 
+	BRA.S	Loop_0DA5		;15ea6: 
 LAB_0DA3:
-	CMPI.W	#$0003,D0		;15ea8: 0c400003
-	BNE.S	LAB_0DA4		;15eac: 660a
-	MOVE.W	32(A4),D7		;15eae: 3e2c0020
-	ADD.W	78(A4),D7		;15eb2: de6c004e
-	BRA.S	LAB_0DA5		;15eb6: 6004
-LAB_0DA4:
-	MOVE.W	32(A4),D7		;15eb8: 3e2c0020
-LAB_0DA5:
-	MOVEQ	#100,D0			;15ebc: 7064
-	JSR	GetRand		;15ebe: 4eb900000c0c
+	CMPI.W	#$0003,D0		;15ea8: 
+	BNE.S	LAB_0DA4		;15eac: If Ax'Zilanths:
+	MOVE.W	32(A4),D7		;15eae: 
+	ADD.W	78(A4),D7		;15eb2: 
+	BRA.S	Loop_0DA5		;15eb6: 
+LAB_0DA4: ; if Tylaran, Rigellian or Swixaran:
+	MOVE.W	32(A4),D7		;15eb8: times
+Loop_0DA5: ; all aliens
+	MOVEQ	#100,D0			;15ebc: rand(0-99)
+	JSR	GetRand	        	;15ebe: 4eb900000c0c
 	CMP.B	D0,D2			;15ec4: b400
 	BMI.S	LAB_0DA7		;15ec6: 6b16
 	SUBQ.B	#1,96(A0)		;15ec8: 53280060
 	MOVE.B	#$05,97(A0)		;15ecc: 117c00050061
-	CMPI.W	#$0006,ALIENID		;15ed2: 0c7900060002defe
+	CMPI.W	#$0006,ALIENID		;15ed2: if Rigellian:
 	BEQ.S	LAB_0DA8		;15eda: 6708
-LAB_0DA6:
+Return_0DA6:
 	RTS				;15edc: 4e75
 LAB_0DA7:
-	DBF	D7,LAB_0DA5		;15ede: 51cfffdc
+	DBF	D7,Loop_0DA5		;15ede: 51cfffdc
 	RTS				;15ee2: 4e75
-LAB_0DA8:
+LAB_0DA8: ; rigellian
 	BSET	#4,91(A0)		;15ee4: 08e80004005b
 	RTS				;15eea: 4e75
+;
 LAB_0DA9:
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;15eec: 20790000055a
 	MOVEQ	#23,D0			;15ef2: 7017
@@ -29695,7 +29745,7 @@ LAB_0E8B:
 	BSR.W	LAB_0FAC		;177b0: 61001940
 	MOVE.B	#$12,LAB_12DF		;177b4: 13fc00120002e44f
 	MOVE.B	#$3c,LAB_12DE		;177bc: 13fc003c0002e44e
-	MOVE.L	#$00061a80,CASH	        ;177c4: cash = 400,000. Alien starting money?
+	MOVE.L	#$00061a80,CASH_GENERAL	        ;177c4: cash = 400,000. Alien starting money?
 	RTS				;177ce: 
 LAB_0E8C:
 	MOVEQ	#1,D0			;177d0: 7001
@@ -29745,7 +29795,7 @@ LAB_0E90:
 	DBF	D7,LAB_0E90		;17840: 51cffff4
 	MOVE.B	#$12,LAB_12DF		;17844: 13fc00120002e44f
 	MOVE.B	#$3c,LAB_12DE		;1784c: 13fc003c0002e44e
-	MOVE.L	#$000493e0,CASH	        ;17854: 300,000; alien starting cash?
+	MOVE.L	#$000493e0,CASH_GENERAL	        ;17854: 300,000; alien starting cash?
 	RTS				;1785e: 4e75
 LAB_0E91:
 	MOVEQ	#1,D0			;17860: 7001
@@ -30309,7 +30359,7 @@ LAB_0ECF:
 	BTST	#6,89(A0)		;1800e: 082800060059
 	BEQ.W	LAB_0ED0		;18014: 6700002c
 	BSR.W	LAB_0DBB		;18018: 6100dfea
-	BSR.W	LAB_0DA1		;1801c: 6100de3a
+	BSR.W	AlienTech_0DA1		;1801c: 6100de3a
 	BSR.W	LAB_0F11		;18020: 61000558
 	BSR.W	LAB_0F15		;18024: 610005b2
 	MOVEA.L	LAB_1289,A5		;18028: 2a790002ded4
@@ -33536,7 +33586,7 @@ DO_TELESCOPE: ; Cheat: All asteroids visible (map and colony view)
 	NOT.B	FLAG_SEEALLASTEROIDS		;1a7c8: 46390001d4b2
 	RTS				;1a7ce: 4e75
 DO_LOADSADOSH: ; Cheat: +100,000 credits
-	ADDI.L	#$000186a0,CASH	;1a7d0: +10,000 cash
+	ADDI.L	#$000186a0,CASH_GENERAL	;1a7d0: +10,000 cash
 	RTS				;1a7da:
 DO_NOISES: ; Cheat: Sound test
 	LEA	STR_ENTERSFX,A0		;1a7dc: 41f90001d485
@@ -34774,7 +34824,7 @@ LAB_11AF:
 LAB_11B0:
 	DC.L	$000800a4,$002400a4,$004000a4,$005c00a4 ;1d7f2
 	DC.L	$000800c2,$002400c2,$004000c2,$005c00c2
-LAB_11B1:
+HARDPOINTCOSTS: ; ship data
 	DC.L	$03e81770,$0fa02ee0,$138803e8,$11942328 ;1d812
 	DC.L	$11942328,$2ee005dc,$0bb81388,$19641f40
 LAB_11B2:
@@ -35040,7 +35090,7 @@ LAB_11C5:
 	DC.L	$000000f0,$0010f800,$100010f0,$20f02000 ;1e77c
 	DC.L	$101030f0,$20e83000,$20103010,$20184000
 	DC.L	$40f04010,$4800ffff
-LAB_11C6:
+HARDPOINTARMOUR:
 	DS.L	5			;1e7a4
 	DC.L	$0000000a,$0014001e,$00280032
 LAB_11C7:
@@ -38526,11 +38576,11 @@ LAB_1274:
 	DS.L	1			;2de5c
 LAB_1275:
 	DS.L	1			;2de60
-CASH: ; current credits
+CASH_GENERAL: ; current credits
 	DC.L	$0003d090		;2de64: decimal 250,000
-LAB_1277:
+CASH_BUILDINGS:
 	DS.L	1			;2de68
-LAB_1278:
+CASH_SHIPS: ; compared to daily cost in shipyard code
 	DS.L	1			;2de6c
 LAB_1279:
 	DS.L	1			;2de70
@@ -38691,7 +38741,14 @@ LAB_12C4:
 	DS.B	1			;2e184
 LAB_12C5:
 	DS.B	1			;2e185
-LAB_12C6:
+SHIPYARDS: ; ship construction. construction yards?
+; Appears to store 64 shipyards or ships in construction, 10 bytes each
+; Would need ship ID, ore consumed x 2
+; [0]   BYTE    ACTIVE (true if ship construction underway here)
+; [1]   BYTE    SHIPID (type of ship 1-8)
+; [2-7] BYTE[6] HARDPOINT (0-15 or FF for end of list)
+; [8]   BYTE    DAY (which day of the construction it is, starting at 1)
+; [9]   BYTE    
 	DS.L	160			;2e186
 LAB_12C7:
 	DS.B	1			;2e406
@@ -40002,17 +40059,17 @@ LAB_136F:
 	DC.L	$f4001c0c		;30a4e
 	DC.L	LAB_11AB		;30a52: 0001d7dc
 	DC.W	$8000			;30a56
-LAB_1370:
+LAB_1370: ; probably cash/building/ships/missiles/intel
 	DC.L	$00000020,$014000aa,$fa000007,$f9000101 ;30a58
 	DC.L	$0145f900,$0e0300a2,$f9000104,$0146fe00
 	DC.L	$22040007
-	DC.L	CASH		;30a7c: 0002de64
+	DC.L	CASH_GENERAL		;30a7c: 0002de64
 	DC.L	$fa00000c,$f9000105,$00a1fa00,$000bfe00 ;30a80
 	DC.L	$22050007
-	DC.L	LAB_1277		;30a94: 0002de68
+	DC.L	CASH_BUILDINGS		;30a94: 0002de68
 	DC.L	$fe002206		;30a98
 	DC.W	$0007
-	DC.L	LAB_1278		;30a9e: 0002de6c
+	DC.L	CASH_SHIPS		;30a9e: 0002de6c
 	DC.L	$fe002207		;30aa2
 	DC.W	$0007
 	DC.L	LAB_1279		;30aa8: 0002de70
@@ -40388,7 +40445,7 @@ LAB_1385:
 	DC.L	$f9001802,$013ffe00,$1f020007 ;3114a
 	DC.L	TEMP_003		;31156: 0001c8ce
 	DC.L	$f9001804,$019bfe00,$1f040007 ;3115a
-	DC.L	CASH		;31166: 0002de64
+	DC.L	CASH_GENERAL		;31166: 0002de64
 	DC.L	$f701f400		;3116a
 	DC.W	$1206
 	DC.L	TEMP_002		;31170: 0001c8ca
