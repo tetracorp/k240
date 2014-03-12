@@ -434,6 +434,7 @@ BUFFER_11: ; 27564 bytes ; probably game strings
 SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ; 750 bytes x 24 asteroids. Asteroid format is as follows:
 ; [0-3]     LONG     Asteroid pointer?
+; [8]       BYTE     ???
 ; [21]      BYTE     Building total?
 ; [24]      BYTE     Asteroid Engine speed? Added to power usage.
 ;   Set true (-1?) when destroyed.
@@ -443,11 +444,15 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ; [80]      BYTE     RADIATION (1 = 10%)
 ; [81]      BYTE     Radiation not from ore (1 = 5%)
 ; [84-85]   WORD     SECURITY
-;     0-40:  ASTEROID SECURE
-;     41-99: LOW MORALE
+;       0- 40: ASTEROID SECURE
+;      41- 99: LOW MORALE
 ;     100-199: SOCIAL UNREST
 ;     200-299: MAJOR CRIMINAL ACTIVITY.
-;     300+:    SECURITY ALERT!
+;     300-310: SECURITY ALERT!
+; [86]      BYTE     ??? security, set to 30-59, set zero when asteroid secure,
+;   decreases by one each turn asteroid not secure
+; [87]      BYTE     Strike (days left)
+;   Days remaining during which all buildings act as if without workers.
 ; [88]      BYTE     
 ; [89]      BYTE     On/Off for buildings
 ;   bit 0: can build satellites/missiles, targeted with ship weapons
@@ -463,11 +468,12 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;   bit 2: Virus outbreak. Set by rigellian population-reducing missile 09
 ;   bit 4: orbital space dock present?
 ;   bit 5: "Recalculate screen generators." Set when screen generator destroyed.
-; [92]      BYTE     Unrest? Power shortage? Worker shortage?
+; [92]      BYTE     Worker shortage.
 ;   bit 1: If 0, Mine operates at 40% efficiency
 ;   bit 2: If 0, Deep Bore Mine and Seismic Penetrator operate at 40% efficiency
 ;   bit 3: If 0, Construction Yard operates at 40% efficiency
 ;   bit 4: If 0, Missile Silo operates at 40% efficiency
+;   bit 5: (command centre worker hortage)
 ; [96]      BYTE     Checked by something
 ; [97]      BYTE     Powercut (Days remaining of halved power generation status
 ;   imposed by Rigellian weapons.)
@@ -513,7 +519,7 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;   18+: Hydration Plant
 ;   19+: Life Support
 ;   20+: Decontamination Filter
-; [720-721] ??? possibly power produced by CPU
+; [720-721] Worker surplus
 ; [722-727] WORD[3]  CPUFAW (Air/Food/Water produced by CPU)
 ; [734]     BYTE     ???
 ; [742-745] BYTE[4]  ???
@@ -25583,7 +25589,7 @@ LAB_0C57:
 	BTST	#4,92(A2)		;13fc6:
 	BNE.S	Loop_0C58		;13fcc:
 	MOVEQ	#10,D0			;13fce: works at 40% efficiency
-	JSR	GetRand		;13fd0: 
+	JSR	GetRand		        ;13fd0: 
 	CMPI.B	#$04,D0			;13fd6: 
 	BPL.S	Next_0C5B		;13fda: 
 Loop_0C58: ; each asteroid
@@ -26075,7 +26081,7 @@ LAB_0C8F: ; if orbital space dock
 	MOVE.B	#$03,23(A6)		;144ec:
 	MOVE.B	#$14,20(A6)		;144f2:
 	BRA.S	ClearYard		;144f8:
-LAB_0C90:
+LAB_0C90: ; Update
 	TST.W	14(A4)			;144fa: 
 	BEQ.S	Return_0C91		;144fe: if weapons factory:
 	TST.B	734(A5)			;14500: 
@@ -26083,131 +26089,131 @@ LAB_0C90:
 Return_0C91:
 	RTS				;14506: 4e75
 LAB_0C92:
-	MOVEM.L	D0-D7/A0-A6,-(A7)	;14508: 48e7fffe
-	MOVE.B	735(A5),D0		;1450c: 102d02df
-	EXT.W	D0			;14510: 4880
-	CMPI.B	#$32,D0			;14512: 0c000032
-	BMI.S	LAB_0C93		;14516: 6b04
-	SUBI.W	#$0030,D0		;14518: 04400030
+	MOVEM.L	D0-D7/A0-A6,-(A7)	;14508:
+	MOVE.B	735(A5),D0		;1450c:
+	EXT.W	D0			;14510:
+	CMPI.B	#$32,D0			;14512:
+	BMI.S	LAB_0C93		;14516:
+	SUBI.W	#$0030,D0		;14518:
 LAB_0C93:
-	MULU	#$0018,D0		;1451c: c0fc0018
-	LEA	TERRANSHIPSTATS_00,A1		;14520: 43f90001e544
-	ADDA.L	D0,A1			;14526: d3c0
-	MOVEQ	#0,D3			;14528: 7600
-	MOVE.W	12(A1),D3		;1452a: 3629000c
-	CMPI.W	#$ffff,D3		;1452e: 0c43ffff
-	BNE.S	LAB_0C94		;14532: 6606
-	MOVE.L	#$00030d40,D3		;14534: 263c00030d40
+	MULU	#$0018,D0		;1451c:
+	LEA	TERRANSHIPSTATS_00,A1	;14520:
+	ADDA.L	D0,A1			;14526:
+	MOVEQ	#0,D3			;14528:
+	MOVE.W	12(A1),D3		;1452a:
+	CMPI.W	#$ffff,D3		;1452e:
+	BNE.S	LAB_0C94		;14532:
+	MOVE.L	#$00030d40,D3		;14534:
 LAB_0C94:
-	LEA	HARDPOINTCOSTS,A3		;1453a: 47f90001d812
-	MOVEQ	#5,D0			;14540: 7005
-	LEA	736(A5),A2		;14542: 45ed02e0
+	LEA	HARDPOINTCOSTS,A3	;1453a:
+	MOVEQ	#5,D0			;14540:
+	LEA	736(A5),A2		;14542:
 Loop_0C95:
-	MOVE.B	(A2)+,D2		;14546: 141a
-	BMI.S	LAB_0C96		;14548: 6b0c
-	EXT.W	D2			;1454a: 4882
-	ADD.W	D2,D2			;1454c: d442
-	MOVE.W	0(A3,D2.W),D2		;1454e: 34332000
-	EXT.L	D2			;14552: 48c2
-	ADD.L	D2,D3			;14554: d682
+	MOVE.B	(A2)+,D2		;14546:
+	BMI.S	LAB_0C96		;14548:
+	EXT.W	D2			;1454a:
+	ADD.W	D2,D2			;1454c:
+	MOVE.W	0(A3,D2.W),D2		;1454e:
+	EXT.L	D2			;14552:
+	ADD.L	D2,D3			;14554:
 LAB_0C96:
-	DBF	D0,Loop_0C95		;14556: 51c8ffee
-	MOVEQ	#0,D0			;1455a: 7000
-	MOVE.B	3(A1),D0		;1455c: 10290003
-	DIVU	D0,D3			;14560: 86c0
-	EXT.L	D3			;14562: 48c3
-	CMP.L	CASH_SHIPS,D3		;14564: b6b90002de6c
-	BPL.W	LAB_0C9D		;1456a: 6a000126
-	LEA	182(A5),A0		;1456e: 41ed00b6
-	TST.B	743(A5)			;14572: 4a2d02e7
-	BEQ.S	LAB_0C97		;14576: 6714
-	MOVE.B	5(A1),D0		;14578: 10290005
-	MOVE.B	4(A1),D1		;1457c: 12290004
-	EXT.W	D1			;14580: 4881
-	ADD.W	D1,D1			;14582: d241
-	TST.W	0(A0,D1.W)		;14584: 4a701000
-	BEQ.W	LAB_0C9D		;14588: 67000108
+	DBF	D0,Loop_0C95		;14556:
+	MOVEQ	#0,D0			;1455a:
+	MOVE.B	3(A1),D0		;1455c:
+	DIVU	D0,D3			;14560:
+	EXT.L	D3			;14562:
+	CMP.L	CASH_SHIPS,D3		;14564:
+	BPL.W	LAB_0C9D		;1456a:
+	LEA	182(A5),A0		;1456e:
+	TST.B	743(A5)			;14572:
+	BEQ.S	LAB_0C97		;14576:
+	MOVE.B	5(A1),D0		;14578:
+	MOVE.B	4(A1),D1		;1457c:
+	EXT.W	D1			;14580:
+	ADD.W	D1,D1			;14582:
+	TST.W	0(A0,D1.W)		;14584:
+	BEQ.W	LAB_0C9D		;14588:
 LAB_0C97:
-	TST.B	744(A5)			;1458c: 4a2d02e8
-	BEQ.S	LAB_0C99		;14590: 6738
-	MOVE.B	7(A1),D0		;14592: 10290007
-	MOVE.B	6(A1),D2		;14596: 14290006
-	EXT.W	D2			;1459a: 4882
-	ADD.W	D2,D2			;1459c: d442
-	TST.W	0(A0,D2.W)		;1459e: 4a702000
-	BEQ.W	LAB_0C9D		;145a2: 670000ee
-	TST.B	743(A5)			;145a6: 4a2d02e7
-	BEQ.S	LAB_0C98		;145aa: 670c
-	SUBQ.B	#1,743(A5)		;145ac: 532d02e7
-	SUBQ.W	#1,0(A0,D1.W)		;145b0: 53701000
-	SUBQ.W	#1,202(A5)		;145b4: 536d00ca
+	TST.B	744(A5)			;1458c:
+	BEQ.S	LAB_0C99		;14590:
+	MOVE.B	7(A1),D0		;14592:
+	MOVE.B	6(A1),D2		;14596:
+	EXT.W	D2			;1459a:
+	ADD.W	D2,D2			;1459c:
+	TST.W	0(A0,D2.W)		;1459e:
+	BEQ.W	LAB_0C9D		;145a2:
+	TST.B	743(A5)			;145a6:
+	BEQ.S	LAB_0C98		;145aa:
+	SUBQ.B	#1,743(A5)		;145ac:
+	SUBQ.W	#1,0(A0,D1.W)		;145b0:
+	SUBQ.W	#1,202(A5)		;145b4:
 LAB_0C98:
-	TST.B	744(A5)			;145b8: 4a2d02e8
-	BEQ.S	LAB_0C99		;145bc: 670c
-	SUBQ.W	#1,0(A0,D2.W)		;145be: 53702000
-	SUBQ.W	#1,202(A5)		;145c2: 536d00ca
-	SUBQ.B	#1,744(A5)		;145c6: 532d02e8
+	TST.B	744(A5)			;145b8:
+	BEQ.S	LAB_0C99		;145bc:
+	SUBQ.W	#1,0(A0,D2.W)		;145be:
+	SUBQ.W	#1,202(A5)		;145c2:
+	SUBQ.B	#1,744(A5)		;145c6:
 LAB_0C99:
-	SUB.L	D3,CASH_SHIPS		;145ca: 97b90002de6c
-	BPL.S	LAB_0C9A		;145d0: 6a06
-	CLR.L	CASH_SHIPS		;145d2: 42b90002de6c
+	SUB.L	D3,CASH_SHIPS		;145ca:
+	BPL.S	LAB_0C9A		;145d0:
+	CLR.L	CASH_SHIPS		;145d2:
 LAB_0C9A:
-	SUBQ.B	#1,742(A5)		;145d8: 532d02e6
-	BEQ.W	LAB_0C9F		;145dc: 670000d0
-	SUBQ.B	#1,745(A5)		;145e0: 532d02e9
-	BNE.W	LAB_0C9D		;145e4: 660000ac
-	MOVE.W	16(A1),D0		;145e8: 30290010
-	MOVE.B	D0,745(A5)		;145ec: 1b4002e9
-	MOVE.W	686(A5),D0		;145f0: 302d02ae
-	BMI.W	LAB_0C9E		;145f4: 6b0000a2
-	ADDQ.W	#1,686(A5)		;145f8: 526d02ae
-	ADDQ.W	#1,D0			;145fc: 5240
-	MOVEA.L	688(A5),A0		;145fe: 206d02b0
-	ADD.W	D0,D0			;14602: d040
-	MOVE.W	0(A0,D0.W),D0		;14604: 30300000
-	CMPI.W	#$ffff,D0		;14608: 0c40ffff
-	BNE.W	LAB_0C9D		;1460c: 66000084
-	SUBQ.W	#1,686(A5)		;14610: 536d02ae
-	BSET	#7,686(A5)		;14614: 08ed000702ae
-	MOVEQ	#0,D1			;1461a: 7200
-	MOVE.B	0(A1),D1		;1461c: 12290000
-	MOVE.L	736(A5),D2		;14620: 242d02e0
-	MOVE.W	740(A5),D3		;14624: 362d02e4
-	MOVE.B	1(A1),D4		;14628: 18290001
-	MOVEQ	#5,D5			;1462c: 7a05
-	LEA	736(A5),A3		;1462e: 47ed02e0
-	LEA	HARDPOINTARMOUR,A4		;14632: 49f90001e7a4
+	SUBQ.B	#1,742(A5)		;145d8:
+	BEQ.W	LAB_0C9F		;145dc:
+	SUBQ.B	#1,745(A5)		;145e0:
+	BNE.W	LAB_0C9D		;145e4:
+	MOVE.W	16(A1),D0		;145e8:
+	MOVE.B	D0,745(A5)		;145ec:
+	MOVE.W	686(A5),D0		;145f0:
+	BMI.W	LAB_0C9E		;145f4:
+	ADDQ.W	#1,686(A5)		;145f8:
+	ADDQ.W	#1,D0			;145fc:
+	MOVEA.L	688(A5),A0		;145fe:
+	ADD.W	D0,D0			;14602:
+	MOVE.W	0(A0,D0.W),D0		;14604:
+	CMPI.W	#$ffff,D0		;14608:
+	BNE.W	LAB_0C9D		;1460c:
+	SUBQ.W	#1,686(A5)		;14610:
+	BSET	#7,686(A5)		;14614:
+	MOVEQ	#0,D1			;1461a:
+	MOVE.B	0(A1),D1		;1461c:
+	MOVE.L	736(A5),D2		;14620:
+	MOVE.W	740(A5),D3		;14624:
+	MOVE.B	1(A1),D4		;14628:
+	MOVEQ	#5,D5			;1462c:
+	LEA	736(A5),A3		;1462e:
+	LEA	HARDPOINTARMOUR,A4		;14632:
 LAB_0C9B:
-	MOVE.B	(A3)+,D6		;14638: 1c1b
-	EXT.W	D6			;1463a: 4886
-	ADD.W	D6,D6			;1463c: dc46
-	ADD.W	0(A4,D6.W),D1		;1463e: d2746000
-	DBF	D5,LAB_0C9B		;14642: 51cdfff4
-	MOVEM.L	D1-D3/A2/A5,-(A7)	;14646: 48e77024
-	MOVEQ	#0,D0			;1464a: 7000
-	MOVEQ	#0,D1			;1464c: 7200
-	MOVE.B	18(A1),D0		;1464e: 10290012
-	MOVE.B	19(A1),D1		;14652: 12290013
-	MOVEQ	#0,D7			;14656: 7e00
-	MOVEQ	#0,D2			;14658: 7400
-	MOVE.B	8(A1),D2		;1465a: 14290008
-	MOVEA.L	A5,A0			;1465e: 204d
-	CMPI.B	#$39,D2			;14660: 0c020039
-	BNE.S	LAB_0C9C		;14664: 6606
-	BSET	#4,90(A0)		;14666: 08e80004005a
+	MOVE.B	(A3)+,D6		;14638:
+	EXT.W	D6			;1463a:
+	ADD.W	D6,D6			;1463c:
+	ADD.W	0(A4,D6.W),D1		;1463e:
+	DBF	D5,LAB_0C9B		;14642:
+	MOVEM.L	D1-D3/A2/A5,-(A7)	;14646:
+	MOVEQ	#0,D0			;1464a:
+	MOVEQ	#0,D1			;1464c:
+	MOVE.B	18(A1),D0		;1464e:
+	MOVE.B	19(A1),D1		;14652:
+	MOVEQ	#0,D7			;14656:
+	MOVEQ	#0,D2			;14658:
+	MOVE.B	8(A1),D2		;1465a:
+	MOVEA.L	A5,A0			;1465e:
+	CMPI.B	#$39,D2			;14660:
+	BNE.S	LAB_0C9C		;14664:
+	BSET	#4,90(A0)		;14666:
 LAB_0C9C:
-	MOVEQ	#0,D6			;1466c: 7c00
-	JSR	Shipbuilding_0866		;1466e: 4eb90000dc98
-	MOVEM.L	(A7)+,D1-D3/A2/A5	;14674: 4cdf240e
-	MOVE.W	D1,50(A6)		;14678: 3d410032
-	MOVE.L	D2,42(A6)		;1467c: 2d42002a
-	MOVE.W	D3,46(A6)		;14680: 3d43002e
-	MOVE.B	#$03,23(A6)		;14684: 1d7c00030017
-	SF	21(A6)			;1468a: 51ee0015
-	MOVE.L	A6,746(A5)		;1468e: 2b4e02ea
+	MOVEQ	#0,D6			;1466c:
+	JSR	Shipbuilding_0866		;1466e:
+	MOVEM.L	(A7)+,D1-D3/A2/A5	;14674:
+	MOVE.W	D1,50(A6)		;14678:
+	MOVE.L	D2,42(A6)		;1467c:
+	MOVE.W	D3,46(A6)		;14680:
+	MOVE.B	#$03,23(A6)		;14684:
+	SF	21(A6)			;1468a:
+	MOVE.L	A6,746(A5)		;1468e:
 LAB_0C9D:
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;14692: 4cdf7fff
-	RTS				;14696: 4e75
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;14692:
+	RTS				;14696:
 LAB_0C9E:
 	BCLR	#15,D0			;14698: 0880000f
 	SUBQ.W	#1,D0			;1469c: 5340
@@ -26515,325 +26521,344 @@ LAB_0CBE:
 Return_0CBF:
 	RTS				;14996:
 ;
-LAB_0CC0:
-	MOVE.W	684(A5),D0		;14998: 302d02ac
-	SUBI.W	#$0032,D0		;1499c: 04400032
-	BLE.S	LAB_0CC1		;149a0: 6f12
-	DIVU	#$0064,D0		;149a2: 80fc0064
-	CMP.W	78(A4),D0		;149a6: b06c004e
-	BLE.S	LAB_0CC1		;149aa: 6f08
-	MOVE.W	84(A5),D0		;149ac: 302d0054
-	ADDQ.W	#1,D0			;149b0: 5240
-	BRA.S	LAB_0CC3		;149b2: 6012
-LAB_0CC1:
-	MOVE.W	84(A5),D0		;149b4: 302d0054
-	SUBQ.W	#1,D0			;149b8: 5340
-	BPL.S	LAB_0CC3		;149ba: 6a0a
-	MOVEQ	#0,D0			;149bc: 7000
-	BRA.S	LAB_0CC3		;149be: 6006
-LAB_0CC2:
-	SF	86(A5)			;149c0: 51ed0056
-	RTS				;149c4: 4e75
+UpdateSecurity:; security
+	MOVE.W	684(A5),D0		;14998:
+	SUBI.W	#$0032,D0		;1499c: pop-50
+	BLE.S	LAB_0CC1		;149a0: if pop > 50:
+	DIVU	#$0064,D0		;149a2:   /100
+	CMP.W	78(A4),D0		;149a6:
+	BLE.S	LAB_0CC1		;149aa:   if (pop-50)/100 > security centres
+	MOVE.W	84(A5),D0		;149ac:
+	ADDQ.W	#1,D0			;149b0:     increase unrest level
+	BRA.S	LAB_0CC3		;149b2:
+LAB_0CC1: ; reduce unrest
+	MOVE.W	84(A5),D0		;149b4:
+	SUBQ.W	#1,D0			;149b8:  decrease unrest level
+	BPL.S	LAB_0CC3		;149ba:
+	MOVEQ	#0,D0			;149bc:  min zero
+	BRA.S	LAB_0CC3		;149be:
+LAB_0CC2: ; ASTEROID SECURE
+	SF	86(A5)			;149c0:
+	RTS				;149c4:
 LAB_0CC3:
-	CMPI.W	#$0136,D0		;149c6: 0c400136
-	BMI.S	LAB_0CC4		;149ca: 6b04
-	MOVE.W	#$0136,D0		;149cc: 303c0136
+	CMPI.W	#$0136,D0		;149c6:
+	BMI.S	LAB_0CC4		;149ca:
+	MOVE.W	#$0136,D0		;149cc: max unrest of 310
 LAB_0CC4:
-	MOVE.W	D0,84(A5)		;149d0: 3b400054
-	CMPI.W	#$0028,D0		;149d4: 0c400028
-	BMI.S	LAB_0CC2		;149d8: 6be6
-	SUBQ.B	#1,86(A5)		;149da: 532d0056
-	BMI.W	LAB_0CCB		;149de: 6b0000d4
-	BNE.W	LAB_0CCA		;149e2: 660000ce
-	CMPI.W	#$0064,D0		;149e6: 0c400064
-	BMI.W	LAB_0CCC		;149ea: 6b0000da
-	CMPI.W	#$00c8,D0		;149ee: 0c4000c8
-	BMI.W	LAB_0CD0		;149f2: 6b00012a
-	CMPI.W	#$012c,D0		;149f6: 0c40012c
-	BMI.W	LAB_0CD4		;149fa: 6b000184
-	MOVEQ	#5,D0			;149fe: 7005
-	JSR	GetRand		;14a00: 4eb900000c0c
-	BNE.W	LAB_0CC5		;14a06: 6600001c
-	MOVE.L	#$00000190,D0		;14a0a: 203c00000190
-	JSR	GetRand		;14a10: 4eb900000c0c
-	MULU	#$03e8,D0		;14a16: c0fc03e8
-	ADDI.L	#$000186a0,D0		;14a1a: 0680000186a0
-	BRA.W	LAB_0CCF		;14a20: 600000e4
-LAB_0CC5:
-	CMPI.B	#$01,D0			;14a24: 0c000001
-	BNE.S	LAB_0CC6		;14a28: 6610
-	MOVEQ	#20,D0			;14a2a: 7014
-	JSR	GetRand		;14a2c: 4eb900000c0c
-	ADDQ.B	#8,D0			;14a32: 5000
-	ADDQ.B	#2,D0			;14a34: 5400
-	BRA.W	LAB_0CD3		;14a36: 60000124
+	MOVE.W	D0,84(A5)		;149d0:
+	CMPI.W	#$0028,D0		;149d4: 0-40: ASTEROID SECURE
+	BMI.S	LAB_0CC2		;149d8:   
+	SUBQ.B	#1,86(A5)		;149da: -1
+	BMI.W	LAB_0CCB		;149de:
+	BNE.W	Return_0CCA		;149e2: if [86] is reduced to zero:
+	CMPI.W	#$0064,D0		;149e6: 
+	BMI.W	LowMoraleEvent		;149ea:  41-99: LOW MORALE
+	CMPI.W	#$00c8,D0		;149ee:
+	BMI.W	SocialUnrestEvent		;149f2:  100-199: SOCIAL UNREST
+	CMPI.W	#$012c,D0		;149f6:
+	BMI.W	MajorCriminalEvent		;149fa:  200-299: MAJOR CRIMINAL ACTIVITY
+	MOVEQ	#5,D0			;149fe:
+	JSR	GetRand		;14a00:
+	BNE.W	LAB_0CC5		;14a06:  SECURITY ALERT! 20% chance:
+	MOVE.L	#$00000190,D0		;14a0a:
+	JSR	GetRand		;14a10:
+	MULU	#$03e8,D0		;14a16:
+	ADDI.L	#$000186a0,D0		;14a1a:  steal 100,000 - 500,000
+	BRA.W	StealCash		;14a20:
+LAB_0CC5: ; 300-310: SECURITY ALERT!
+	CMPI.B	#$01,D0			;14a24: 20% chance:
+	BNE.S	LAB_0CC6		;14a28:
+	MOVEQ	#20,D0			;14a2a:
+	JSR	GetRand		;14a2c:
+	ADDQ.B	#8,D0			;14a32:
+	ADDQ.B	#2,D0			;14a34:
+	BRA.W	WorkersDesert		;14a36:
 LAB_0CC6:
-	CMPI.B	#$02,D0			;14a3a: 0c000002
-	BNE.S	LAB_0CC7		;14a3e: 660c
-	MOVEQ	#2,D1			;14a40: 7202
-	MOVEQ	#3,D2			;14a42: 7403
-	MOVEQ	#4,D3			;14a44: 7604
-	MOVEQ	#55,D4			;14a46: 7837
-	BRA.W	LAB_0CDB		;14a48: 600001bc
+	CMPI.B	#$02,D0			;14a3a: 20% chance
+	BNE.S	LAB_0CC7		;14a3e:
+	MOVEQ	#2,D1			;14a40: Assault Fighter
+	MOVEQ	#3,D2			;14a42: Combat Eagle
+	MOVEQ	#4,D3			;14a44: Scout Ship
+	MOVEQ	#55,D4			;14a46: Transporter
+	BRA.W	StealShip		;14a48:
 LAB_0CC7:
-	CMPI.B	#$03,D0			;14a4c: 0c000003
-	BEQ.W	LAB_0CD7		;14a50: 6700016c
-	MOVEA.L	BUFFER_03,A1		;14a54: 227900000536
-	LEA	BP_00_2GMINE,A0		;14a5a: 41f90002e42a
-	MOVEQ	#0,D1			;14a60: 7200
-	MOVEQ	#0,D0			;14a62: 7000
+	CMPI.B	#$03,D0			;14a4c: 20% chance
+	BEQ.W	StealMissile		;14a50:
+	MOVEA.L	BUFFER_03,A1		;14a54: 20% chance
+	LEA	BP_00_2GMINE,A0		;14a5a: stolen blueprint
+	MOVEQ	#0,D1			;14a60:
+	MOVEQ	#0,D0			;14a62:
 LAB_0CC8:
-	ADDQ.B	#1,D1			;14a64: 5201
-	TST.B	(A0)+			;14a66: 4a18
-	BEQ.S	LAB_0CC9		;14a68: 6704
-	MOVE.B	D1,(A1)+		;14a6a: 12c1
-	ADDQ.B	#1,D0			;14a6c: 5200
+	ADDQ.B	#1,D1			;14a64:
+	TST.B	(A0)+			;14a66:
+	BEQ.S	LAB_0CC9		;14a68:
+	MOVE.B	D1,(A1)+		;14a6a:
+	ADDQ.B	#1,D0			;14a6c:
 LAB_0CC9:
-	CMPI.B	#$22,D1			;14a6e: 0c010022
-	BNE.S	LAB_0CC8		;14a72: 66f0
-	TST.B	D0			;14a74: 4a00
-	BEQ.S	LAB_0CCA		;14a76: 673a
-	JSR	GetRand		;14a78: 4eb900000c0c
-	MOVEA.L	BUFFER_03,A0		;14a7e: 207900000536
-	MOVE.B	0(A0,D0.W),D0		;14a84: 10300000
-	EXT.W	D0			;14a88: 4880
-	LEA	LAB_12C9,A0		;14a8a: 41f90002e429
-	SF	0(A0,D0.W)		;14a90: 51f00000
-	MULU	#$000a,D0		;14a94: c0fc000a
-	LEA	LAB_1108,A0		;14a98: 41f90001b27a
-	ADDA.W	D0,A0			;14a9e: d0c0
-	MOVE.W	(A0),TEMP_002		;14aa0: 33d00001c8ca
-	LEA	LAB_1381,A0		;14aa6: 41f900031088
-	JSR	LAB_05B6		;14aac: 4eb900008ee4
-LAB_0CCA:
-	RTS				;14ab2: 4e75
-LAB_0CCB:
-	MOVEQ	#30,D0			;14ab4: 701e
-	JSR	GetRand		;14ab6: 4eb900000c0c
-	ADDI.B	#$1e,D0			;14abc: 0600001e
-	MOVE.B	D0,86(A5)		;14ac0: 1b400056
-	RTS				;14ac4: 4e75
-LAB_0CCC:
-	MOVEQ	#2,D0			;14ac6: 7002
-	JSR	GetRand		;14ac8: 4eb900000c0c
-	BEQ.S	LAB_0CCE		;14ace: 6726
-	MOVEQ	#20,D0			;14ad0: 7014
-	JSR	GetRand		;14ad2: 4eb900000c0c
-	ADDQ.B	#8,D0			;14ad8: 5000
-	ADDQ.B	#2,D0			;14ada: 5400
-LAB_0CCD:
-	MOVE.B	D0,87(A5)		;14adc: 1b400057
-	MOVE.W	#$015e,TEMP_002		;14ae0: 33fc015e0001c8ca
-	LEA	LAB_1382,A0		;14ae8: 41f9000310b6
-	JSR	LAB_05B6		;14aee: 4eb900008ee4
-	RTS				;14af4: 4e75
-LAB_0CCE:
-	MOVEQ	#90,D0			;14af6: 705a
-	JSR	GetRand		;14af8: 4eb900000c0c
-	MULU	#$0064,D0		;14afe: c0fc0064
-	ADDI.W	#$03e8,D0		;14b02: 064003e8
-LAB_0CCF:
-	BSR.W	LAB_0CE0		;14b06: 61000160
-	MOVE.L	D0,TEMP_002		;14b0a: 23c00001c8ca
-	LEA	LAB_1380,A0		;14b10: 41f900031058
-	JSR	LAB_05B6		;14b16: 4eb900008ee4
-	RTS				;14b1c: 4e75
-LAB_0CD0:
-	MOVEQ	#3,D0			;14b1e: 7003
-	JSR	GetRand		;14b20: 4eb900000c0c
-	BNE.S	LAB_0CD1		;14b26: 6616
-	MOVE.L	#$00000190,D0		;14b28: 203c00000190
-	JSR	GetRand		;14b2e: 4eb900000c0c
-	MULU	#$0064,D0		;14b34: c0fc0064
-	ADDI.W	#$2710,D0		;14b38: 06402710
-	BRA.S	LAB_0CCF		;14b3c: 60c8
-LAB_0CD1:
-	CMPI.B	#$01,D0			;14b3e: 0c000001
-	BNE.S	LAB_0CD2		;14b42: 660e
-	MOVEQ	#70,D0			;14b44: 7046
-	JSR	GetRand		;14b46: 4eb900000c0c
-	ADDI.B	#$1e,D0			;14b4c: 0600001e
-	BRA.S	LAB_0CCD		;14b50: 608a
-LAB_0CD2:
-	MOVEQ	#10,D0			;14b52: 700a
-	JSR	GetRand		;14b54: 4eb900000c0c
-	ADDQ.B	#5,D0			;14b5a: 5a00
-LAB_0CD3:
-	CMPI.W	#$0032,684(A5)		;14b5c: 0c6d003202ac
-	BMI.W	LAB_0CCA		;14b62: 6b00ff4e
-	SUB.W	D0,684(A5)		;14b66: 916d02ac
-	MOVE.W	#$015f,TEMP_002		;14b6a: 33fc015f0001c8ca
-	LEA	LAB_1382,A0		;14b72: 41f9000310b6
-	JSR	LAB_05B6		;14b78: 4eb900008ee4
-	RTS				;14b7e: 4e75
-LAB_0CD4:
-	MOVEQ	#4,D0			;14b80: 7004
-	JSR	GetRand		;14b82: 4eb900000c0c
-	BNE.S	LAB_0CD5		;14b88: 661a
-	MOVE.L	#$000001f4,D0		;14b8a: 203c000001f4
-	JSR	GetRand		;14b90: 4eb900000c0c
-	MULU	#$0064,D0		;14b96: c0fc0064
-	ADDI.L	#$0000c350,D0		;14b9a: 06800000c350
-	BRA.W	LAB_0CCF		;14ba0: 6000ff64
+	CMPI.B	#$22,D1			;14a6e: 34 blueprints
+	BNE.S	LAB_0CC8		;14a72:
+	TST.B	D0			;14a74:
+	BEQ.S	Return_0CCA		;14a76:
+	JSR	GetRand		        ;14a78:
+	MOVEA.L	BUFFER_03,A0		;14a7e:
+	MOVE.B	0(A0,D0.W),D0		;14a84:
+	EXT.W	D0			;14a88:
+	LEA	LAB_12C9,A0		;14a8a:
+	SF	0(A0,D0.W)		;14a90:
+	MULU	#$000a,D0		;14a94:
+	LEA	LAB_1108,A0		;14a98:
+	ADDA.W	D0,A0			;14a9e:
+	MOVE.W	(A0),TEMP_002		;14aa0:
+	LEA	LAB_1381,A0		;14aa6:
+	JSR	LAB_05B6		;14aac:
+Return_0CCA:
+	RTS				;14ab2:
+LAB_0CCB: ; random delay until next security event
+	MOVEQ	#30,D0			;14ab4:
+	JSR	GetRand		        ;14ab6:
+	ADDI.B	#$1e,D0			;14abc:
+	MOVE.B	D0,86(A5)		;14ac0: [86] = 30-59
+	RTS				;14ac4:
+; 
+LowMoraleEvent: ; strike - LOW MORALE
+	MOVEQ	#2,D0			;14ac6: 
+	JSR	GetRand	        	;14ac8:
+	BEQ.S	LAB_0CCE		;14ace: 50% chance
+	MOVEQ	#20,D0			;14ad0:
+	JSR	GetRand		        ;14ad2:
+	ADDQ.B	#8,D0			;14ad8:
+	ADDQ.B	#2,D0			;14ada:
+BeginStrike:
+	MOVE.B	D0,87(A5)		;14adc: duration 10-29 days
+	MOVE.W	#$015e,TEMP_002		;14ae0:
+; EMPLOYEES ARE UNHAPPY WITH THEIR LIVING AND WORKING CONDITIONS. WORKERS IN SEVERAL INDUSTRIES HAVE ELECTED TO STRIKE FOR A PERIOD OF TIME. OUR SECURITY FORCES ARE INSUFFICIENT TO FORCE THEM BACK TO WORK.
+	LEA	LAB_1382,A0		;14ae8:
+	JSR	LAB_05B6		;14aee:
+	RTS				;14af4:
+LAB_0CCE: ; LOW MORALE, 50% chance: steal 1k-10k
+	MOVEQ	#90,D0			;14af6:
+	JSR	GetRand		        ;14af8:
+	MULU	#$0064,D0		;14afe:
+	ADDI.W	#$03e8,D0		;14b02: 1,000 - 10,000
+StealCash:
+	BSR.W	DeductStolenCash		;14b06:
+	MOVE.L	D0,TEMP_002		;14b0a:
+	LEA	LAB_1380,A0		;14b10:
+	JSR	LAB_05B6		;14b16:
+	RTS				;14b1c:
+SocialUnrestEvent: ; SOCIAL UNREST
+	MOVEQ	#3,D0			;14b1e:
+	JSR	GetRand		        ;14b20:
+	BNE.S	LAB_0CD1		;14b26: 1/3 cahnce:
+	MOVE.L	#$00000190,D0		;14b28:
+	JSR	GetRand		        ;14b2e:
+	MULU	#$0064,D0		;14b34:
+	ADDI.W	#$2710,D0		;14b38:
+	BRA.S	StealCash		;14b3c: Steal 10,000 - 50,000
+LAB_0CD1: ; 2/3 chance
+	CMPI.B	#$01,D0			;14b3e: 1/3 chance
+	BNE.S	LAB_0CD2		;14b42:
+	MOVEQ	#70,D0			;14b44:
+	JSR	GetRand		        ;14b46:
+	ADDI.B	#$1e,D0			;14b4c:
+	BRA.S	BeginStrike		;14b50: Strike for 30-99 days
+LAB_0CD2: ; 1/3 chance
+	MOVEQ	#10,D0			;14b52:
+	JSR	GetRand		        ;14b54:
+	ADDQ.B	#5,D0			;14b5a:
+WorkersDesert:
+	CMPI.W	#$0032,684(A5)		;14b5c: If there are 50 or more workers:
+	BMI.W	Return_0CCA		;14b62:
+	SUB.W	D0,684(A5)		;14b66: 5-14 workers desert
+	MOVE.W	#$015f,TEMP_002		;14b6a:
+; AFTER INVESTIGATING SEVERAL MISSING-PERSONS CASES, WE HAVE DISCOVERED THAT A SMALL GROUP OF PEOPLE HAVE DESERTED THE COLONY. YOU MUST INCREASE SECURITY TO ENSURE WE SUFFER NO FURTHER LOSS OF WORKERS.
+	LEA	LAB_1382,A0		;14b72:
+	JSR	LAB_05B6		;14b78:
+	RTS				;14b7e:
+MajorCriminalEvent:
+	MOVEQ	#4,D0			;14b80:
+	JSR	GetRand		        ;14b82:
+	BNE.S	LAB_0CD5		;14b88: 25% chance:
+	MOVE.L	#$000001f4,D0		;14b8a:
+	JSR	GetRand		        ;14b90:
+	MULU	#$0064,D0		;14b96:
+	ADDI.L	#$0000c350,D0		;14b9a:
+	BRA.W	StealCash		;14ba0: steal 50,000 - 100,000
 LAB_0CD5:
-	CMPI.B	#$01,D0			;14ba4: 0c000001
-	BNE.S	LAB_0CD6		;14ba8: 660e
-	MOVEQ	#20,D0			;14baa: 7014
-	JSR	GetRand		;14bac: 4eb900000c0c
-	ADDQ.B	#8,D0			;14bb2: 5000
-	ADDQ.B	#2,D0			;14bb4: 5400
-	BRA.S	LAB_0CD3		;14bb6: 60a4
+	CMPI.B	#$01,D0			;14ba4: 25% chance:
+	BNE.S	LAB_0CD6		;14ba8:
+	MOVEQ	#20,D0			;14baa:
+	JSR	GetRand	        	;14bac:
+	ADDQ.B	#8,D0			;14bb2:
+	ADDQ.B	#2,D0			;14bb4:
+	BRA.S	WorkersDesert		;14bb6: 10-29 workers desert
 LAB_0CD6:
-	CMPI.B	#$02,D0			;14bb8: 0c000002
-	BNE.S	LAB_0CDA		;14bbc: 6640
-LAB_0CD7:
-	MOVEQ	#9,D0			;14bbe: 7009
-	JSR	GetRand		;14bc0: 4eb900000c0c
-	LEA	100(A5),A0		;14bc6: 41ed0064
-	ADD.W	D0,D0			;14bca: d040
-	ADDA.W	D0,A0			;14bcc: d0c0
-	TST.W	(A0)+			;14bce: 4a58
-	BEQ.S	LAB_0CD9		;14bd0: 671e
+	CMPI.B	#$02,D0			;14bb8: 25% chance:
+	BNE.S	LAB_0CDA		;14bbc:
+StealMissile: ; 25% chance
+	MOVEQ	#9,D0			;14bbe:
+	JSR	GetRand		        ;14bc0:
+	LEA	100(A5),A0		;14bc6: random missile
+	ADD.W	D0,D0			;14bca:
+	ADDA.W	D0,A0			;14bcc:
+	TST.W	(A0)+			;14bce:
+	BEQ.S	LAB_0CD9		;14bd0:
 LAB_0CD8:
-	CLR.W	-(A0)			;14bd2: 4260
-	CLR.W	166(A5)			;14bd4: 426d00a6
-	ADDI.W	#$004e,D0		;14bd8: 0640004e
-	MOVE.W	D0,TEMP_002		;14bdc: 33c00001c8ca
-	LEA	LAB_1383,A0		;14be2: 41f9000310de
-	JSR	LAB_05B6		;14be8: 4eb900008ee4
-	RTS				;14bee: 4e75
-LAB_0CD9:
-	ADDQ.W	#2,D0			;14bf0: 5440
-	TST.W	(A0)+			;14bf2: 4a58
-	BGT.S	LAB_0CD8		;14bf4: 6edc
-	ADDQ.W	#2,D0			;14bf6: 5440
-	TST.W	(A0)+			;14bf8: 4a58
-	BGT.S	LAB_0CD8		;14bfa: 6ed6
-	RTS				;14bfc: 4e75
-LAB_0CDA:
-	MOVEQ	#2,D1			;14bfe: 7202
-	MOVEQ	#4,D2			;14c00: 7404
-	MOVEQ	#4,D3			;14c02: 7604
-	MOVEQ	#4,D4			;14c04: 7804
-LAB_0CDB:
-	MOVEQ	#0,D7			;14c06: 7e00
-	MOVE.L	0(A5),D0		;14c08: 202d0000
-	BEQ.S	LAB_0CDD		;14c0c: 671c
+	CLR.W	-(A0)			;14bd2:
+	CLR.W	166(A5)			;14bd4:
+	ADDI.W	#$004e,D0		;14bd8: missile name
+	MOVE.W	D0,TEMP_002		;14bdc:
+	LEA	LAB_1383,A0		;14be2:
+	JSR	LAB_05B6		;14be8:
+	RTS				;14bee:
+LAB_0CD9: ; if none of that missile
+	ADDQ.W	#2,D0			;14bf0:
+	TST.W	(A0)+			;14bf2: try next missile
+	BGT.S	LAB_0CD8		;14bf4:
+	ADDQ.W	#2,D0			;14bf6:
+	TST.W	(A0)+			;14bf8: try next missile
+	BGT.S	LAB_0CD8		;14bfa:
+	RTS				;14bfc: give up
+; It appears that when a missile is stolen, all of that missile are taken.
+; It picks a missile at random from the first ten (not including Anti-Virus).
+; If none of that missile are available, it tries the next two, then gives up.
+; It can steal Anti-Virus if it fails to grab Vortex, or it fails to grab
+; Stasis and there are no Vortex either. On a failed Vortex grab when there are
+; no Anti-Virus, if bytes [122-123] are not zero, it will reset that to zero
+; and report the theft of "ONLY 10 OF EACH MISSILE TYPE ALLOWED!".
+LAB_0CDA: ; 25% chance, major criminal activity
+	MOVEQ	#2,D1			;14bfe: assault fighter?
+	MOVEQ	#4,D2			;14c00: scout?
+	MOVEQ	#4,D3			;14c02:
+	MOVEQ	#4,D4			;14c04:
+StealShip:
+	MOVEQ	#0,D7			;14c06:
+	MOVE.L	0(A5),D0		;14c08:
+	BEQ.S	Return_0CDD		;14c0c: if hangar?
 LAB_0CDC:
-	MOVEA.L	D0,A0			;14c0e: 2040
-	MOVE.B	8(A0),D7		;14c10: 1e280008
-	CMP.B	D7,D1			;14c14: b207
-	BEQ.S	LAB_0CDE		;14c16: 6714
-	CMP.B	D7,D2			;14c18: b407
-	BEQ.S	LAB_0CDE		;14c1a: 6710
-	CMP.B	D7,D3			;14c1c: b607
-	BEQ.S	LAB_0CDE		;14c1e: 670c
-	CMP.B	D7,D4			;14c20: b807
-	BEQ.S	LAB_0CDE		;14c22: 6708
-	MOVE.L	0(A0),D0		;14c24: 20280000
-	BNE.S	LAB_0CDC		;14c28: 66e4
-LAB_0CDD:
-	RTS				;14c2a: 4e75
+	MOVEA.L	D0,A0			;14c0e:
+	MOVE.B	8(A0),D7		;14c10: ship type?
+	CMP.B	D7,D1			;14c14:
+	BEQ.S	LAB_0CDE		;14c16: assault fighter?
+	CMP.B	D7,D2			;14c18:
+	BEQ.S	LAB_0CDE		;14c1a: scout ship
+	CMP.B	D7,D3			;14c1c:
+	BEQ.S	LAB_0CDE		;14c1e: scout ship
+	CMP.B	D7,D4			;14c20:
+	BEQ.S	LAB_0CDE		;14c22: scout ship
+	MOVE.L	0(A0),D0		;14c24:
+	BNE.S	LAB_0CDC		;14c28:
+Return_0CDD:
+	RTS				;14c2a:
 LAB_0CDE:
-	SUBQ.B	#1,D7			;14c2c: 5307
-	MOVE.W	#$0400,24(A0)		;14c2e: 317c04000018
-	MOVE.L	#LAB_11E0,28(A0)	;14c34: 217c0001e982001c
-	CMPI.B	#$32,D7			;14c3c: 0c070032
-	BMI.S	LAB_0CDF		;14c40: 6b04
-	SUBI.W	#$0030,D7		;14c42: 04470030
+	SUBQ.B	#1,D7			;14c2c:
+	MOVE.W	#$0400,24(A0)		;14c2e: 1024
+	MOVE.L	#LAB_11E0,28(A0)	;14c34:
+	CMPI.B	#$32,D7			;14c3c:
+	BMI.S	LAB_0CDF		;14c40:
+	SUBI.W	#$0030,D7		;14c42:
 LAB_0CDF:
-	MULU	#$0018,D7		;14c46: cefc0018
-	LEA	TERRANSHIPSTATS_00,A0	;14c4a: 41f90001e544
-	ADDA.L	D7,A0			;14c50: d1c7
-	MOVE.W	10(A0),TEMP_002	;14c52: 
-	LEA	LAB_1384,A0		;14c5a: 41f90003110c
-	JSR	LAB_05B6		;14c60: 4eb900008ee4
-	RTS				;14c66: 
+	MULU	#$0018,D7		;14c46:
+	LEA	TERRANSHIPSTATS_00,A0	;14c4a:
+	ADDA.L	D7,A0			;14c50:
+	MOVE.W	10(A0),TEMP_002	;14c52:
+	LEA	LAB_1384,A0		;14c5a:
+	JSR	LAB_05B6		;14c60:
+	RTS				;14c66:
 ;
-LAB_0CE0:
-	MOVE.L	CASH_GENERAL,D1		        ;14c68: 22390002de64
-	ADD.L	CASH_BUILDINGS,D1		;14c6e: d2b90002de68
-	ADD.L	CASH_SHIPS,D1		;14c74: d2b90002de6c
-	ADD.L	CASH_INTEL,D1		;14c7a: d2b90002de70
-	ADD.L	CASH_MISSILES,D1		;14c80: d2b90002de74
-	CMP.L	CASH_GENERAL,D0	        	;14c86: b0b90002de64
-	BGT.S	LAB_0CE1		;14c8c: 
-	SUB.L	D0,CASH_GENERAL		        ;14c8e: pay cash
-	RTS				;14c94: 
+DeductStolenCash: ; steal cash
+; Steal d0 amount of cash. Tries to take from general cash first, then
+; building fund, vehicle fund, intelligence and missiles, in order. If it
+; gets to missiles and there's still not enough, it takes all that it can.
+	MOVE.L	CASH_GENERAL,D1		        ;14c68:
+	ADD.L	CASH_BUILDINGS,D1		;14c6e:
+	ADD.L	CASH_SHIPS,D1		;14c74:
+	ADD.L	CASH_INTEL,D1		;14c7a:
+	ADD.L	CASH_MISSILES,D1		;14c80:
+	CMP.L	CASH_GENERAL,D0	        	;14c86:
+	BGT.S	LAB_0CE1		;14c8c:
+	SUB.L	D0,CASH_GENERAL		        ;14c8e:
+	RTS				;14c94:
 LAB_0CE1:
-	SUB.L	CASH_GENERAL,D0	        	;14c96: 90b90002de64
-	CLR.L	CASH_GENERAL		        ;14c9c: 42b90002de64
-	CMP.L	CASH_BUILDINGS,D0		;14ca2: b0b90002de68
-	BGT.S	LAB_0CE2		;14ca8: 6e08
-	SUB.L	D0,CASH_BUILDINGS		;14caa: 91b90002de68
-	RTS				;14cb0: 4e75
+	SUB.L	CASH_GENERAL,D0	        	;14c96:
+	CLR.L	CASH_GENERAL		        ;14c9c:
+	CMP.L	CASH_BUILDINGS,D0		;14ca2:
+	BGT.S	LAB_0CE2		;14ca8:
+	SUB.L	D0,CASH_BUILDINGS		;14caa:
+	RTS				;14cb0:
 LAB_0CE2:
-	SUB.L	CASH_BUILDINGS,D0		;14cb2: 90b90002de68
-	CLR.L	CASH_BUILDINGS		;14cb8: 42b90002de68
-	CMP.L	CASH_SHIPS,D0		;14cbe: b0b90002de6c
-	BGT.S	LAB_0CE3		;14cc4: 6e08
-	SUB.L	D0,CASH_SHIPS		;14cc6: 91b90002de6c
-	RTS				;14ccc: 4e75
+	SUB.L	CASH_BUILDINGS,D0		;14cb2:
+	CLR.L	CASH_BUILDINGS		;14cb8:
+	CMP.L	CASH_SHIPS,D0		;14cbe:
+	BGT.S	LAB_0CE3		;14cc4:
+	SUB.L	D0,CASH_SHIPS		;14cc6:
+	RTS				;14ccc:
 LAB_0CE3:
-	SUB.L	CASH_SHIPS,D0		;14cce: 90b90002de6c
-	CLR.L	CASH_SHIPS		;14cd4: 42b90002de6c
-	CMP.L	CASH_INTEL,D0		;14cda: b0b90002de70
-	BGT.S	LAB_0CE4		;14ce0: 6e08
-	SUB.L	D0,CASH_INTEL		;14ce2: 91b90002de70
-	RTS				;14ce8: 4e75
+	SUB.L	CASH_SHIPS,D0		;14cce:
+	CLR.L	CASH_SHIPS		;14cd4:
+	CMP.L	CASH_INTEL,D0		;14cda:
+	BGT.S	LAB_0CE4		;14ce0:
+	SUB.L	D0,CASH_INTEL		;14ce2:
+	RTS				;14ce8:
 LAB_0CE4:
-	SUB.L	CASH_INTEL,D0		;14cea: 90b90002de70
-	CLR.L	CASH_INTEL		;14cf0: 42b90002de70
-	CMP.L	CASH_MISSILES,D0		;14cf6: b0b90002de74
-	BGT.S	LAB_0CE5		;14cfc: 6e08
-	SUB.L	D0,CASH_MISSILES		;14cfe: 91b90002de74
-	RTS				;14d04: 4e75
+	SUB.L	CASH_INTEL,D0		;14cea:
+	CLR.L	CASH_INTEL		;14cf0:
+	CMP.L	CASH_MISSILES,D0		;14cf6:
+	BGT.S	LAB_0CE5		;14cfc:
+	SUB.L	D0,CASH_MISSILES		;14cfe:
+	RTS				;14d04:
 LAB_0CE5:
-	CLR.L	CASH_MISSILES		;14d06: 42b90002de74
-	MOVE.L	D1,D0			;14d0c: 2001
-	RTS				;14d0e: 4e75
-LAB_0CE6:
-	ST	D7			;14d10: 50c7
-	MOVE.W	684(A5),D0		;14d12: 302d02ac
-	MOVE.W	16(A4),D1		;14d16: 322c0010
-	ASL.W	#3,D1			;14d1a: e741
-	SUB.W	D1,D0			;14d1c: 9041
-	BPL.S	LAB_0CE7		;14d1e: 6a04
-	BCLR	#1,D7			;14d20: 08870001
+	CLR.L	CASH_MISSILES		;14d06:
+	MOVE.L	D1,D0			;14d0c:
+	RTS				;14d0e:
+;
+UpdateWorkers: ; update workers
+; There are only five industries that require workers:
+; Mining, advanced mining (deep bore/seismic), ship construction,
+; missile construction, and command centre. Each requires eight workers
+; per building. If any industry has less than 100% of the required
+; workers, it operates at 40% efficiency.
+	ST	D7			;14d10:
+	MOVE.W	684(A5),D0		;14d12:
+	MOVE.W	16(A4),D1		;14d16: mines
+	ASL.W	#3,D1			;14d1a: 8 per
+	SUB.W	D1,D0			;14d1c:
+	BPL.S	LAB_0CE7		;14d1e:
+	BCLR	#1,D7			;14d20: clear bit if not enough workers
 LAB_0CE7:
-	MOVE.W	26(A4),D1		;14d24: 322c001a
-	ADD.W	42(A4),D1		;14d28: d26c002a
-	ASL.W	#3,D1			;14d2c: e741
-	SUB.W	D1,D0			;14d2e: 9041
-	BPL.S	LAB_0CE8		;14d30: 6a04
-	BCLR	#2,D7			;14d32: 08870002
+	MOVE.W	26(A4),D1		;14d24: deep bore mines
+	ADD.W	42(A4),D1		;14d28: and seismic penetrators
+	ASL.W	#3,D1			;14d2c:
+	SUB.W	D1,D0			;14d2e:
+	BPL.S	LAB_0CE8		;14d30:
+	BCLR	#2,D7			;14d32:
 LAB_0CE8:
-	MOVE.W	50(A4),D1		;14d36: 322c0032
-	ASL.W	#3,D1			;14d3a: e741
-	SUB.W	D1,D0			;14d3c: 9041
-	BPL.S	LAB_0CE9		;14d3e: 6a04
-	BCLR	#3,D7			;14d40: 08870003
+	MOVE.W	50(A4),D1		;14d36: cosntruction yard
+	ASL.W	#3,D1			;14d3a:
+	SUB.W	D1,D0			;14d3c:
+	BPL.S	LAB_0CE9		;14d3e:
+	BCLR	#3,D7			;14d40:
 LAB_0CE9:
-	MOVE.W	28(A4),D1		;14d44: 322c001c
-	ASL.W	#3,D1			;14d48: e741
-	SUB.W	D1,D0			;14d4a: 9041
-	BPL.S	LAB_0CEA		;14d4c: 6a04
-	BCLR	#4,D7			;14d4e: 08870004
+	MOVE.W	28(A4),D1		;14d44: missile silo
+	ASL.W	#3,D1			;14d48:
+	SUB.W	D1,D0			;14d4a:
+	BPL.S	LAB_0CEA		;14d4c:
+	BCLR	#4,D7			;14d4e:
 LAB_0CEA:
-	MOVE.W	48(A4),D1		;14d52: 322c0030
-	ASL.W	#3,D1			;14d56: e741
-	SUB.W	D1,D0			;14d58: 9041
-	BPL.S	LAB_0CEB		;14d5a: 6a04
-	BCLR	#5,D7			;14d5c: 08870005
+	MOVE.W	48(A4),D1		;14d52: command centre
+	ASL.W	#3,D1			;14d56:
+	SUB.W	D1,D0			;14d58:
+	BPL.S	LAB_0CEB		;14d5a:
+	BCLR	#5,D7			;14d5c:
 LAB_0CEB:
-	MOVE.W	D0,720(A5)		;14d60: 3b4002d0
-	TST.B	87(A5)			;14d64: 4a2d0057
-	BEQ.S	LAB_0CEC		;14d68: 6706
-	SF	D7			;14d6a: 51c7
-	SUBQ.B	#1,87(A5)		;14d6c: 532d0057
+	MOVE.W	D0,720(A5)		;14d60:
+	TST.B	87(A5)			;14d64:
+	BEQ.S	LAB_0CEC		;14d68:
+	SF	D7			;14d6a:
+	SUBQ.B	#1,87(A5)		;14d6c:
 LAB_0CEC:
-	MOVE.B	D7,92(A5)		;14d70: 1b47005c
-	RTS				;14d74: 4e75
+	MOVE.B	D7,92(A5)		;14d70:
+	RTS				;14d74:
 ;
 UpdateAir:
 	MOVE.W	38(A4),D0		;14d76:
@@ -27207,8 +27232,8 @@ LAB_0D18: ; update current asteroid (terran?)
 	BSR.W	UpdateFood		;15150:
 	BSR.W	UpdateWater		;15154:
 	BSR.W	UpdatePower		;15158:
-	BSR.W	LAB_0CE6		;1515c:
-	BSR.W	LAB_0CC0		;15160:
+	BSR.W	UpdateWorkers		;1515c:
+	BSR.W	UpdateSecurity		;15160:
 	BSR.W	LAB_0C90		;15164:
 	BSR.W	LAB_0E64		;15168:
 LAB_0D19:
@@ -29857,7 +29882,8 @@ Warhead_08_Swix:
 	JSR	LAB_105D		;172fc: 4eb90001a4f8
 LAB_0E63:
 	RTS				;17302: 4e75
-LAB_0E64:
+;
+LAB_0E64: ; Update
 	TST.B	98(A5)			;17304: 4a2d0062
 	BNE.S	LAB_0E65		;17308: 6602
 	RTS				;1730a: 4e75
