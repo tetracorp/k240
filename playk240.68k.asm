@@ -438,6 +438,7 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ; [21]      BYTE     Building total?
 ; [24]      BYTE     Asteroid Engine speed? Added to power usage.
 ;   Set true (-1?) when destroyed.
+;   Set true on an alien asteroid when initialized.
 ; [25]      BYTE     ???? (must be positive to build spy satellites. owner? stasis?)
 ; [40-57?]  STRING   Asteroid name
 ; [60-79]   WORD[10] ORELEFT (Un-mined ore in asteroid)
@@ -457,17 +458,26 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ; [89]      BYTE     On/Off for buildings
 ;   bit 0: can build satellites/missiles, targeted with ship weapons
 ;     probably "occupied" bit or stasis
+;     set to 1 on new alien colony
 ;   bit 1: can build satellites/missiles, targeted by aliens only (0: you only)
 ;     probably "occupied by you?" bit
-;   bit 2: Gravity Nullifier on
+;     Set to 0 on new alien colony.
+;   bit 2: Gravity Nullifier on (set 1 on alien colony)
 ;   bit 3: Asteroid Engines on
 ;   bit 6: set when asteroid exploded or possibly hit with missile (white flash)?
-;          if true, asteroid belongs to alien
+;          if true, asteroid belongs to alien.
+;          set to 1 on new alien colony
+;          attempts to build here fail.
+;   bit 7: asteroid is in stasis
 ; [90]      BYTE     
 ;   bit 0: set by virus missile used by certain aliens
+;          cleared on ore eaters
 ;   bit 2: Virus outbreak. Set by rigellian population-reducing missile 09
-;   bit 4: orbital space dock present?
+;   bit 4: orbital space dock present? true for ore/rigellian
 ;   bit 5: "Recalculate screen generators." Set when screen generator destroyed.
+;   bit 7: cleared on ore eaters
+; [91]      BYTE
+;   bit 1: Set for Tylarans.
 ; [92]      BYTE     Worker shortage.
 ;   bit 1: If 0, Mine operates at 40% efficiency
 ;   bit 2: If 0, Deep Bore Mine and Seismic Penetrator operate at 40% efficiency
@@ -494,31 +504,30 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ; [364-523] BYTE[8]x20   Combat Eagles in hangar?
 ; [524-683] BYTE[8]x20   Scout Ships in hangar?
 ; [684-685] WORD     Population (a Swixaran weapon reduces this by 5)
+; [692]     BYTE     (0x28 / 40 / 0b101000 on new alien colony.)
 ; [694-699] WORD[3]  Power production/usage/surplus
 ; [700-705] WORD[3]  Air production/usage/surplus
 ; [706-711] WORD[3]  Food production/usage/surplus
+;   food surplus set to 60 on Tylaran.
 ; [712-717] WORD[3]  Water production/usage/surplus
 ; [718-719] WORD     POWERSHORTAGE  (Certain buildings won't run if this is too high)
 ;   *see POWERFAIL_ORDER
 ;   1+: Asteroid Engines
-;   2+: (ore teleporter?)
 ;   3+: Gravity Nullifier (clears 89 bit 2)
-;   4+: (satellite silo?)
 ;   5+: Anti-Missile Pod
 ;   6+: Seismic Penetrator
-;   7+: (security centre?)
 ;   8+: Deep Bore Mine
 ;   9+: Mine
-;   10+: Medical Centre (radiation treatment - virus treatment still functions)
 ;   11+: Construction Yard
 ;   12+: Sensor Array / Improved Sensors
-;   13+: Repair Facility
-;   14+: Turret (any)
-;   15+; Screen Generator
-;   17+: Hydroponics
-;   18+: Hydration Plant
-;   19+: Life Support
+;   13+: Turret (any)
+;   16+: Medical Centre (radiation treatment - virus treatment still functions)
+;   19+: Repair Facility
 ;   20+: Decontamination Filter
+;   21+; Screen Generator
+;   23+: Hydroponics
+;   24+: Hydration Plant
+;   25+: Life Support
 ; [720-721] Worker surplus
 ; [722-727] WORD[3]  CPUFAW (Air/Food/Water produced by CPU)
 ; [734]     BYTE     ???
@@ -8703,7 +8712,7 @@ LAB_046B:
 	BSR.W	ErrorMsgLine		;069c6: 61000e5c
 	RTS				;069ca: 4e75
 ;
-LAB_046C:
+LAB_046C: ; attempts to build
 	MOVEA.L	CURRENTASTEROID,A0	;069cc: 20790002de54
 	MOVE.B	89(A0),D0		;069d2: ast[89]
 	BMI.S	LAB_046B		;069d6: 6bec
@@ -19246,7 +19255,7 @@ LAB_0936:
 	ASL.W	#2,D1			;0f10e: e541
 	ADD.W	D1,D2			;0f110: d441
 	BRA.S	LAB_0938		;0f112: 602c
-LAB_0937:
+LAB_0937: ; anti-missile pod?
 	MOVEA.L	TARGETASTEROID,A0		;0f114: 20790002ded4
 	CMPI.W	#$0005,718(A0)		;0f11a: 0c68000502ce
 	BPL.S	LAB_093A		;0f120: 6a36
@@ -23188,7 +23197,7 @@ LAB_0B2E:
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A2		;121fe: 24790000055a
 	MOVEA.L	SAVEDATA6_BLDGTOTAL,A4		;12204: 28790000056e
 	MOVEQ	#23,D2			;1220a: 7417
-LAB_0B2F:
+LAB_0B2F: ; sensors
 	MOVE.L	A2,-(A7)		;1220c: 2f0a
 	MOVE.L	A4,-(A7)		;1220e: 2f0c
 	MOVE.W	D2,-(A7)		;12210: 3f02
@@ -25958,11 +25967,11 @@ LAB_0C82:
 	ADD.W	D3,D2			;143ba: 
 	ADDA.W	D2,A2			;143bc: 
 	TST.B	(A2)+			;143be: if yards+(ID*10)
-	BGT.S	LAB_0C84		;143c0:
+	BGT.S	LAB_0C84		;143c0: (a2 = yard)
 Return_0C83:
 	RTS				;143c2:
 LAB_0C84:
-	MOVE.B	(A2)+,D0		;143c4: d0 = yard[1]
+	MOVE.B	(A2)+,D0		;143c4: d0 = ship ID
 	EXT.W	D0			;143c6: 
 	CMPI.B	#$32,D0			;143c8: 
 	BMI.S	LAB_0C85		;143cc: 
@@ -25997,7 +26006,7 @@ LAB_0C87:
 	LEA	182(A5),A5		;14414: a5 = store
 	MOVE.B	5(A1),D0		;14418: d0 = ore 1 cost
 	CMP.B	(A2),D0			;1441c: 
-	BMI.S	LAB_0C88		;1441e: if (day <= ore1cost):
+	BMI.S	LAB_0C88		;1441e: if (daysleft <= ore1cost):
 	MOVE.B	4(A1),D1		;14420:   d1 = that ore
 	EXT.W	D1			;14424: 
 	ADD.W	D1,D1			;14426: 
@@ -26029,8 +26038,8 @@ LAB_0C89: ; take money
 	CLR.L	CASH_SHIPS		;1445a: Ensure cash can't go negative
 LAB_0C8A: ; build ship
 ; a1 = construction data, a2 = shipyard, a3 = hardpoint
-	SUBQ.B	#1,(A2)			;14460: a2 = ore1paid--
-	BNE.S	Return_0C8E		;14462: if ore1paid was 1: ; first run
+	SUBQ.B	#1,(A2)			;14460: one less ship
+	BNE.S	Return_0C8E		;14462: if zero ships:
 	MOVEQ	#0,D0			;14464: 
 	MOVE.B	-7(A2),D0		;14466: d0 = shipID
 	MOVEQ	#0,D1			;1446a: 
@@ -27046,7 +27055,7 @@ LAB_0D00:
 	MOVEQ	#0,D4			;14f50:
 	MOVEQ	#0,D5			;14f52:
 	MOVEQ	#100,D7			;14f54:
-Loop_0D01: ; 101 times (once per square):
+Loop_0D01: ; 101 times (once per square), count number of special buildings
 	TST.B	2(A1)			;14f56:
 	BMI.S	Next_0D04		;14f5a: if positive construction:
 	MOVE.B	0(A1),D1		;14f5c:
@@ -27133,7 +27142,7 @@ LAB_0D0D:
 LAB_0D0E: ; power shortage
 	ADDQ.W	#1,D1			;15022:
 	MOVE.W	D1,718(A5)		;15024: powershort: which item it failed on
-	BSET	#5,90(A5)		;15028:
+	BSET	#5,90(A5)		;15028: re-init screen generators
 	CLR.W	698(A5)			;1502e: power surplus to zero
 	SUBQ.W	#1,D1			;15032:
 	BRA.S	LAB_0D14		;15034:
@@ -27598,7 +27607,7 @@ LAB_0D49:
 ; CAUSE UNKNOWN!
 LAB_0D4A:
 	RTS				;155e0: 4e75
-LAB_0D4B:
+LAB_0D4B: ; meteor shower
 	BSR.W	LAB_0B63		;155e2: 6100d262
 	MOVE.W	D3,D0			;155e6: 3003
 	BEQ.S	LAB_0D4C		;155e8: 6718
@@ -28313,6 +28322,8 @@ LAB_0D9F:
 	DBF	D6,Loop_0D9D		;15e52: 
 Return_0DA0:
 	RTS				;15e56: 4e75
+;
+; Approximate beginning of alien code section. 
 ;
 AlienTech_0DA1: ; alien building?
 ; some mechanic which works differently by alien
@@ -29421,12 +29432,12 @@ LAB_0E26:
 	MOVE.L	(A7)+,TARGETASTEROID		;16d18: 23df0002ded4
 	RTS				;16d1e: 4e75
 LAB_0E27:
-	DC.L	LAB_0E28		;16d20: 00016d38
-	DC.L	LAB_0E2E		;16d24: 00016df4
-	DC.L	LAB_0E28		;16d28: 00016d38
-	DC.L	LAB_0E2F		;16d2c: 00016e04
-	DC.L	LAB_0E37		;16d30: 00016eb0
-	DC.L	LAB_0E3D		;16d34: 00016f32
+	DC.L	LAB_0E28		;16d20: Kll-Kp-Qua 
+	DC.L	LAB_0E2E		;16d24: Ore Eaters 
+	DC.L	LAB_0E28		;16d28: Ax'Zilanth 
+	DC.L	LAB_0E2F		;16d2c: Tylaran    
+	DC.L	LAB_0E37		;16d30: Rigellian  
+	DC.L	LAB_0E3D		;16d34: Swixaran   
 LAB_0E28:
 	CMPI.W	#$0002,LAB_12A1		;16d38: 0c7900020002e052
 	BMI.W	LAB_0E2D		;16d40: 6b0000b0
@@ -30218,7 +30229,7 @@ LAB_0E8A:
 	DC.L	LAB_0E8C		;17786: Ax'Zilanth
 	DC.L	LAB_0E91		;1778a: Tylaran
 	DC.L	LAB_0E92		;1778e: Rigellian
-	DC.L	LAB_0E93		;17792: Swixaran
+	DC.L	LAB_0E93		;17792: Swixaran   
 LAB_0E8B:
 	MOVEQ	#1,D0			;17796: 7001
 	BSR.W	LAB_0EA3		;17798: 6100036c
@@ -30308,82 +30319,84 @@ LAB_0E92:
 	MOVEQ	#66,D2			;17898: 7442
 	BSR.W	LAB_0FAC		;1789a: 61001856
 	RTS				;1789e: 4e75
+;
 LAB_0E93:
-	MOVEQ	#0,D0			;178a0: 7000
-	BSR.W	LAB_0EA3		;178a2: 61000262
-	MOVEQ	#1,D0			;178a6: 7001
-	BSR.W	LAB_0EA3		;178a8: 6100025c
-	MOVEQ	#2,D0			;178ac: 7002
-	BSR.W	LAB_0EA3		;178ae: 61000256
-	MOVEQ	#65,D2			;178b2: 7441
-	BSR.W	LAB_0FAC		;178b4: 6100183c
-	MOVEQ	#4,D7			;178b8: 7e04
-LAB_0E94:
-	MOVE.W	D7,-(A7)		;178ba: 3f07
-	MOVEQ	#60,D2			;178bc: 743c
-	BSR.W	LAB_0FAC		;178be: 61001832
-	MOVE.W	(A7)+,D7		;178c2: 3e1f
-	DBF	D7,LAB_0E94		;178c4: 51cffff4
-	MOVEA.L	LAB_1236,A0		;178c8: 20790002021a
-	MOVE.W	(A0)+,D0		;178ce: 3018
-	MOVE.L	A0,-(A7)		;178d0: 2f08
-	JSR	LAB_0B84		;178d2: 4eb900012b4c
-	ST	24(A0)			;178d8: 50e80018
-	MOVE.B	#$45,89(A0)		;178dc: 117c00450059
-	MOVE.B	#$28,692(A0)		;178e2: 117c002802b4
-	MOVE.W	SAVEDATA1_ALIEN_03,696(A0)	;178e8: 31790002030602b8
-	MOVE.W	SAVEDATA1_ALIEN_04,698(A0)	;178f0: 31790002030802ba
-	MOVE.W	SAVEDATA1_ALIEN_05,700(A0)	;178f8: 31790002030a02bc
-	MOVE.L	A0,TARGETASTEROID		;17900: 23c80002ded4
-	BSR.W	LAB_0C19		;17906: 6100bfdc
-	MOVE.L	A6,LAB_1286		;1790a: 23ce0002dec8
-	MOVE.L	A5,LAB_1287		;17910: 23cd0002decc
-	MOVE.L	A4,LAB_1288		;17916: 23cc0002ded0
-	MOVEQ	#0,D0			;1791c: 7000
-	BSR.W	LAB_0EA3		;1791e: 610001e6
-	MOVEQ	#1,D0			;17922: 7001
-	BSR.W	LAB_0EA3		;17924: 610001e0
-	MOVEQ	#3,D7			;17928: 7e03
+	MOVEQ	#0,D0			;178a0:
+	BSR.W	LAB_0EA3		;178a2:
+	MOVEQ	#1,D0			;178a6:
+	BSR.W	LAB_0EA3		;178a8:
+	MOVEQ	#2,D0			;178ac:
+	BSR.W	LAB_0EA3		;178ae:
+	MOVEQ	#65,D2			;178b2:
+	BSR.W	LAB_0FAC		;178b4:
+	MOVEQ	#4,D7			;178b8: 5.times do:
+Loop_0E94: ; appears to initialize alien asteroid
+	MOVE.W	D7,-(A7)		;178ba:
+	MOVEQ	#60,D2			;178bc:
+	BSR.W	LAB_0FAC		;178be:
+	MOVE.W	(A7)+,D7		;178c2:
+	DBF	D7,Loop_0E94		;178c4:
+;
+	MOVEA.L	LAB_1236,A0		;178c8:
+	MOVE.W	(A0)+,D0		;178ce:
+	MOVE.L	A0,-(A7)		;178d0:
+	JSR	LAB_0B84		;178d2:
+	ST	24(A0)			;178d8:
+	MOVE.B	#$45,89(A0)		;178dc:
+	MOVE.B	#$28,692(A0)		;178e2:
+	MOVE.W	SAVEDATA1_ALIEN_03,696(A0)	;178e8:
+	MOVE.W	SAVEDATA1_ALIEN_04,698(A0)	;178f0:
+	MOVE.W	SAVEDATA1_ALIEN_05,700(A0)	;178f8:
+	MOVE.L	A0,TARGETASTEROID		;17900:
+	BSR.W	LAB_0C19		;17906:
+	MOVE.L	A6,LAB_1286		;1790a:
+	MOVE.L	A5,LAB_1287		;17910:
+	MOVE.L	A4,LAB_1288		;17916:
+	MOVEQ	#0,D0			;1791c:
+	BSR.W	LAB_0EA3		;1791e:
+	MOVEQ	#1,D0			;17922:
+	BSR.W	LAB_0EA3		;17924:
+	MOVEQ	#3,D7			;17928:
 LAB_0E95:
-	MOVE.W	D7,-(A7)		;1792a: 3f07
-	MOVEQ	#60,D2			;1792c: 743c
-	BSR.W	LAB_0FAC		;1792e: 610017c2
-	MOVE.W	(A7)+,D7		;17932: 3e1f
-	DBF	D7,LAB_0E95		;17934: 51cffff4
-	MOVEA.L	TARGETASTEROID,A0		;17938: 20790002ded4
-	BSET	#4,90(A0)		;1793e: 08e80004005a
-	MOVEQ	#75,D2			;17944: 744b
-	BSR.W	LAB_0FAC		;17946: 610017aa
-	MOVEA.L	(A7)+,A0		;1794a: 205f
-	MOVE.W	(A0),D0			;1794c: 3010
-	JSR	LAB_0B84		;1794e: 4eb900012b4c
-	ST	24(A0)			;17954: 50e80018
-	MOVE.B	#$45,89(A0)		;17958: 117c00450059
-	MOVE.B	#$28,692(A0)		;1795e: 117c002802b4
-	MOVE.W	SAVEDATA1_ALIEN_03,696(A0)	;17964: 31790002030602b8
-	MOVE.W	SAVEDATA1_ALIEN_04,698(A0)	;1796c: 31790002030802ba
-	MOVE.W	SAVEDATA1_ALIEN_05,700(A0)	;17974: 31790002030a02bc
-	MOVE.L	A0,TARGETASTEROID		;1797c: 23c80002ded4
-	BSR.W	LAB_0C19		;17982: 6100bf60
-	MOVE.L	A6,LAB_1286		;17986: 23ce0002dec8
-	MOVE.L	A5,LAB_1287		;1798c: 23cd0002decc
-	MOVE.L	A4,LAB_1288		;17992: 23cc0002ded0
-	MOVEQ	#0,D0			;17998: 7000
-	BSR.W	LAB_0EA3		;1799a: 6100016a
-	MOVEQ	#1,D0			;1799e: 7001
-	BSR.W	LAB_0EA3		;179a0: 61000164
-	MOVEQ	#3,D7			;179a4: 7e03
+	MOVE.W	D7,-(A7)		;1792a:
+	MOVEQ	#60,D2			;1792c:
+	BSR.W	LAB_0FAC		;1792e:
+	MOVE.W	(A7)+,D7		;17932:
+	DBF	D7,LAB_0E95		;17934:
+	MOVEA.L	TARGETASTEROID,A0		;17938:
+	BSET	#4,90(A0)		;1793e: orbital space dock?
+	MOVEQ	#75,D2			;17944:
+	BSR.W	LAB_0FAC		;17946:
+	MOVEA.L	(A7)+,A0		;1794a:
+	MOVE.W	(A0),D0			;1794c:
+	JSR	LAB_0B84		;1794e:
+	ST	24(A0)			;17954:
+	MOVE.B	#$45,89(A0)		;17958:
+	MOVE.B	#$28,692(A0)		;1795e:
+	MOVE.W	SAVEDATA1_ALIEN_03,696(A0)	;17964:
+	MOVE.W	SAVEDATA1_ALIEN_04,698(A0)	;1796c:
+	MOVE.W	SAVEDATA1_ALIEN_05,700(A0)	;17974:
+	MOVE.L	A0,TARGETASTEROID		;1797c:
+	BSR.W	LAB_0C19		;17982:
+	MOVE.L	A6,LAB_1286		;17986:
+	MOVE.L	A5,LAB_1287		;1798c:
+	MOVE.L	A4,LAB_1288		;17992:
+	MOVEQ	#0,D0			;17998:
+	BSR.W	LAB_0EA3		;1799a:
+	MOVEQ	#1,D0			;1799e:
+	BSR.W	LAB_0EA3		;179a0:
+	MOVEQ	#3,D7			;179a4:
 LAB_0E96:
-	MOVE.W	D7,-(A7)		;179a6: 3f07
-	MOVEQ	#60,D2			;179a8: 743c
-	BSR.W	LAB_0FAC		;179aa: 61001746
-	MOVE.W	(A7)+,D7		;179ae: 3e1f
-	DBF	D7,LAB_0E96		;179b0: 51cffff4
-	MOVEA.L	TARGETASTEROID,A0		;179b4: 20790002ded4
-	BSET	#4,90(A0)		;179ba: 08e80004005a
-	MOVEQ	#75,D2			;179c0: 744b
-	BSR.W	LAB_0FAC		;179c2: 6100172e
-	RTS				;179c6: 4e75
+	MOVE.W	D7,-(A7)		;179a6:
+	MOVEQ	#60,D2			;179a8:
+	BSR.W	LAB_0FAC		;179aa:
+	MOVE.W	(A7)+,D7		;179ae:
+	DBF	D7,LAB_0E96		;179b0:
+	MOVEA.L	TARGETASTEROID,A0		;179b4:
+	BSET	#4,90(A0)		;179ba:
+	MOVEQ	#75,D2			;179c0:
+	BSR.W	LAB_0FAC		;179c2:
+	RTS				;179c6:
 LAB_0E97:
 	MOVEA.L	LAB_1287,A0		;179c8: 20790002decc
 	MOVEQ	#99,D0			;179ce: 7063
@@ -30420,13 +30433,13 @@ LAB_0E9A:
 	MOVEQ	#0,D0			;17a2e: 7000
 	RTS				;17a30: 4e75
 LAB_0E9B:
-	DC.L	LAB_0E9C		;17a32: 00017a4a
-	DC.L	LAB_0EA0		;17a36: 00017ac8
-	DC.L	LAB_0E9C		;17a3a: 00017a4a
-	DC.L	LAB_0E9F		;17a3e: 00017a9e
-	DC.L	LAB_0E9C		;17a42: 00017a4a
-	DC.L	LAB_0E9C		;17a46: 00017a4a
-LAB_0E9C:
+	DC.L	LAB_0E9C		;17a32:
+	DC.L	LAB_0EA0		;17a36: Ore-Eaters
+	DC.L	LAB_0E9C		;17a3a:
+	DC.L	LAB_0E9F		;17a3e: Tylarans
+	DC.L	LAB_0E9C		;17a42:
+	DC.L	LAB_0E9C		;17a46:
+LAB_0E9C: ; All aliens
 	MOVEA.L	TARGETASTEROID,A0		;17a4a: 20790002ded4
 	BTST	#7,90(A0)		;17a50: 08280007005a
 	BNE.S	LAB_0E9E		;17a56: 6642
@@ -30448,7 +30461,8 @@ LAB_0E9D:
 LAB_0E9E:
 	MOVEQ	#-1,D0			;17a9a: 70ff
 	RTS				;17a9c: 4e75
-LAB_0E9F:
+;
+LAB_0E9F: ; Tylarans
 	MOVEA.L	TARGETASTEROID,A0		;17a9e: 20790002ded4
 	CMPI.B	#$40,8(A6)		;17aa4: 0c2e00400008
 	BNE.S	LAB_0E9D		;17aaa: 66ac
@@ -30457,7 +30471,7 @@ LAB_0E9F:
 	MOVE.W	#$0400,24(A6)		;17aba: 3d7c04000018
 	MOVE.W	#$003c,710(A0)		;17ac0: 317c003c02c6
 	BRA.S	LAB_0E9D		;17ac6: 6090
-LAB_0EA0:
+LAB_0EA0: ; Ore Eaters
 	MOVEA.L	LAB_1286,A6		;17ac8: 2c790002dec8
 	MOVE.W	#$0230,D1		;17ace: 323c0230
 LAB_0EA1:
@@ -30587,12 +30601,12 @@ LAB_0EAA:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;17c88: 4cdf7fff
 	RTS				;17c8c: 4e75
 LAB_0EAB:
-	DC.L	LAB_0EAC		;17c8e: 00017ca6
-	DC.L	LAB_0EAF		;17c92: 00017cd8
-	DC.L	LAB_0EB7		;17c96: 00017dba
-	DC.L	LAB_0EB8		;17c9a: 00017dbc
-	DC.L	LAB_0EB7		;17c9e: 00017dba
-	DC.L	LAB_0EB7		;17ca2: 00017dba
+	DC.L	LAB_0EAC		;17c8e: Kll-Kp-Qua 
+	DC.L	LAB_0EAF		;17c92: Ore Eaters 
+	DC.L	LAB_0EB7		;17c96: Ax'Zilanth 
+	DC.L	LAB_0EB8		;17c9a: Tylaran    
+	DC.L	LAB_0EB7		;17c9e: Rigellian  
+	DC.L	LAB_0EB7		;17ca2: Swixaran   
 LAB_0EAC:
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A5		;17ca6: 2a790000055a
 	MOVE.W	#$0017,D0		;17cac: 303c0017
@@ -30976,12 +30990,12 @@ LAB_0ED9:
 	JSR	(A2)			;181ac: 4e92
 	RTS				;181ae: 4e75
 LAB_0EDA:
-	DC.L	LAB_0EDB		;181b0: 000181c8
-	DC.L	LAB_0EEC		;181b4: 000182fe
-	DC.L	LAB_0EE3		;181b8: 00018254
-	DC.L	LAB_0EF3		;181bc: 00018360
-	DC.L	LAB_0EFD		;181c0: 0001840e
-	DC.L	LAB_0F04		;181c4: 0001849a
+	DC.L	LAB_0EDB		;181b0: Kll-Kp-Qua 
+	DC.L	LAB_0EEC		;181b4: Ore Eaters 
+	DC.L	LAB_0EE3		;181b8: Ax'Zilanth 
+	DC.L	LAB_0EF3		;181bc: Tylaran    
+	DC.L	LAB_0EFD		;181c0: Rigellian  
+	DC.L	LAB_0F04		;181c4: Swixaran   
 LAB_0EDB:
 	TST.W	58(A1)			;181c8: 4a69003a
 	BNE.S	LAB_0EDC		;181cc: 6604
@@ -31357,12 +31371,12 @@ LAB_0F15:
 	JSR	(A1)			;185ec: 4e91
 	RTS				;185ee: 4e75
 LAB_0F16:
-	DC.L	LAB_0F17		;185f0: 00018608
-	DC.L	LAB_0F25		;185f4: 00018742
-	DC.L	LAB_0F1F		;185f8: 000186b2
-	DC.L	LAB_0F2C		;185fc: 000187da
-	DC.L	LAB_0F38		;18600: 000188d8
-	DC.L	LAB_0F3E		;18604: 00018966
+	DC.L	LAB_0F17		;185f0: Kll-Kp-Qua 
+	DC.L	LAB_0F25		;185f4: Ore Eaters 
+	DC.L	LAB_0F1F		;185f8: Ax'Zilanth 
+	DC.L	LAB_0F2C		;185fc: Tylaran    
+	DC.L	LAB_0F38		;18600: Rigellian  
+	DC.L	LAB_0F3E		;18604: Swixaran   
 LAB_0F17:
 	MOVEA.L	TARGETASTEROID,A0		;18608: 20790002ded4
 	SUBQ.W	#1,698(A0)		;1860e: 536802ba
@@ -31795,12 +31809,12 @@ LAB_0F52:
 	JSR	(A1)			;18b1e: 4e91
 	RTS				;18b20: 4e75
 LAB_0F53:
-	DC.L	LAB_0F54		;18b22: 00018b3a
-	DC.L	LAB_0F5A		;18b26: 00018bb8
-	DC.L	LAB_0F57		;18b2a: 00018b7e
-	DC.L	LAB_0F61		;18b2e: 00018c26
-	DC.L	LAB_0F62		;18b32: 00018c28
-	DC.L	LAB_0F61		;18b36: 00018c26
+	DC.L	LAB_0F54		;18b22: Kll-Kp-Qua 
+	DC.L	LAB_0F5A		;18b26: Ore Eaters 
+	DC.L	LAB_0F57		;18b2a: Ax'Zilanth 
+	DC.L	LAB_0F61		;18b2e: Tylaran    
+	DC.L	LAB_0F62		;18b32: Rigellian  
+	DC.L	LAB_0F61		;18b36: Swixaran   
 LAB_0F54:
 	BTST	#0,CLOCK_12E7		;18b3a: 083900000002e457
 	BNE.S	LAB_0F56		;18b42: 6638
@@ -31973,12 +31987,12 @@ LAB_0F6E:
 	JSR	(A1)			;18d0c: 4e91
 	RTS				;18d0e: 4e75
 LAB_0F6F:
-	DC.L	LAB_0F70		;18d10: 00018d28
-	DC.L	LAB_0F83		;18d14: 00018e6e
-	DC.L	LAB_0F79		;18d18: 00018dd4
-	DC.L	LAB_0F8F		;18d1c: 00018f56
-	DC.L	LAB_0F98		;18d20: 00018fce
-	DC.L	LAB_0FA1		;18d24: 00019054
+	DC.L	LAB_0F70		;18d10: Kll-Kp-Qua 
+	DC.L	LAB_0F83		;18d14: Ore Eaters 
+	DC.L	LAB_0F79		;18d18: Ax'Zilanth 
+	DC.L	LAB_0F8F		;18d1c: Tylaran    
+	DC.L	LAB_0F98		;18d20: Rigellian  
+	DC.L	LAB_0FA1		;18d24: Swixaran   
 LAB_0F70:
 	MOVEA.L	TARGETASTEROID,A0		;18d28: 20790002ded4
 	MOVEA.L	LAB_1288,A1		;18d2e: 22790002ded0
@@ -33894,7 +33908,7 @@ LAB_105D:
 	BSR.S	PlaySound		;1a506: 6104
 	MOVE.L	(A7)+,D0		;1a508: 201f
 	RTS				;1a50a: 4e75
-
+; Approximate end of alien code, beginning of cheat functions
 PlaySound: ; called by cheat function - make noise?
 ; play sound number d0
 	MOVEM.L	D0-D3/A0-A6,-(A7)	;1a50c: 48e7f0fe
@@ -36882,6 +36896,7 @@ SAVEDATA1_ALIEN_02: ; can increment. always starts zero
 ; Default: 0 for all aliens.
 	DS.W	1			;20304
 SAVEDATA1_ALIEN_03: ; read-only. varies between alien
+; May be power usage.
 ; 01: 70
 ; 02: 30
 ; 03: 130
@@ -36890,6 +36905,7 @@ SAVEDATA1_ALIEN_03: ; read-only. varies between alien
 ; 06: 40
 	DC.W	$0046			;20306
 SAVEDATA1_ALIEN_04: ; read-only. varies between alien
+; May be power surplus.
 ; 01: 200
 ; 02: 30
 ; 03: 35
@@ -36898,6 +36914,8 @@ SAVEDATA1_ALIEN_04: ; read-only. varies between alien
 ; 06: 120
 	DC.W	$00c8			;20308
 SAVEDATA1_ALIEN_05: ; read-only. varies between alien
+; Percentage chance of using missiles, perhaps, since Tylaran is 0
+; May be life support production.
 ; 01: 25
 ; 02: 35
 ; 03: 30
@@ -36905,7 +36923,7 @@ SAVEDATA1_ALIEN_05: ; read-only. varies between alien
 ; 05: 30
 ; 06: 30
 	DC.W	$0019			;2030a
-SAVEDATA1_ALIEN_06: ; read-only, varies between alien
+SAVEDATA1_ALIEN_06: ; read-only, varies between alien. Percentage chance
 ; 01: 20
 ; 02: 10
 ; 03: 15
@@ -40495,10 +40513,10 @@ LAB_12C5:
 SHIPYARDS: ; ship construction. construction yards?
 ; Appears to store 64 shipyards or ships in construction, 10 bytes each
 ; Would need ship ID, ore consumed x 2
-; [0]   BYTE    Number of ships left to build?
-; [1]   BYTE    SHIPID (type of ship 1-8)
-; [2-7] BYTE[6] HARDPOINT (0-15 or FF for end of list)
-; [8]   BYTE    DAY (which day of the construction it is, starting at 1)
+; [0]   BYTE    Number of ships to build?
+; [1]   BYTE    Ship type number
+; [2-6] BYTE[6] HARDPOINT (0-15 or FF for end of list)
+; [8]   BYTE    DAYSLEFT
 ; [9]   BYTE    
 	DS.L	160			;2e186
 LAB_12C7:
