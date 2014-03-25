@@ -422,8 +422,10 @@ SAVEDATA4_BUILDINGS: ; 33600 bytes
 ; [0]   BYTE  ID (building type)
 ; [1]   BYTE  Hitpoints (current)
 ; [2]   BYTE  Under construction(?) (negative if unfinished)
-; [4-5] ????  Coords?
-; [5] bit 7: Set if protected by shield generator?
+; [4-5] WORD  Coords?
+;   [5]
+;   bit 6: cleared if damaged
+;   bit 7: Set if protected by shield generator?
 ; [6-11] ???? Extra coords for large buildings / animation frames
 ; [12]  BYTE  Time-to-Fire (ticks before turret/landingpad can activate)
 ;    Construction Yard: ID number
@@ -440,10 +442,13 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;   Set true (-1?) when destroyed.
 ;   Set true on an alien asteroid when initialized.
 ; [25]      BYTE     ???? (must be positive to build spy satellites. owner? stasis?)
+;                    (must be positive for buildings to work)
+; [38-39]   WORD     Set to 30 by Swixaran missile 8
 ; [40-57?]  STRING   Asteroid name
 ; [60-79]   WORD[10] ORELEFT (Un-mined ore in asteroid)
 ; [80]      BYTE     RADIATION (1 = 10%)
 ; [81]      BYTE     Radiation not from ore (1 = 5%)
+; [82-83]   WORD     ??? (if LAB_11FF, damage adds to this)
 ; [84-85]   WORD     SECURITY
 ;       0- 40: ASTEROID SECURE
 ;      41- 99: LOW MORALE
@@ -464,6 +469,7 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;     Set to 0 on new alien colony.
 ;   bit 2: Gravity Nullifier on (set 1 on alien colony)
 ;   bit 3: Asteroid Engines on
+;   bit 4: used searching for visibility in freak sensor scan
 ;   bit 6: set when asteroid exploded or possibly hit with missile (white flash)?
 ;          if true, asteroid belongs to alien.
 ;          set to 1 on new alien colony
@@ -486,7 +492,9 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;   bit 5: (command centre worker hortage)
 ; [96]      BYTE     Checked by something
 ; [97]      BYTE     Powercut (Days remaining of halved power generation status
-;   imposed by Rigellian weapons.)
+;                    imposed by Rigellian weapons.)
+; [98]      BYTE     ?? (set 5-9 by swixaran missile)
+; [99]      BYTE     ?? (set 04 by swixaran missile)
 ; [100-121] WORD[11] MISSILES (Number of each missile in silos)
 ; [136-137] WORD     ??? (increases when one Mega is removed)
 ; [144-165] WORD[11] Number of each missile to be built     
@@ -495,7 +503,7 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;   Decrements when landing pad triggers. maybe number of ships in asteroid
 ; [170]     BYTE     ???? (Checked for positive. -1 when satellite built)
 ; [171]     BYTE     Satellites built at asteroid
-; [172]     BYTE     +1 when hit with Napalm Orb/Chaos Bomb
+; [172]     BYTE     +1 when hit with Napalm Orb/Chaos Bomb/Disruptor/Ion
 ; [178-181] LONG     ??? (address?)
 ; [182-201] WORD[10] OREMINED (Ore in asteroid's stores)
 ; [202-203] WORD     ORETOTAL (Total amount of ore stored)
@@ -504,7 +512,10 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ; [364-523] BYTE[8]x20   Combat Eagles in hangar?
 ; [524-683] BYTE[8]x20   Scout Ships in hangar?
 ; [684-685] WORD     Population (a Swixaran weapon reduces this by 5)
-; [692]     BYTE     (0x28 / 40 / 0b101000 on new alien colony.)
+; [686-687] WORD     OSD: 8/3/1 (Destr/Term, Trans/FB, OSD). +1/-1, 0
+; [688-691] LONG     OSD: ???
+; [692-693] WORD     (byte 692: 0x28 / 40 / 0b101000 on new alien colony.)
+;                    must be zero for buildings to function
 ; [694-699] WORD[3]  Power production/usage/surplus
 ; [700-705] WORD[3]  Air production/usage/surplus
 ; [706-711] WORD[3]  Food production/usage/surplus
@@ -530,9 +541,16 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;   25+: Life Support
 ; [720-721] Worker surplus
 ; [722-727] WORD[3]  CPUFAW (Air/Food/Water produced by CPU)
-; [734]     BYTE     ???
+; [734]     BYTE     OSD: Number of ships left to build
+; [735]     BYTE     OSD: Ship type number
+; [736-741] BYTE[6]  OSD: hardpoints
+; [742]     BYTE?    OSD: DAYSLEFT?
+; [743]     BYTE?    OSD: Ore 1 needed
+; [744]     BYTE     OSD: Ore 2 needed
+; [745]     BYTE     OSD: DAYSLEFT?
 ; [742-745] BYTE[4]  ???
 ; [746-747] WORD     ????
+; [748-749] ????
 	DS.L	$00000000		;0055a: 00000000
 BUFFER_13: ; 4752 bytes
 	DS.L	$00000000		;0055e: 00000000
@@ -5635,7 +5653,7 @@ Loop_02C4:
 ;
 	ST	LAB_12C9		;044b2: 50f90002e429
 	MOVEQ	#1,D1			;044b8: 
-	MOVE.B	D1,LAB_12DE		;044ba: #1
+	MOVE.B	D1,EVENTCOUNT		;044ba: #1
 	MOVE.B	D1,LAB_12DF		;044c0: #1
 	MOVE.B	D1,CLOCK_12E7		;044c6: #1
 	MOVE.B	#$fe,LAB_12E1		;044cc: 13fc00fe0002e451
@@ -8984,134 +9002,137 @@ LAB_0484: ; 40
 	DC.L	ColonySummaryWindow		;06d42: HYDRATION PLANT
 	DC.L	ColonySummaryWindow		;06d46: SECURITY CENTRE
 Return_0485:
-	RTS				;06d4a: 4e75
-LAB_0486:
-	MOVEQ	#0,D1			;06d4c: 7200
-	MOVE.B	0(A0),D1		;06d4e: 12280000
-	BEQ.W	LAB_0491		;06d52: 6700011a
-	MOVE.W	4(A0),D2		;06d56: 34280004
-	BCLR	#6,1(A6,D2.W)		;06d5a: 08b600062001
-	BTST	#7,1(A6,D2.W)		;06d60: 083600072001
-	BEQ.S	LAB_0487		;06d66: 6706
-	ASR.W	#1,D7			;06d68: e247
-	BNE.S	LAB_0487		;06d6a: 6602
-	MOVEQ	#1,D7			;06d6c: 7e01
+	RTS				;06d4a:
+;
+DamageBuilding: ; damage building? d7=damage
+; Applies d7 damage to building a0.
+; Returns d0 (4=foursquare building, 0=onesquare), d1,d2 (coords).
+	MOVEQ	#0,D1			;06d4c:
+	MOVE.B	0(A0),D1		;06d4e: building to be targeted
+	BEQ.W	LAB_0491		;06d52:
+	MOVE.W	4(A0),D2		;06d56: coords
+	BCLR	#6,1(A6,D2.W)		;06d5a:
+	BTST	#7,1(A6,D2.W)		;06d60: if protected by a screen generator
+	BEQ.S	LAB_0487		;06d66:
+	ASR.W	#1,D7			;06d68:   half damage
+	BNE.S	LAB_0487		;06d6a:
+	MOVEQ	#1,D7			;06d6c:   minumum 1 damage
 LAB_0487:
-	TST.B	LAB_11FF		;06d6e: 4a390001ebd4
-	BNE.S	LAB_0488		;06d74: 660a
-	MOVEA.L	TARGETASTEROID,A2		;06d76: 24790002ded4
-	ADD.W	D7,82(A2)		;06d7c: df6a0052
+	TST.B	LAB_11FF		;06d6e:
+	BNE.S	LAB_0488		;06d74:
+	MOVEA.L	TARGETASTEROID,A2	;06d76:
+	ADD.W	D7,82(A2)		;06d7c:
 LAB_0488:
-	SUB.B	D7,1(A0)		;06d80: 9f280001
-	BGT.W	LAB_0492		;06d84: 6e0000ec
-	MOVEM.L	D0-D7/A0-A6,-(A7)	;06d88: 48e7fffe
-	CMPI.B	#$29,D1			;06d8c: 0c010029
-	BPL.S	LAB_0489		;06d90: 6a10
-	SUBQ.B	#1,D1			;06d92: 5301
-	LSL.W	#2,D1			;06d94: e549
-	LEA	LAB_0495,A1		;06d96: 43f900006eb4
-	MOVEA.L	0(A1,D1.W),A1		;06d9c: 22711000
-	JSR	(A1)			;06da0: 4e91
+	SUB.B	D7,1(A0)		;06d80: apply damage to building
+	BGT.W	LAB_0492		;06d84:
+	MOVEM.L	D0-D7/A0-A6,-(A7)	;06d88: If this reduces it to zero or lower:
+	CMPI.B	#$29,D1			;06d8c:
+	BPL.S	LAB_0489		;06d90: If buildings 1-40
+	SUBQ.B	#1,D1			;06d92:   (standard terran)
+	LSL.W	#2,D1			;06d94:
+	LEA	LAB_0495,A1		;06d96:   handle special building
+	MOVEA.L	0(A1,D1.W),A1		;06d9c:   detonation code
+	JSR	(A1)			;06da0:
 LAB_0489:
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;06da2: 4cdf7fff
-	SF	0(A0)			;06da6: 51e80000
-	TST.B	2(A0)			;06daa: 4a280002
-	BMI.S	LAB_048B		;06dae: 6b14
-	MOVE.W	D1,D3			;06db0: 3601
-	CMPI.B	#$50,D3			;06db2: 0c030050
-	BMI.S	LAB_048A		;06db6: 6b04
-	SUBI.W	#$004f,D3		;06db8: 0443004f
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;06da2:
+	SF	0(A0)			;06da6:
+	TST.B	2(A0)			;06daa:
+	BMI.S	LAB_048B		;06dae: If building not under construction:
+	MOVE.W	D1,D3			;06db0:
+	CMPI.B	#$50,D3			;06db2: 
+	BMI.S	LAB_048A		;06db6:  If building above 80 (alien)
+	SUBI.W	#$004f,D3		;06db8:    -79 (convert to terran numbers)
 LAB_048A:
-	SUBQ.B	#1,D3			;06dbc: 5303
-	ADD.W	D3,D3			;06dbe: d643
-	SUBQ.W	#1,0(A1,D3.W)		;06dc0: 53713000
+	SUBQ.B	#1,D3			;06dbc:  
+	ADD.W	D3,D3			;06dbe:
+	SUBQ.W	#1,0(A1,D3.W)		;06dc0: one less of that building
 LAB_048B:
-	SF	2(A0)			;06dc4: 51e80002
-	MOVE.W	4(A0),D2		;06dc8: 34280004
-	MOVEQ	#3,D0			;06dcc: 7003
-	JSR	GetRand		;06dce: 4eb900000c0c
-	MOVEQ	#45,D3			;06dd4: 762d
-	ADD.B	D0,D3			;06dd6: d600
-	TST.B	LAB_12EC		;06dd8: 4a390002e465
-	BEQ.S	LAB_048C		;06dde: 6704
-	ADDI.W	#$0010,D3		;06de0: 06430010
+	SF	2(A0)			;06dc4: not under construction now
+	MOVE.W	4(A0),D2		;06dc8: coords
+	MOVEQ	#3,D0			;06dcc:
+	JSR	GetRand		        ;06dce:
+	MOVEQ	#45,D3			;06dd4:
+	ADD.B	D0,D3			;06dd6: (45~48)
+	TST.B	LAB_12EC		;06dd8:
+	BEQ.S	LAB_048C		;06dde: If LAB_12EC:
+	ADDI.W	#$0010,D3		;06de0:   (55~58)
 LAB_048C:
-	MOVE.W	D3,2(A6,D2.W)		;06de4: 3d832002
-	ANDI.W	#$010f,0(A6,D2.W)	;06de8: 0276010f2000
-	CMPI.B	#$50,D1			;06dee: 0c010050
-	BMI.S	LAB_048E		;06df2: 6b2e
-	CMPI.B	#$5a,D1			;06df4: 0c01005a
-	BNE.S	LAB_048D		;06df8: 660c
-	MOVEA.L	TARGETASTEROID,A2		;06dfa: 24790002ded4
-	BSET	#5,90(A2)		;06e00: 08ea0005005a
+	MOVE.W	D3,2(A6,D2.W)		;06de4: replace flat ground sprite?
+	ANDI.W	#$010f,0(A6,D2.W)	;06de8:
+	CMPI.B	#$50,D1			;06dee: 
+	BMI.S	LAB_048E		;06df2: If building 80+ (alien):
+	CMPI.B	#$5a,D1			;06df4:
+	BNE.S	LAB_048D		;06df8:   If building 90:
+	MOVEA.L	TARGETASTEROID,A2	;06dfa:
+	BSET	#5,90(A2)		;06e00:     recalc screen generators
 LAB_048D:
-	SUBQ.W	#1,D1			;06e06: 5341
-	MULU	#$000a,D1		;06e08: c2fc000a
-	LEA	TERRAN_BUILDING_STATS,A2		;06e0c: 45f90001c3e4
-	ADDA.L	D1,A2			;06e12: d5c1
-	MOVEQ	#0,D0			;06e14: 7000
-	MOVE.B	4(A2),D0		;06e16: 102a0004
-	CMPI.B	#$01,D0			;06e1a: 0c000001
-	BEQ.S	LAB_0490		;06e1e: 673c
-	BRA.S	LAB_048F		;06e20: 600e
-LAB_048E:
-	MOVEQ	#1,D0			;06e22: 7001
-	CMPI.B	#$15,D1			;06e24: 0c010015
-	BMI.S	LAB_0490		;06e28: 6b32
-	CMPI.B	#$1b,D1			;06e2a: 0c01001b
-	BPL.S	LAB_0490		;06e2e: 6a2c
-LAB_048F:
-	MOVE.W	6(A0),D1		;06e30: 32280006
-	MOVE.W	D3,2(A6,D1.W)		;06e34: 3d831002
-	ANDI.W	#$010f,0(A6,D1.W)	;06e38: 0276010f1000
-	MOVE.W	8(A0),D1		;06e3e: 32280008
-	MOVE.W	D3,2(A6,D1.W)		;06e42: 3d831002
-	ANDI.W	#$010f,0(A6,D1.W)	;06e46: 0276010f1000
-	MOVE.W	10(A0),D1		;06e4c: 3228000a
-	MOVE.W	D3,2(A6,D1.W)		;06e50: 3d831002
-	ANDI.W	#$010f,0(A6,D1.W)	;06e54: 0276010f1000
-	MOVEQ	#4,D0			;06e5a: 7004
-LAB_0490:
-	EXT.L	D2			;06e5c: 48c2
-	DIVU	#$0044,D2		;06e5e: 84fc0044
-	MOVE.W	D2,D1			;06e62: 3202
-	SWAP	D2			;06e64: 4842
-	ASR.W	#2,D2			;06e66: e442
-	LSL.W	#8,D2			;06e68: e14a
-	OR.W	D1,D2			;06e6a: 8441
-	RTS				;06e6c: 4e75
+	SUBQ.W	#1,D1			;06e06:
+	MULU	#$000a,D1		;06e08:
+	LEA	TERRAN_BUILDING_STATS,A2	;06e0c:
+	ADDA.L	D1,A2			;06e12:
+	MOVEQ	#0,D0			;06e14:
+	MOVE.B	4(A2),D0		;06e16: check building's 04 value
+	CMPI.B	#$01,D0			;06e1a: (1 means building is four-square)
+	BEQ.S	LAB_0490		;06e1e:
+	BRA.S	LAB_048F		;06e20:
+LAB_048E: ; if terran building
+	MOVEQ	#1,D0			;06e22:
+	CMPI.B	#$15,D1			;06e24: if terran four-square building
+	BMI.S	LAB_0490		;06e28: 
+	CMPI.B	#$1b,D1			;06e2a: 
+	BPL.S	LAB_0490		;06e2e:
+LAB_048F: ; If alien building with an [04] of 01
+	MOVE.W	6(A0),D1		;06e30: 
+	MOVE.W	D3,2(A6,D1.W)		;06e34: 
+	ANDI.W	#$010f,0(A6,D1.W)	;06e38: clear its other three coords
+	MOVE.W	8(A0),D1		;06e3e:
+	MOVE.W	D3,2(A6,D1.W)		;06e42:
+	ANDI.W	#$010f,0(A6,D1.W)	;06e46:
+	MOVE.W	10(A0),D1		;06e4c:
+	MOVE.W	D3,2(A6,D1.W)		;06e50:
+	ANDI.W	#$010f,0(A6,D1.W)	;06e54:
+	MOVEQ	#4,D0			;06e5a:
+LAB_0490: ; any building
+	EXT.L	D2			;06e5c:
+	DIVU	#$0044,D2		;06e5e: coords/68
+	MOVE.W	D2,D1			;06e62:
+	SWAP	D2			;06e64:
+	ASR.W	#2,D2			;06e66:
+	LSL.W	#8,D2			;06e68:
+	OR.W	D1,D2			;06e6a:
+	RTS				;06e6c:
 LAB_0491:
-	MOVEQ	#0,D2			;06e6e: 7400
-	RTS				;06e70: 4e75
-LAB_0492:
-	MOVE.W	4(A0),D2		;06e72: 34280004
-	CMPI.B	#$50,D1			;06e76: 0c010050
-	BMI.S	LAB_0493		;06e7a: 6b16
-	SUBQ.W	#1,D1			;06e7c: 5341
-	MULU	#$000a,D1		;06e7e: c2fc000a
-	LEA	TERRAN_BUILDING_STATS,A2		;06e82: 45f90001c3e4
-	ADDA.L	D1,A2			;06e88: d5c1
-	MOVEQ	#0,D0			;06e8a: 7000
-	MOVE.B	4(A2),D0		;06e8c: 102a0004
-	BRA.S	LAB_0494		;06e90: 6010
+	MOVEQ	#0,D2			;06e6e:
+	RTS				;06e70:
+LAB_0492: ; if building still stands after taking damage
+	MOVE.W	4(A0),D2		;06e72:
+	CMPI.B	#$50,D1			;06e76:
+	BMI.S	LAB_0493		;06e7a: Alien buildings
+	SUBQ.W	#1,D1			;06e7c:
+	MULU	#$000a,D1		;06e7e:
+	LEA	TERRAN_BUILDING_STATS,A2    ;06e82:
+	ADDA.L	D1,A2			;06e88:
+	MOVEQ	#0,D0			;06e8a:
+	MOVE.B	4(A2),D0		;06e8c: foursquare value
+	BRA.S	LAB_0494		;06e90:
 LAB_0493:
-	MOVEQ	#1,D0			;06e92: 7001
-	CMPI.B	#$15,D1			;06e94: 0c010015
-	BMI.S	LAB_0494		;06e98: 6b08
-	CMPI.B	#$1b,D1			;06e9a: 0c01001b
-	BPL.S	LAB_0494		;06e9e: 6a02
-	MOVEQ	#4,D0			;06ea0: 7004
+	MOVEQ	#1,D0			;06e92:
+	CMPI.B	#$15,D1			;06e94:
+	BMI.S	LAB_0494		;06e98:
+	CMPI.B	#$1b,D1			;06e9a:
+	BPL.S	LAB_0494		;06e9e:
+	MOVEQ	#4,D0			;06ea0: d0 = 4 if foursquare
 LAB_0494:
-	EXT.L	D2			;06ea2: 48c2
-	DIVU	#$0044,D2		;06ea4: 84fc0044
-	MOVE.W	D2,D1			;06ea8: 3202
-	SWAP	D2			;06eaa: 4842
-	ASR.W	#2,D2			;06eac: e442
-	LSL.W	#8,D2			;06eae: e14a
-	OR.W	D1,D2			;06eb0: 8441
+	EXT.L	D2			;06ea2:
+	DIVU	#$0044,D2		;06ea4:
+	MOVE.W	D2,D1			;06ea8:
+	SWAP	D2			;06eaa:
+	ASR.W	#2,D2			;06eac:
+	LSL.W	#8,D2			;06eae:
+	OR.W	D1,D2			;06eb0:
 	RTS				;06eb2:
 LAB_0495: ; 40
-; special effects on build? on detonate?
+; special effects on detonate
 	DC.L	Return_0485		;06eb4:
 	DC.L	Return_0485		;06eb8:
 	DC.L	DestroyStorageFacility		;06ebc: STORAGE FACILITY
@@ -17234,10 +17255,10 @@ LAB_0838:
 	LEA	14(A0),A0		;0d8c0: 41e8000e
 	DBF	D0,LAB_0838		;0d8c4: loop
 ; 
-	CMPI.L	#$00007530,CASH_GENERAL	        ;0d8c8: 30,000CR (new colony price)
+	CMPI.L	#$00007530,CASH_GENERAL	;0d8c8: 30,000CR (new colony price)
 	BPL.S	LAB_0839		;0d8d2: if not enough cash
 	MOVE.W	#$011e,D0		;0d8d4: not established: lack of money
-	MOVE.L	TARGETASTEROID,D1		;0d8d8: 
+	MOVE.L	TARGETASTEROID,D1	;0d8d8: 
 	MOVEQ	#0,D2			;0d8de: 7400
 	MOVEQ	#1,D3			;0d8e0: 7601
 	MOVEQ	#4,D4			;0d8e2: 7804
@@ -17245,17 +17266,17 @@ LAB_0838:
 ; COLONY NOT ESTABLISHED DUE TO LACK OF MONEY.
 	BRA.S	LAB_083A		;0d8e8: return -1
 LAB_0839: ; if colony can be placed, do so
-	SUBI.L	#$00007530,CASH_GENERAL	        ;0d8ea: pay for new colony
+	SUBI.L	#$00007530,CASH_GENERAL ;0d8ea: pay for new colony
 	MOVE.W	#$011d,D0		;0d8f4: str001f: colony established
 ; COLONY ESTABLISHED ON THIS ASTEROID.
-	MOVE.L	TARGETASTEROID,D1		;0d8f8: 22390002ded4
+	MOVE.L	TARGETASTEROID,D1	;0d8f8: 22390002ded4
 	MOVEQ	#0,D2			;0d8fe: 7400
 	MOVEQ	#1,D3			;0d900: 7601
 	MOVEQ	#4,D4			;0d902: 7804
 	BSR.W	LAB_05B9		;0d904: 6100b67a
 	MOVEQ	#21,D4			;0d908: 7815
 	BSR.W	LAB_04AC		;0d90a: 610097ba
-	MOVEA.L	TARGETASTEROID,A0		;0d90e: 20790002ded4
+	MOVEA.L	TARGETASTEROID,A0	;0d90e: 20790002ded4
 	MOVE.W	#$01f4,692(A0)		;0d914: ast[692-693]=500?
 LAB_083A:
 	MOVEA.L	(A7)+,A6		;0d91a: 2c5f
@@ -17561,8 +17582,11 @@ LAB_0865: ; ship id a6 is zero
 	RTS				;0dc96: a6 = ptr to ship slot
 ;
 Shipbuilding_0866: ; used in shipbuilding
-; orbital space dock calls this with the following data registers:
-; (3,18,57,d3,d4,d5,0,0)
+; d0-d7
+; OSD:    ( 3,18,57,d3,d4,d5, 0 ,0)
+; Vortex: ( ?, ?,52, ?, ?, ?,16, 0)
+; TylVor: ( ?, ?,68, ?, ?, ?,16, 0)
+; 
 	BSR.S	LAB_0862		;0dc98: find empty ship ID
 	BMI.S	LAB_0867		;0dc9a: 
 	MOVEA.L	A0,A1			;0dc9c: 2248
@@ -18180,34 +18204,34 @@ LAB_08B4:
 	CMPI.B	#$2f,D1			;0e33a: 0c01002f
 	BNE.S	LAB_08B0		;0e33e: 66c4
 LAB_08B5:
-	MOVE.W	D0,-(A7)		;0e340: 3f00
-	MOVE.L	A2,-(A7)		;0e342: 2f0a
-	MOVE.L	A6,-(A7)		;0e344: 2f0e
-	MOVEQ	#0,D0			;0e346: 7000
-	MOVEQ	#0,D1			;0e348: 7200
-	MOVE.B	10(A6),D0		;0e34a: 102e000a
-	MOVE.B	11(A6),D1		;0e34e: 122e000b
-	MOVE.W	10(A6),D2		;0e352: 342e000a
-	MOVEA.L	LAB_1286,A6		;0e356: 2c790002dec8
-	ASL.W	#2,D0			;0e35c: e540
-	MULU	#$0044,D1		;0e35e: c2fc0044
-	ADD.W	D0,D1			;0e362: d240
-	ADDA.L	D1,A6			;0e364: ddc1
-	MOVE.W	2(A6),D0		;0e366: 302e0002
-	BPL.S	LAB_08B7		;0e36a: 6a42
-	BCLR	#15,D0			;0e36c: 0880000f
-	BCLR	#14,D0			;0e370: 0880000e
-	MULU	#$000e,D0		;0e374: c0fc000e
-	MOVEA.L	LAB_1287,A0		;0e378: 20790002decc
-	ADDA.L	D0,A0			;0e37e: d1c0
-	MOVEA.L	LAB_1286,A6		;0e380: 2c790002dec8
-	MOVEA.L	LAB_1288,A1		;0e386: 22790002ded0
-	MOVEQ	#1,D7			;0e38c: 7e01
-	CMPI.W	#$0006,ALIENID		;0e38e: 0c7900060002defe
-	BNE.S	LAB_08B6		;0e396: 6602
-	MOVEQ	#2,D7			;0e398: 7e02
+	MOVE.W	D0,-(A7)		;0e340:
+	MOVE.L	A2,-(A7)		;0e342:
+	MOVE.L	A6,-(A7)		;0e344:
+	MOVEQ	#0,D0			;0e346:
+	MOVEQ	#0,D1			;0e348:
+	MOVE.B	10(A6),D0		;0e34a:
+	MOVE.B	11(A6),D1		;0e34e:
+	MOVE.W	10(A6),D2		;0e352:
+	MOVEA.L	LAB_1286,A6		;0e356:
+	ASL.W	#2,D0			;0e35c:
+	MULU	#$0044,D1		;0e35e:
+	ADD.W	D0,D1			;0e362:
+	ADDA.L	D1,A6			;0e364:
+	MOVE.W	2(A6),D0		;0e366:
+	BPL.S	LAB_08B7		;0e36a:
+	BCLR	#15,D0			;0e36c:
+	BCLR	#14,D0			;0e370:
+	MULU	#$000e,D0		;0e374:
+	MOVEA.L	LAB_1287,A0		;0e378:
+	ADDA.L	D0,A0			;0e37e:
+	MOVEA.L	LAB_1286,A6		;0e380:
+	MOVEA.L	LAB_1288,A1		;0e386:
+	MOVEQ	#1,D7			;0e38c:
+	CMPI.W	#$0006,ALIENID		;0e38e:
+	BNE.S	LAB_08B6		;0e396:
+	MOVEQ	#2,D7			;0e398: Swixaran takes double. Fire?
 LAB_08B6:
-	JSR	LAB_0486		;0e39a: 4eb900006d4c
+	JSR	DamageBuilding		;0e39a: 4eb900006d4c
 	TST.B	LAB_12EB		;0e3a0: 4a390002e464
 	BNE.S	LAB_08B7		;0e3a6: 6606
 	JSR	LAB_105D		;0e3a8: 4eb90001a4f8
@@ -18537,47 +18561,51 @@ LAB_08D7:
 LAB_08D8:
 	MOVEM.L	(A7)+,D0/A0/A6		;0e7fc: 4cdf4101
 	RTS				;0e800: 4e75
-LAB_08D9:
-	MOVE.L	A6,-(A7)		;0e802: 2f0e
-	MOVE.B	8(A6),D0		;0e804: 102e0008
-	CMPI.B	#$37,D0			;0e808: 0c000037
-	BMI.S	LAB_08DC		;0e80c: 6b2c
-	BNE.S	LAB_08DA		;0e80e: 6606
-	BSR.W	LAB_0A75		;0e810: 610026c6
-	BRA.S	LAB_08DC		;0e814: 6024
+;
+LAB_08D9: ; destroy ship?
+; Interesting feature: destroying alien ship 0x42 gives 5k cash.
+; Destroying a 0x43 gives 10k cash.
+	MOVE.L	A6,-(A7)		;0e802:
+	MOVE.B	8(A6),D0		;0e804:
+	CMPI.B	#$37,D0			;0e808:
+	BMI.S	LAB_08DC		;0e80c:
+	BNE.S	LAB_08DA		;0e80e:
+	BSR.W	LAB_0A75		;0e810: transporter-specific rules
+	BRA.S	LAB_08DC		;0e814:
 LAB_08DA:
-	CMPI.B	#$42,D0			;0e816: 0c000042
-	BMI.S	LAB_08DC		;0e81a: 6b1e
-	BNE.S	LAB_08DB		;0e81c: 660c
-	ADDI.L	#$00001388,CASH_GENERAL   	;0e81e: add 5,000 cash
-	BRA.S	LAB_08DC		;0e828: 6010
+	CMPI.B	#$42,D0			;0e816:
+	BMI.S	LAB_08DC		;0e81a:
+	BNE.S	LAB_08DB		;0e81c:
+	ADDI.L	#$00001388,CASH_GENERAL	;0e81e:
+	BRA.S	LAB_08DC		;0e828:
 LAB_08DB:
-	CMPI.B	#$43,D0			;0e82a: 0c000043
-	BNE.S	LAB_08DC		;0e82e: 660a
-	ADDI.L	#$00002710,CASH_GENERAL	        ;0e830: add 10,000 cash
+	CMPI.B	#$43,D0			;0e82a:
+	BNE.S	LAB_08DC		;0e82e:
+	ADDI.L	#$00002710,CASH_GENERAL ;0e830:
 LAB_08DC:
-	TST.B	8(A6)			;0e83a: 4a2e0008
-	BEQ.S	LAB_08DD		;0e83e: 6744
-	SF	8(A6)			;0e840: 51ee0008
-	SUBQ.W	#1,SHIPCOUNTER		;0e844: 53790002e09e
-	LEA	LAB_128A,A0		;0e84a: 41f90002ded8
-	TST.B	21(A6)			;0e850: 4a2e0015
-	BMI.S	LAB_08DE		;0e854: 6b34
-	MOVE.L	A6,-(A7)		;0e856: 2f0e
-	JSR	LAB_01E2		;0e858: 4eb90000252e
-	MOVEA.L	(A7)+,A6		;0e85e: 2c5f
-	MOVE.W	#$ffff,36(A6)		;0e860: 3d7cffff0024
-	TST.B	48(A6)			;0e866: 4a2e0030
-	BEQ.S	LAB_08DD		;0e86a: 6718
-	MOVEM.L	D1/A1-A2,-(A7)		;0e86c: 48e74060
-	MOVEA.L	SAVEDATA7,A2		;0e870: 247900000562
-	JSR	LAB_0FCD		;0e876: 4eb9000194be
-	ADDQ.B	#1,27(A2)		;0e87c: 522a001b
-	MOVEM.L	(A7)+,D1/A1-A2		;0e880: 4cdf0602
+	TST.B	8(A6)			;0e83a:
+	BEQ.S	LAB_08DD		;0e83e:
+	SF	8(A6)			;0e840:
+	SUBQ.W	#1,SHIPCOUNTER		;0e844:
+	LEA	LAB_128A,A0		;0e84a:
+	TST.B	21(A6)			;0e850:
+	BMI.S	LAB_08DE		;0e854:
+	MOVE.L	A6,-(A7)		;0e856:
+	JSR	LAB_01E2		;0e858:
+	MOVEA.L	(A7)+,A6		;0e85e:
+	MOVE.W	#$ffff,36(A6)		;0e860:
+	TST.B	48(A6)			;0e866:
+	BEQ.S	LAB_08DD		;0e86a:
+	MOVEM.L	D1/A1-A2,-(A7)		;0e86c:
+	MOVEA.L	SAVEDATA7,A2		;0e870:
+	JSR	LAB_0FCD		;0e876:
+	ADDQ.B	#1,27(A2)		;0e87c:
+	MOVEM.L	(A7)+,D1/A1-A2		;0e880:
 LAB_08DD:
-	MOVEA.L	(A7)+,A6		;0e884: 2c5f
-	MOVEQ	#0,D0			;0e886: 7000
-	RTS				;0e888: 4e75
+	MOVEA.L	(A7)+,A6		;0e884:
+	MOVEQ	#0,D0			;0e886:
+	RTS				;0e888:
+;
 LAB_08DE:
 	LEA	LAB_128C,A0		;0e88a: 41f90002dee0
 	MOVE.L	A6,-(A7)		;0e890: 2f0e
@@ -18720,7 +18748,7 @@ LAB_08EE:
 ;
 FitRandomHardpoints: ; random hardpoints to ship (a6)?
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;0ea58:
-	MOVEQ	#-1,D0			;0ea5c: 70ff
+	MOVEQ	#-1,D0			;0ea5c:
 	MOVE.L	D0,42(A6)		;0ea5e: Init hardpoints to FF (empty)
 	MOVE.W	D0,46(A6)		;0ea62: Init hardpoints to FF (empty)
 	MOVEQ	#0,D0			;0ea66: 
@@ -18740,14 +18768,14 @@ LAB_08F0:
 ; probably due to their having an orbital space dock with a variant weapon
 ; which uses Mega. OSD ground weapons don't fire until you place your building
 ; at which point it fires the Mega hardpoint and destroys the asteroid.
-	JSR	GetRand		;0ea8e: 4eb900000c0c
+	JSR	GetRand		;0ea8e:
 LAB_08F1:
 	MOVE.B	D0,(A0)+		;0ea94: next slot
 	SUBQ.B	#1,D1			;0ea96: 
 	BEQ.S	RET_08F3		;0ea98: while hardpoints still free:
 LAB_08F2: ; bestow any hardpoint
-	MOVEQ	#16,D0			;0ea9a: 7010
-	JSR	GetRand		;0ea9c: 4eb900000c0c
+	MOVEQ	#16,D0			;0ea9a:
+	JSR	GetRand		;0ea9c:
 	CMPI.B	#$08,D0			;0eaa2: Static Inducer forbidden
 	BEQ.S	LAB_08F2		;0eaa6: 
 	CMPI.B	#$09,D0			;0eaa8: Warp Generator forbidden
@@ -19638,7 +19666,7 @@ LAB_0961:
 	ORI.B	#$00,D0			;0f5dc: 00000000
 LAB_0962:
 	DC.W	$0000			;0f5e0
-LAB_0963: ; 
+LAB_0963: ;  destroy building? explosion?
 	MOVEA.L	LAB_1286,A6		;0f5e2: 2c790002dec8
 	ASL.W	#2,D0			;0f5e8: e540
 	MULU	#$0044,D1		;0f5ea: c2fc0044
@@ -19663,7 +19691,7 @@ LAB_0966:
 	MOVE.W	D1,-(A7)		;0f61a: 3f01
 	MOVEA.L	LAB_1286,A6		;0f61c: 2c790002dec8
 	MOVEA.L	LAB_1288,A1		;0f622: 22790002ded0
-	JSR	LAB_0486		;0f628: 4eb900006d4c
+	JSR	DamageBuilding		;0f628: 4eb900006d4c
 	MOVE.W	(A7)+,D1		;0f62e: 321f
 	TST.B	LAB_12EB		;0f630: 4a390002e464
 	BNE.S	LAB_0965		;0f636: 66c2
@@ -20022,104 +20050,107 @@ Warhead_04_Nuclear:
 ; Aliens 1, 2 and 3 (Kll-Kp-Qua, Ore Eaters, Ax'Zilanth) use Nuclear.
 ; Alien 5 (Rigellian) uses it with an alternate effect.
 ; Swixarans don't use nukes.
-	TST.B	21(A6)			;0fa82: 4a2e0015
-	BPL.S	LAB_0991		;0fa86: 6a10
-	CMPI.W	#$0005,ALIENID		;0fa88: 0c7900050002defe
-	BNE.S	LAB_0991		;0fa90: 6606
-	JMP	Warhead_04_Rigel		;0fa92: 4ef90000fbec
+	TST.B	21(A6)			;0fa82:
+	BPL.S	LAB_0991		;0fa86:
+	CMPI.W	#$0005,ALIENID		;0fa88:
+	BNE.S	LAB_0991		;0fa90:
+	JMP	Warhead_04_Rigel	;0fa92:
 LAB_0991:
-	TST.B	LAB_12EB		;0fa98: 4a390002e464
-	BNE.S	LAB_0992		;0fa9e: 661c
-	CMPI.B	#$04,LAB_1308		;0faa0: 0c3900040002e482
-	BEQ.S	LAB_0992		;0faa8: 6712
-	MOVE.W	#$0f00,LAB_12B7		;0faaa: 33fc0f000002e0a4
-	BSR.W	LAB_09A9		;0fab2: 61000220
-	JSR	LAB_105C		;0fab6: 4eb90001a4e2
+	TST.B	LAB_12EB		;0fa98:
+	BNE.S	LAB_0992		;0fa9e:
+	CMPI.B	#$04,LAB_1308		;0faa0:
+	BEQ.S	LAB_0992		;0faa8:
+	MOVE.W	#$0f00,LAB_12B7		;0faaa:
+	BSR.W	LAB_09A9		;0fab2:
+	JSR	LAB_105C		;0fab6:
 LAB_0992:
-	MOVEA.L	LAB_1287,A0		;0fabc: 20790002decc
-	MOVE.W	#$0063,D2		;0fac2: 343c0063
-LAB_0993:
-	MOVE.B	0(A0),D1		;0fac6: 12280000
-	BEQ.W	LAB_0996		;0faca: 67000060
-	MOVEM.L	D2/A0,-(A7)		;0face: 48e72080
-	MOVEA.L	LAB_1288,A1		;0fad2: 22790002ded0
-	MOVEA.L	LAB_1286,A6		;0fad8: 2c790002dec8
-	MOVEQ	#7,D7			;0fade: 7e07
-	JSR	LAB_0486		;0fae0: 4eb900006d4c
-	TST.B	LAB_12EB		;0fae6: 4a390002e464
-	BNE.S	LAB_0995		;0faec: 663a
-	CMPI.B	#$01,D0			;0faee: 0c000001
-	BEQ.W	LAB_0994		;0faf2: 67000014
-	MOVEQ	#39,D5			;0faf6: 7a27
-	LEA	LAB_11F2,A2		;0faf8: 45f90001ea60
-	BSR.W	LAB_09B0		;0fafe: 6100027a
-	MOVEM.L	(A7)+,D2/A0		;0fb02: 4cdf0104
-	BRA.S	LAB_0996		;0fb06: 6024
-LAB_0994:
-	LEA	LAB_11F2,A2		;0fb08: 45f90001ea60
-	MOVE.B	#$98,D1			;0fb0e: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;0fb12: 20790002de54
-	MOVEQ	#39,D5			;0fb18: 7a27
-	MOVEQ	#6,D0			;0fb1a: 7006
-	JSR	GetRand		;0fb1c: 4eb900000c0c
-	EXG	D0,D5			;0fb22: c145
-	BSR.W	LAB_08A9		;0fb24: 6100e6d2
+	MOVEA.L	LAB_1287,A0		;0fabc:
+	MOVE.W	#$0063,D2		;0fac2: 100.times do:
+Loop_0993: ; once per building
+	MOVE.B	0(A0),D1		;0fac6:
+	BEQ.W	Next_0996		;0faca:
+	MOVEM.L	D2/A0,-(A7)		;0face:
+	MOVEA.L	LAB_1288,A1		;0fad2:
+	MOVEA.L	LAB_1286,A6		;0fad8:
+	MOVEQ	#7,D7			;0fade: 7 damage
+; Nuclear deals 7 to every building and 9 to every square,
+; striking four-square buildings multiple times.
+	JSR	DamageBuilding		;0fae0:
+	TST.B	LAB_12EB		;0fae6:
+	BNE.S	LAB_0995		;0faec:
+	CMPI.B	#$01,D0			;0faee:
+	BEQ.W	LAB_0994		;0faf2:
+	MOVEQ	#39,D5			;0faf6:
+	LEA	LAB_11F2,A2		;0faf8:
+	BSR.W	LAB_09B0		;0fafe:
+	MOVEM.L	(A7)+,D2/A0		;0fb02:
+	BRA.S	Next_0996		;0fb06:
+LAB_0994: ; occurs if d0=1
+	LEA	LAB_11F2,A2		;0fb08:
+	MOVE.B	#$98,D1			;0fb0e:
+	MOVEA.L	CURRENTASTEROID,A0	;0fb12:
+	MOVEQ	#39,D5			;0fb18:
+	MOVEQ	#6,D0			;0fb1a:
+	JSR	GetRand			;0fb1c:
+	EXG	D0,D5			;0fb22:
+	BSR.W	LAB_08A9		;0fb24:
 LAB_0995:
-	MOVEM.L	(A7)+,D2/A0		;0fb28: 4cdf0104
-LAB_0996:
-	LEA	14(A0),A0		;0fb2c: 41e8000e
-	DBF	D2,LAB_0993		;0fb30: 51caff94
-	MOVEA.L	TARGETASTEROID,A0		;0fb34: 20790002ded4
-	MOVE.L	0(A0),D0		;0fb3a: 20280000
-	BEQ.S	LAB_0999		;0fb3e: 672a
-	MOVEA.L	D0,A0			;0fb40: 2040
+	MOVEM.L	(A7)+,D2/A0		;0fb28:
+Next_0996:
+	LEA	14(A0),A0		;0fb2c:
+	DBF	D2,Loop_0993		;0fb30:
+;
+	MOVEA.L	TARGETASTEROID,A0	;0fb34:
+	MOVE.L	0(A0),D0		;0fb3a:
+	BEQ.S	LAB_0999		;0fb3e:
+	MOVEA.L	D0,A0			;0fb40:
 LAB_0997:
-	MOVE.L	0(A0),D1		;0fb42: 22280000
-	TST.B	20(A0)			;0fb46: 4a280014
-	BMI.S	LAB_0998		;0fb4a: 6b16
-	MOVEQ	#100,D0			;0fb4c: 7064
-	JSR	GetRand		;0fb4e: 4eb900000c0c
-	CMPI.B	#$19,D0			;0fb54: 0c000019
-	BPL.W	LAB_0998		;0fb58: 6a000008
-	MOVE.W	#$0d00,24(A0)		;0fb5c: 317c0d000018
+	MOVE.L	0(A0),D1		;0fb42:
+	TST.B	20(A0)			;0fb46:
+	BMI.S	LAB_0998		;0fb4a:
+	MOVEQ	#100,D0			;0fb4c:
+	JSR	GetRand			;0fb4e:
+	CMPI.B	#$19,D0			;0fb54:
+	BPL.W	LAB_0998		;0fb58:
+	MOVE.W	#$0d00,24(A0)		;0fb5c:
 LAB_0998:
-	TST.L	D1			;0fb62: 4a81
-	BEQ.S	LAB_0999		;0fb64: 6704
-	MOVEA.L	D1,A0			;0fb66: 2041
-	BRA.S	LAB_0997		;0fb68: 60d8
+	TST.L	D1			;0fb62:
+	BEQ.S	LAB_0999		;0fb64:
+	MOVEA.L	D1,A0			;0fb66:
+	BRA.S	LAB_0997		;0fb68:
 LAB_0999:
-	MOVEA.L	TARGETASTEROID,A0		;0fb6a: 20790002ded4
-	MOVE.L	8(A0),D0		;0fb70: 20280008
-	BEQ.S	LAB_099C		;0fb74: 672a
-	MOVEA.L	D0,A0			;0fb76: 2040
+	MOVEA.L	TARGETASTEROID,A0	;0fb6a:
+	MOVE.L	8(A0),D0		;0fb70:
+	BEQ.S	LAB_099C		;0fb74:
+	MOVEA.L	D0,A0			;0fb76:
 LAB_099A:
-	MOVE.L	0(A0),D1		;0fb78: 22280000
-	TST.B	20(A0)			;0fb7c: 4a280014
-	BMI.S	LAB_099B		;0fb80: 6b16
-	MOVEQ	#100,D0			;0fb82: 7064
-	JSR	GetRand		;0fb84: 4eb900000c0c
-	CMPI.B	#$19,D0			;0fb8a: 0c000019
-	BPL.W	LAB_099B		;0fb8e: 6a000008
-	MOVE.W	#$0d00,24(A0)		;0fb92: 317c0d000018
+	MOVE.L	0(A0),D1		;0fb78:
+	TST.B	20(A0)			;0fb7c:
+	BMI.S	LAB_099B		;0fb80:
+	MOVEQ	#100,D0			;0fb82:
+	JSR	GetRand			;0fb84:
+	CMPI.B	#$19,D0			;0fb8a:
+	BPL.W	LAB_099B		;0fb8e:
+	MOVE.W	#$0d00,24(A0)		;0fb92:
 LAB_099B:
-	TST.L	D1			;0fb98: 4a81
-	BEQ.S	LAB_099C		;0fb9a: 6704
-	MOVEA.L	D1,A0			;0fb9c: 2041
-	BRA.S	LAB_099A		;0fb9e: 60d8
+	TST.L	D1			;0fb98:
+	BEQ.S	LAB_099C		;0fb9a:
+	MOVEA.L	D1,A0			;0fb9c:
+	BRA.S	LAB_099A		;0fb9e:
 LAB_099C:
-	TST.B	LAB_12EB		;0fba0: 4a390002e464
-	BNE.S	LAB_099E		;0fba6: 6630
-	CMPI.B	#$04,LAB_1308		;0fba8: 0c3900040002e482
-	BEQ.S	LAB_099E		;0fbb0: 6726
-	LEA	LAB_10E1,A0		;0fbb2: 41f90001af12
-	LEA	LAB_10E4,A1		;0fbb8: 43f90001af92
-	JSR	LAB_03DE		;0fbbe: 4eb90000596e
-	LEA	LAB_10E1,A0		;0fbc4: 41f90001af12
-	LEA	LAB_10E4,A1		;0fbca: 43f90001af92
-	MOVEQ	#31,D0			;0fbd0: 701f
-LAB_099D:
-	MOVE.W	(A0)+,(A1)+		;0fbd2: 32d8
-	DBF	D0,LAB_099D		;0fbd4: 51c8fffc
+	TST.B	LAB_12EB		;0fba0:
+	BNE.S	LAB_099E		;0fba6:
+	CMPI.B	#$04,LAB_1308		;0fba8:
+	BEQ.S	LAB_099E		;0fbb0:
+	LEA	LAB_10E1,A0		;0fbb2:
+	LEA	LAB_10E4,A1		;0fbb8:
+	JSR	LAB_03DE		;0fbbe:
+	LEA	LAB_10E1,A0		;0fbc4:
+	LEA	LAB_10E4,A1		;0fbca:
+	MOVEQ	#31,D0			;0fbd0:
+Loop_099D:
+	MOVE.W	(A0)+,(A1)+		;0fbd2:
+	DBF	D0,Loop_099D		;0fbd4:
 LAB_099E:
 	MOVEA.L	TARGETASTEROID,A1	;0fbd8:
 	CMPI.B	#$07,81(A1)		;0fbde: if radiation is 7 or lower:
@@ -20129,42 +20160,42 @@ LAB_099F:
 	RTS				;0fbea: 
 ;
 Warhead_04_Rigel: ; Rigellian nuke
-	TST.B	LAB_12EB		;0fbec: 4a390002e464
-	BNE.S	LAB_09A1		;0fbf2: 661c
-	CMPI.B	#$04,LAB_1308		;0fbf4: 0c3900040002e482
-	BEQ.S	LAB_09A1		;0fbfc: 6712
-	MOVE.W	#$0f00,LAB_12B7		;0fbfe: 33fc0f000002e0a4
-	BSR.W	LAB_09A9		;0fc06: 610000cc
-	JSR	LAB_105C		;0fc0a: 4eb90001a4e2
+	TST.B	LAB_12EB		;0fbec:
+	BNE.S	LAB_09A1		;0fbf2:
+	CMPI.B	#$04,LAB_1308		;0fbf4:
+	BEQ.S	LAB_09A1		;0fbfc:
+	MOVE.W	#$0f00,LAB_12B7		;0fbfe:
+	BSR.W	LAB_09A9		;0fc06:
+	JSR	LAB_105C		;0fc0a:
 LAB_09A1:
-	MOVEA.L	LAB_1287,A0		;0fc10: 20790002decc
-	MOVE.W	#$0063,D2		;0fc16: 343c0063
+	MOVEA.L	LAB_1287,A0		;0fc10:
+	MOVE.W	#$0063,D2		;0fc16:
 LAB_09A2:
-	MOVE.B	0(A0),D1		;0fc1a: 12280000
-	BEQ.W	LAB_09A5		;0fc1e: 67000060
-	MOVEM.L	D2/A0,-(A7)		;0fc22: 48e72080
-	MOVEA.L	LAB_1288,A1		;0fc26: 22790002ded0
-	MOVEA.L	LAB_1286,A6		;0fc2c: 2c790002dec8
-	MOVEQ	#10,D7			;0fc32: 7e0a
-	JSR	LAB_0486		;0fc34: 4eb900006d4c
-	TST.B	LAB_12EB		;0fc3a: 4a390002e464
-	BNE.S	LAB_09A4		;0fc40: 663a
-	CMPI.B	#$01,D0			;0fc42: 0c000001
-	BEQ.W	LAB_09A3		;0fc46: 67000014
-	MOVEQ	#38,D5			;0fc4a: 7a26
-	LEA	LAB_11ED,A2		;0fc4c: 45f90001ea0c
-	BSR.W	LAB_09B0		;0fc52: 61000126
-	MOVEM.L	(A7)+,D2/A0		;0fc56: 4cdf0104
-	BRA.S	LAB_09A5		;0fc5a: 6024
+	MOVE.B	0(A0),D1		;0fc1a:
+	BEQ.W	LAB_09A5		;0fc1e:
+	MOVEM.L	D2/A0,-(A7)		;0fc22:
+	MOVEA.L	LAB_1288,A1		;0fc26:
+	MOVEA.L	LAB_1286,A6		;0fc2c:
+	MOVEQ	#10,D7			;0fc32: 10 damage instead of 7
+	JSR	DamageBuilding		;0fc34:
+	TST.B	LAB_12EB		;0fc3a:
+	BNE.S	LAB_09A4		;0fc40:
+	CMPI.B	#$01,D0			;0fc42:
+	BEQ.W	LAB_09A3		;0fc46:
+	MOVEQ	#38,D5			;0fc4a:
+	LEA	LAB_11ED,A2		;0fc4c:
+	BSR.W	LAB_09B0		;0fc52:
+	MOVEM.L	(A7)+,D2/A0		;0fc56:
+	BRA.S	LAB_09A5		;0fc5a:
 LAB_09A3:
-	LEA	LAB_11ED,A2		;0fc5c: 45f90001ea0c
-	MOVE.B	#$98,D1			;0fc62: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;0fc66: 20790002de54
-	MOVEQ	#38,D5			;0fc6c: 7a26
-	MOVEQ	#6,D0			;0fc6e: 7006
-	JSR	GetRand		;0fc70: 4eb900000c0c
-	EXG	D0,D5			;0fc76: c145
-	BSR.W	LAB_08A9		;0fc78: 6100e57e
+	LEA	LAB_11ED,A2		;0fc5c:
+	MOVE.B	#$98,D1			;0fc62:
+	MOVEA.L	CURRENTASTEROID,A0	;0fc66:
+	MOVEQ	#38,D5			;0fc6c:
+	MOVEQ	#6,D0			;0fc6e:
+	JSR	GetRand			;0fc70:
+	EXG	D0,D5			;0fc76:
+	BSR.W	LAB_08A9		;0fc78:
 LAB_09A4:
 	MOVEM.L	(A7)+,D2/A0		;0fc7c: 4cdf0104
 LAB_09A5:
@@ -20298,252 +20329,252 @@ LAB_09B0:
 ;
 Warhead_00_Expl: ; explosive missile?
 ; All aliens but Tylarans use this missile.
-	LEA	LAB_1209,A0		;0fe2a: 41f90001f076
-	MOVEQ	#26,D0			;0fe30: 701a
-LAB_09B2:
-	MOVE.W	(A6)+,(A0)+		;0fe32: 30de
-	DBF	D0,LAB_09B2		;0fe34: 51c8fffc
-	MOVEQ	#0,D0			;0fe38: 7000
-	LEA	LAB_11FD,A0		;0fe3a: 41f90001ebc2
-LAB_09B3:
-	LEA	LAB_1209,A6		;0fe40: 4df90001f076
-	MOVE.B	(A0)+,D1		;0fe46: 1218
-	ADD.B	D1,10(A6)		;0fe48: d32e000a
-	MOVE.B	(A0)+,D1		;0fe4c: 1218
-	ADD.B	D1,11(A6)		;0fe4e: d32e000b
-	MOVEM.L	D0/A0,-(A7)		;0fe52: 48e78080
-	MOVEQ	#10,D7			;0fe56: 7e0a
-	BSR.W	LAB_09B5		;0fe58: 61000018
-	MOVEM.L	(A7)+,D0/A0		;0fe5c: 4cdf0101
-	ADDQ.B	#1,D0			;0fe60: 5200
-	CMPI.B	#$04,D0			;0fe62: 0c000004
-	BNE.S	LAB_09B3		;0fe66: 66d8
-	RTS				;0fe68: 4e75
-Warhead_11_Unknown:
-	JSR	LAB_105D		;0fe6a: 4eb90001a4f8
-	MOVEQ	#30,D7			;0fe70: 7e1e
-LAB_09B5:
-	MOVEQ	#0,D0			;0fe72: 7000
-	MOVEQ	#0,D1			;0fe74: 7200
-	MOVE.B	10(A6),D0		;0fe76: 102e000a
-	MOVE.B	11(A6),D1		;0fe7a: 122e000b
-	MOVE.W	10(A6),D2		;0fe7e: 342e000a
-	MOVEA.L	A6,A4			;0fe82: 284e
-	MOVEA.L	LAB_1286,A6		;0fe84: 2c790002dec8
-	ASL.W	#2,D0			;0fe8a: e540
-	MULU	#$0044,D1		;0fe8c: c2fc0044
-	ADD.W	D0,D1			;0fe90: d240
-	ADDA.L	D1,A6			;0fe92: ddc1
-	MOVE.W	2(A6),D0		;0fe94: 302e0002
-	BEQ.W	LAB_09B7		;0fe98: 670000ce
-	BPL.W	LAB_09B8		;0fe9c: 6a0000cc
-	BCLR	#15,D0			;0fea0: 0880000f
-	BCLR	#14,D0			;0fea4: 0880000e
-	MULU	#$000e,D0		;0fea8: c0fc000e
-	MOVEA.L	LAB_1287,A0		;0feac: 20790002decc
-	ADDA.L	D0,A0			;0feb2: d1c0
-	MOVEQ	#0,D1			;0feb4: 7200
-	MOVE.B	0(A0),D1		;0feb6: 12280000
-	BEQ.W	LAB_09B7		;0feba: 670000ac
-	MOVE.W	D1,-(A7)		;0febe: 3f01
-	MOVEA.L	LAB_1286,A6		;0fec0: 2c790002dec8
-	MOVEA.L	LAB_1288,A1		;0fec6: 22790002ded0
-	JSR	LAB_0486		;0fecc: 4eb900006d4c
-	MOVE.W	(A7)+,D1		;0fed2: 321f
-	TST.B	LAB_12EB		;0fed4: 4a390002e464
-	BNE.W	LAB_09B7		;0feda: 6600008c
-	JSR	LAB_105D		;0fede: 4eb90001a4f8
-	CMPI.W	#$0004,D0		;0fee4: 0c400004
-	BEQ.S	LAB_09B6		;0fee8: 674c
-	SUBQ.W	#1,D1			;0feea: 5341
-	LEA	LAB_13EE,A5		;0feec: 4bf90003344e
-	ADD.W	D1,D1			;0fef2: d241
-	MOVE.W	D1,D0			;0fef4: 3001
-	ASL.W	#2,D0			;0fef6: e540
-	ADD.W	D0,D1			;0fef8: d240
-	MOVE.W	8(A5,D1.W),D1		;0fefa: 32351008
-	CMPI.W	#$0019,D1		;0fefe: 0c410019
-	BMI.S	LAB_09B8		;0ff02: 6b66
-	MOVE.W	D2,-(A7)		;0ff04: 3f02
-	MOVE.W	38(A4),-(A7)		;0ff06: 3f2c0026
-	LEA	LAB_11F0,A2		;0ff0a: 45f90001ea42
-	MOVEQ	#51,D0			;0ff10: 7033
-	MOVE.W	10(A4),D2		;0ff12: 342c000a
-	MOVE.B	#$98,D1			;0ff16: 123c0098
-	MOVEA.L	TARGETASTEROID,A0		;0ff1a: 20790002ded4
-	MOVEQ	#0,D5			;0ff20: 7a00
-	BSR.W	LAB_08A9		;0ff22: 6100e2d4
-	MOVE.W	(A7)+,38(A0)		;0ff26: 315f0026
-	MOVE.W	(A7)+,D2		;0ff2a: 341f
-	LEA	LAB_11EE,A2		;0ff2c: 45f90001ea1e
-	MOVEQ	#46,D5			;0ff32: 7a2e
-	BRA.S	LAB_09B9		;0ff34: 6044
+	LEA	LAB_1209,A0		;0fe2a:
+	MOVEQ	#26,D0			;0fe30:
+Loop_09B2:
+	MOVE.W	(A6)+,(A0)+		;0fe32:
+	DBF	D0,Loop_09B2		;0fe34:
+	MOVEQ	#0,D0			;0fe38:
+	LEA	LAB_11FD,A0		;0fe3a:
+Loop_09B3:
+	LEA	LAB_1209,A6		;0fe40:
+	MOVE.B	(A0)+,D1		;0fe46:
+	ADD.B	D1,10(A6)		;0fe48:
+	MOVE.B	(A0)+,D1		;0fe4c:
+	ADD.B	D1,11(A6)		;0fe4e:
+	MOVEM.L	D0/A0,-(A7)		;0fe52:
+	MOVEQ	#10,D7			;0fe56: 10 damage
+	BSR.W	LAB_09B5		;0fe58:
+	MOVEM.L	(A7)+,D0/A0		;0fe5c:
+	ADDQ.B	#1,D0			;0fe60:
+	CMPI.B	#$04,D0			;0fe62: runs 3 times?
+	BNE.S	Loop_09B3		;0fe66:
+	RTS				;0fe68:
+Warhead_11_Unknown: ; possibly meteor storm
+	JSR	LAB_105D		;0fe6a:
+	MOVEQ	#30,D7			;0fe70: 30 damage?
+LAB_09B5: ; explosive, area explosive, scatter, ion cannon, etc
+	MOVEQ	#0,D0			;0fe72:
+	MOVEQ	#0,D1			;0fe74:
+	MOVE.B	10(A6),D0		;0fe76:
+	MOVE.B	11(A6),D1		;0fe7a:
+	MOVE.W	10(A6),D2		;0fe7e:
+	MOVEA.L	A6,A4			;0fe82:
+	MOVEA.L	LAB_1286,A6		;0fe84:
+	ASL.W	#2,D0			;0fe8a:
+	MULU	#$0044,D1		;0fe8c:
+	ADD.W	D0,D1			;0fe90:
+	ADDA.L	D1,A6			;0fe92:
+	MOVE.W	2(A6),D0		;0fe94:
+	BEQ.W	LAB_09B7		;0fe98:
+	BPL.W	LAB_09B8		;0fe9c:
+	BCLR	#15,D0			;0fea0:
+	BCLR	#14,D0			;0fea4:
+	MULU	#$000e,D0		;0fea8:
+	MOVEA.L	LAB_1287,A0		;0feac:
+	ADDA.L	D0,A0			;0feb2:
+	MOVEQ	#0,D1			;0feb4:
+	MOVE.B	0(A0),D1		;0feb6:
+	BEQ.W	LAB_09B7		;0feba:
+	MOVE.W	D1,-(A7)		;0febe:
+	MOVEA.L	LAB_1286,A6		;0fec0:
+	MOVEA.L	LAB_1288,A1		;0fec6:
+	JSR	DamageBuilding		;0fecc:
+	MOVE.W	(A7)+,D1		;0fed2:
+	TST.B	LAB_12EB		;0fed4:
+	BNE.W	LAB_09B7		;0feda:
+	JSR	LAB_105D		;0fede:
+	CMPI.W	#$0004,D0		;0fee4:
+	BEQ.S	LAB_09B6		;0fee8:
+	SUBQ.W	#1,D1			;0feea:
+	LEA	LAB_13EE,A5		;0feec:
+	ADD.W	D1,D1			;0fef2:
+	MOVE.W	D1,D0			;0fef4:
+	ASL.W	#2,D0			;0fef6:
+	ADD.W	D0,D1			;0fef8:
+	MOVE.W	8(A5,D1.W),D1		;0fefa:
+	CMPI.W	#$0019,D1		;0fefe:
+	BMI.S	LAB_09B8		;0ff02:
+	MOVE.W	D2,-(A7)		;0ff04:
+	MOVE.W	38(A4),-(A7)		;0ff06:
+	LEA	LAB_11F0,A2		;0ff0a:
+	MOVEQ	#51,D0			;0ff10:
+	MOVE.W	10(A4),D2		;0ff12:
+	MOVE.B	#$98,D1			;0ff16:
+	MOVEA.L	TARGETASTEROID,A0	;0ff1a:
+	MOVEQ	#0,D5			;0ff20:
+	BSR.W	LAB_08A9		;0ff22:
+	MOVE.W	(A7)+,38(A0)		;0ff26:
+	MOVE.W	(A7)+,D2		;0ff2a:
+	LEA	LAB_11EE,A2		;0ff2c:
+	MOVEQ	#46,D5			;0ff32:
+	BRA.S	LAB_09B9		;0ff34:
 LAB_09B6:
-	MOVE.W	38(A4),-(A7)		;0ff36: 3f2c0026
-	MOVE.W	10(A4),-(A7)		;0ff3a: 3f2c000a
-	LEA	LAB_11EE,A2		;0ff3e: 45f90001ea1e
-	MOVEQ	#46,D5			;0ff44: 7a2e
-	BSR.W	LAB_09B0		;0ff46: 6100fe32
-	MOVE.W	(A7)+,D2		;0ff4a: 341f
-	LEA	LAB_11F0,A2		;0ff4c: 45f90001ea42
-	MOVEQ	#51,D0			;0ff52: 7033
-	MOVE.B	#$98,D1			;0ff54: 123c0098
-	MOVEA.L	TARGETASTEROID,A0		;0ff58: 20790002ded4
-	MOVEQ	#0,D5			;0ff5e: 7a00
-	BSR.W	LAB_08A9		;0ff60: 6100e296
-	MOVE.W	(A7)+,38(A0)		;0ff64: 315f0026
+	MOVE.W	38(A4),-(A7)		;0ff36:
+	MOVE.W	10(A4),-(A7)		;0ff3a:
+	LEA	LAB_11EE,A2		;0ff3e:
+	MOVEQ	#46,D5			;0ff44:
+	BSR.W	LAB_09B0		;0ff46:
+	MOVE.W	(A7)+,D2		;0ff4a:
+	LEA	LAB_11F0,A2		;0ff4c:
+	MOVEQ	#51,D0			;0ff52:
+	MOVE.B	#$98,D1			;0ff54:
+	MOVEA.L	TARGETASTEROID,A0	;0ff58:
+	MOVEQ	#0,D5			;0ff5e:
+	BSR.W	LAB_08A9		;0ff60:
+	MOVE.W	(A7)+,38(A0)		;0ff64:
 LAB_09B7:
-	RTS				;0ff68: 4e75
+	RTS				;0ff68:
 LAB_09B8:
-	TST.B	LAB_12EB		;0ff6a: 4a390002e464
-	BNE.S	LAB_09B7		;0ff70: 66f6
-	LEA	LAB_11ED,A2		;0ff72: 45f90001ea0c
-	MOVEQ	#38,D5			;0ff78: 7a26
+	TST.B	LAB_12EB		;0ff6a:
+	BNE.S	LAB_09B7		;0ff70:
+	LEA	LAB_11ED,A2		;0ff72:
+	MOVEQ	#38,D5			;0ff78:
 LAB_09B9:
-	MOVE.B	#$94,D1			;0ff7a: 123c0094
-	MOVEA.L	CURRENTASTEROID,A0		;0ff7e: 20790002de54
-	MOVEQ	#6,D0			;0ff84: 7006
-	JSR	GetRand		;0ff86: 4eb900000c0c
-	EXG	D0,D5			;0ff8c: c145
-	BSR.W	LAB_08A9		;0ff8e: 6100e268
-	RTS				;0ff92: 4e75
+	MOVE.B	#$94,D1			;0ff7a:
+	MOVEA.L	CURRENTASTEROID,A0	;0ff7e:
+	MOVEQ	#6,D0			;0ff84:
+	JSR	GetRand			;0ff86:
+	EXG	D0,D5			;0ff8c:
+	BSR.W	LAB_08A9		;0ff8e:
+	RTS				;0ff92:
 Warhead_01_Area:
 ; All aliens but Tylarans use this missile.
-	LEA	LAB_1209,A0		;0ff94: 41f90001f076
-	MOVEQ	#26,D0			;0ff9a: 701a
-LAB_09BB:
-	MOVE.W	(A6)+,(A0)+		;0ff9c: 30de
-	DBF	D0,LAB_09BB		;0ff9e: 51c8fffc
-	MOVEQ	#0,D0			;0ffa2: 7000
-	LEA	LAB_11FB,A0		;0ffa4: 41f90001eb7e
-LAB_09BC:
-	LEA	LAB_1209,A6		;0ffaa: 4df90001f076
-	MOVE.B	(A0)+,D1		;0ffb0: 1218
-	ADD.B	D1,10(A6)		;0ffb2: d32e000a
-	MOVE.B	(A0)+,D1		;0ffb6: 1218
-	ADD.B	D1,11(A6)		;0ffb8: d32e000b
-	MOVEM.L	D0/A0,-(A7)		;0ffbc: 48e78080
-	MOVEQ	#10,D7			;0ffc0: 7e0a
-	BSR.W	LAB_09B5		;0ffc2: 6100feae
-	MOVEM.L	(A7)+,D0/A0		;0ffc6: 4cdf0101
-	ADDQ.B	#1,D0			;0ffca: 5200
-	CMPI.B	#$19,D0			;0ffcc: 0c000019
-	BNE.S	LAB_09BC		;0ffd0: 66d8
-	RTS				;0ffd2: 4e75
+	LEA	LAB_1209,A0		;0ff94:
+	MOVEQ	#26,D0			;0ff9a:
+Loop_09BB:
+	MOVE.W	(A6)+,(A0)+		;0ff9c:
+	DBF	D0,Loop_09BB		;0ff9e:
+	MOVEQ	#0,D0			;0ffa2:
+	LEA	LAB_11FB,A0		;0ffa4:
+Loop_09BC:
+	LEA	LAB_1209,A6		;0ffaa:
+	MOVE.B	(A0)+,D1		;0ffb0:
+	ADD.B	D1,10(A6)		;0ffb2:
+	MOVE.B	(A0)+,D1		;0ffb6:
+	ADD.B	D1,11(A6)		;0ffb8:
+	MOVEM.L	D0/A0,-(A7)		;0ffbc:
+	MOVEQ	#10,D7			;0ffc0: 10 damage
+	BSR.W	LAB_09B5		;0ffc2:
+	MOVEM.L	(A7)+,D0/A0		;0ffc6:
+	ADDQ.B	#1,D0			;0ffca:
+	CMPI.B	#$19,D0			;0ffcc: runs 19 times
+	BNE.S	Loop_09BC		;0ffd0:
+	RTS				;0ffd2:
 Warhead_03_Hellfire:
 ; Only alien 3 (Ax'Zilanth) uses Hellfire.
-; Against Swixarans, some variable relating to Napalm/Hellfire is
-; higher: 8 instead of 5. Possibly damage, duration or spread.
-	ST	LAB_12ED		;0ffd4: 50f90002e466
-	LEA	LAB_1209,A0		;0ffda: 41f90001f076
-	MOVEQ	#26,D0			;0ffe0: 701a
-LAB_09BE:
-	MOVE.W	(A6)+,(A0)+		;0ffe2: 30de
-	DBF	D0,LAB_09BE		;0ffe4: 51c8fffc
-	MOVEQ	#0,D0			;0ffe8: 7000
-	LEA	LAB_11FC,A0		;0ffea: 41f90001ebb0
-LAB_09BF:
-	LEA	LAB_1209,A6		;0fff0: 4df90001f076
-	MOVE.B	(A0)+,D1		;0fff6: 1218
-	ADD.B	D1,10(A6)		;0fff8: d32e000a
-	MOVE.B	(A0)+,D1		;0fffc: 1218
-	ADD.B	D1,11(A6)		;0fffe: d32e000b
-	MOVEM.L	D0/A0,-(A7)		;10002: 48e78080
-	BSR.W	LAB_09C3		;10006: 61000052
-	MOVEM.L	(A7)+,D0/A0		;1000a: 4cdf0101
-	ADDQ.B	#1,D0			;1000e: 5200
-	CMPI.B	#$09,D0			;10010: 0c000009
-	BNE.S	LAB_09BF		;10014: 66da
-	SF	LAB_12ED		;10016: 51f90002e466
-	RTS				;1001c: 4e75
+; Damage is higher against Swixarans.
+	ST	LAB_12ED		;0ffd4:
+	LEA	LAB_1209,A0		;0ffda:
+	MOVEQ	#26,D0			;0ffe0:
+Loop_09BE:
+	MOVE.W	(A6)+,(A0)+		;0ffe2:
+	DBF	D0,Loop_09BE		;0ffe4:
+	MOVEQ	#0,D0			;0ffe8:
+	LEA	LAB_11FC,A0		;0ffea:
+Loop_09BF:
+	LEA	LAB_1209,A6		;0fff0:
+	MOVE.B	(A0)+,D1		;0fff6:
+	ADD.B	D1,10(A6)		;0fff8:
+	MOVE.B	(A0)+,D1		;0fffc:
+	ADD.B	D1,11(A6)		;0fffe:
+	MOVEM.L	D0/A0,-(A7)		;10002:
+	BSR.W	LAB_09C3		;10006:
+	MOVEM.L	(A7)+,D0/A0		;1000a:
+	ADDQ.B	#1,D0			;1000e:
+	CMPI.B	#$09,D0			;10010: runs 9 times
+	BNE.S	Loop_09BF		;10014:
+	SF	LAB_12ED		;10016:
+	RTS				;1001c:
 Warhead_02_Napalm:
 ; Only alien 1 (Kll-Kp-Qua) uses Napalm.
-	LEA	LAB_1209,A0		;1001e: 41f90001f076
-	MOVEQ	#26,D0			;10024: 701a
+	LEA	LAB_1209,A0		;1001e:
+	MOVEQ	#26,D0			;10024:
 LAB_09C1:
-	MOVE.W	(A6)+,(A0)+		;10026: 30de
-	DBF	D0,LAB_09C1		;10028: 51c8fffc
-	MOVEQ	#0,D0			;1002c: 7000
-	LEA	LAB_11FB,A0		;1002e: 41f90001eb7e
+	MOVE.W	(A6)+,(A0)+		;10026:
+	DBF	D0,LAB_09C1		;10028:
+	MOVEQ	#0,D0			;1002c:
+	LEA	LAB_11FB,A0		;1002e:
 LAB_09C2:
-	LEA	LAB_1209,A6		;10034: 4df90001f076
-	MOVE.B	(A0)+,D1		;1003a: 1218
-	ADD.B	D1,10(A6)		;1003c: d32e000a
-	MOVE.B	(A0)+,D1		;10040: 1218
-	ADD.B	D1,11(A6)		;10042: d32e000b
-	MOVEM.L	D0/A0,-(A7)		;10046: 48e78080
-	BSR.S	LAB_09C3		;1004a: 610e
-	MOVEM.L	(A7)+,D0/A0		;1004c: 4cdf0101
-	ADDQ.B	#1,D0			;10050: 5200
-	CMPI.B	#$19,D0			;10052: 0c000019
-	BNE.S	LAB_09C2		;10056: 66dc
-	RTS				;10058: 4e75
-LAB_09C3:
-	MOVEQ	#0,D0			;1005a: 7000
-	MOVEQ	#0,D1			;1005c: 7200
-	MOVE.B	10(A6),D0		;1005e: 102e000a
-	MOVE.B	11(A6),D1		;10062: 122e000b
-	MOVE.W	10(A6),D2		;10066: 342e000a
-	MOVEA.L	A6,A4			;1006a: 284e
-	MOVEA.L	LAB_1286,A6		;1006c: 2c790002dec8
-	ASL.W	#2,D0			;10072: e540
-	MULU	#$0044,D1		;10074: c2fc0044
-	ADD.W	D0,D1			;10078: d240
-	ADDA.L	D1,A6			;1007a: ddc1
-	MOVE.W	2(A6),D0		;1007c: 302e0002
-	BEQ.W	LAB_09C8		;10080: 670000b0
-	BPL.W	LAB_09C9		;10084: 6a0000ae
-	BCLR	#15,D0			;10088: 0880000f
-	BCLR	#14,D0			;1008c: 0880000e
-	MULU	#$000e,D0		;10090: c0fc000e
-	MOVEA.L	LAB_1287,A0		;10094: 20790002decc
-	ADDA.L	D0,A0			;1009a: d1c0
-	MOVEQ	#0,D1			;1009c: 7200
-	MOVE.B	0(A0),D1		;1009e: 12280000
-	BEQ.W	LAB_09C8		;100a2: 6700008e
-	MOVE.W	D1,-(A7)		;100a6: 3f01
-	MOVEA.L	LAB_1286,A6		;100a8: 2c790002dec8
-	MOVEA.L	LAB_1288,A1		;100ae: 22790002ded0
-	MOVEQ	#5,D7			;100b4: 7e05
-	CMPI.W	#$0006,ALIENID		;100b6: 0c7900060002defe
-	BNE.S	LAB_09C4		;100be: 6602
-	MOVEQ	#8,D7			;100c0: 7e08
+	LEA	LAB_1209,A6		;10034:
+	MOVE.B	(A0)+,D1		;1003a:
+	ADD.B	D1,10(A6)		;1003c:
+	MOVE.B	(A0)+,D1		;10040:
+	ADD.B	D1,11(A6)		;10042:
+	MOVEM.L	D0/A0,-(A7)		;10046:
+	BSR.S	LAB_09C3		;1004a:
+	MOVEM.L	(A7)+,D0/A0		;1004c:
+	ADDQ.B	#1,D0			;10050:
+	CMPI.B	#$19,D0			;10052: runs 19 times
+	BNE.S	LAB_09C2		;10056:
+	RTS				;10058:
+LAB_09C3: ; triggers for both napalm and hellfire
+	MOVEQ	#0,D0			;1005a:
+	MOVEQ	#0,D1			;1005c:
+	MOVE.B	10(A6),D0		;1005e:
+	MOVE.B	11(A6),D1		;10062:
+	MOVE.W	10(A6),D2		;10066:
+	MOVEA.L	A6,A4			;1006a:
+	MOVEA.L	LAB_1286,A6		;1006c:
+	ASL.W	#2,D0			;10072:
+	MULU	#$0044,D1		;10074:
+	ADD.W	D0,D1			;10078:
+	ADDA.L	D1,A6			;1007a:
+	MOVE.W	2(A6),D0		;1007c:
+	BEQ.W	Return_09C8		;10080:
+	BPL.W	LAB_09C9		;10084:
+	BCLR	#15,D0			;10088:
+	BCLR	#14,D0			;1008c:
+	MULU	#$000e,D0		;10090:
+	MOVEA.L	LAB_1287,A0		;10094:
+	ADDA.L	D0,A0			;1009a:
+	MOVEQ	#0,D1			;1009c:
+	MOVE.B	0(A0),D1		;1009e:
+	BEQ.W	Return_09C8		;100a2:
+	MOVE.W	D1,-(A7)		;100a6:
+	MOVEA.L	LAB_1286,A6		;100a8:
+	MOVEA.L	LAB_1288,A1		;100ae:
+	MOVEQ	#5,D7			;100b4: 5 damage
+	CMPI.W	#$0006,ALIENID		;100b6:
+	BNE.S	LAB_09C4		;100be:
+	MOVEQ	#8,D7			;100c0: 8 damage to Swixaran
 LAB_09C4:
-	JSR	LAB_0486		;100c2: 4eb900006d4c
-	MOVE.W	(A7)+,D1		;100c8: 321f
-	TST.B	LAB_12ED		;100ca: 4a390002e466
-	BNE.S	LAB_09C5		;100d0: 660e
-	TST.B	LAB_12EB		;100d2: 4a390002e464
-	BNE.S	LAB_09C8		;100d8: 6658
-	JSR	LAB_105D		;100da: 4eb90001a4f8
+	JSR	DamageBuilding		;100c2:
+	MOVE.W	(A7)+,D1		;100c8:
+	TST.B	LAB_12ED		;100ca:
+	BNE.S	LAB_09C5		;100d0:
+	TST.B	LAB_12EB		;100d2:
+	BNE.S	Return_09C8		;100d8:
+	JSR	LAB_105D		;100da:
 LAB_09C5:
-	CMPI.W	#$0004,D0		;100e0: 0c400004
-	BEQ.S	LAB_09C6		;100e4: 6732
-	SUBQ.W	#1,D1			;100e6: 5341
-	LEA	LAB_13EE,A5		;100e8: 4bf90003344e
-	ADD.W	D1,D1			;100ee: d241
-	MOVE.W	D1,D0			;100f0: 3001
-	ASL.W	#2,D0			;100f2: e540
-	ADD.W	D0,D1			;100f4: d240
-	MOVE.W	8(A5,D1.W),D1		;100f6: 32351008
-	CMPI.W	#$0019,D1		;100fa: 0c410019
-	BMI.S	LAB_09C9		;100fe: 6b34
-	LEA	LAB_11F3,A2		;10100: 45f90001ea86
-	MOVEQ	#47,D5			;10106: 7a2f
-	TST.B	LAB_12ED		;10108: 4a390002e466
-	BEQ.S	LAB_09CA		;1010e: 673a
-	LEA	LAB_11F5,A2		;10110: 45f90001eaca
-	BRA.S	LAB_09CA		;10116: 6032
+	CMPI.W	#$0004,D0		;100e0:
+	BEQ.S	LAB_09C6		;100e4:
+	SUBQ.W	#1,D1			;100e6:
+	LEA	LAB_13EE,A5		;100e8:
+	ADD.W	D1,D1			;100ee:
+	MOVE.W	D1,D0			;100f0:
+	ASL.W	#2,D0			;100f2:
+	ADD.W	D0,D1			;100f4:
+	MOVE.W	8(A5,D1.W),D1		;100f6:
+	CMPI.W	#$0019,D1		;100fa:
+	BMI.S	LAB_09C9		;100fe:
+	LEA	LAB_11F3,A2		;10100:
+	MOVEQ	#47,D5			;10106:
+	TST.B	LAB_12ED		;10108:
+	BEQ.S	LAB_09CA		;1010e:
+	LEA	LAB_11F5,A2		;10110:
+	BRA.S	LAB_09CA		;10116:
 LAB_09C6:
-	LEA	LAB_11F3,A2		;10118: 45f90001ea86
-	TST.B	LAB_12ED		;1011e: 4a390002e466
-	BEQ.S	LAB_09C7		;10124: 6706
-	LEA	LAB_11F5,A2		;10126: 45f90001eaca
+	LEA	LAB_11F3,A2		;10118:
+	TST.B	LAB_12ED		;1011e:
+	BEQ.S	LAB_09C7		;10124:
+	LEA	LAB_11F5,A2		;10126:
 LAB_09C7:
-	MOVEQ	#47,D5			;1012c: 7a2f
-	BSR.W	LAB_09B0		;1012e: 6100fc4a
-LAB_09C8:
-	RTS				;10132: 4e75
+	MOVEQ	#47,D5			;1012c:
+	BSR.W	LAB_09B0		;1012e:
+Return_09C8:
+	RTS				;10132:
+;
 LAB_09C9:
 	LEA	LAB_11F2,A2		;10134: 45f90001ea60
 	MOVEQ	#39,D5			;1013a: 7a27
@@ -20552,9 +20583,9 @@ LAB_09C9:
 	LEA	LAB_11F4,A2		;10144: 45f90001eaac
 LAB_09CA:
 	MOVE.B	#$94,D1			;1014a: 123c0094
-	MOVEA.L	TARGETASTEROID,A0		;1014e: 20790002ded4
+	MOVEA.L	TARGETASTEROID,A0	;1014e: 20790002ded4
 	MOVEQ	#6,D0			;10154: 7006
-	JSR	GetRand		;10156: 4eb900000c0c
+	JSR	GetRand			;10156: 4eb900000c0c
 	EXG	D0,D5			;1015c: c145
 	BSR.W	LAB_08A9		;1015e: 6100e098
 	RTS				;10162: 4e75
@@ -20574,7 +20605,7 @@ LAB_09CC:
 	MOVEQ	#9,D7			;1018e: 7e09
 	MOVE.B	21(A6),D0		;10190: 102e0015
 	BPL.S	LAB_09CD		;10194: 6a10
-	TST.B	FLAG_SEEALLASTEROIDS		;10196: 4a390001d4b2
+	TST.B	FLAG_SEEALLASTEROIDS	;10196: 4a390001d4b2
 	BNE.S	LAB_09CE		;1019c: 6616
 	BTST	#3,D0			;1019e: 08000003
 	BEQ.S	LAB_09CF		;101a2: 672e
@@ -21330,9 +21361,9 @@ Return_0A34:
 StaticInducer:
 ; Fires 10% of the time. Deals zero damage.
 	MOVEQ	#10,D0			;109da: 
-	JSR	GetRand	    	        ;109dc: 
+	JSR	GetRand	   	 	;109dc: 
 	BNE.S	Return_0A36		;109e2: 
-	MOVEA.L	TARGETASTEROID,A5		;109e4: 
+	MOVEA.L	TARGETASTEROID,A5	;109e4: 
 	MOVEQ	#0,D7			;109ea: Zero damage
 	BSR.W	FireAtShip		;109ec: 
 	BMI.S	Return_0A36		;109f0: 
@@ -21346,9 +21377,9 @@ Return_0A36:
 AlienStaticInducer: 
 ; Used by Ore-Eaters and Tylarans. Same as Terran equivalent.
 	MOVEQ	#10,D0			;10a0e: 
-	JSR	GetRand		;10a10: 
+	JSR	GetRand			;10a10: 
 	BNE.S	LAB_0A38		;10a16: 
-	MOVEA.L	TARGETASTEROID,A5		;10a18: 
+	MOVEA.L	TARGETASTEROID,A5	;10a18: 
 	MOVEQ	#0,D7			;10a1e: 
 	BSR.W	FireAtTerranShip	;10a20: 
 	BMI.S	LAB_0A38		;10a24: 
@@ -21389,28 +21420,28 @@ Return_0A3D:
 	RTS				;10a60:
 AlienCannon05:
 ; As Terran cannons, except for the damage values, which vary by race.
-	MOVE.W	CANNON_05_DAMAGE,D7		;10a62: 3e3900020312
-	BRA.S	LAB_0A41		;10a68: 600e
+	MOVE.W	CANNON_05_DAMAGE,D7	;10a62:
+	BRA.S	LAB_0A41		;10a68:
 AlienCannon06:
-	MOVE.W	CANNON_06_DAMAGE,D7		;10a6a: 3e3900020316
-	BRA.S	LAB_0A41		;10a70: 6006
+	MOVE.W	CANNON_06_DAMAGE,D7	;10a6a:
+	BRA.S	LAB_0A41		;10a70:
 AlienCannon07:
-	MOVE.W	CANNON_07_DAMAGE,D7		;10a72: 3e3900020314
+	MOVE.W	CANNON_07_DAMAGE,D7	;10a72:
 LAB_0A41:
-	MOVEQ	#10,D0			;10a78: 700a
-	JSR	GetRand		;10a7a: 4eb900000c0c
-	CMPI.B	#$03,D0			;10a80: 0c000003
-	BPL.S	Return_0A42		;10a84: 6a22
-	MOVEA.L	TARGETASTEROID,A5		;10a86: 2a790002ded4
-	BSR.W	FireAtTerranShip		;10a8c: 6100035a
-	BMI.S	Return_0A42		;10a90: 6b16
-	BSET	#6,21(A6)		;10a92: 08ee00060015
-	TST.B	LAB_12EB		;10a98: 4a390002e464
-	BNE.S	Return_0A42		;10a9e: 6608
-	MOVEQ	#12,D0			;10aa0: 700c
-	JSR	PlaySound		;10aa2: 4eb90001a50c
+	MOVEQ	#10,D0			;10a78:
+	JSR	GetRand			;10a7a:
+	CMPI.B	#$03,D0			;10a80:
+	BPL.S	Return_0A42		;10a84:
+	MOVEA.L	TARGETASTEROID,A5	;10a86:
+	BSR.W	FireAtTerranShip	;10a8c:
+	BMI.S	Return_0A42		;10a90:
+	BSET	#6,21(A6)		;10a92:
+	TST.B	LAB_12EB		;10a98:
+	BNE.S	Return_0A42		;10a9e:
+	MOVEQ	#12,D0			;10aa0:
+	JSR	PlaySound		;10aa2:
 Return_0A42:
-	RTS				;10aa8: 4e75
+	RTS				;10aa8:
 LaserHardpoint:
 ; Laser appears to do 2 damage.
 	MOVEQ	#2,D7			;10aaa: 
@@ -21429,7 +21460,7 @@ LAB_0A46:
 	JSR	GetRand		        ;10ab6: 
 	CMPI.B	#$03,D0			;10abc:
 	BPL.S	Return_0A47		;10ac0: if 30% chance:
-	MOVEA.L	TARGETASTEROID,A5		;10ac2: 
+	MOVEA.L	TARGETASTEROID,A5	;10ac2: 
 	BSR.W	FireAtShip		;10ac8: 
 	BMI.S	Return_0A47		;10acc: 
 	BSET	#6,21(A6)		;10ace: 
@@ -21443,13 +21474,13 @@ IonCannon:
 ; 50% chance to fire.
 	TST.B	LAB_12F8		;10ae6:
 	BNE.S	Return_0A4A		;10aec:
-	MOVEA.L	TARGETASTEROID,A0		;10aee:
+	MOVEA.L	TARGETASTEROID,A0	;10aee:
 	MOVE.B	89(A0),D0		;10af4:
 	ANDI.B	#$03,D0			;10af8:
 	CMP.B	D0,D6			;10afc:
 	BNE.S	Return_0A4A		;10afe:
 	MOVEQ	#10,D0			;10b00:
-	JSR	GetRand		;10b02:
+	JSR	GetRand			;10b02:
 	CMPI.B	#$05,D0			;10b08:
 	BPL.S	Return_0A4A		;10b0c:
 	BSET	#6,21(A6)		;10b0e:
@@ -21459,10 +21490,10 @@ IonCannon:
 	MOVE.B	D3,11(A6)		;10b22:
 	MOVE.W	D4,38(A6)		;10b26:
 	BNE.S	LAB_0A49		;10b2a:
-	MOVEA.L	TARGETASTEROID,A0		;10b2c:
+	MOVEA.L	TARGETASTEROID,A0	;10b2c:
 	ADDQ.B	#1,172(A0)		;10b32:
 LAB_0A49:
-	MOVEQ	#5,D7			;10b36: 
+	MOVEQ	#5,D7			;10b36: 5 damage.
 	SF	LAB_13B4		;10b38: 
 	BSR.W	LAB_09B5		;10b3e: 
 	TST.B	LAB_13B4		;10b42: 
@@ -21470,57 +21501,57 @@ LAB_0A49:
 	MOVEQ	#13,D0			;10b4a: 
 	JSR	PlaySound		;10b4c: 
 Return_0A4A:
-	RTS				;10b52: 4e75
+	RTS				;10b52:
 Disruptor:
 ; 20% chance to fire.
-	TST.B	LAB_12F8		;10b54: 4a390002e471
-	BNE.W	Return_0A4F		;10b5a: 660000a0
-	MOVEA.L	TARGETASTEROID,A0		;10b5e: 20790002ded4
-	MOVE.B	89(A0),D0		;10b64: 10280059
-	ANDI.B	#$03,D0			;10b68: 02000003
-	CMP.B	D0,D6			;10b6c: bc00
-	BNE.W	Return_0A4F		;10b6e: 6600008c
-	MOVEQ	#10,D0			;10b72: 700a
-	JSR	GetRand		;10b74: 4eb900000c0c
-	CMPI.B	#$02,D0			;10b7a: 0c000002
-	BPL.S	Return_0A4F		;10b7e: 6a7c
-	BSET	#6,21(A6)		;10b80: 08ee00060015
-	BSR.W	LAB_093F		;10b86: 6100e63c
-	LEA	LAB_1208,A6		;10b8a: 4df90001f040
-	MOVE.B	D2,10(A6)		;10b90: 1d42000a
-	MOVE.B	D3,11(A6)		;10b94: 1d43000b
-	MOVE.W	D4,38(A6)		;10b98: 3d440026
-	BNE.S	LAB_0A4C		;10b9c: 660a
-	MOVEA.L	TARGETASTEROID,A0		;10b9e: 20790002ded4
-	ADDQ.B	#1,172(A0)		;10ba4: 522800ac
+	TST.B	LAB_12F8		;10b54:
+	BNE.W	Return_0A4F		;10b5a:
+	MOVEA.L	TARGETASTEROID,A0	;10b5e:
+	MOVE.B	89(A0),D0		;10b64:
+	ANDI.B	#$03,D0			;10b68:
+	CMP.B	D0,D6			;10b6c:
+	BNE.W	Return_0A4F		;10b6e:
+	MOVEQ	#10,D0			;10b72:
+	JSR	GetRand			;10b74:
+	CMPI.B	#$02,D0			;10b7a:
+	BPL.S	Return_0A4F		;10b7e:
+	BSET	#6,21(A6)		;10b80:
+	BSR.W	LAB_093F		;10b86:
+	LEA	LAB_1208,A6		;10b8a:
+	MOVE.B	D2,10(A6)		;10b90:
+	MOVE.B	D3,11(A6)		;10b94:
+	MOVE.W	D4,38(A6)		;10b98:
+	BNE.S	LAB_0A4C		;10b9c:
+	MOVEA.L	TARGETASTEROID,A0	;10b9e:
+	ADDQ.B	#1,172(A0)		;10ba4:
 LAB_0A4C:
-	LEA	LAB_1209,A0		;10ba8: 41f90001f076
-	MOVEQ	#26,D0			;10bae: 701a
-LAB_0A4D:
-	MOVE.W	(A6)+,(A0)+		;10bb0: 30de
-	DBF	D0,LAB_0A4D		;10bb2: 51c8fffc
-	SF	LAB_13B4		;10bb6: 51f9000315ec
-	MOVEQ	#0,D0			;10bbc: 7000
-	LEA	LAB_11FD,A0		;10bbe: 41f90001ebc2
-LAB_0A4E:
-	LEA	LAB_1209,A6		;10bc4: 4df90001f076
-	MOVE.B	(A0)+,D1		;10bca: 1218
-	ADD.B	D1,10(A6)		;10bcc: d32e000a
-	MOVE.B	(A0)+,D1		;10bd0: 1218
-	ADD.B	D1,11(A6)		;10bd2: d32e000b
-	MOVEM.L	D0/A0,-(A7)		;10bd6: 48e78080
-	MOVEQ	#5,D7			;10bda: 7e05
-	BSR.W	LAB_09B5		;10bdc: 6100f294
-	MOVEM.L	(A7)+,D0/A0		;10be0: 4cdf0101
-	ADDQ.B	#1,D0			;10be4: 5200
-	CMPI.B	#$04,D0			;10be6: 0c000004
-	BNE.S	LAB_0A4E		;10bea: 66d8
-	TST.B	LAB_13B4		;10bec: 4a39000315ec
-	BNE.S	Return_0A4F		;10bf2: 6608
-	MOVEQ	#13,D0			;10bf4: 700d
-	JSR	PlaySound		;10bf6: 4eb90001a50c
+	LEA	LAB_1209,A0		;10ba8:
+	MOVEQ	#26,D0			;10bae:
+Loop_0A4D:
+	MOVE.W	(A6)+,(A0)+		;10bb0:
+	DBF	D0,Loop_0A4D		;10bb2:
+	SF	LAB_13B4		;10bb6:
+	MOVEQ	#0,D0			;10bbc:
+	LEA	LAB_11FD,A0		;10bbe:
+Loop_0A4E:
+	LEA	LAB_1209,A6		;10bc4:
+	MOVE.B	(A0)+,D1		;10bca:
+	ADD.B	D1,10(A6)		;10bcc:
+	MOVE.B	(A0)+,D1		;10bd0:
+	ADD.B	D1,11(A6)		;10bd2:
+	MOVEM.L	D0/A0,-(A7)		;10bd6:
+	MOVEQ	#5,D7			;10bda: 5 damage.
+	BSR.W	LAB_09B5		;10bdc:
+	MOVEM.L	(A7)+,D0/A0		;10be0:
+	ADDQ.B	#1,D0			;10be4:
+	CMPI.B	#$04,D0			;10be6:
+	BNE.S	Loop_0A4E		;10bea:
+	TST.B	LAB_13B4		;10bec:
+	BNE.S	Return_0A4F		;10bf2:
+	MOVEQ	#13,D0			;10bf4:
+	JSR	PlaySound		;10bf6:
 Return_0A4F:
-	RTS				;10bfc: 4e75
+	RTS				;10bfc:
 NapalmOrb:
 ; Has a 20% chance to fire.
 	TST.B	LAB_12F8		;10bfe:
@@ -21543,7 +21574,7 @@ NapalmOrb:
 	MOVE.B	D3,11(A6)		;10c3a:
 	MOVE.W	D4,38(A6)		;10c3e:
 	BNE.S	LAB_0A51		;10c42:
-	MOVEA.L	TARGETASTEROID,A0		;10c44:
+	MOVEA.L	TARGETASTEROID,A0	;10c44:
 	ADDQ.B	#1,172(A0)		;10c4a:
 LAB_0A51:
 	SF	LAB_13B4		;10c4e:
@@ -21557,25 +21588,25 @@ Return_0A52:
 ChaosBomb:
 ; Fires 20% of the time
 	TST.B	LAB_12F8		;10c6a:
-	BNE.W	Return_0A57		;10c70: 6600009e
-	MOVEA.L	TARGETASTEROID,A0		;10c74: 20790002ded4
-	MOVE.B	89(A0),D0		;10c7a: 10280059
-	ANDI.B	#$03,D0			;10c7e: 02000003
-	CMP.B	D0,D6			;10c82: bc00
-	BNE.W	Return_0A57		;10c84: 6600008a
-	MOVEQ	#10,D0			;10c88: 700a
-	JSR	GetRand		;10c8a: 4eb900000c0c
-	CMPI.B	#$02,D0			;10c90: 0c000002
-	BPL.S	Return_0A57		;10c94: 6a7a
-	BSET	#6,21(A6)		;10c96: 08ee00060015
-	BSR.W	LAB_093F		;10c9c: 6100e526
-	LEA	LAB_1208,A6		;10ca0: 4df90001f040
-	MOVE.B	D2,10(A6)		;10ca6: 1d42000a
-	MOVE.B	D3,11(A6)		;10caa: 1d43000b
-	MOVE.W	D4,38(A6)		;10cae: 3d440026
-	BNE.S	LAB_0A54		;10cb2: 660a
-	MOVEA.L	TARGETASTEROID,A0		;10cb4: 20790002ded4
-	ADDQ.B	#1,172(A0)		;10cba: 522800ac
+	BNE.W	Return_0A57		;10c70:
+	MOVEA.L	TARGETASTEROID,A0	;10c74:
+	MOVE.B	89(A0),D0		;10c7a:
+	ANDI.B	#$03,D0			;10c7e:
+	CMP.B	D0,D6			;10c82:
+	BNE.W	Return_0A57		;10c84:
+	MOVEQ	#10,D0			;10c88:
+	JSR	GetRand			;10c8a:
+	CMPI.B	#$02,D0			;10c90:
+	BPL.S	Return_0A57		;10c94:
+	BSET	#6,21(A6)		;10c96:
+	BSR.W	LAB_093F		;10c9c:
+	LEA	LAB_1208,A6		;10ca0:
+	MOVE.B	D2,10(A6)		;10ca6:
+	MOVE.B	D3,11(A6)		;10caa:
+	MOVE.W	D4,38(A6)		;10cae:
+	BNE.S	LAB_0A54		;10cb2:
+	MOVEA.L	TARGETASTEROID,A0	;10cb4:
+	ADDQ.B	#1,172(A0)		;10cba:
 LAB_0A54:
 	LEA	LAB_1209,A0		;10cbe: 
 	MOVEQ	#26,D0			;10cc4: 27.times do:
@@ -21603,76 +21634,78 @@ LAB_0A56:
 	JSR	PlaySound		;10d0a:
 Return_0A57:
 	RTS				;10d10:
+;
 AlienHardpoint04:
 ; Alien Vortex Mine. Exactly like Terran version, except it has only a 10% chance
 ; of firing, half that of its Terran equivalent. Used by Ore-Eaters, Ax-Zilanths,
 ; and especially Tylarans.
-	MOVEQ	#100,D0			;10d12: 7064
-	JSR	GetRand		;10d14: 4eb900000c0c
-	CMPI.B	#$0a,D0			;10d1a: 0c00000a
-	BMI.S	LAB_0A5A		;10d1e: 6b10
-	RTS				;10d20: 4e75
+	MOVEQ	#100,D0			;10d12:
+	JSR	GetRand			;10d14:
+	CMPI.B	#$0a,D0			;10d1a:
+	BMI.S	LAB_0A5A		;10d1e:
+	RTS				;10d20:
 VortexMine:
 ; Fires 20% of the time
-	MOVEQ	#100,D0			;10d22: 7064
-	JSR	GetRand		;10d24: 4eb900000c0c
-	CMPI.B	#$14,D0			;10d2a: 0c000014
-	BPL.S	Return_0A5B		;10d2e: 6a52
+	MOVEQ	#100,D0			;10d22:
+	JSR	GetRand			;10d24:
+	CMPI.B	#$14,D0			;10d2a:
+	BPL.S	Return_0A5B		;10d2e:
 LAB_0A5A:
-	TST.B	LAB_12F8		;10d30: 4a390002e471
-	BNE.S	Return_0A5B		;10d36: 664a
-	MOVEA.L	TARGETASTEROID,A0		;10d38: 20790002ded4
-	MOVE.B	89(A0),D0		;10d3e: 10280059
-	ANDI.B	#$03,D0			;10d42: 02000003
-	CMP.B	D0,D6			;10d46: bc00
-	BNE.S	Return_0A5B		;10d48: 6638
-	BSET	#6,21(A6)		;10d4a: 08ee00060015
-	MOVEQ	#13,D0			;10d50: 700d
-	JSR	PlaySound		;10d52: 4eb90001a50c
-	BSR.W	LAB_093F		;10d58: 6100e46a
-	MOVE.B	D2,D0			;10d5c: 1002
-	MOVE.B	D3,D1			;10d5e: 1203
-	MOVEA.L	TARGETASTEROID,A0		;10d60: 20790002ded4
-	MOVEQ	#52,D2			;10d66: 7434
-	MOVEQ	#0,D7			;10d68: 7e00
-	MOVEQ	#16,D6			;10d6a: 7c10
-	BSR.W	Shipbuilding_0866		;10d6c: 6100cf2a
-	BMI.S	Return_0A5B		;10d70: 6b10
-	MOVE.B	#$11,20(A6)		;10d72: 1d7c00110014
-	MOVE.B	#$0f,24(A6)		;10d78: 1d7c000f0018
-	CLR.W	38(A6)			;10d7e: 426e0026
+	TST.B	LAB_12F8		;10d30:
+	BNE.S	Return_0A5B		;10d36:
+	MOVEA.L	TARGETASTEROID,A0	;10d38:
+	MOVE.B	89(A0),D0		;10d3e:
+	ANDI.B	#$03,D0			;10d42:
+	CMP.B	D0,D6			;10d46:
+	BNE.S	Return_0A5B		;10d48:
+	BSET	#6,21(A6)		;10d4a:
+	MOVEQ	#13,D0			;10d50:
+	JSR	PlaySound		;10d52:
+	BSR.W	LAB_093F		;10d58:
+	MOVE.B	D2,D0			;10d5c:
+	MOVE.B	D3,D1			;10d5e:
+	MOVEA.L	TARGETASTEROID,A0	;10d60:
+	MOVEQ	#52,D2			;10d66:
+	MOVEQ	#0,D7			;10d68:
+	MOVEQ	#16,D6			;10d6a:
+	BSR.W	Shipbuilding_0866	;10d6c:
+	BMI.S	Return_0A5B		;10d70:
+	MOVE.B	#$11,20(A6)		;10d72: 17
+	MOVE.B	#$0f,24(A6)		;10d78: 15
+	CLR.W	38(A6)			;10d7e:
 Return_0A5B:
-	RTS				;10d82: 4e75
+	RTS				;10d82:
 AlienHardpoint12: ; ground weapon, 10% chance of firing
 ; Only Tylarans use this. Most likely their alternate Vortex Mine.
-	TST.B	LAB_12F8		;10d84: 4a390002e471
-	BNE.S	Return_0A5D		;10d8a: 665a
-	MOVEA.L	TARGETASTEROID,A0		;10d8c: 20790002ded4
-	MOVE.B	89(A0),D0		;10d92: 10280059
-	ANDI.B	#$03,D0			;10d96: 02000003
-	CMPI.B	#$03,D0			;10d9a: 0c000003
-	BNE.S	Return_0A5D		;10d9e: 6646
-	MOVEQ	#100,D0			;10da0: 7064
-	JSR	GetRand		;10da2: 4eb900000c0c
-	CMPI.B	#$0a,D0			;10da8: 0c00000a
-	BPL.S	Return_0A5D		;10dac: 6a38
-	BSET	#6,21(A6)		;10dae: 08ee00060015
-	MOVEQ	#13,D0			;10db4: 700d
-	JSR	PlaySound		;10db6: 4eb90001a50c
-	BSR.W	LAB_093F		;10dbc: 6100e406
-	MOVE.B	D2,D0			;10dc0: 1002
-	MOVE.B	D3,D1			;10dc2: 1203
-	MOVEA.L	TARGETASTEROID,A0		;10dc4: 20790002ded4
-	MOVEQ	#68,D2			;10dca: 7444
-	MOVEQ	#0,D7			;10dcc: 7e00
-	MOVEQ	#16,D6			;10dce: 7c10
-	BSR.W	Shipbuilding_0866		;10dd0: 6100cec6
-	BMI.S	Return_0A5D		;10dd4: 6b10
-	MOVE.B	#$11,20(A6)		;10dd6: 1d7c00110014
-	MOVE.B	#$29,24(A6)		;10ddc: 1d7c00290018
-	CLR.W	38(A6)			;10de2: 426e0026
+	TST.B	LAB_12F8		;10d84:
+	BNE.S	Return_0A5D		;10d8a:
+	MOVEA.L	TARGETASTEROID,A0	;10d8c:
+	MOVE.B	89(A0),D0		;10d92:
+	ANDI.B	#$03,D0			;10d96:
+	CMPI.B	#$03,D0			;10d9a:
+	BNE.S	Return_0A5D		;10d9e:
+	MOVEQ	#100,D0			;10da0:
+	JSR	GetRand			;10da2:
+	CMPI.B	#$0a,D0			;10da8:
+	BPL.S	Return_0A5D		;10dac:
+	BSET	#6,21(A6)		;10dae:
+	MOVEQ	#13,D0			;10db4:
+	JSR	PlaySound		;10db6:
+	BSR.W	LAB_093F		;10dbc:
+	MOVE.B	D2,D0			;10dc0:
+	MOVE.B	D3,D1			;10dc2:
+	MOVEA.L	TARGETASTEROID,A0	;10dc4:
+	MOVEQ	#68,D2			;10dca:
+	MOVEQ	#0,D7			;10dcc:
+	MOVEQ	#16,D6			;10dce:
+	BSR.W	Shipbuilding_0866	;10dd0:
+	BMI.S	Return_0A5D		;10dd4:
+	MOVE.B	#$11,20(A6)		;10dd6: 17
+	MOVE.B	#$29,24(A6)		;10ddc: 41
+	CLR.W	38(A6)			;10de2:
 Return_0A5D:
-	RTS				;10de6: 4e75
+	RTS				;10de6:
+;
 FireAtTerranShip:
 	MOVEQ	#0,D0			;10de8:
 	MOVE.B	RND_00A0+1,D0		;10dea:
@@ -23651,7 +23684,8 @@ LAB_0B61:
 	MOVEQ	#0,D0			;12842: 7000
 LAB_0B62:
 	RTS				;12844: 4e75
-LAB_0B63:
+;
+LAB_0B63: ; random asteroid picker?
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;12846: 20790000055a
 	LEA	LAB_121F,A1		;1284c: 43f90001f852
 	LEA	LAB_1220,A2		;12852: 45f90001f8b6
@@ -24382,7 +24416,7 @@ LAB_0BC4:
 	MOVEQ	#59,D7			;130f0: 7e3b
 	LEA	LAB_1227,A0		;130f2: 41f90001fa06
 	SF	LAB_0BCA		;130f8: 51f9000131a2
-LAB_0BC5:
+Loop_0BC5:
 	MOVE.W	D7,-(A7)		;130fe: 3f07
 	MOVE.L	A0,-(A7)		;13100: 2f08
 	MOVE.W	(A0),D2			;13102: 3410
@@ -24426,7 +24460,8 @@ LAB_0BC8:
 	MOVEA.L	(A7)+,A0		;13170: 205f
 	MOVE.W	(A7)+,D7		;13172: 3e1f
 	ADDQ.L	#8,A0			;13174: 5088
-	DBF	D7,LAB_0BC5		;13176: 51cfff86
+	DBF	D7,Loop_0BC5		;13176: 51cfff86
+;
 	JSR	LAB_03C3		;1317a: 4eb9000056d0
 	MOVE.W	(A7)+,D6		;13180: 3c1f
 	SUBQ.B	#1,D6			;13182: 5306
@@ -24439,112 +24474,118 @@ LAB_0BC9:
 	RTS				;131a0: 4e75
 LAB_0BCA:
 	DC.W	$0000			;131a2
-LAB_0BCB:
-	MOVE.B	D0,LAB_0BE0		;131a4: 13c00001333e
-	CLR.L	LAB_0BDE		;131aa: 42b900013336
-	MOVE.L	A0,LAB_0BDF		;131b0: 23c80001333a
-	BTST	#6,89(A0)		;131b6: 082800060059
-	BEQ.S	LAB_0BCC		;131bc: 6706
-	MOVE.L	A0,LAB_0BDE		;131be: 23c800013336
+;
+LAB_0BCB: ; called when population zero. erase colony
+	MOVE.B	D0,LAB_0BE0		;131a4:
+	CLR.L	LAB_0BDE		;131aa:
+	MOVE.L	A0,LAB_0BDF		;131b0:
+	BTST	#6,89(A0)		;131b6:
+	BEQ.S	LAB_0BCC		;131bc:
+	MOVE.L	A0,LAB_0BDE		;131be:
 LAB_0BCC:
-	MOVE.L	A0,-(A7)		;131c4: 2f08
-	MOVEA.L	LAB_1287,A0		;131c6: 20790002decc
-	MOVE.W	#$0063,D2		;131cc: 343c0063
-LAB_0BCD:
-	MOVE.B	0(A0),D1		;131d0: 12280000
-	BEQ.S	LAB_0BCE		;131d4: 671e
-	MOVEM.L	D2/A0,-(A7)		;131d6: 48e72080
-	MOVE.W	4(A0),D0		;131da: 30280004
-	EXT.L	D0			;131de: 48c0
-	DIVU	#$0044,D0		;131e0: 80fc0044
-	MOVE.W	D0,D1			;131e4: 3200
-	SWAP	D0			;131e6: 4840
-	ASR.W	#2,D0			;131e8: e440
-	MOVEQ	#120,D7			;131ea: 7e78
-	BSR.W	LAB_0963		;131ec: 6100c3f4
-	MOVEM.L	(A7)+,D2/A0		;131f0: 4cdf0104
+	MOVE.L	A0,-(A7)		;131c4:
+	MOVEA.L	LAB_1287,A0		;131c6:
+	MOVE.W	#$0063,D2		;131cc:
+Loop_0BCD:
+	MOVE.B	0(A0),D1		;131d0:
+	BEQ.S	LAB_0BCE		;131d4:
+	MOVEM.L	D2/A0,-(A7)		;131d6:
+	MOVE.W	4(A0),D0		;131da:
+	EXT.L	D0			;131de:
+	DIVU	#$0044,D0		;131e0:
+	MOVE.W	D0,D1			;131e4:
+	SWAP	D0			;131e6:
+	ASR.W	#2,D0			;131e8:
+	MOVEQ	#120,D7			;131ea:
+	BSR.W	LAB_0963		;131ec:
+	MOVEM.L	(A7)+,D2/A0		;131f0:
 LAB_0BCE:
-	LEA	14(A0),A0		;131f4: 41e8000e
-	DBF	D2,LAB_0BCD		;131f8: 51caffd6
-	MOVEA.L	LAB_1288,A0		;131fc: 20790002ded0
-	MOVEQ	#39,D0			;13202: 7027
-LAB_0BCF:
-	CLR.W	(A0)+			;13204: 4258
-	DBF	D0,LAB_0BCF		;13206: 51c8fffc
-	MOVEA.L	LAB_1286,A6		;1320a: 2c790002dec8
-	MOVE.W	#$0230,D7		;13210: 3e3c0230
-	MOVE.L	#$010f0fff,D1		;13214: 223c010f0fff
-LAB_0BD0:
-	MOVE.W	2(A6),D2		;1321a: 342e0002
-	BMI.S	LAB_0BD1		;1321e: 6b06
-	CMPI.W	#$003d,D2		;13220: 0c42003d
-	BMI.S	LAB_0BD2		;13224: 6b10
+	LEA	14(A0),A0		;131f4:
+	DBF	D2,Loop_0BCD		;131f8:
+;
+	MOVEA.L	LAB_1288,A0		;131fc:
+	MOVEQ	#39,D0			;13202:
+Loop_0BCF:
+	CLR.W	(A0)+			;13204:
+	DBF	D0,Loop_0BCF		;13206:
+;
+	MOVEA.L	LAB_1286,A6		;1320a:
+	MOVE.W	#$0230,D7		;13210:
+	MOVE.L	#$010f0fff,D1		;13214:
+Loop_0BD0:
+	MOVE.W	2(A6),D2		;1321a:
+	BMI.S	LAB_0BD1		;1321e:
+	CMPI.W	#$003d,D2		;13220:
+	BMI.S	LAB_0BD2		;13224:
 LAB_0BD1:
-	MOVEQ	#3,D0			;13226: 7003
-	JSR	GetRand		;13228: 4eb900000c0c
-	ADDI.W	#$002d,D0		;1322e: 0640002d
-	MOVE.W	D0,2(A6)		;13232: 3d400002
+	MOVEQ	#3,D0			;13226:
+	JSR	GetRand		;13228:
+	ADDI.W	#$002d,D0		;1322e:
+	MOVE.W	D0,2(A6)		;13232:
 LAB_0BD2:
-	AND.L	D1,(A6)+		;13236: c39e
-	DBF	D7,LAB_0BD0		;13238: 51cfffe0
-	MOVEA.L	(A7)+,A0		;1323c: 205f
-	CMPI.B	#$04,24(A0)		;1323e: 0c2800040018
-	BMI.S	LAB_0BD3		;13244: 6b06
-	MOVE.B	#$04,24(A0)		;13246: 117c00040018
+	AND.L	D1,(A6)+		;13236:
+	DBF	D7,Loop_0BD0		;13238:
+;
+	MOVEA.L	(A7)+,A0		;1323c:
+	CMPI.B	#$04,24(A0)		;1323e:
+	BMI.S	LAB_0BD3		;13244:
+	MOVE.B	#$04,24(A0)		;13246:
 LAB_0BD3:
-	MOVE.B	89(A0),D0		;1324c: 10280059
-	ANDI.B	#$bc,D0			;13250: 020000bc
-	MOVE.B	D0,89(A0)		;13254: 11400059
-	BSR.W	LAB_0BE1		;13258: 610000e6
-	BSR.W	LAB_0B2E		;1325c: 6100ef7a
-	MOVE.L	LAB_0BDE,D1		;13260: 223900013336
-	BEQ.W	LAB_0BDA		;13266: 6700008c
-	TST.B	LAB_0BE0		;1326a: 4a390001333e
-	BNE.S	LAB_0BD4		;13270: 6614
-	MOVE.W	#$013c,D0		;13272: 303c013c
+	MOVE.B	89(A0),D0		;1324c:
+	ANDI.B	#$bc,D0			;13250:
+	MOVE.B	D0,89(A0)		;13254:
+	BSR.W	LAB_0BE1		;13258:
+	BSR.W	LAB_0B2E		;1325c:
+	MOVE.L	LAB_0BDE,D1		;13260:
+	BEQ.W	LAB_0BDA		;13266:
+	TST.B	LAB_0BE0		;1326a:
+	BNE.S	LAB_0BD4		;13270:
+	MOVE.W	#$013c,D0		;13272:
 ; WELL DONE! YOU HAVE DESTROYED AN ENEMY ASTEROID!
-	MOVE.L	#$000186a0,D2		;13276: 243c000186a0
+	MOVE.L	#$000186a0,D2		;13276:
 ; 100,000CR
-	MOVEQ	#1,D3			;1327c: 7601
-	MOVEQ	#0,D4			;1327e: 7800
-	JSR	LAB_05B9		;13280: 4eb900008f80
+	MOVEQ	#1,D3			;1327c:
+	MOVEQ	#0,D4			;1327e:
+	JSR	LAB_05B9		;13280:
 LAB_0BD4:
-	MOVEA.L	LAB_0BDF,A0		;13286: 20790001333a
-	BTST	#4,90(A0)		;1328c: 08280004005a
-	BEQ.S	LAB_0BD7		;13292: 671e
-	MOVE.L	8(A0),D0		;13294: 20280008
-	BEQ.S	LAB_0BD7		;13298: 6718
-	MOVEA.L	D0,A6			;1329a: 2c40
+	MOVEA.L	LAB_0BDF,A0		;13286:
+	BTST	#4,90(A0)		;1328c:
+	BEQ.S	LAB_0BD7		;13292:
+	MOVE.L	8(A0),D0		;13294:
+	BEQ.S	LAB_0BD7		;13298:
+	MOVEA.L	D0,A6			;1329a:
 LAB_0BD5:
-	CMPI.B	#$4b,8(A6)		;1329c: 0c2e004b0008
-	BEQ.S	LAB_0BD6		;132a2: 670a
-	MOVE.L	0(A6),D2		;132a4: 242e0000
-	BEQ.S	LAB_0BD7		;132a8: 6708
-	MOVEA.L	D2,A6			;132aa: 2c42
-	BRA.S	LAB_0BD5		;132ac: 60ee
+	CMPI.B	#$4b,8(A6)		;1329c:
+	BEQ.S	LAB_0BD6		;132a2:
+	MOVE.L	0(A6),D2		;132a4:
+	BEQ.S	LAB_0BD7		;132a8:
+	MOVEA.L	D2,A6			;132aa:
+	BRA.S	LAB_0BD5		;132ac:
 LAB_0BD6:
-	BSR.W	LAB_08C8		;132ae: 6100b2cc
+	BSR.W	LAB_08C8		;132ae:
 LAB_0BD7:
-	MOVEA.L	LAB_0BDE,A0		;132b2: 207900013336
-	BSR.W	LAB_0E26		;132b8: 61003a38
+	MOVEA.L	LAB_0BDE,A0		;132b2:
+	BSR.W	LAB_0E26		;132b8:
 LAB_0BD8:
-	MOVEA.L	LAB_0BDF,A0		;132bc: 20790001333a
-	MOVE.B	89(A0),D2		;132c2: 14280059
-	MOVE.B	90(A0),D3		;132c6: 1628005a
-	LEA	82(A0),A1		;132ca: 43e80052
-	MOVE.W	#$014d,D0		;132ce: 303c014d
+	MOVEA.L	LAB_0BDF,A0		;132bc:
+	MOVE.B	89(A0),D2		;132c2:
+	MOVE.B	90(A0),D3		;132c6:
+	LEA	82(A0),A1		;132ca:
+	MOVE.W	#$014d,D0		;132ce:
 ; CLICK 'EXIT' TO DEMOLISH, ELSE CLICK 'ABORT'.
-	MOVEQ	#0,D1			;132d2: 7200
-LAB_0BD9:
-	MOVE.W	D1,(A1)+		;132d4: 32c1
-	DBF	D0,LAB_0BD9		;132d6: 51c8fffc
-	ANDI.B	#$30,D2			;132da: 02020030
-	MOVE.B	D2,89(A0)		;132de: 11420059
-	ANDI.B	#$c0,D3			;132e2: 020300c0
-	BSET	#5,D3			;132e6: 08c30005
-	MOVE.B	D3,90(A0)		;132ea: 1143005a
-	SF	91(A0)			;132ee: 51e8005b
-	RTS				;132f2: 4e75
+	MOVEQ	#0,D1			;132d2:
+Loop_0BD9:
+	MOVE.W	D1,(A1)+		;132d4:
+	DBF	D0,Loop_0BD9		;132d6:
+;
+	ANDI.B	#$30,D2			;132da:
+	MOVE.B	D2,89(A0)		;132de:
+	ANDI.B	#$c0,D3			;132e2:
+	BSET	#5,D3			;132e6:
+	MOVE.B	D3,90(A0)		;132ea:
+	SF	91(A0)			;132ee:
+	RTS				;132f2:
+;
 LAB_0BDA:
 	MOVEA.L	LAB_0BDF,A0		;132f4: 20790001333a
 	BTST	#4,90(A0)		;132fa: 08280004005a
@@ -24567,7 +24608,7 @@ LAB_0BDD:
 	MOVEA.L	LAB_0BDF,A0		;1332a: 20790001333a
 	BSR.W	LAB_0E26		;13330: 610039c0
 	BRA.S	LAB_0BD8		;13334: 6086
-LAB_0BDE:
+LAB_0BDE: ; stores asteroid
 	ORI.B	#$00,D0			;13336: 00000000
 LAB_0BDF:
 	ORI.B	#$00,D0			;1333a: 00000000
@@ -24648,11 +24689,11 @@ LAB_0BE9:
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A2		;133ec: 24790000055a
 	MOVEA.L	BUFFER_05,A3		;133f2: 26790000053e
 	MOVEQ	#23,D7			;133f8: 7e17
-LAB_0BEA:
+Loop_0BEA:
 	TST.B	25(A2)			;133fa: 4a2a0019
-	BMI.S	LAB_0BED		;133fe: 6b7e
+	BMI.S	Next_0BED		;133fe: 6b7e
 	BTST	#4,89(A2)		;13400: 082a00040059
-	BNE.S	LAB_0BED		;13406: 6676
+	BNE.S	Next_0BED		;13406: 6676
 	MOVEM.W	26(A2),D0-D1		;13408: 4caa0003001a
 	MOVE.W	D0,D3			;1340e: 3600
 	LSR.W	#3,D0			;13410: e648
@@ -24664,13 +24705,13 @@ LAB_0BEA:
 	EXT.L	D1			;1341c: 48c1
 	ANDI.W	#$0007,D3		;1341e: 02430007
 	BTST	D3,0(A3,D1.L)		;13422: 07331800
-	BEQ.S	LAB_0BED		;13426: 6756
+	BEQ.S	Next_0BED		;13426: 6756
 	CMPI.W	#$0006,ALIENID		;13428: 0c7900060002defe
 	BNE.S	LAB_0BEB		;13430: 6612
 	CMPA.L	LAB_1274,A2		;13432: b5f90002de5c
 	BNE.S	LAB_0BEB		;13438: 660a
 	BTST	#2,LAB_130F		;1343a: 083900020002e489
-	BNE.S	LAB_0BED		;13442: 663a
+	BNE.S	Next_0BED		;13442: 663a
 LAB_0BEB:
 	MOVE.L	A2,-(A7)		;13444: 2f0a
 	MOVE.W	D7,-(A7)		;13446: 3f07
@@ -24683,31 +24724,31 @@ LAB_0BEB:
 	MOVE.L	#$00002710,D2		;13460: 243c00002710
 	MOVEQ	#5,D3			;13466: 7605
 LAB_0BEC:
-	MOVE.L	A2,D1			;13468: 220a
-	MOVEQ	#9,D4			;1346a: 7809
-	JSR	MessageWindow		;1346c: 4eb900008fd2
+	MOVE.L	A2,D1			;13468:
+	MOVEQ	#9,D4			;1346a:
+	JSR	MessageWindow		;1346c:
 ; 0x121: SENSORS REPORT DISCOVERY OF A NEW ASTEROID AND HAVE NAMED IT:
 ; 0x134: SENSORS REPORT DISCOVERY OF AN ALIEN ASTEROID AND HAVE NAMED IT:
-	MOVE.W	(A7)+,D7		;13472: 3e1f
-	MOVEA.L	(A7)+,A2		;13474: 245f
-	BSET	#4,89(A2)		;13476: 08ea00040059
-	RTS				;1347c: 4e75
-LAB_0BED:
-	LEA	750(A2),A2		;1347e: 45ea02ee
-	DBF	D7,LAB_0BEA		;13482: 51cfff76
-	RTS				;13486: 4e75
+	MOVE.W	(A7)+,D7		;13472:
+	MOVEA.L	(A7)+,A2		;13474:
+	BSET	#4,89(A2)		;13476:
+	RTS				;1347c:
+Next_0BED:
+	LEA	750(A2),A2		;1347e:
+	DBF	D7,Loop_0BEA		;13482:
+	RTS				;13486:
 LAB_0BEE:
 	LEA	LAB_121A,A0		;13488: 41f90001f352
 	MOVEQ	#0,D0			;1348e: 7000
 	MOVE.B	25(A2),D0		;13490: 102a0019
 	BMI.W	LAB_0BF9		;13494: 6b000180
-	TST.B	FLAG_SEEALLASTEROIDS		;13498: 4a390001d4b2
+	TST.B	FLAG_SEEALLASTEROIDS	;13498: 4a390001d4b2
 	BNE.S	LAB_0BEF		;1349e: 660a
 	BTST	#4,89(A2)		;134a0: 082a00040059
 	BEQ.W	LAB_0BF9		;134a6: 6700016e
 LAB_0BEF:
 	MOVE.L	A2,D0			;134aa: 200a
-	SUB.L	SAVEDATA5_ASTEROIDS,D0		;134ac: 90b90000055a
+	SUB.L	SAVEDATA5_ASTEROIDS,D0	;134ac: 90b90000055a
 	DIVU	#$02ee,D0		;134b2: 80fc02ee
 	MOVE.B	34(A2),D1		;134b6: 122a0022
 	BEQ.S	LAB_0BF3		;134ba: 672a
@@ -24833,7 +24874,7 @@ LAB_0BF9:
 	RTS				;13616: 4e75
 LAB_0BFA:
 	MOVEM.W	LAB_0071,D0-D1		;13618: 4cb9000300000760
-	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;13620: 20790000055a
+	MOVEA.L	SAVEDATA5_ASTEROIDS,A0	;13620: 20790000055a
 	MOVEQ	#23,D2			;13626: 7417
 LAB_0BFB:
 	TST.B	25(A0)			;13628: 4a280019
@@ -25068,22 +25109,22 @@ LAB_0C17:
 LAB_0C18:
 	BTST	D0,D0			;138e2: 0100
 LAB_0C19:
-	MOVE.L	A0,D0			;138e4: 2008
-	SUB.L	SAVEDATA5_ASTEROIDS,D0		;138e6: 90b90000055a
-	DIVU	#$02ee,D0		;138ec: 80fc02ee
-	MOVE.W	D0,D1			;138f0: 3200
-	LEA	ASTEROIDMAPS,A6		;138f2: 4df900020be8
-	MULU	#$08c4,D0		;138f8: c0fc08c4
-	ADDA.L	D0,A6			;138fc: ddc0
-	MOVEA.L	SAVEDATA4_BUILDINGS,A5		;138fe: 2a7900000552
-	MOVE.W	D1,D0			;13904: 3001
-	MULU	#$0578,D0		;13906: c0fc0578
-	ADDA.L	D0,A5			;1390a: dbc0
-	MOVEA.L	SAVEDATA6_BLDGTOTAL,A4		;1390c: 28790000056e
-	MOVE.W	D1,D0			;13912: 3001
-	MULU	#$0050,D0		;13914: c0fc0050
-	ADDA.L	D0,A4			;13918: d9c0
-	RTS				;1391a: 4e75
+	MOVE.L	A0,D0			;138e4:
+	SUB.L	SAVEDATA5_ASTEROIDS,D0	;138e6:
+	DIVU	#$02ee,D0		;138ec:
+	MOVE.W	D0,D1			;138f0:
+	LEA	ASTEROIDMAPS,A6		;138f2:
+	MULU	#$08c4,D0		;138f8:
+	ADDA.L	D0,A6			;138fc:
+	MOVEA.L	SAVEDATA4_BUILDINGS,A5	;138fe:
+	MOVE.W	D1,D0			;13904:
+	MULU	#$0578,D0		;13906:
+	ADDA.L	D0,A5			;1390a:
+	MOVEA.L	SAVEDATA6_BLDGTOTAL,A4	;1390c:
+	MOVE.W	D1,D0			;13912:
+	MULU	#$0050,D0		;13914:
+	ADDA.L	D0,A4			;13918:
+	RTS				;1391a:
 LAB_0C1A:
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A3		;1391c: 26790000055a
 	MOVEQ	#23,D7			;13922: 7e17
@@ -25270,26 +25311,26 @@ LAB_0C29:
 	RTS				;13b3a: 4e75
 ;
 LAB_0C2A: ; main game loop here maybe
-	TST.B	LAB_12AD		;13b3c: 4a390002e097
-	BNE.W	LAB_0C3F		;13b42: 6600025a
-	TST.B	LAB_12AF		;13b46: 4a390002e099
-	BNE.W	LAB_0C3F		;13b4c: 66000250
-	JSR	LAB_0B7B		;13b50: 4eb900012a9a
-	BTST	#4,LAB_12E6		;13b56: 083900040002e456
-	BEQ.W	LAB_0C2E		;13b5e: 67000066
-	TST.B	LAB_12E0		;13b62: 4a390002e450
-	BEQ.S	LAB_0C2B		;13b68: 6708
-	SUBQ.B	#1,LAB_12E0		;13b6a: 53390002e450
-	BRA.S	LAB_0C2C		;13b70: 6030
+	TST.B	LAB_12AD		;13b3c:
+	BNE.W	LAB_0C3F		;13b42:
+	TST.B	LAB_12AF		;13b46:
+	BNE.W	LAB_0C3F		;13b4c:
+	JSR	LAB_0B7B		;13b50:
+	BTST	#4,LAB_12E6		;13b56:
+	BEQ.W	LAB_0C2E		;13b5e:
+	TST.B	MAGSTORM		;13b62:
+	BEQ.S	LAB_0C2B		;13b68:
+	SUBQ.B	#1,MAGSTORM		;13b6a:
+	BRA.S	LAB_0C2C		;13b70:
 LAB_0C2B:
-	TST.B	LAB_12B0		;13b72: 4a390002e09a
-	BNE.S	LAB_0C2C		;13b78: 6628
-	MOVE.B	LAB_12F1,LAB_12F2	;13b7a: 13f90002e46a0002e46b
-	SF	LAB_12F1		;13b84: 51f90002e46a
-	MOVEA.L	LAB_128A,A6		;13b8a: 2c790002ded8
-	JSR	LAB_07A6		;13b90: 4eb90000cb28
-	MOVEA.L	LAB_128C,A6		;13b96: 2c790002dee0
-	JSR	LAB_07A6		;13b9c: 4eb90000cb28
+	TST.B	LAB_12B0		;13b72:
+	BNE.S	LAB_0C2C		;13b78:
+	MOVE.B	LAB_12F1,LAB_12F2	;13b7a:
+	SF	LAB_12F1		;13b84:
+	MOVEA.L	LAB_128A,A6		;13b8a:
+	JSR	LAB_07A6		;13b90:
+	MOVEA.L	LAB_128C,A6		;13b96:
+	JSR	LAB_07A6		;13b9c:
 LAB_0C2C:
 	SUBQ.B	#1,LAB_0C40+2		;13ba2: 533900013daa
 	BGT.S	LAB_0C2D		;13ba8: 6e0c
@@ -25299,12 +25340,13 @@ LAB_0C2D:
 	BCLR	#4,LAB_12E6		;13bb6: 08b900040002e456
 	BCLR	#3,LAB_12E6		;13bbe: 08b900030002e456
 LAB_0C2E:
+; more main game loopy stuff
 	BTST	#5,LAB_12E6		;13bc6: 083900050002e456
 	BEQ.W	LAB_0C31		;13bce: 6700005e
 	BSR.W	LAB_0FE9		;13bd2: 61005b60
 	BSR.W	LAB_0B4D		;13bd6: 6100eada
 	BSR.W	LAB_0EBF		;13bda: 6100426e
-	BSR.W	MissileConstruction		;13bde: 610003b0
+	BSR.W	MissileConstruction	;13bde: 610003b0
 	BSR.W	SatelliteSilo		;13be2: 61000480
 	BSR.W	LAB_0D3E		;13be6: 610018ae
 	TST.B	LAB_1296		;13bea: 4a390002df01
@@ -25359,7 +25401,8 @@ LAB_0C36:
 	MOVE.B	#$05,LAB_0C40		;13cb0: 13fc000500013da8
 	BSR.W	LAB_0958		;13cb8: 6100b7c6
 LAB_0C37:
-	TST.B	LAB_12E2		;13cbc: 4a390002e452
+	TST.B	LAB_12E2		;13cbc:
+; meteor shower countdown
 	BEQ.S	LAB_0C38		;13cc2: 670c
 	SUBQ.B	#1,LAB_12E2		;13cc4: 53390002e452
 	BNE.S	LAB_0C38		;13cca: 6604
@@ -25402,7 +25445,7 @@ LAB_0C3C:
 LAB_0C3D:
 	CMPI.B	#$01,CLOCK_12E7		;13d48: day 1 of each year
 	BNE.S	LAB_0C3E		;13d50: 
-	BSR.W	LAB_0D81		;13d52: fluctuate ore prices?
+	BSR.W	RecalcOrePrices		;13d52: fluctuate ore prices?
 LAB_0C3E: ; every other day of the year:
 	JSR	LAB_07DC		;13d56: 4eb90000cfec
 	JSR	LAB_07DB		;13d5c: 4eb90000cfda
@@ -25425,10 +25468,11 @@ LAB_0C40:
 	ORI.B	#$00,D0			;13da8: 00000000
 ;
 LAB_0C43: ; probably called once per tick
-	MOVEA.L	SAVEDATA4_BUILDINGS,A1		;13dac: 227900000552
+; Main game loop function to call each Terran building's daily function
+	MOVEA.L	SAVEDATA4_BUILDINGS,A1	;13dac: 227900000552
 	LEA	ASTEROIDMAPS,A6		;13db2: 4df900020be8
-	MOVEA.L	SAVEDATA6_BLDGTOTAL,A4		;13db8: 28790000056e
-	MOVEA.L	SAVEDATA5_ASTEROIDS,A5		;13dbe: 2a790000055a
+	MOVEA.L	SAVEDATA6_BLDGTOTAL,A4	;13db8: 28790000056e
+	MOVEA.L	SAVEDATA5_ASTEROIDS,A5	;13dbe: 2a790000055a
 	MOVEQ	#23,D0			;13dc4: 24.times do: ; once per asteroid
 Loop_0C44:
 	TST.B	25(A5)			;13dc6: 
@@ -25437,7 +25481,7 @@ Loop_0C44:
 	BMI.W	LAB_0C48		;13dd2:  if ast[89] >= 0:
 	ANDI.B	#$03,D1			;13dd6: 
 	CMPI.B	#$03,D1			;13dda: 
-	BNE.W	LAB_0C48		;13dde:     if ast[89] 25% of results
+	BNE.W	LAB_0C48		;13dde:     Terran buildings:
 	MOVEA.L	A1,A0			;13de2: 
 	MOVEQ	#99,D7			;13de4: 100.times do: ; once per building
 Loop_0C45:
@@ -26081,7 +26125,7 @@ LAB_0C8F: ; if orbital space dock
 	MOVEQ	#0,D7			;144ce:
 	MOVEQ	#57,D2			;144d0:
 	MOVEQ	#0,D6			;144d2:
-	JSR	Shipbuilding_0866		;144d4: (3,18,57,d3,d4,d5,0,0)
+	JSR	Shipbuilding_0866	;144d4: (3,18,57,d3,d4,d5,0,0)
 	BMI.S	ClearYard		;144da:
 	MOVEM.L	(A7)+,D1-D3/A2		;144dc:
 	MOVE.W	D1,50(A6)		;144e0:
@@ -26090,13 +26134,15 @@ LAB_0C8F: ; if orbital space dock
 	MOVE.B	#$03,23(A6)		;144ec:
 	MOVE.B	#$14,20(A6)		;144f2:
 	BRA.S	ClearYard		;144f8:
-LAB_0C90: ; Update
+;
+UpdateOSDYard: ; Update large ships being built at the asteroid
+; either building the OSD, or ships built by the OSD
 	TST.W	14(A4)			;144fa: 
 	BEQ.S	Return_0C91		;144fe: if weapons factory:
 	TST.B	734(A5)			;14500: 
 	BGT.S	LAB_0C92		;14504: 
 Return_0C91:
-	RTS				;14506: 4e75
+	RTS				;14506:
 LAB_0C92:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;14508:
 	MOVE.B	735(A5),D0		;1450c:
@@ -26107,12 +26153,12 @@ LAB_0C92:
 LAB_0C93:
 	MULU	#$0018,D0		;1451c:
 	LEA	TERRANSHIPSTATS_00,A1	;14520:
-	ADDA.L	D0,A1			;14526:
+	ADDA.L	D0,A1			;14526: a1=current ship stats
 	MOVEQ	#0,D3			;14528:
-	MOVE.W	12(A1),D3		;1452a:
-	CMPI.W	#$ffff,D3		;1452e:
+	MOVE.W	12(A1),D3		;1452a: d3=ship cost
+	CMPI.W	#$ffff,D3		;1452e: 0xffff: listed cost of OSD
 	BNE.S	LAB_0C94		;14532:
-	MOVE.L	#$00030d40,D3		;14534:
+	MOVE.L	#$00030d40,D3		;14534: 200,000: actual cost of OSD
 LAB_0C94:
 	LEA	HARDPOINTCOSTS,A3	;1453a:
 	MOVEQ	#5,D0			;14540:
@@ -26132,35 +26178,35 @@ LAB_0C96:
 	DIVU	D0,D3			;14560:
 	EXT.L	D3			;14562:
 	CMP.L	CASH_SHIPS,D3		;14564:
-	BPL.W	LAB_0C9D		;1456a:
+	BPL.W	Done_0C9D		;1456a:
 	LEA	182(A5),A0		;1456e:
 	TST.B	743(A5)			;14572:
 	BEQ.S	LAB_0C97		;14576:
-	MOVE.B	5(A1),D0		;14578:
-	MOVE.B	4(A1),D1		;1457c:
+	MOVE.B	5(A1),D0		;14578: d0=ore1_amount
+	MOVE.B	4(A1),D1		;1457c: d1=ore1_type
 	EXT.W	D1			;14580:
 	ADD.W	D1,D1			;14582:
 	TST.W	0(A0,D1.W)		;14584:
-	BEQ.W	LAB_0C9D		;14588:
+	BEQ.W	Done_0C9D		;14588: if there is any, continue:
 LAB_0C97:
 	TST.B	744(A5)			;1458c:
 	BEQ.S	LAB_0C99		;14590:
-	MOVE.B	7(A1),D0		;14592:
-	MOVE.B	6(A1),D2		;14596:
+	MOVE.B	7(A1),D0		;14592: d0=ore2_amount
+	MOVE.B	6(A1),D2		;14596: d2=ore2_type
 	EXT.W	D2			;1459a:
 	ADD.W	D2,D2			;1459c:
 	TST.W	0(A0,D2.W)		;1459e:
-	BEQ.W	LAB_0C9D		;145a2:
+	BEQ.W	Done_0C9D		;145a2: if there is any, continue:
 	TST.B	743(A5)			;145a6:
 	BEQ.S	LAB_0C98		;145aa:
 	SUBQ.B	#1,743(A5)		;145ac:
-	SUBQ.W	#1,0(A0,D1.W)		;145b0:
-	SUBQ.W	#1,202(A5)		;145b4:
+	SUBQ.W	#1,0(A0,D1.W)		;145b0: ore1_stored--
+	SUBQ.W	#1,202(A5)		;145b4: oretotal--
 LAB_0C98:
 	TST.B	744(A5)			;145b8:
 	BEQ.S	LAB_0C99		;145bc:
-	SUBQ.W	#1,0(A0,D2.W)		;145be:
-	SUBQ.W	#1,202(A5)		;145c2:
+	SUBQ.W	#1,0(A0,D2.W)		;145be: ore2_stored--
+	SUBQ.W	#1,202(A5)		;145c2: oretotal--
 	SUBQ.B	#1,744(A5)		;145c6:
 LAB_0C99:
 	SUB.L	D3,CASH_SHIPS		;145ca:
@@ -26170,8 +26216,8 @@ LAB_0C9A:
 	SUBQ.B	#1,742(A5)		;145d8:
 	BEQ.W	LAB_0C9F		;145dc:
 	SUBQ.B	#1,745(A5)		;145e0:
-	BNE.W	LAB_0C9D		;145e4:
-	MOVE.W	16(A1),D0		;145e8:
+	BNE.W	Done_0C9D		;145e4:
+	MOVE.W	16(A1),D0		;145e8: Destr/Term 8, Transp/FB 3, OSD 1
 	MOVE.B	D0,745(A5)		;145ec:
 	MOVE.W	686(A5),D0		;145f0:
 	BMI.W	LAB_0C9E		;145f4:
@@ -26181,23 +26227,23 @@ LAB_0C9A:
 	ADD.W	D0,D0			;14602:
 	MOVE.W	0(A0,D0.W),D0		;14604:
 	CMPI.W	#$ffff,D0		;14608:
-	BNE.W	LAB_0C9D		;1460c:
-	SUBQ.W	#1,686(A5)		;14610:
+	BNE.W	Done_0C9D		;1460c:
+	SUBQ.W	#1,686(A5)		;14610: -1
 	BSET	#7,686(A5)		;14614:
 	MOVEQ	#0,D1			;1461a:
 	MOVE.B	0(A1),D1		;1461c:
-	MOVE.L	736(A5),D2		;14620:
-	MOVE.W	740(A5),D3		;14624:
+	MOVE.L	736(A5),D2		;14620: hardpoint 1
+	MOVE.W	740(A5),D3		;14624: hardpoint 5
 	MOVE.B	1(A1),D4		;14628:
 	MOVEQ	#5,D5			;1462c:
 	LEA	736(A5),A3		;1462e:
-	LEA	HARDPOINTARMOUR,A4		;14632:
-LAB_0C9B:
+	LEA	HARDPOINTARMOUR,A4	;14632:
+Loop_0C9B:
 	MOVE.B	(A3)+,D6		;14638:
 	EXT.W	D6			;1463a:
 	ADD.W	D6,D6			;1463c:
 	ADD.W	0(A4,D6.W),D1		;1463e:
-	DBF	D5,LAB_0C9B		;14642:
+	DBF	D5,Loop_0C9B		;14642:
 	MOVEM.L	D1-D3/A2/A5,-(A7)	;14646:
 	MOVEQ	#0,D0			;1464a:
 	MOVEQ	#0,D1			;1464c:
@@ -26212,7 +26258,7 @@ LAB_0C9B:
 	BSET	#4,90(A0)		;14666:
 LAB_0C9C:
 	MOVEQ	#0,D6			;1466c:
-	JSR	Shipbuilding_0866		;1466e:
+	JSR	Shipbuilding_0866	;1466e:
 	MOVEM.L	(A7)+,D1-D3/A2/A5	;14674:
 	MOVE.W	D1,50(A6)		;14678:
 	MOVE.L	D2,42(A6)		;1467c:
@@ -26220,45 +26266,47 @@ LAB_0C9C:
 	MOVE.B	#$03,23(A6)		;14684:
 	SF	21(A6)			;1468a:
 	MOVE.L	A6,746(A5)		;1468e:
-LAB_0C9D:
+Done_0C9D:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;14692:
 	RTS				;14696:
+;
 LAB_0C9E:
-	BCLR	#15,D0			;14698: 0880000f
-	SUBQ.W	#1,D0			;1469c: 5340
-	BMI.S	LAB_0C9F		;1469e: 6b0e
-	BSET	#15,D0			;146a0: 08c0000f
-	MOVE.W	D0,686(A5)		;146a4: 3b4002ae
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;146a8: 4cdf7fff
-	RTS				;146ac: 4e75
+	BCLR	#15,D0			;14698:
+	SUBQ.W	#1,D0			;1469c:
+	BMI.S	LAB_0C9F		;1469e:
+	BSET	#15,D0			;146a0:
+	MOVE.W	D0,686(A5)		;146a4:
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;146a8:
+	RTS				;146ac:
 LAB_0C9F:
-	MOVEA.L	746(A5),A6		;146ae: 2c6d02ea
-	BSET	#4,21(A6)		;146b2: 08ee00040015
-	MOVE.B	8(A6),D0		;146b8: 102e0008
-	CMPI.B	#$35,D0			;146bc: 0c000035
-	BEQ.S	LAB_0CA0		;146c0: 6706
-	CMPI.B	#$36,D0			;146c2: 0c000036
-	BNE.S	LAB_0CA1		;146c6: 660e
+	MOVEA.L	746(A5),A6		;146ae:
+	BSET	#4,21(A6)		;146b2:
+	MOVE.B	8(A6),D0		;146b8:
+	CMPI.B	#$35,D0			;146bc:
+	BEQ.S	LAB_0CA0		;146c0:
+	CMPI.B	#$36,D0			;146c2:
+	BNE.S	LAB_0CA1		;146c6:
 LAB_0CA0:
-	MOVE.W	#$0400,24(A6)		;146c8: 3d7c04000018
-	MOVE.L	#LAB_11D2,28(A6)	;146ce: 2d7c0001e910001c
+	MOVE.W	#$0400,24(A6)		;146c8:
+	MOVE.L	#LAB_11D2,28(A6)	;146ce:c
 LAB_0CA1:
-	SUBQ.B	#1,734(A5)		;146d6: 532d02de
-	BEQ.S	LAB_0CA2		;146da: 6724
-	MOVE.B	3(A1),742(A5)		;146dc: 1b69000302e6
-	MOVE.B	5(A1),743(A5)		;146e2: 1b69000502e7
-	MOVE.B	7(A1),744(A5)		;146e8: 1b69000702e8
-	MOVE.W	16(A1),D0		;146ee: 30290010
-	MOVE.B	D0,745(A5)		;146f2: 1b4002e9
-	CLR.W	686(A5)			;146f6: 426d02ae
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;146fa: 4cdf7fff
-	RTS				;146fe: 4e75
+	SUBQ.B	#1,734(A5)		;146d6:
+	BEQ.S	LAB_0CA2		;146da:
+	MOVE.B	3(A1),742(A5)		;146dc:
+	MOVE.B	5(A1),743(A5)		;146e2:
+	MOVE.B	7(A1),744(A5)		;146e8:
+	MOVE.W	16(A1),D0		;146ee:
+	MOVE.B	D0,745(A5)		;146f2:
+	CLR.W	686(A5)			;146f6:
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;146fa:
+	RTS				;146fe:
 LAB_0CA2:
-	MOVEQ	#0,D0			;14700: 7000
-	MOVE.W	D0,686(A5)		;14702: 3b4002ae
-	MOVE.L	D0,746(A5)		;14706: 2b4002ea
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;1470a: 4cdf7fff
-	RTS				;1470e: 4e75
+	MOVEQ	#0,D0			;14700:
+	MOVE.W	D0,686(A5)		;14702:
+	MOVE.L	D0,746(A5)		;14706:
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;1470a:
+	RTS				;1470e:
+;
 LandingPad:
 ; need to work on this
 	TST.W	168(A5)			;14710: 
@@ -26280,28 +26328,28 @@ Return_0CA5:
 LAB_0CA6:
 ; a0 = building, a5=asteroid, a6=hangar
 	MOVE.W	4(A0),D0		;14738: get coords
-	EXT.L	D0			;1473c: 48c0
+	EXT.L	D0			;1473c: 
 	DIVU	#$0044,D0		;1473e: coords/44
-	MOVE.W	D0,D1			;14742: 3200
-	SWAP	D0			;14744: 4840
-	ASR.W	#2,D0			;14746: e440
-	MOVE.B	D0,10(A6)		;14748: 1d40000a
-	MOVE.B	D1,11(A6)		;1474c: 1d41000b
-	CLR.W	24(A6)			;14750: 426e0018
-	BCLR	#6,20(A6)		;14754: 08ae00060014
-	MOVE.L	A0,-(A7)		;1475a: 2f08
-	LEA	LAB_11FA,A2		;1475c: 45f90001eb48
-	MOVEQ	#36,D0			;14762: 7024
-	MOVE.B	#$94,D1			;14764: 123c0094
-	MOVEA.L	A5,A0			;14768: 204d
-	JSR	LAB_08A7		;1476a: 4eb90000e15c
-	CLR.W	38(A0)			;14770: 42680026
-	MOVE.B	#$0b,24(A0)		;14774: 117c000b0018
-	MOVEA.L	(A7)+,A1		;1477a: 225f
-	MOVE.L	A1,32(A0)		;1477c: 21490020
-	ST	12(A1)			;14780: 50e9000c
-	SUBQ.W	#1,168(A5)		;14784: 536d00a8
-	RTS				;14788: 4e75
+	MOVE.W	D0,D1			;14742:
+	SWAP	D0			;14744:
+	ASR.W	#2,D0			;14746:
+	MOVE.B	D0,10(A6)		;14748:
+	MOVE.B	D1,11(A6)		;1474c:
+	CLR.W	24(A6)			;14750:
+	BCLR	#6,20(A6)		;14754:
+	MOVE.L	A0,-(A7)		;1475a:
+	LEA	LAB_11FA,A2		;1475c:
+	MOVEQ	#36,D0			;14762:
+	MOVE.B	#$94,D1			;14764:
+	MOVEA.L	A5,A0			;14768:
+	JSR	LAB_08A7		;1476a:
+	CLR.W	38(A0)			;14770:
+	MOVE.B	#$0b,24(A0)		;14774:
+	MOVEA.L	(A7)+,A1		;1477a:
+	MOVE.L	A1,32(A0)		;1477c:
+	ST	12(A1)			;14780:
+	SUBQ.W	#1,168(A5)		;14784:
+	RTS				;14788:
 ;
 LAB_0CA7: ; shipbuilding
 	LEA	204(A0),A0		;1478a: 41e800cc
@@ -26385,11 +26433,11 @@ LAB_0CAF: ; radiation from radioactive ores
 	DIVU	#$0064,D1		;14854: +1 radiation per 100 Asteros
 	MOVE.B	D1,D0			;14858:
 	MOVE.B	17(A1),D1		;1485a:
-	ASR.B	#1,D1			;1485e: +1 radiation per 2 Nexos
+	ASR.B	#1,D1			;1485e: +1 radiation per 2 Traxium
 	BSET	#0,D1			;14860:
 	ADD.B	D1,D0			;14864: 
-	ADD.B	19(A1),D0		;14866: add radiation
-	ADD.B	81(A5),D0		;1486a: add radiation again
+	ADD.B	19(A1),D0		;14866: +1 radiation per 1 Nexos
+	ADD.B	81(A5),D0		;1486a: add radiation
 	RTS				;1486e:
 UpdateRadiation:
 	BSR.S	LAB_0CAF		;14870: d0 = 2*radiation + ore rad
@@ -27182,59 +27230,61 @@ LAB_0D14:
 ; the rest are ignored, and the point of failure is recorded to determine
 ; which buildings function.
 ;
-LAB_0D15:
-	MOVEA.L	SAVEDATA4_BUILDINGS,A0		;15076: 207900000552
-	MOVEA.L	SAVEDATA6_BLDGTOTAL,A4		;1507c: 28790000056e
-	MOVEA.L	SAVEDATA5_ASTEROIDS,A5		;15082: 2a790000055a
-	LEA	ASTEROIDMAPS,A6		;15088: 4df900020be8
-	MOVEQ	#23,D0			;1508e: 7017
-LAB_0D16:
-	TST.B	25(A5)			;15090: 4a2d0019
-	BMI.W	LAB_0D1A		;15094: 6b0000d8
-	MOVE.B	89(A5),D1		;15098: 122d0059
-	BMI.W	LAB_0D1A		;1509c: 6b0000d0
-	ANDI.B	#$03,D1			;150a0: 02010003
-	CMPI.B	#$03,D1			;150a4: 0c010003
-	BNE.W	LAB_0D1A		;150a8: 660000c4
-	TST.W	692(A5)			;150ac: 4a6d02b4
-	BNE.W	LAB_0D1A		;150b0: 660000bc
-	MOVE.W	D0,-(A7)		;150b4: 3f00
-	MOVEQ	#0,D0			;150b6: 7000
-	MOVE.W	684(A5),D0		;150b8: 302d02ac
-	BNE.S	LAB_0D17		;150bc: 662a
-	MOVEM.L	D0-D7/A0-A6,-(A7)	;150be: 48e7fffe
-	EXG	A0,A5			;150c2: c14d
-	MOVE.L	A0,TARGETASTEROID		;150c4: 23c80002ded4
-	MOVE.L	A5,LAB_1287		;150ca: 23cd0002decc
-	MOVE.L	A4,LAB_1288		;150d0: 23cc0002ded0
-	MOVE.L	A6,LAB_1286		;150d6: 23ce0002dec8
-	BSR.W	LAB_0BCB		;150dc: 6100e0c6
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;150e0: 4cdf7fff
-	BRA.W	LAB_0D19		;150e4: 60000086
+LAB_0D15: ; Important main game loop function.
+; Iterates over each asteroid
+	MOVEA.L	SAVEDATA4_BUILDINGS,A0	;15076:
+	MOVEA.L	SAVEDATA6_BLDGTOTAL,A4	;1507c:
+	MOVEA.L	SAVEDATA5_ASTEROIDS,A5	;15082:
+	LEA	ASTEROIDMAPS,A6		;15088:
+	MOVEQ	#23,D0			;1508e:
+Loop_0D16:
+	TST.B	25(A5)			;15090:
+	BMI.W	Next_0D1A		;15094:
+	MOVE.B	89(A5),D1		;15098: check for stasis
+	BMI.W	Next_0D1A		;1509c:
+	ANDI.B	#$03,D1			;150a0:
+	CMPI.B	#$03,D1			;150a4: check for Terran colony
+	BNE.W	Next_0D1A		;150a8:
+	TST.W	692(A5)			;150ac: check for ??
+	BNE.W	Next_0D1A		;150b0:
+	MOVE.W	D0,-(A7)		;150b4:
+	MOVEQ	#0,D0			;150b6:
+	MOVE.W	684(A5),D0		;150b8:
+	BNE.S	LAB_0D17		;150bc:
+; If zero population:
+	MOVEM.L	D0-D7/A0-A6,-(A7)	;150be:
+	EXG	A0,A5			;150c2:
+	MOVE.L	A0,TARGETASTEROID	;150c4:
+	MOVE.L	A5,LAB_1287		;150ca:
+	MOVE.L	A4,LAB_1288		;150d0:
+	MOVE.L	A6,LAB_1286		;150d6:
+	BSR.W	LAB_0BCB		;150dc:
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;150e0:
+	BRA.W	Next_0D19		;150e4:
 LAB_0D17:
-	ADD.W	D0,D0			;150e8: d040
-	ADDI.W	#$0064,D0		;150ea: +100
-	ADD.L	D0,CASH_GENERAL		        ;150ee: d1b90002de64
-	CMPI.B	#$14,172(A5)		;150f4: 0c2d001400ac
-	BMI.S	LAB_0D18		;150fa: 6b42
-	SF	172(A5)			;150fc: 51ed00ac
-	MOVEM.L	D0-D7/A0-A6,-(A7)	;15100: 48e7fffe
-	MOVE.L	A5,TARGETASTEROID		;15104: 23cd0002ded4
-	MOVE.L	A0,LAB_1287		;1510a: 23c80002decc
-	MOVE.L	A4,LAB_1288		;15110: 23cc0002ded0
-	MOVE.L	A6,LAB_1286		;15116: 23ce0002dec8
-	LEA	LAB_1208,A6		;1511c: 4df90001f040
-	JSR	LAB_0832		;15122: 4eb90000d86a
-	MOVEQ	#0,D0			;15128: 7000
-	MOVEQ	#0,D1			;1512a: 7200
-	MOVE.B	12(A6),D0		;1512c: 102e000c
-	MOVE.B	13(A6),D1		;15130: 122e000d
-	MOVEQ	#120,D7			;15134: 7e78
-	BSR.W	LAB_0963		;15136: 6100a4aa
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;1513a: 4cdf7fff
+	ADD.W	D0,D0			;150e8: +2 cash per colonist
+	ADDI.W	#$0064,D0		;150ea: +100 cash per colony
+	ADD.L	D0,CASH_GENERAL		;150ee:
+	CMPI.B	#$14,172(A5)		;150f4: if [172] is 20 or higher:
+	BMI.S	LAB_0D18		;150fa:
+	SF	172(A5)			;150fc:   [172] = 0
+	MOVEM.L	D0-D7/A0-A6,-(A7)	;15100:
+	MOVE.L	A5,TARGETASTEROID	;15104:
+	MOVE.L	A0,LAB_1287		;1510a:
+	MOVE.L	A4,LAB_1288		;15110:
+	MOVE.L	A6,LAB_1286		;15116:
+	LEA	LAB_1208,A6		;1511c:
+	JSR	LAB_0832		;15122:
+	MOVEQ	#0,D0			;15128:
+	MOVEQ	#0,D1			;1512a:
+	MOVE.B	12(A6),D0		;1512c:
+	MOVE.B	13(A6),D1		;15130:
+	MOVEQ	#120,D7			;15134: buildingdestroy damage
+	BSR.W	LAB_0963		;15136:
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;1513a:
 LAB_0D18: ; update current asteroid (terran?)
 	MOVEQ	#0,D1			;1513e:
-	BSR.W	UpdateScreenGenerators		;15140:
+	BSR.W	UpdateScreenGenerators	;15140:
 	BSR.W	UpdateRadiation		;15144:
 	BSR.W	UpdatePopulation	;15148: population
 	BSR.W	UpdateAir		;1514c:
@@ -27243,16 +27293,16 @@ LAB_0D18: ; update current asteroid (terran?)
 	BSR.W	UpdatePower		;15158:
 	BSR.W	UpdateWorkers		;1515c:
 	BSR.W	UpdateSecurity		;15160:
-	BSR.W	LAB_0C90		;15164:
-	BSR.W	LAB_0E64		;15168:
-LAB_0D19:
+	BSR.W	UpdateOSDYard		;15164:
+	BSR.W	UpdateSwixWpn		;15168:
+Next_0D19:
 	MOVE.W	(A7)+,D0		;1516c: 301f
-LAB_0D1A:
+Next_0D1A:
 	ADDA.L	#$00000050,A4		;1516e: +80 ; asteroid building count
 	ADDA.L	#$00000578,A0		;15174: +1400
 	ADDA.L	#$000002ee,A5		;1517a: +750 ; a5: one asteroid
 	ADDA.L	#$000008c4,A6		;15180: +2244
-	DBF	D0,LAB_0D16		;15186: loop
+	DBF	D0,Loop_0D16		;15186: loop
 	RTS				;1518a:
 LAB_0D1B:
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A2		;1518c: 24790000055a
@@ -27506,35 +27556,40 @@ Loop_0D3D:
 	RTS				;15494:
 ;
 LAB_0D3E:
-	SUBQ.B	#1,LAB_12DE		;15496: 53390002e44e
-	BNE.W	Return_0D44		;1549c: 66000084
-	MOVEA.L	SAVEDATA3_SHIPS,A0	;154a0: 20790000054e
-	MOVE.W	#$02bb,D0		;154a6: 303c02bb
-LAB_0D3F:
-	CMPI.B	#$37,8(A0)		;154aa: 0c2800370008
-	BEQ.S	LAB_0D40		;154b0: 6710
-	LEA	54(A0),A0		;154b2: 41e80036
-	DBF	D0,LAB_0D3F		;154b6: 51c8fff2
-	MOVE.B	#$15,LAB_12DF		;154ba: 13fc00150002e44f
+	SUBQ.B	#1,EVENTCOUNT		;15496:
+	BNE.W	Return_0D44		;1549c:
+	MOVEA.L	SAVEDATA3_SHIPS,A0	;154a0:
+	MOVE.W	#$02bb,D0		;154a6:
+Loop_0D3F:
+	CMPI.B	#$37,8(A0)		;154aa: no transporter?
+	BEQ.S	LAB_0D40		;154b0:
+	LEA	54(A0),A0		;154b2:
+	DBF	D0,Loop_0D3F		;154b6:
+	MOVE.B	#$15,LAB_12DF		;154ba: 21: new transporter
 LAB_0D40:
-	MOVE.L	#$0000008c,D0		;154c2: rand(0-139)
-	JSR	GetRand		        ;154c8: 4eb900000c0c
-	ADDI.B	#$3c,D0			;154ce: 0600003c
-	MOVE.B	D0,LAB_12DE		;154d2: 13c00002e44e
-	MOVE.B	LAB_12DF,D0		;154d8: 10390002e44f
-	BEQ.S	LAB_0D41		;154de: 6704
-	SUBQ.B	#1,D0			;154e0: 5300
-	BRA.S	LAB_0D42		;154e2: 6008
+	MOVE.L	#$0000008c,D0		;154c2:
+	JSR	GetRand		        ;154c8:
+	ADDI.B	#$3c,D0			;154ce:
+	MOVE.B	D0,EVENTCOUNT		;154d2:
+; Reset event counter to a number between 0 and 60 evenly divisible by 4
+; slightly more likely to be 0, 4 or 8
+; 0*4: 12/139  1*4: 12/139  2*4: 11/139  3*4 to 15*4: 8/139
+	MOVE.B	LAB_12DF,D0		;154d8:
+	BEQ.S	LAB_0D41		;154de: pick one at random if unset
+	SUBQ.B	#1,D0			;154e0:
+	BRA.S	LAB_0D42		;154e2:
 LAB_0D41:
 	MOVEQ	#24,D0			;154e4: rand(0-23)
 	JSR	GetRand		        ;154e6:
 LAB_0D42:
 	TST.B	LAB_10DF		;154ec:
 	BNE.S	LAB_0D43		;154f2: generate random event
+; if LAB_10DF is zero, event countdown is reset to between 10 and 39
+; and manual protection codes are called for
 	MOVEQ	#30,D0			;154f4:
 	JSR	GetRand		        ;154f6:
 	ADDI.B	#$0a,D0			;154fc: rand: 10-40
-	MOVE.B	D0,LAB_12DE		;15500:
+	MOVE.B	D0,EVENTCOUNT		;15500:
 	JSR	LAB_029B		;15506:
 	RTS				;1550c:
 LAB_0D43:
@@ -27571,43 +27626,43 @@ RANDOM_EVENTS: ; 24 random effects?
 	DC.L	UnknownEvent_0D6E	;1557c:
 	DC.L	Reinforcements		;15580:
 MagneticStorm:
-	MOVEQ	#80,D0			;15584: 7050
-	JSR	GetRand		;15586: 4eb900000c0c
-	ADDI.B	#$14,D0			;1558c: 06000014
-	ADD.B	D0,D0			;15590: d000
-	MOVE.B	D0,LAB_12E0		;15592: 13c00002e450
-	MOVEQ	#0,D1			;15598: 7200
-	MOVE.W	#$0125,D0		;1559a: 303c0125
-	MOVEQ	#0,D2			;1559e: 7400
-	MOVEQ	#1,D3			;155a0: 7601
-	MOVEQ	#11,D4			;155a2: 780b
-	JSR	MessageWindow		;155a4: 4eb900008fd2
+	MOVEQ	#80,D0			;15584:
+	JSR	GetRand		;15586:
+	ADDI.B	#$14,D0			;1558c:
+	ADD.B	D0,D0			;15590:
+	MOVE.B	D0,MAGSTORM		;15592:
+	MOVEQ	#0,D1			;15598:
+	MOVE.W	#$0125,D0		;1559a:
+	MOVEQ	#0,D2			;1559e:
+	MOVEQ	#1,D3			;155a0:
+	MOVEQ	#11,D4			;155a2:
+	JSR	MessageWindow		;155a4:
 ; MAGNETIC STORM! NAVIGATIONAL EQUIPMENT DOWN ON ALL DEEP SPACE VESSELS.
-	RTS				;155aa: 4e75
+	RTS				;155aa:
 ScoutBreakup:
-	MOVE.L	LAB_128A,D0		;155ac: 20390002ded8
-	BEQ.S	LAB_0D4A		;155b2: 672c
-	MOVEA.L	D0,A6			;155b4: 2c40
-LAB_0D48:
-	CMPI.B	#$04,8(A6)		;155b6: 0c2e00040008
-	BEQ.S	LAB_0D49		;155bc: 670a
-	MOVE.L	0(A6),D0		;155be: 202e0000
-	BEQ.S	LAB_0D4A		;155c2: 671c
-	MOVEA.L	D0,A6			;155c4: 2c40
-	BRA.S	LAB_0D48		;155c6: 60ee
+	MOVE.L	LAB_128A,D0		;155ac:
+	BEQ.S	Return_0D4A		;155b2:
+	MOVEA.L	D0,A6			;155b4:
+Loop_0D48:
+	CMPI.B	#$04,8(A6)		;155b6:
+	BEQ.S	LAB_0D49		;155bc:
+	MOVE.L	0(A6),D0		;155be:
+	BEQ.S	Return_0D4A		;155c2:
+	MOVEA.L	D0,A6			;155c4:
+	BRA.S	Loop_0D48		;155c6:
 LAB_0D49:
-	JSR	LAB_08D9		;155c8: 4eb90000e802
-	MOVEQ	#0,D1			;155ce: 7200
-	MOVE.W	#$0126,D0		;155d0: 303c0126
-	MOVEQ	#0,D2			;155d4: 7400
-	MOVEQ	#1,D3			;155d6: 7601
-	MOVEQ	#1,D4			;155d8: 7801
-	JSR	MessageWindow		;155da: 4eb900008fd2
+	JSR	LAB_08D9		;155c8:
+	MOVEQ	#0,D1			;155ce:
+	MOVE.W	#$0126,D0		;155d0:
+	MOVEQ	#0,D2			;155d4:
+	MOVEQ	#1,D3			;155d6:
+	MOVEQ	#1,D4			;155d8:
+	JSR	MessageWindow		;155da:
 ; RECEIVING A BROKEN-UP SIGNAL FROM A SCOUT. WE SUSPECT ITS DESTRUCTION,
 ; CAUSE UNKNOWN!
-LAB_0D4A:
-	RTS				;155e0: 4e75
-LAB_0D4B: ; meteor shower
+Return_0D4A:
+	RTS				;155e0:
+LAB_0D4B: ; meteor shower - random asteroid picking routine?
 	BSR.W	LAB_0B63		;155e2: 6100d262
 	MOVE.W	D3,D0			;155e6: 3003
 	BEQ.S	LAB_0D4C		;155e8: 6718
@@ -27650,30 +27705,30 @@ LAB_0D50:
 ; SOLAR FLARE! WE HAVE DETECTED INCREASED RADIATION ON ALL KNOWN ASTEROIDS!
 	RTS				;15648: 4e75
 FreakSensor:
-	BSR.W	LAB_0B63		;1564a: 6100d1fa
-	MOVE.W	D2,D0			;1564e: 3002
-	BEQ.S	Return_0D53		;15650: 671a
-	ADD.W	D2,D2			;15652: d442
-	ADD.W	D2,D2			;15654: d442
-	LEA	LAB_1220,A0		;15656: 41f90001f8b6
-	ADDA.W	D2,A0			;1565c: d0c2
-LAB_0D52:
-	MOVEA.L	-(A0),A1		;1565e: 2260
-	BSET	#4,89(A1)		;15660: 08e900040059
-	BEQ.S	LAB_0D54		;15666: 6706
-	SUBQ.W	#1,D0			;15668: 5340
-	BNE.S	LAB_0D52		;1566a: 66f2
+	BSR.W	LAB_0B63		;1564a:
+	MOVE.W	D2,D0			;1564e:
+	BEQ.S	Return_0D53		;15650:
+	ADD.W	D2,D2			;15652:
+	ADD.W	D2,D2			;15654:
+	LEA	LAB_1220,A0		;15656:
+	ADDA.W	D2,A0			;1565c:
+Loop_0D52:
+	MOVEA.L	-(A0),A1		;1565e:
+	BSET	#4,89(A1)		;15660:
+	BEQ.S	LAB_0D54		;15666:
+	SUBQ.W	#1,D0			;15668:
+	BNE.S	Loop_0D52		;1566a:
 Return_0D53:
-	RTS				;1566c: 4e75
+	RTS				;1566c:
 LAB_0D54:
 	CMPI.W	#$0006,ALIENID		;1566e: 
 	BNE.S	LAB_0D55		;15676: If Swixaran:
-	CMPA.L	LAB_1274,A1		;15678: b3f90002de5c
-	BNE.S	LAB_0D55		;1567e: 6612
-	BTST	#2,LAB_130F		;15680: 083900020002e489
-	BEQ.S	LAB_0D55		;15688: 6708
-	BCLR	#4,89(A1)		;1568a: 08a900040059
-	RTS				;15690: 4e75
+	CMPA.L	LAB_1274,A1		;15678:
+	BNE.S	LAB_0D55		;1567e:
+	BTST	#2,LAB_130F		;15680:
+	BEQ.S	LAB_0D55		;15688:
+	BCLR	#4,89(A1)		;1568a:
+	RTS				;15690:
 LAB_0D55: 
 	MOVEQ	#0,D1			;15692:
 	MOVE.W	#$0129,D0		;15694: decimal 297
@@ -27681,30 +27736,30 @@ LAB_0D55:
 	MOVEQ	#5,D3			;1569e: 
 	MOVEQ	#9,D4			;156a0: 
 	JSR	MessageWindow		;156a2: 
-; A FREAK SENSOR SCAN HAS ENABLED US TO DESCOVER AN ALIEN-OCCUPIED ASTEROID!
+; A FREAK SENSOR SCAN HAS ENABLED US TO DISCOVER AN ALIEN-OCCUPIED ASTEROID!
 	RTS				;156a8: 
 SurveyMoreOre:
-	BSR.W	LAB_0D4B		;156aa: 6100ff36
-	BMI.S	LAB_0D58		;156ae: 6b2c
-	LEA	LAB_1229,A1		;156b0: 43f900020010
-	LEA	60(A0),A2		;156b6: 45e8003c
-	MOVEQ	#7,D1			;156ba: 7207
-LAB_0D57:
-	MOVE.W	(A1)+,D0		;156bc: 3019
-	JSR	GetRand		;156be: 4eb900000c0c
-	ADD.W	D0,(A2)+		;156c4: d15a
-	DBF	D1,LAB_0D57		;156c6: 51c9fff4
-	MOVE.L	A0,D1			;156ca: 2208
-	MOVE.W	#$012a,D0		;156cc: 303c012a
-	MOVEQ	#0,D2			;156d0: 7400
-	MOVEQ	#1,D3			;156d2: 7601
-	MOVEQ	#0,D4			;156d4: 7800
-	JSR	MessageWindow		;156d6: 4eb900008fd2
+	BSR.W	LAB_0D4B		;156aa:
+	BMI.S	LAB_0D58		;156ae:
+	LEA	LAB_1229,A1		;156b0:
+	LEA	60(A0),A2		;156b6:
+	MOVEQ	#7,D1			;156ba:
+Loop_0D57:
+	MOVE.W	(A1)+,D0		;156bc:
+	JSR	GetRand			;156be:
+	ADD.W	D0,(A2)+		;156c4:
+	DBF	D1,Loop_0D57		;156c6:
+	MOVE.L	A0,D1			;156ca:
+	MOVE.W	#$012a,D0		;156cc:
+	MOVEQ	#0,D2			;156d0:
+	MOVEQ	#1,D3			;156d2:
+	MOVEQ	#0,D4			;156d4:
+	JSR	MessageWindow		;156d6:
 ; A NEW GEOLOGICAL SURVEY HAS DISCOVERED MORE ORE DEPOSITS ON:
 LAB_0D58:
-	RTS				;156dc: 4e75
+	RTS				;156dc:
 SurveyLessOre:
-	BSR.W	LAB_0B63		;156de: 6100d166
+	BSR.W	LAB_0B63		;156de:
 	MOVE.W	D3,D0			;156e2: 3003
 	CMPI.W	#$0002,D0		;156e4: 0c400002
 	BMI.S	LAB_0D5C		;156e8: 6b48
@@ -27772,187 +27827,188 @@ PowerplantBurnout:
 LAB_0D60:
 	RTS				;15798: 4e75
 EngineBurnout: ; asteroid engines explode, +1 radiation, interestingly
-	MOVEQ	#23,D5			;1579a: 7a17
-	BSR.S	LAB_0D5D		;1579c: 6196
-	BMI.S	LAB_0D62		;1579e: 6b1c
-	MOVE.L	TARGETASTEROID,D1	;157a0: 22390002ded4
-	MOVEA.L	D1,A0			;157a6: 2041
-	ADDQ.B	#1,81(A0)		;157a8: 52280051
-	MOVE.W	#$012d,D0		;157ac: 303c012d
-	MOVEQ	#0,D2			;157b0: 7400
-	MOVEQ	#1,D3			;157b2: 7601
-	MOVEQ	#13,D4			;157b4: 780d
-	JSR	LAB_05B9		;157b6: 4eb900008f80
+	MOVEQ	#23,D5			;1579a:
+	BSR.S	LAB_0D5D		;1579c:
+	BMI.S	LAB_0D62		;1579e:
+	MOVE.L	TARGETASTEROID,D1	;157a0:
+	MOVEA.L	D1,A0			;157a6:
+	ADDQ.B	#1,81(A0)		;157a8:
+	MOVE.W	#$012d,D0		;157ac:
+	MOVEQ	#0,D2			;157b0:
+	MOVEQ	#1,D3			;157b2:
+	MOVEQ	#13,D4			;157b4:
+	JSR	LAB_05B9		;157b6:
 ; GRAVITATIONAL ANOMALY!! ASTEROID ENGINES HAVE GONE CRITICAL ON:
 LAB_0D62:
-	RTS				;157bc: 4e75
+	RTS				;157bc:
 AirFailure:
-	BSR.W	LAB_0D4B		;157be: 6100fe22
-	BMI.S	LAB_0D64		;157c2: 6b16
-	CLR.W	704(A0)			;157c4: 426802c0
-	MOVE.L	A0,D1			;157c8: 2208
-	MOVE.W	#$012e,D0		;157ca: 303c012e
-	MOVEQ	#0,D2			;157ce: 7400
-	MOVEQ	#1,D3			;157d0: 7601
-	MOVEQ	#13,D4			;157d2: 780d
-	JSR	MessageWindow		;157d4: 4eb900008fd2
+	BSR.W	LAB_0D4B		;157be:
+	BMI.S	LAB_0D64		;157c2:
+	CLR.W	704(A0)			;157c4:
+	MOVE.L	A0,D1			;157c8:
+	MOVE.W	#$012e,D0		;157ca:
+	MOVEQ	#0,D2			;157ce:
+	MOVEQ	#1,D3			;157d0:
+	MOVEQ	#13,D4			;157d2:
+	JSR	MessageWindow		;157d4:
 ; PRESSURE VALVE FAILURE!! WE ARE RECORDING AIR LOSS FROM TANKS ON:
 LAB_0D64:
-	RTS				;157da: 4e75
+	RTS				;157da:
 WaterFailure:
-	BSR.W	LAB_0D4B		;157dc: 6100fe04
-	BMI.S	LAB_0D66		;157e0: 6b16
-	CLR.W	716(A0)			;157e2: 426802cc
-	MOVE.L	A0,D1			;157e6: 2208
-	MOVE.W	#$012f,D0		;157e8: 303c012f
-	MOVEQ	#0,D2			;157ec: 7400
-	MOVEQ	#1,D3			;157ee: 7601
-	MOVEQ	#13,D4			;157f0: 780d
-	JSR	MessageWindow		;157f2: 4eb900008fd2
+	BSR.W	LAB_0D4B		;157dc:
+	BMI.S	LAB_0D66		;157e0:
+	CLR.W	716(A0)			;157e2:
+	MOVE.L	A0,D1			;157e6:
+	MOVE.W	#$012f,D0		;157e8:
+	MOVEQ	#0,D2			;157ec:
+	MOVEQ	#1,D3			;157ee:
+	MOVEQ	#13,D4			;157f0:
+	JSR	MessageWindow		;157f2:
 ; RUPTURED PIPELINE!! WE ARE RECEIVING REPORTS OF WATER LEAKAGE ON:
 LAB_0D66:
-	RTS				;157f8: 4e75
+	RTS				;157f8:
 PowerFailure:
-	BSR.W	LAB_0D4B		;157fa: 6100fde6
-	BMI.S	LAB_0D68		;157fe: 6b16
-	CLR.W	698(A0)			;15800: 426802ba
-	MOVE.L	A0,D1			;15804: 2208
-	MOVE.W	#$0130,D0		;15806: 303c0130
-	MOVEQ	#0,D2			;1580a: 7400
-	MOVEQ	#1,D3			;1580c: 7601
-	MOVEQ	#13,D4			;1580e: 780d
-	JSR	MessageWindow		;15810: 4eb900008fd2
+	BSR.W	LAB_0D4B		;157fa:
+	BMI.S	LAB_0D68		;157fe:
+	CLR.W	698(A0)			;15800:
+	MOVE.L	A0,D1			;15804:
+	MOVE.W	#$0130,D0		;15806:
+	MOVEQ	#0,D2			;1580a:
+	MOVEQ	#1,D3			;1580c:
+	MOVEQ	#13,D4			;1580e:
+	JSR	MessageWindow		;15810:
 ; COMPUTER CONTROL STATION FAILURE!! POWER LOSS REPORTED ON:
 LAB_0D68:
-	RTS				;15816: 4e75
+	RTS				;15816:
 GravitationalVortex:
-	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;15818: 20790000055a
-	MOVEQ	#23,D7			;1581e: 7e17
+	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;15818:
+	MOVEQ	#23,D7			;1581e:
 LAB_0D6A:
-	MOVEQ	#24,D0			;15820: 7018
-	JSR	GetRand		;15822: 4eb900000c0c
-	MOVE.B	D0,35(A0)		;15828: 11400023
-	LSL.W	#2,D0			;1582c: e548
-	LEA	LAB_121C,A1		;1582e: 43f90001f6c2
-	MOVEM.W	0(A1,D0.W),D0-D1	;15834: 4cb100030000
-	MOVEM.W	D0-D1,56(A0)		;1583a: 48a800030038
-	MOVEQ	#16,D0			;15840: 7010
-	JSR	GetRand		;15842: 4eb900000c0c
-	LEA	LAB_121D,A1		;15848: 43f90001f722
-	MOVE.B	0(A1,D0.W),24(A0)	;1584e: 117100000018
-	LEA	750(A0),A0		;15854: 41e802ee
-	DBF	D7,LAB_0D6A		;15858: 51cfffc6
-	MOVEQ	#0,D1			;1585c: 7200
-	MOVE.W	#$0131,D0		;1585e: 303c0131
-	MOVEQ	#0,D2			;15862: 7400
-	MOVEQ	#1,D3			;15864: 7601
-	MOVEQ	#0,D4			;15866: 7800
-	JSR	MessageWindow		;15868: 4eb900008fd2
+	MOVEQ	#24,D0			;15820:
+	JSR	GetRand		;15822:
+	MOVE.B	D0,35(A0)		;15828:
+	LSL.W	#2,D0			;1582c:
+	LEA	LAB_121C,A1		;1582e:
+	MOVEM.W	0(A1,D0.W),D0-D1	;15834:
+	MOVEM.W	D0-D1,56(A0)		;1583a:
+	MOVEQ	#16,D0			;15840:
+	JSR	GetRand		;15842:
+	LEA	LAB_121D,A1		;15848:
+	MOVE.B	0(A1,D0.W),24(A0)	;1584e:
+	LEA	750(A0),A0		;15854:
+	DBF	D7,LAB_0D6A		;15858:
+	MOVEQ	#0,D1			;1585c:
+	MOVE.W	#$0131,D0		;1585e:
+	MOVEQ	#0,D2			;15862:
+	MOVEQ	#1,D3			;15864:
+	MOVEQ	#0,D4			;15866:
+	JSR	MessageWindow		;15868:
 ; GRAVITATIONAL VORTEX! SENSORS REPORT A VECTOR ALTERATION OF ALL KNOWN ASTEROIDS.
-	RTS				;1586e: 4e75
+	RTS				;1586e:
 VirusOutbreak:
-	BSR.W	LAB_0D4B		;15870: 6100fd70
-	BMI.S	LAB_0D6C		;15874: 6b30
-	BSR.W	LAB_0C19		;15876: 6100e06c
-	MOVE.W	684(A0),D1		;1587a: 322802ac
-	ADDI.W	#$0032,D1		;1587e: 06410032
-	EXT.L	D1			;15882: 48c1
-	DIVU	#$0064,D1		;15884: 82fc0064
-	CMP.W	68(A4),D1		;15888: b26c0044
-	BLE.S	LAB_0D6C		;1588c: 6f18
-	BSET	#2,90(A0)		;1588e: 08e80002005a
-	MOVE.L	A0,D1			;15894: 2208
-	MOVE.W	#$0132,D0		;15896: 303c0132
-	MOVEQ	#0,D2			;1589a: 7400
-	MOVEQ	#1,D3			;1589c: 7601
-	MOVEQ	#1,D4			;1589e: 7801
-	JSR	MessageWindow		;158a0: 4eb900008fd2
+	BSR.W	LAB_0D4B		;15870:
+	BMI.S	LAB_0D6C		;15874:
+	BSR.W	LAB_0C19		;15876:
+	MOVE.W	684(A0),D1		;1587a:
+	ADDI.W	#$0032,D1		;1587e:
+	EXT.L	D1			;15882:
+	DIVU	#$0064,D1		;15884:
+	CMP.W	68(A4),D1		;15888:
+	BLE.S	LAB_0D6C		;1588c:
+	BSET	#2,90(A0)		;1588e:
+	MOVE.L	A0,D1			;15894:
+	MOVE.W	#$0132,D0		;15896:
+	MOVEQ	#0,D2			;1589a:
+	MOVEQ	#1,D3			;1589c:
+	MOVEQ	#1,D4			;1589e:
+	JSR	MessageWindow		;158a0:
 ; VIRUS OUTBREAK! MORE MEDICAL FACILITIES REQUIRED ON:
 LAB_0D6C:
-	RTS				;158a6: 4e75
+	RTS				;158a6:
 OreBribe:
-	MOVEQ	#10,D0			;158a8: 700a
-	JSR	GetRand		;158aa: 4eb900000c0c
-	ADDQ.B	#1,D0			;158b0: 5200
-	MULU	#$2710,D0		;158b2: c0fc2710
-	MOVE.L	D0,D2			;158b6: 2400
-	MOVE.W	#$0135,D0		;158b8: 303c0135
-	MOVEQ	#0,D1			;158bc: 7200
-	MOVEQ	#1,D3			;158be: 7601
-	MOVEQ	#0,D4			;158c0: 7800
-	JSR	MessageWindow		;158c2: 4eb900008fd2
+	MOVEQ	#10,D0			;158a8:
+	JSR	GetRand		;158aa:
+	ADDQ.B	#1,D0			;158b0:
+	MULU	#$2710,D0		;158b2:
+	MOVE.L	D0,D2			;158b6:
+	MOVE.W	#$0135,D0		;158b8:
+	MOVEQ	#0,D1			;158bc:
+	MOVEQ	#1,D3			;158be:
+	MOVEQ	#0,D4			;158c0:
+	JSR	MessageWindow		;158c2:
 ; THE EMPIRE ASKS YOU TO IMPROVE ORE SHIPMENTS.
 ; YOU ARE OFFERED A BRIBE, PASSED OFF AS A BONUS!
-	RTS				;158c8: 4e75
-UnknownEvent_0D6E: ; appears twice in random events list
+	RTS				;158c8:
+UnknownEvent_0D6E:
 ; if LAB_12AB is positive,
 ; it sets LAB_12AA to 0xffe0
 ; and adds rand(8-188) to LAB_12AB.
-	TST.W	LAB_12AB		;158ca: 4a790002e094
-	BNE.S	LAB_0D6F		;158d0: 661a
-	MOVE.W	#$ffe0,LAB_12AA		;158d2: 33fcffe00002e092
-	MOVE.W	#$00b4,D0		;158da: 303c00b4
-	JSR	GetRand		;158de: 4eb900000c0c
-	ADDQ.B	#8,D0			;158e4: 5000
-	MOVE.W	D0,LAB_12AB		;158e6: 33c00002e094
+	TST.W	LAB_12AB		;158ca:
+	BNE.S	LAB_0D6F		;158d0:
+	MOVE.W	#$ffe0,LAB_12AA		;158d2:
+	MOVE.W	#$00b4,D0		;158da:
+	JSR	GetRand		;158de:
+	ADDQ.B	#8,D0			;158e4:
+	MOVE.W	D0,LAB_12AB		;158e6:
 LAB_0D6F:
-	RTS				;158ec: 4e75
+	RTS				;158ec:
 ;
 Reinforcements:
-	BSR.W	LAB_0D4B		;158ee: 6100fcf2
-	BMI.W	LAB_0D73		;158f2: 6b0000b8
-	MOVE.L	A0,-(A7)		;158f6: 2f08
-	MOVE.L	A0,D1			;158f8: 2208
-	MOVEQ	#0,D2			;158fa: 7400
-	MOVE.W	#$014b,D0		;158fc: 303c014b
-	MOVEQ	#1,D3			;15900: 7601
-	MOVEQ	#0,D4			;15902: 7800
-	JSR	MessageWindow		;15904: 4eb900008fd2
+	BSR.W	LAB_0D4B		;158ee:
+	BMI.W	LAB_0D73		;158f2:
+	MOVE.L	A0,-(A7)		;158f6:
+	MOVE.L	A0,D1			;158f8:
+	MOVEQ	#0,D2			;158fa:
+	MOVE.W	#$014b,D0		;158fc:
+	MOVEQ	#1,D3			;15900:
+	MOVEQ	#0,D4			;15902:
+	JSR	MessageWindow		;15904:
 ; THE EMPIRE HAS SENT YOU REINFORCEMENTS. SHIPS DETECTED HEADING FOR
-	MOVEA.L	(A7)+,A0		;1590a: 205f
-	MOVE.L	A0,D0			;1590c: 2008
-	SUB.L	SAVEDATA5_ASTEROIDS,D0		;1590e: 90b90000055a
-	DIVU	#$02ee,D0		;15914: 80fc02ee
-	MOVE.B	D0,LAB_0D74+2		;15918: 13c0000159b0
-	MOVE.W	#$012c,D0		;1591e: 303c012c
-	JSR	GetRand		;15922: 4eb900000c0c
-	MOVE.W	D0,LAB_0D74		;15928: 33c0000159ae
-	MOVEQ	#6,D0			;1592e: 7006
-	JSR	GetRand		;15930: 4eb900000c0c
-	ADDQ.B	#5,D0			;15936: 5a00
-LAB_0D71:
-	MOVE.W	D0,-(A7)		;15938: 3f00
-	MOVEQ	#5,D0			;1593a: 7005
-	JSR	GetRand		;1593c: 4eb900000c0c
-	LEA	LAB_122F,A0		;15942: 41f900020155
-	MOVEQ	#0,D2			;15948: 7400
-	MOVE.B	0(A0,D0.W),D2		;1594a: 14300000
-	MOVEQ	#0,D7			;1594e: 7e00
-	LEA	LAB_128A,A0		;15950: 41f90002ded8
-	MOVEQ	#0,D6			;15956: 7c00
-	JSR	Shipbuilding_0866		;15958: 4eb90000dc98
-	BMI.S	LAB_0D72		;1595e: 6b46
-	JSR	FitRandomHardpoints		;15960: 4eb90000ea58
-	BSR.W	LAB_0A6D		;15966: 6100b51a
-	MOVEQ	#8,D0			;1596a: 7008
-	JSR	GetRand		;1596c: 4eb900000c0c
-	MOVE.W	D0,12(A6)		;15972: 3d40000c
-	MOVEQ	#8,D0			;15976: 7008
-	JSR	GetRand		;15978: 4eb900000c0c
-	SUBQ.W	#4,D0			;1597e: 5940
-	ADD.W	LAB_0D74,D0		;15980: d079000159ae
-	MOVE.W	D0,10(A6)		;15986: 3d40000a
-	BSET	#4,21(A6)		;1598a: 08ee00040015
-	MOVE.W	#$0402,24(A6)		;15990: 3d7c04020018
-	MOVE.L	#LAB_11D8,28(A6)	;15996: 2d7c0001e936001c
-	MOVE.B	LAB_0D74+2,32(A6)	;1599e: 1d79000159b00020
+	MOVEA.L	(A7)+,A0		;1590a:
+	MOVE.L	A0,D0			;1590c:
+	SUB.L	SAVEDATA5_ASTEROIDS,D0		;1590e:
+	DIVU	#$02ee,D0		;15914:
+	MOVE.B	D0,LAB_0D74+2		;15918:
+	MOVE.W	#$012c,D0		;1591e:
+	JSR	GetRand		;15922:
+	MOVE.W	D0,LAB_0D74		;15928:
+	MOVEQ	#6,D0			;1592e:
+	JSR	GetRand		;15930:
+	ADDQ.B	#5,D0			;15936:
+; 5-10 ships
+Loop_0D71:
+	MOVE.W	D0,-(A7)		;15938:
+	MOVEQ	#5,D0			;1593a:
+	JSR	GetRand			;1593c:
+	LEA	LAB_122F,A0		;15942:
+	MOVEQ	#0,D2			;15948:
+	MOVE.B	0(A0,D0.W),D2		;1594a:
+	MOVEQ	#0,D7			;1594e:
+	LEA	LAB_128A,A0		;15950:
+	MOVEQ	#0,D6			;15956:
+	JSR	Shipbuilding_0866	;15958:
+	BMI.S	LAB_0D72		;1595e:
+	JSR	FitRandomHardpoints	;15960:
+	BSR.W	LAB_0A6D		;15966:
+	MOVEQ	#8,D0			;1596a:
+	JSR	GetRand			;1596c:
+	MOVE.W	D0,12(A6)		;15972:
+	MOVEQ	#8,D0			;15976:
+	JSR	GetRand			;15978:
+	SUBQ.W	#4,D0			;1597e:
+	ADD.W	LAB_0D74,D0		;15980:
+	MOVE.W	D0,10(A6)		;15986:
+	BSET	#4,21(A6)		;1598a:
+	MOVE.W	#$0402,24(A6)		;15990:
+	MOVE.L	#LAB_11D8,28(A6)	;15996:
+	MOVE.B	LAB_0D74+2,32(A6)	;1599e:
 LAB_0D72:
-	MOVE.W	(A7)+,D0		;159a6: 301f
-	DBF	D0,LAB_0D71		;159a8: 51c8ff8e
+	MOVE.W	(A7)+,D0		;159a6:
+	DBF	D0,Loop_0D71		;159a8:
 LAB_0D73:
-	RTS				;159ac: 4e75
+	RTS				;159ac:
 LAB_0D74:
-	ORI.B	#$00,D0			;159ae: 00000000
+	ORI.B	#$00,D0			;159ae:
 NewTransporter:
 	BSR.W	LAB_0D4B		;159b2: 6100fc2e
 	BMI.W	LAB_0D77		;159b6: 6b000094
@@ -28009,94 +28065,99 @@ MeteorShower:
 	JSR	MessageWindow		;15a74: 4eb900008fd2
 ; SENSORS PREDICT A METEOR SHOWER DUE IN 7 DAYS. ALERT EMPLOYEES ON:
 LAB_0D7B:
-	RTS				;15a7a: 4e75
-LAB_0D7C:
-	MOVEA.L	LAB_127B,A0		;15a7c: 20790002de78
-	MOVE.L	A0,TARGETASTEROID		;15a82: 23c80002ded4
-	BSR.W	LAB_0C19		;15a88: 6100de5a
-	MOVE.L	A6,LAB_1286		;15a8c: 23ce0002dec8
-	MOVE.L	A4,LAB_1288		;15a92: 23cc0002ded0
-	MOVE.L	A5,LAB_1287		;15a98: 23cd0002decc
-	MOVEQ	#15,D0			;15a9e: 700f
-	JSR	GetRand		;15aa0: 4eb900000c0c
-	ADDQ.B	#5,D0			;15aa6: 5a00
+	RTS				;15a7a:
+LAB_0D7C: ; meteor shower hits
+	MOVEA.L	LAB_127B,A0		;15a7c:
+	MOVE.L	A0,TARGETASTEROID	;15a82:
+	BSR.W	LAB_0C19		;15a88:
+	MOVE.L	A6,LAB_1286		;15a8c:
+	MOVE.L	A4,LAB_1288		;15a92:
+	MOVE.L	A5,LAB_1287		;15a98:
+	MOVEQ	#15,D0			;15a9e:
+	JSR	GetRand			;15aa0:
+	ADDQ.B	#5,D0			;15aa6:
+; 5-19 meteors?
 LAB_0D7D:
-	MOVE.W	D0,-(A7)		;15aa8: 3f00
-	LEA	LAB_11F6,A2		;15aaa: 45f90001eae8
-	MOVEQ	#42,D0			;15ab0: 702a
-	MOVE.B	#$98,D1			;15ab2: 123c0098
-	MOVEQ	#0,D5			;15ab6: 7a00
-	MOVEA.L	LAB_127B,A0		;15ab8: 20790002de78
-	JSR	LAB_08A9		;15abe: 4eb90000e1f8
-	BMI.S	LAB_0D80		;15ac4: 6b50
-	MOVEA.L	A0,A6			;15ac6: 2c48
-	MOVE.B	#$0b,27(A6)		;15ac8: 1d7c000b001b
-	JSR	LAB_0936		;15ace: 4eb90000f0e2
-	MOVE.B	8(A6),D0		;15ad4: 102e0008
-	MOVEQ	#70,D1			;15ad8: 7246
-	CMPI.B	#$2d,D0			;15ada: 0c00002d
-	BEQ.S	LAB_0D7E		;15ade: 6702
-	MOVEQ	#69,D1			;15ae0: 7245
+	MOVE.W	D0,-(A7)		;15aa8:
+	LEA	LAB_11F6,A2		;15aaa:
+	MOVEQ	#42,D0			;15ab0:
+	MOVE.B	#$98,D1			;15ab2:
+	MOVEQ	#0,D5			;15ab6:
+	MOVEA.L	LAB_127B,A0		;15ab8:
+	JSR	LAB_08A9		;15abe:
+	BMI.S	LAB_0D80		;15ac4:
+	MOVEA.L	A0,A6			;15ac6:
+	MOVE.B	#$0b,27(A6)		;15ac8:
+	JSR	LAB_0936		;15ace:
+	MOVE.B	8(A6),D0		;15ad4:
+	MOVEQ	#70,D1			;15ad8:
+	CMPI.B	#$2d,D0			;15ada:
+	BEQ.S	LAB_0D7E		;15ade:
+	MOVEQ	#69,D1			;15ae0:
 LAB_0D7E:
-	MOVE.B	D1,8(A6)		;15ae2: 1d410008
-	MOVE.B	#$20,24(A6)		;15ae6: 1d7c00200018
-	MOVEQ	#50,D0			;15aec: 7032
-	JSR	GetRand		;15aee: 4eb900000c0c
-	MOVE.B	D0,22(A6)		;15af4: 1d400016
-	BSET	#6,20(A6)		;15af8: 08ee00060014
-	MOVE.W	(A7)+,D0		;15afe: 301f
-	DBF	D0,LAB_0D7D		;15b00: 51c8ffa6
-	TST.B	LAB_12EB		;15b04: 4a390002e464
-	BNE.S	LAB_0D7F		;15b0a: 6608
-	MOVEQ	#6,D0			;15b0c: 7006
-	JSR	PlaySound		;15b0e: 4eb90001a50c
+	MOVE.B	D1,8(A6)		;15ae2:
+	MOVE.B	#$20,24(A6)		;15ae6:
+	MOVEQ	#50,D0			;15aec:
+	JSR	GetRand			;15aee:
+	MOVE.B	D0,22(A6)		;15af4:
+	BSET	#6,20(A6)		;15af8:
+	MOVE.W	(A7)+,D0		;15afe:
+	DBF	D0,LAB_0D7D		;15b00:
+	TST.B	LAB_12EB		;15b04:
+	BNE.S	LAB_0D7F		;15b0a:
+	MOVEQ	#6,D0			;15b0c:
+	JSR	PlaySound		;15b0e:
 LAB_0D7F:
-	RTS				;15b14: 4e75
+	RTS				;15b14:
 LAB_0D80:
-	MOVE.W	(A7)+,D0		;15b16: 301f
-	RTS				;15b18: 4e75
+	MOVE.W	(A7)+,D0		;15b16:
+	RTS				;15b18:
 ;
-LAB_0D81: ; fluctuate ore prices?
-	MOVEQ	#9,D7			;15b1a: 7e09
-	LEA	OREPRICE_00,A0		;15b1c: 41f900020ad8
-LAB_0D82:
-	SUBQ.W	#1,14(A0)		;15b22: 5368000e
-	BPL.S	LAB_0D83		;15b26: 6a1a
-	CLR.W	14(A0)			;15b28: 4268000e
-	MOVE.W	12(A0),D0		;15b2c: 3028000c
-	JSR	GetRand		;15b30: 4eb900000c0c
-	MOVE.L	8(A0),D1		;15b36: 22280008
-	MULU	D1,D0			;15b3a: c0c1
-	ADD.L	4(A0),D0		;15b3c: d0a80004
-	MOVE.L	D0,(A0)			;15b40: 2080
-LAB_0D83:
-	LEA	16(A0),A0		;15b42: 41e80010
-	DBF	D7,LAB_0D82		;15b46: 51cfffda
-	RTS				;15b4a: 4e75
+RecalcOrePrices: ; Recalculate ore prices
+; Occurs on day 01 of each year
+; New ore price is minimum + (rand(fluctuation)*increment)
+; Old ore price and how much you sell are irrelevant to the new price,
+; it's random
+	MOVEQ	#9,D7			;15b1a:
+	LEA	OREPRICE_00,A0		;15b1c:
+Loop_0D82:
+	SUBQ.W	#1,14(A0)		;15b22:
+	BPL.S	Next_0D83		;15b26: 
+	CLR.W	14(A0)			;15b28:
+	MOVE.W	12(A0),D0		;15b2c:
+	JSR	GetRand			;15b30:
+	MOVE.L	8(A0),D1		;15b36:
+	MULU	D1,D0			;15b3a:
+	ADD.L	4(A0),D0		;15b3c:
+	MOVE.L	D0,(A0)			;15b40:
+Next_0D83:
+	LEA	16(A0),A0		;15b42:
+	DBF	D7,Loop_0D82		;15b46:
+	RTS				;15b4a:
 ;
 FixOrePrices:
-	MOVEQ	#4,D0			;15b4c: 7004
-	JSR	GetRand		;15b4e: 4eb900000c0c
-	ADDQ.B	#2,D0			;15b54: 5400
-LAB_0D85:
-	MOVE.W	D0,-(A7)		;15b56: 3f00
-	MOVEQ	#10,D0			;15b58: 700a
-	JSR	GetRand		;15b5a: 4eb900000c0c
-	LEA	OREPRICE_00,A0		;15b60: 41f900020ad8
-	ASL.W	#4,D0			;15b66: e940
-	ADDA.W	D0,A0			;15b68: d0c0
-	MOVEQ	#4,D0			;15b6a: 7004
-	JSR	GetRand		;15b6c: 4eb900000c0c
-	ADDQ.B	#2,D0			;15b72: 5400
-	MOVE.W	D0,14(A0)		;15b74: 3140000e
-	MOVE.W	(A7)+,D0		;15b78: 301f
-	DBF	D0,LAB_0D85		;15b7a: 51c8ffda
-	MOVE.W	#$014f,D0		;15b7e: 303c014f
-	MOVEQ	#0,D1			;15b82: 7200
-	MOVEQ	#0,D2			;15b84: 7400
-	MOVEQ	#1,D3			;15b86: 7601
-	MOVEQ	#0,D4			;15b88: 7800
-	JSR	MessageWindow		;15b8a: 4eb900008fd2
+	MOVEQ	#4,D0			;15b4c: 2-5
+	JSR	GetRand			;15b4e:
+	ADDQ.B	#2,D0			;15b54:
+Loop_0D85:
+	MOVE.W	D0,-(A7)		;15b56:
+	MOVEQ	#10,D0			;15b58: random ore
+	JSR	GetRand			;15b5a:
+	LEA	OREPRICE_00,A0		;15b60:
+	ASL.W	#4,D0			;15b66:
+	ADDA.W	D0,A0			;15b68:
+	MOVEQ	#4,D0			;15b6a:
+	JSR	GetRand			;15b6c: 2-5
+	ADDQ.B	#2,D0			;15b72:
+	MOVE.W	D0,14(A0)		;15b74:
+	MOVE.W	(A7)+,D0		;15b78:
+	DBF	D0,Loop_0D85		;15b7a:
+	MOVE.W	#$014f,D0		;15b7e:
+	MOVEQ	#0,D1			;15b82:
+	MOVEQ	#0,D2			;15b84:
+	MOVEQ	#1,D3			;15b86:
+	MOVEQ	#0,D4			;15b88:
+	JSR	MessageWindow		;15b8a:
 ; THE IMPERIAL TREASURY HAS FIXED SEVERAL ORE PRICES FOR A NUMBER OF YEARS
 ; TO STABILISE THE ORE MARKET.
 	RTS				;15b90: 4e75
@@ -29810,6 +29871,7 @@ Warhead_10_Swix:
 	SUBI.W	#$0032,684(A0)		;171c0: 0468003202ac
 	BRA.W	Flash_0E55		;171c6: 6000ff5a
 Warhead_10_Rigel:
+; Halves a colony's power generation for 20-39 days.
 	MOVEA.L	TARGETASTEROID,A0	;171ca:
 	CLR.W	698(A0)			;171d0:
 	MOVEQ	#20,D0			;171d4:
@@ -29817,9 +29879,9 @@ Warhead_10_Rigel:
 	ADDI.B	#$14,D0			;171dc: rand: 20-39
 	MOVE.B	D0,97(A0)		;171e0:
 	TST.B	LAB_12EB		;171e4:
-	BNE.S	LAB_0E5B		;171ea:
+	BNE.S	Return_0E5B		;171ea:
 	CMPI.B	#$04,LAB_1308		;171ec: visual effects
-	BEQ.S	LAB_0E5B		;171f4:
+	BEQ.S	Return_0E5B		;171f4:
 	MOVE.W	10(A6),D2		;171f6:
 	LEA	LAB_11EE,A2		;171fa:
 	MOVE.B	#$98,D1			;17200:
@@ -29829,8 +29891,9 @@ Warhead_10_Rigel:
 	JSR	LAB_08A9		;1720e:
 	MOVEQ	#16,D0			;17214:
 	JSR	PlaySound		;17216:
-LAB_0E5B:
+Return_0E5B:
 	RTS				;1721c: 4e75
+;
 Warhead_09_Swix:
 	MOVEA.L	LAB_1287,A0		;1721e: 20790002decc
 	MOVEQ	#99,D0			;17224: 7063
@@ -29841,214 +29904,226 @@ LAB_0E5E:
 	LEA	14(A0),A0		;1722e: 41e8000e
 	DBF	D0,LAB_0E5D		;17232: 51c8fff2
 	TST.B	LAB_12EB		;17236: 4a390002e464
-	BNE.S	LAB_0E5F		;1723c: 662c
+	BNE.S	Return_0E5F		;1723c: 662c
 	MOVE.W	10(A6),D2		;1723e: 342e000a
 	LEA	LAB_11F0,A2		;17242: 45f90001ea42
 	MOVE.B	#$98,D1			;17248: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;1724c: 20790002de54
+	MOVEA.L	CURRENTASTEROID,A0	;1724c: 20790002de54
 	MOVEQ	#51,D0			;17252: 7033
 	MOVEQ	#0,D5			;17254: 7a00
 	JSR	LAB_08A9		;17256: 4eb90000e1f8
 	MOVE.W	#$001e,38(A0)		;1725c: 317c001e0026
 	MOVEQ	#16,D0			;17262: 7010
 	JSR	PlaySound		;17264: 4eb90001a50c
-LAB_0E5F:
+Return_0E5F:
 	RTS				;1726a: 4e75
-LAB_0E60:
-	MOVEM.L	D0/A0/A6,-(A7)		;1726c: 48e78082
-	MOVEA.L	LAB_1288,A1		;17270: 22790002ded0
-	MOVEA.L	LAB_1286,A6		;17276: 2c790002dec8
-	MOVEQ	#120,D7			;1727c: 7e78
-	JSR	LAB_0486		;1727e: 4eb900006d4c
-	TST.B	LAB_12EB		;17284: 4a390002e464
-	BNE.S	LAB_0E61		;1728a: 6622
-	LEA	LAB_11EC,A2		;1728c: 45f90001e9fa
-	MOVE.B	#$98,D1			;17292: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;17296: 20790002de54
-	MOVEQ	#73,D5			;1729c: 7a49
-	MOVEQ	#6,D0			;1729e: 7006
-	JSR	GetRand		;172a0: 4eb900000c0c
-	EXG	D0,D5			;172a6: c145
-	JSR	LAB_08A9		;172a8: 4eb90000e1f8
-LAB_0E61:
-	MOVEM.L	(A7)+,D0/A0/A6		;172ae: 4cdf4101
-	BRA.W	LAB_0E5E		;172b2: 6000ff7a
-Warhead_08_Swix:
-	MOVEA.L	TARGETASTEROID,A0		;172b6: 20790002ded4
-	MOVEQ	#5,D0			;172bc: 7005
-	JSR	GetRand		;172be: 4eb900000c0c
-	ADDQ.B	#5,D0			;172c4: 5a00
-	ADD.B	D0,98(A0)		;172c6: d1280062
-	MOVE.B	#$04,99(A0)		;172ca: 117c00040063
-	TST.B	LAB_12EB		;172d0: 4a390002e464
-	BNE.S	LAB_0E63		;172d6: 662a
-	MOVE.W	10(A6),D2		;172d8: 342e000a
-	LEA	LAB_11F0,A2		;172dc: 45f90001ea42
-	MOVE.B	#$98,D1			;172e2: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;172e6: 20790002de54
-	MOVEQ	#51,D0			;172ec: 7033
-	MOVEQ	#0,D5			;172ee: 7a00
-	JSR	LAB_08A9		;172f0: 4eb90000e1f8
-	MOVE.W	#$001e,38(A0)		;172f6: 317c001e0026
-	JSR	LAB_105D		;172fc: 4eb90001a4f8
-LAB_0E63:
-	RTS				;17302: 4e75
 ;
-LAB_0E64: ; Update
-	TST.B	98(A5)			;17304: 4a2d0062
-	BNE.S	LAB_0E65		;17308: 6602
-	RTS				;1730a: 4e75
+LAB_0E60:
+	MOVEM.L	D0/A0/A6,-(A7)		;1726c:
+	MOVEA.L	LAB_1288,A1		;17270:
+	MOVEA.L	LAB_1286,A6		;17276:
+	MOVEQ	#120,D7			;1727c: Completely destroy building
+	JSR	DamageBuilding		;1727e:
+	TST.B	LAB_12EB		;17284:
+	BNE.S	LAB_0E61		;1728a:
+	LEA	LAB_11EC,A2		;1728c:
+	MOVE.B	#$98,D1			;17292:
+	MOVEA.L	CURRENTASTEROID,A0	;17296:
+	MOVEQ	#73,D5			;1729c:
+	MOVEQ	#6,D0			;1729e:
+	JSR	GetRand			;172a0:
+	EXG	D0,D5			;172a6:
+	JSR	LAB_08A9		;172a8:
+LAB_0E61:
+	MOVEM.L	(A7)+,D0/A0/A6		;172ae:
+	BRA.W	LAB_0E5E		;172b2:
+;
+Warhead_08_Swix:
+	MOVEA.L	TARGETASTEROID,A0	;172b6:
+	MOVEQ	#5,D0			;172bc:
+	JSR	GetRand		        ;172be:
+	ADDQ.B	#5,D0			;172c4: (5~9)
+	ADD.B	D0,98(A0)		;172c6:
+	MOVE.B	#$04,99(A0)		;172ca:
+	TST.B	LAB_12EB		;172d0:
+	BNE.S	Return_0E63		;172d6:
+	MOVE.W	10(A6),D2		;172d8:
+	LEA	LAB_11F0,A2		;172dc:
+	MOVE.B	#$98,D1			;172e2:
+	MOVEA.L	CURRENTASTEROID,A0	;172e6:
+	MOVEQ	#51,D0			;172ec:
+	MOVEQ	#0,D5			;172ee:
+	JSR	LAB_08A9		;172f0:
+	MOVE.W	#$001e,38(A0)		;172f6:
+	JSR	LAB_105D		;172fc:
+Return_0E63:
+	RTS				;17302:
+;
+UpdateSwixWpn: ; Update the effect of Warhead_08_Swix.
+; Deals 10 damage to a random building.
+; When set, triggers once every 4 days for the next
+; 5 to 9 times (20-49 days).
+	TST.B	98(A5)			;17304: if [98]:
+; [98] starts at (5~9) and decreases each turn it triggers.
+; Appears to be turns remaining
+	BNE.S	LAB_0E65		;17308:
+	RTS				;1730a:
 LAB_0E65:
-	SUBQ.B	#1,99(A5)		;1730c: 532d0063
-	BMI.S	LAB_0E66		;17310: 6b02
-	RTS				;17312: 4e75
+	SUBQ.B	#1,99(A5)		;1730c: [99]--
+; [99] starts at 4, decreases each turn and at 0 it resets to 4 and
+; triggers. Appears to be a once-per-four-days effect.
+	BMI.S	LAB_0E66		;17310: if negative:
+	RTS				;17312:
 LAB_0E66:
-	MOVEM.L	D0-D7/A0-A6,-(A7)	;17314: 48e7fffe
-	MOVE.B	#$04,99(A5)		;17318: 1b7c00040063
-	SUBQ.B	#1,98(A5)		;1731e: 532d0062
-	MOVE.L	A5,TARGETASTEROID		;17322: 23cd0002ded4
-	MOVE.L	A6,LAB_1286		;17328: 23ce0002dec8
-	MOVE.L	A0,LAB_1287		;1732e: 23c80002decc
-	MOVE.L	A4,LAB_1288		;17334: 23cc0002ded0
-	MOVEA.L	LAB_1287,A0		;1733a: 20790002decc
-	MOVEQ	#100,D0			;17340: 7064
-	JSR	GetRand		;17342: 4eb900000c0c
-	MULU	#$000e,D0		;17348: c0fc000e
-	ADDA.L	D0,A0			;1734c: d1c0
-LAB_0E67:
-	SUBA.L	#$0000002a,A0		;1734e: 91fc0000002a
-	CMPA.L	LAB_1287,A0		;17354: b1f90002decc
-	BMI.W	LAB_0E6A		;1735a: 6b000088
-	TST.B	0(A0)			;1735e: 4a280000
-	BEQ.S	LAB_0E67		;17362: 67ea
-	SF	LAB_12EB		;17364: 51f90002e464
-	CMPA.L	CURRENTASTEROID,A5		;1736a: bbf90002de54
-	BEQ.S	LAB_0E68		;17370: 6706
-	ST	LAB_12EB		;17372: 50f90002e464
+	MOVEM.L	D0-D7/A0-A6,-(A7)	;17314:
+	MOVE.B	#$04,99(A5)		;17318: [99] = 4
+	SUBQ.B	#1,98(A5)		;1731e: [98]--
+	MOVE.L	A5,TARGETASTEROID	;17322:
+	MOVE.L	A6,LAB_1286		;17328:
+	MOVE.L	A0,LAB_1287		;1732e:
+	MOVE.L	A4,LAB_1288		;17334:
+	MOVEA.L	LAB_1287,A0		;1733a:
+	MOVEQ	#100,D0			;17340:
+	JSR	GetRand	        	;17342:
+	MULU	#$000e,D0		;17348:
+	ADDA.L	D0,A0			;1734c: a0 = random building
+Loop_0E67:
+	SUBA.L	#$0000002a,A0		;1734e: go back three buildings
+	CMPA.L	LAB_1287,A0		;17354:
+	BMI.W	LAB_0E6A		;1735a: if not out of range:
+	TST.B	0(A0)			;1735e:   if a building is not here:
+	BEQ.S	Loop_0E67		;17362:     go back another three
+	SF	LAB_12EB		;17364:
+	CMPA.L	CURRENTASTEROID,A5	;1736a:
+	BEQ.S	LAB_0E68		;17370:
+	ST	LAB_12EB		;17372:  LAB_12EB true if not current ast
 LAB_0E68:
-	MOVEA.L	LAB_1288,A1		;17378: 22790002ded0
-	MOVEA.L	LAB_1286,A6		;1737e: 2c790002dec8
-	MOVEQ	#10,D7			;17384: 7e0a
-	JSR	LAB_0486		;17386: 4eb900006d4c
-	TST.B	LAB_12EB		;1738c: 4a390002e464
-	BNE.S	LAB_0E6A		;17392: 6650
-	CMPI.B	#$01,D0			;17394: 0c000001
-	BEQ.W	LAB_0E69		;17398: 67000022
-	LEA	LAB_11ED,A2		;1739c: 45f90001ea0c
-	MOVEQ	#38,D5			;173a2: 7a26
-	JSR	LAB_09B0		;173a4: 4eb90000fd7a
-	JSR	LAB_105D		;173aa: 4eb90001a4f8
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;173b0: 4cdf7fff
-	SF	LAB_12EB		;173b4: 51f90002e464
-	RTS				;173ba: 4e75
+	MOVEA.L	LAB_1288,A1		;17378: buildings total
+	MOVEA.L	LAB_1286,A6		;1737e: maps
+	MOVEQ	#10,D7			;17384: deal 10 damage
+	JSR	DamageBuilding		;17386:
+	TST.B	LAB_12EB		;1738c: 
+	BNE.S	LAB_0E6A		;17392: if current asteroid:
+	CMPI.B	#$01,D0			;17394:
+	BEQ.W	LAB_0E69		;17398:
+	LEA	LAB_11ED,A2		;1739c:
+	MOVEQ	#38,D5			;173a2:
+	JSR	LAB_09B0		;173a4:
+	JSR	LAB_105D		;173aa:
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;173b0:
+	SF	LAB_12EB		;173b4:
+	RTS				;173ba:
+;
 LAB_0E69:
-	LEA	LAB_11ED,A2		;173bc: 45f90001ea0c
-	MOVE.B	#$98,D1			;173c2: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;173c6: 20790002de54
-	MOVEQ	#38,D5			;173cc: 7a26
-	MOVEQ	#6,D0			;173ce: 7006
-	JSR	GetRand		;173d0: 4eb900000c0c
-	EXG	D0,D5			;173d6: c145
-	JSR	LAB_08A9		;173d8: 4eb90000e1f8
-	JSR	LAB_105D		;173de: 4eb90001a4f8
+	LEA	LAB_11ED,A2		;173bc:
+	MOVE.B	#$98,D1			;173c2:
+	MOVEA.L	CURRENTASTEROID,A0	;173c6:
+	MOVEQ	#38,D5			;173cc:
+	MOVEQ	#6,D0			;173ce:
+	JSR	GetRand		        ;173d0:
+	EXG	D0,D5			;173d6:
+	JSR	LAB_08A9		;173d8:
+	JSR	LAB_105D		;173de:
 LAB_0E6A:
-	MOVEM.L	(A7)+,D0-D7/A0-A6	;173e4: 4cdf7fff
-	SF	LAB_12EB		;173e8: 51f90002e464
-	RTS				;173ee: 4e75
+	MOVEM.L	(A7)+,D0-D7/A0-A6	;173e4:
+	SF	LAB_12EB		;173e8:
+	RTS				;173ee:
+;
 Warhead_10_OreEat:
-	MOVEA.L	LAB_1287,A0		;173f0: 20790002decc
-	MOVEQ	#100,D0			;173f6: 7064
-	JSR	GetRand		;173f8: 4eb900000c0c
-	MULU	#$000e,D0		;173fe: c0fc000e
-	ADDA.L	D0,A0			;17402: d1c0
+	MOVEA.L	LAB_1287,A0		;173f0:
+	MOVEQ	#100,D0			;173f6:
+	JSR	GetRand			;173f8:
+	MULU	#$000e,D0		;173fe:
+	ADDA.L	D0,A0			;17402:
 LAB_0E6C:
-	SUBA.L	#$0000002a,A0		;17404: 91fc0000002a
-	CMPA.L	LAB_1287,A0		;1740a: b1f90002decc
-	BMI.W	LAB_0E70		;17410: 6b0000cc
-	TST.B	0(A0)			;17414: 4a280000
-	BEQ.S	LAB_0E6C		;17418: 67ea
-	MOVE.L	A6,-(A7)		;1741a: 2f0e
-	MOVEA.L	LAB_1288,A1		;1741c: 22790002ded0
-	MOVEA.L	LAB_1286,A6		;17422: 2c790002dec8
-	MOVEQ	#120,D7			;17428: 7e78
-	JSR	LAB_0486		;1742a: 4eb900006d4c
-	TST.B	LAB_12EB		;17430: 4a390002e464
-	BNE.S	LAB_0E6E		;17436: 663a
-	CMPI.B	#$01,D0			;17438: 0c000001
-	BEQ.W	LAB_0E6D		;1743c: 67000012
-	MOVEQ	#73,D5			;17440: 7a49
-	LEA	LAB_11EC,A2		;17442: 45f90001e9fa
-	JSR	LAB_09B0		;17448: 4eb90000fd7a
-	BRA.S	LAB_0E6E		;1744e: 6022
+	SUBA.L	#$0000002a,A0		;17404: pick a building at random
+	CMPA.L	LAB_1287,A0		;1740a:
+	BMI.W	LAB_0E70		;17410:
+	TST.B	0(A0)			;17414:
+	BEQ.S	LAB_0E6C		;17418:
+	MOVE.L	A6,-(A7)		;1741a:
+	MOVEA.L	LAB_1288,A1		;1741c:
+	MOVEA.L	LAB_1286,A6		;17422:
+	MOVEQ	#120,D7			;17428: completely destroy building
+	JSR	DamageBuilding		;1742a:
+	TST.B	LAB_12EB		;17430:
+	BNE.S	LAB_0E6E		;17436:
+	CMPI.B	#$01,D0			;17438:
+	BEQ.W	LAB_0E6D		;1743c:
+	MOVEQ	#73,D5			;17440:
+	LEA	LAB_11EC,A2		;17442:
+	JSR	LAB_09B0		;17448:
+	BRA.S	LAB_0E6E		;1744e:
 LAB_0E6D:
-	LEA	LAB_11EC,A2		;17450: 45f90001e9fa
-	MOVE.B	#$98,D1			;17456: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;1745a: 20790002de54
-	MOVEQ	#73,D5			;17460: 7a49
-	MOVEQ	#6,D0			;17462: 7006
-	JSR	GetRand		;17464: 4eb900000c0c
-	EXG	D0,D5			;1746a: c145
-	JSR	LAB_08A9		;1746c: 4eb90000e1f8
+	LEA	LAB_11EC,A2		;17450:
+	MOVE.B	#$98,D1			;17456:
+	MOVEA.L	CURRENTASTEROID,A0	;1745a:
+	MOVEQ	#73,D5			;17460:
+	MOVEQ	#6,D0			;17462:
+	JSR	GetRand			;17464:
+	EXG	D0,D5			;1746a:
+	JSR	LAB_08A9		;1746c:
 LAB_0E6E:
-	MOVEQ	#4,D0			;17472: 7004
-	JSR	GetRand		;17474: 4eb900000c0c
-	MOVE.W	D0,D1			;1747a: 3200
-	MOVEA.L	TARGETASTEROID,A0		;1747c: 20790002ded4
-	LEA	60(A0),A0		;17482: 41e8003c
-	ADD.W	D1,D1			;17486: d241
-	MOVE.W	#$00c8,D0		;17488: 303c00c8
-	JSR	GetRand		;1748c: 4eb900000c0c
-	ADDI.W	#$0064,D0		;17492: 06400064
-	ADD.W	0(A0,D1.W),D0		;17496: d0701000
-	CMPI.W	#$03e8,D0		;1749a: 0c4003e8
-	BMI.S	LAB_0E6F		;1749e: 6b04
-	MOVE.W	#$03e8,D0		;174a0: 303c03e8
+	MOVEQ	#4,D0			;17472:
+	JSR	GetRand			;17474:
+	MOVE.W	D0,D1			;1747a:
+	MOVEA.L	TARGETASTEROID,A0	;1747c:
+	LEA	60(A0),A0		;17482:
+	ADD.W	D1,D1			;17486:
+	MOVE.W	#$00c8,D0		;17488:
+	JSR	GetRand			;1748c:
+	ADDI.W	#$0064,D0		;17492:
+	ADD.W	0(A0,D1.W),D0		;17496:
+	CMPI.W	#$03e8,D0		;1749a:
+	BMI.S	LAB_0E6F		;1749e:
+	MOVE.W	#$03e8,D0		;174a0:
 LAB_0E6F:
-	MOVE.W	D0,0(A0,D1.W)		;174a4: 31801000
-	MOVEA.L	(A7)+,A6		;174a8: 2c5f
-	TST.B	LAB_12EB		;174aa: 4a390002e464
-	BNE.S	LAB_0E70		;174b0: 662c
-	MOVE.W	10(A6),D2		;174b2: 342e000a
-	LEA	LAB_11F0,A2		;174b6: 45f90001ea42
-	MOVE.B	#$98,D1			;174bc: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;174c0: 20790002de54
-	MOVEQ	#51,D0			;174c6: 7033
-	MOVEQ	#0,D5			;174c8: 7a00
-	JSR	LAB_08A9		;174ca: 4eb90000e1f8
-	MOVE.W	#$001e,38(A0)		;174d0: 317c001e0026
-	MOVEQ	#16,D0			;174d6: 7010
-	JSR	PlaySound		;174d8: 4eb90001a50c
+	MOVE.W	D0,0(A0,D1.W)		;174a4:
+	MOVEA.L	(A7)+,A6		;174a8:
+	TST.B	LAB_12EB		;174aa:
+	BNE.S	LAB_0E70		;174b0:
+	MOVE.W	10(A6),D2		;174b2:
+	LEA	LAB_11F0,A2		;174b6:
+	MOVE.B	#$98,D1			;174bc:
+	MOVEA.L	CURRENTASTEROID,A0	;174c0:
+	MOVEQ	#51,D0			;174c6:
+	MOVEQ	#0,D5			;174c8:
+	JSR	LAB_08A9		;174ca:
+	MOVE.W	#$001e,38(A0)		;174d0:
+	MOVEQ	#16,D0			;174d6:
+	JSR	PlaySound		;174d8:
 LAB_0E70:
-	RTS				;174de: 4e75
+	RTS				;174de:
+;
 Warhead_09_OreEat:
-	MOVEA.L	LAB_1287,A0		;174e0: 20790002decc
-	MOVE.W	#$0063,D2		;174e6: 343c0063
+	MOVEA.L	LAB_1287,A0		;174e0:
+	MOVE.W	#$0063,D2		;174e6:
 LAB_0E72:
-	MOVE.B	0(A0),D1		;174ea: 12280000
-	BEQ.W	LAB_0E75		;174ee: 67000064
-	MOVEM.L	D2/A0,-(A7)		;174f2: 48e72080
-	MOVEA.L	LAB_1288,A1		;174f6: 22790002ded0
-	MOVEA.L	LAB_1286,A6		;174fc: 2c790002dec8
-	MOVEQ	#14,D7			;17502: 7e0e
-	JSR	LAB_0486		;17504: 4eb900006d4c
-	TST.B	LAB_12EB		;1750a: 4a390002e464
-	BNE.S	LAB_0E74		;17510: 663e
-	CMPI.B	#$01,D0			;17512: 0c000001
-	BEQ.W	LAB_0E73		;17516: 67000016
-	MOVEQ	#38,D5			;1751a: 7a26
-	LEA	LAB_11ED,A2		;1751c: 45f90001ea0c
-	JSR	LAB_09B0		;17522: 4eb90000fd7a
-	MOVEM.L	(A7)+,D2/A0		;17528: 4cdf0104
-	BRA.S	LAB_0E75		;1752c: 6026
+	MOVE.B	0(A0),D1		;174ea:
+	BEQ.W	LAB_0E75		;174ee:
+	MOVEM.L	D2/A0,-(A7)		;174f2:
+	MOVEA.L	LAB_1288,A1		;174f6:
+	MOVEA.L	LAB_1286,A6		;174fc:
+	MOVEQ	#14,D7			;17502: 14 damage
+	JSR	DamageBuilding		;17504:
+	TST.B	LAB_12EB		;1750a:
+	BNE.S	LAB_0E74		;17510:
+	CMPI.B	#$01,D0			;17512:
+	BEQ.W	LAB_0E73		;17516:
+	MOVEQ	#38,D5			;1751a:
+	LEA	LAB_11ED,A2		;1751c:
+	JSR	LAB_09B0		;17522:
+	MOVEM.L	(A7)+,D2/A0		;17528:
+	BRA.S	LAB_0E75		;1752c:
 LAB_0E73:
-	LEA	LAB_11ED,A2		;1752e: 45f90001ea0c
-	MOVE.B	#$98,D1			;17534: 123c0098
-	MOVEA.L	CURRENTASTEROID,A0		;17538: 20790002de54
-	MOVEQ	#38,D5			;1753e: 7a26
-	MOVEQ	#6,D0			;17540: 7006
-	JSR	GetRand		;17542: 4eb900000c0c
-	EXG	D0,D5			;17548: c145
-	JSR	LAB_08A9		;1754a: 4eb90000e1f8
+	LEA	LAB_11ED,A2		;1752e:
+	MOVE.B	#$98,D1			;17534:
+	MOVEA.L	CURRENTASTEROID,A0	;17538:
+	MOVEQ	#38,D5			;1753e:
+	MOVEQ	#6,D0			;17540:
+	JSR	GetRand			;17542:
+	EXG	D0,D5			;17548:
+	JSR	LAB_08A9		;1754a:
 LAB_0E74:
 	MOVEM.L	(A7)+,D2/A0		;17550: 4cdf0104
 LAB_0E75:
@@ -30242,7 +30317,7 @@ LAB_0E8B:
 	MOVEQ	#66,D2			;177ae: 7442
 	BSR.W	LAB_0FAC		;177b0: 61001940
 	MOVE.B	#$12,LAB_12DF		;177b4: 13fc00120002e44f
-	MOVE.B	#$3c,LAB_12DE		;177bc: 13fc003c0002e44e
+	MOVE.B	#$3c,EVENTCOUNT		;177bc: 13fc003c0002e44e
 	MOVE.L	#$00061a80,CASH_GENERAL	        ;177c4: cash = 400,000. starting money?
 	RTS				;177ce: 
 LAB_0E8C:
@@ -30292,7 +30367,7 @@ LAB_0E90:
 	MOVE.W	(A7)+,D7		;1783e: 3e1f
 	DBF	D7,LAB_0E90		;17840: 51cffff4
 	MOVE.B	#$12,LAB_12DF		;17844: 13fc00120002e44f
-	MOVE.B	#$3c,LAB_12DE		;1784c: 13fc003c0002e44e
+	MOVE.B	#$3c,EVENTCOUNT		;1784c: 13fc003c0002e44e
 	MOVE.L	#$000493e0,CASH_GENERAL	        ;17854: 300,000; starting cash?
 	RTS				;1785e: 4e75
 LAB_0E91:
@@ -30703,9 +30778,9 @@ LAB_0EBA:
 	RTS				;17dec: 4e75
 LAB_0EBB:
 	CMPI.W	#$0006,ALIENID		;17dee: 0c7900060002defe
-	BNE.S	LAB_0EBE		;17df6: 6650
+	BNE.S	Return_0EBE		;17df6: 6650
 	BTST	#2,LAB_130F		;17df8: 083900020002e489
-	BEQ.S	LAB_0EBE		;17e00: 6746
+	BEQ.S	Return_0EBE		;17e00: 6746
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;17e02: 20790000055a
 	MOVEQ	#23,D0			;17e08: 7017
 LAB_0EBC:
@@ -30716,7 +30791,7 @@ LAB_0EBC:
 	CMPI.B	#$01,D1			;17e18: 0c010001
 	BNE.S	LAB_0EBD		;17e1c: 6608
 	BTST	#4,90(A0)		;17e1e: 08280004005a
-	BNE.S	LAB_0EBE		;17e24: 6622
+	BNE.S	Return_0EBE		;17e24: 6622
 LAB_0EBD:
 	LEA	750(A0),A0		;17e26: 41e802ee
 	DBF	D0,LAB_0EBC		;17e2a: 51c8ffde
@@ -30728,9 +30803,9 @@ LAB_0EBD:
 	MOVEQ	#0,D4			;17e40: 7800
 	JSR	MessageWindow		;17e42: 4eb900008fd2
 ; REPORTS ARRIVING SUGGEST THAT THE ALIEN CLOAKING DEVICE HAS POWERED DOWN!
-LAB_0EBE:
+Return_0EBE:
 	RTS				;17e48: 4e75
-LAB_0EBF:
+LAB_0EBF: ; iterate over all asteroids
 	CMPI.W	#$ff00,LAB_12C4		;17e4a: 0c79ff000002e184
 	BNE.S	LAB_0EC0		;17e52: 660c
 	ST	LAB_12C5		;17e54: 50f90002e185
@@ -32847,7 +32922,7 @@ LAB_0FE6:
 LAB_0FE7:
 	DC.W	$0000			;19732
 LAB_0FE9:
-	TST.B	LAB_12E0		;19734: 4a390002e450
+	TST.B	MAGSTORM		;19734: 4a390002e450
 	BNE.W	LAB_0FED		;1973a: 66000082
 	TST.B	LAB_12B0		;1973e: 4a390002e09a
 	BNE.W	LAB_0FED		;19744: 66000078
@@ -34820,7 +34895,9 @@ TERRAN_BUILDING_STATS: ; building stats
 ; 40 buildings x 10 bytes each store all Terran building's base stats
 ; [00-01] WORD Name (index of name in strings list)
 ; [02-03] WORD Desc (same)
-; [04-05] WORD Cost (in credits)
+; [04-05] WORD Cost (in credits) (terran only)
+;   [04]  BYTE FourSquare (alien buildings: 01 if four squares)
+;   [05]  BYTE ??? (alien buildings)
 ; [06]    BYTE Hitpoints
 ; [07]    BYTE BuildTime (in days)
 ; [08]    BYTE Scaffold (height of scaffold when constructing building)
@@ -35963,6 +36040,23 @@ LAB_11BD:
 	DC.L	$00010001,$00050006,$00010001
 	DC.W	$0002
 TERRANSHIPSTATS_00: ; ship construction data. 24 bytes each
+; structure:
+; [0] BYTE  Armor
+; [1] BYTE  Speed (speed-1)
+; [2] BYTE  Hardpoints (number of hardpoints)
+; [3] BYTE  Build time
+; [4] BYTE  Ore 1 type
+; [5] BYTE  Ore 1 amount
+; [6] BYTE  Ore 2 type
+; [7] BYTE  Ore 2 amount
+; [8] BYTE  ID number
+; [9] BYTE  ??? (always zero)
+; [10-11] WORD  Name (index of name string)
+; [12-13] WORD  Cost
+; [14-15] WORD  Length (metres)
+; [16-17] WORD  ??? (Destr/Term 8, Transp/FleetB 3, OSD 1)
+; [18-19] WORD  ???
+; [20-23] LONG  ??? (ptr)
 ; Interesting. Theoretical ship zero would have the following stats:
 ; Armor: 10, Speed: 2, Hardpoints: 0, Build time: 10 days
 ; Ore1: 0002 (2 Selenium), Ore2: 0301 (1 Crystalite)
@@ -36688,7 +36782,7 @@ LAB_1228:
 	DC.L	$04040404,$06060606,$06060505,$05050505
 	DC.L	$05050505,$05040404,$04040404
 	DC.W	$0404
-LAB_1229:
+LAB_1229: ; extra ore survey random table
 	DC.L	$00c800c8,$00c80064,$00320032,$0014000a ;20010
 LAB_122A: ; some kind of lookup table for screen generators
 	DC.L	$ff280004,$00040004,$00040004,$00040044 ;20020
@@ -36805,7 +36899,7 @@ RADIATION_TABLE:
 	DC.L	$000a0b0d,$0e111419	;2014a
 	DC.W	$2132
 	DC.B	$64
-LAB_122F:
+LAB_122F: ; reinforcements ship type table
 	DC.B	$02			;20155
 	DC.L	$03043536
 LAB_1230:
@@ -38215,8 +38309,13 @@ SAVEDATA2_000_CARGO:
 	DC.L	CARGO_08		;20acc: 0002e148
 	DS.L	1			;20ad0
 	DC.L	CARGO_09		;20ad4: 0002e15c
-; Ore price chart follows, 4 longs, 1 word, 1 word padding
-; Current Price, Min Price, Increment, Fluctuation, padding
+; ORE PRICE CHART
+; For each of ten ores:
+; [00-03]  LONG  Current price
+; [04-07]  LONG  Minimum price
+; [08-11]  LONG  Increment
+; [12-13]  WORD  Fluctuation
+; [14-15]  WORD  Fixed
 OREPRICE_00: ; Selenium
 	DC.L	$00000032,$00000014,$00000005,$00140000 ;20ad8
 OREPRICE_01: ; Asteros
@@ -40597,15 +40696,15 @@ LAB_12DC: ;
 	DC.B	$ff			;2e44c
 FLAG_VOICE:
 	DC.B	$ff			;2e44d
-LAB_12DE:
+EVENTCOUNT:
 	DC.B	$01			;2e44e
 LAB_12DF:
 	DC.B	$01			;2e44f
-LAB_12E0:
+MAGSTORM:
 	DS.B	1			;2e450
 LAB_12E1:
 	DC.B	$fe			;2e451
-LAB_12E2:
+LAB_12E2: ; meteor shower countdown
 	DS.B	1			;2e452
 LAB_12E3:
 	DS.B	1			;2e453
@@ -40615,7 +40714,7 @@ FLAG_12E5:
 	DS.B	1			;2e455
 LAB_12E6: ; often bit-set
 	DS.B	1			;2e456
-CLOCK_12E7: ; This is only ever set to 0 but often compared to bitmasks
+CLOCK_12E7: ; appears to be number of days in current year
 	DC.B	$01			;2e457
 YEAR_12E8: ; year. 380
 	DC.W	$017c			;2e458
@@ -40699,10 +40798,15 @@ LAB_130D:
 LAB_130E:
 	DS.B	1			;2e488
 LAB_130F:
+; A variable set to 0b0000 0100 for Swixaran, 0 for other aliens
+; copied from SAVEDATA1_ALIEN_15
 	DS.B	1			;2e489
 ; Massive save game data chunk ends here.
 ; 0x20a88 for 55810 bytes until 0x2e48a.
 	DC.W	$4e71 ; return
+;
+;
+;
 LAB_1310:
 	DC.L	$002300e8,$00950024,$00e800a5,$000a00e8 ;2e48c
 	DC.L	$00b5ffff
