@@ -390,16 +390,20 @@ BUFFER_08: ; 64 bytes public
 SAVEDATA3_SHIPS: ; 37800 bytes
 ; 54 bytes x 700 ships
 ; All bytes 8 onward are default to zeroes unless otherwise specified.
+; Accounts for all ships and vortex storms.
 ; [0]     BYTE  ??
 ; [8]     BYTE  SHIPID (OSD: 0x39)
 ; [9]     BYTE  FACING (Default: rand(0-7), or FF for FBS/OSD.)
-; [10]    BYTE  ??? (OSD: 3?)
-; [11]    BYTE  ??? (OSD: 18?))
+; [10]    BYTE  ??? (OSD: 3?) d0 - coord?
+; [11]    BYTE  ??? (OSD: 18?)) d1 - coord?
 ; [12-13] WORD  ??? (Default: 0xFFFF. Byte 13 copied from byte 11 on biggest ships.)
+;   12: FF on vortex hit
 ; [14-15] WORD  ??? (Default: 0008)
 ; [16-17] WORD  ??? (Default: 0004)
 ; [18]    BYTE  ??? (Default: -1)
+; [19]    BYTE  CYCLE? (Vortex: -1 per, reset to 5 at 0)
 ; [20]    BYTE  SPEED? (OSD: 20?)
+;   0x11 0001 0001 = Vortex
 ;   bit 4: True if Fleet Battleship or Orbital Space Dock.
 ; [21]    BYTE  Animation? (Default: 00, can be negative)
 ;   bit 1: Set true if phased out due to Warp Generator.
@@ -407,10 +411,16 @@ SAVEDATA3_SHIPS: ; 37800 bytes
 ;   bit 5: Set true if ship carries a Deflector.
 ;   bit 6: Set true if a weapon is firing.
 ; [22]    BYTE  Time-to-Fire (Observed cycling. Raised to 100 if static inducer.)
+;   0x32 (50) on Vortex
 ; [23]    BYTE  ??? (OSD: 3? Default: 1)
-; [24]    BYTE  ??? (Set to 0x0d00 when ship reduced to 0 or less armour)
+; [24-25] WORD  ??? (Set to 0x0d00 when ship reduced to 0 or less armour)
+;   0x0f 0000 1111 on Vortex
+;   0x29 0010 1001 on Tylaran vortex
+;   0x0400 on kll-kp-qua small ship with hardpoint #11? self-destruct?
+; [28-31] LONG  ??? Kll-Kp-Qua hardpoint 11 sets/checks this
 ; [36-37] WORD  ??? (Default: 0xffff)
 ; [38-39] WORD  ??? (Default: 0x0032 / 50)
+;   0000 (CLR.W) on Vortex
 ; [42-47] BYTE[6] HARDPOINT?
 ; [48]    BYTE  FLEETID? 
 ; [49]    BYTE  ???  AlienHP15 countdown
@@ -444,7 +454,7 @@ SAVEDATA5_ASTEROIDS: ; 18000 bytes
 ;   Set 0x46 (70) on colonization/destruction?
 ; [25]      BYTE     ???? (must be positive to build spy satellites. owner? stasis?)
 ;                    (must be positive for buildings to work)
-; [38-39]   WORD     Set to 30 by Swixaran missile 8
+; [38-39]   WORD     Set to 30 by Swixaran missile 8/9
 ; [40-57?]  STRING   Asteroid name
 ; [60-79]   WORD[10] ORELEFT (Un-mined ore in asteroid)
 ; [80]      BYTE     RADIATION (1 = 10%)
@@ -3107,7 +3117,7 @@ LAB_01BF:
 	MOVEQ	#55,D2			;0213e: 
 	MOVEA.L	CURRENTASTEROID,A0		;02140: 
 	MOVEQ	#0,D6			;02146: 
-	JSR	Shipbuilding_0866		;02148: 
+	JSR	SpawnObject		;02148: 
 	MOVE.W	#$050c,42(A6)		;0214e: 
 	MOVEQ	#-1,D0			;02154: 
 	MOVE.L	D0,44(A6)		;02156: 
@@ -11712,7 +11722,7 @@ LAB_05BB:
 	MOVE.L	D2,(A0)			;08fa0: 
 LAB_05BC:
 	RTS				;08fa2: 
-LAB_05BD:
+Daily_05BD:
 	LEA	LAB_1225,A0		;08fa4: 
 LAB_05BE:
 	MOVE.W	2(A0),D0		;08faa: 
@@ -16120,7 +16130,7 @@ LAB_07A8:
 LAB_07A9:
 	SF	LAB_12EB		;0cb6e: 
 	RTS				;0cb74: 
-LAB_07AA:
+Daily_07AA:
 	ST	LAB_12EB		;0cb76: 
 	MOVEA.L	SAVEDATA5_ASTEROIDS,A0		;0cb7c: 
 	MOVE.W	LAB_07BF,D0		;0cb82: 
@@ -16284,7 +16294,7 @@ LAB_07BE:
 	RTS				;0cd4e: 
 LAB_07BF:
 	DC.W	$0000			;0cd50
-LAB_07C0:
+Daily_07C0:
 	ST	LAB_12EB		;0cd52: 
 	ST	LAB_12F8		;0cd58: 
 	MOVEA.L	BUFFER_16,A6		;0cd5e: 
@@ -16479,19 +16489,19 @@ LAB_07D9:
 	SF	LAB_12F8		;0cfb8: 
 	MOVE.B	#$05,LAB_1308		;0cfbe: 
 	RTS				;0cfc6: 
-LAB_07DA:
+Daily_07DA:
 	MOVEA.L	CURRENTASTEROID,A6		;0cfc8: 
 	MOVE.L	16(A6),D0		;0cfce: 
 	BEQ.W	LAB_07F0		;0cfd2: 
 	MOVEA.L	D0,A6			;0cfd6: 
 	BRA.S	LAB_07DD		;0cfd8: 
-LAB_07DB:
+Daily_07DB:
 	MOVEA.L	CURRENTASTEROID,A6		;0cfda: 
 	MOVE.L	8(A6),D0		;0cfe0: 
 	BEQ.W	LAB_07F0		;0cfe4: 
 	MOVEA.L	D0,A6			;0cfe8: 
 	BRA.S	LAB_07DD		;0cfea: 
-LAB_07DC:
+Daily_07DC:
 	BSR.W	LAB_0890		;0cfec: 
 	CLR.W	LAB_12B5		;0cff0: 
 	MOVEA.L	CURRENTASTEROID,A6		;0cff6: 
@@ -17590,7 +17600,7 @@ LAB_0865: ; ship id a6 is zero
 	MOVEQ	#0,D3			;0dc94: return 0 (success)
 	RTS				;0dc96: a6 = ptr to ship slot
 ;
-Shipbuilding_0866: ; used in shipbuilding. spawn object?
+SpawnObject: ; used in shipbuilding. spawn object?
 ; d0-d7
 ; OSD:    ( 3,18,57,d3,d4,d5, 0 ,0)
 ; Vortex: ( ?, ?,52, ?, ?, ?,16, 0)
@@ -18274,7 +18284,7 @@ LAB_08BB:
 	MOVEQ	#0,D7			;0e3ee: 
 	MOVEA.L	TARGETASTEROID,A0		;0e3f0: 
 	MOVEQ	#16,D6			;0e3f6: 
-	BSR.W	Shipbuilding_0866		;0e3f8: 
+	BSR.W	SpawnObject		;0e3f8: 
 	BMI.S	LAB_08BC		;0e3fc: 
 	MOVEA.L	(A7),A1			;0e3fe: 
 	MOVE.B	27(A1),27(A6)		;0e400: 
@@ -19018,7 +19028,7 @@ LAB_0912:
 	CMPA.L	CURRENTASTEROID,A0		;0eda0: 
 	BNE.S	LAB_0913		;0eda6: 
 	MOVEQ	#6,D0			;0eda8: 
-	JSR	LAB_104F		;0edaa: 
+	JSR	Daily_104F		;0edaa: 
 LAB_0913:
 	BSR.W	LAB_0936		;0edb0: 
 	MOVEQ	#0,D0			;0edb4: 
@@ -19761,38 +19771,38 @@ LAB_096E:
 	MOVE.W	D2,-(A7)		;0f6ee: 
 	LEA	LAB_11EE,A2		;0f6f0: 
 	MOVE.B	#$98,D1			;0f6f6: 
-	MOVEA.L	CURRENTASTEROID,A0		;0f6fa: 
+	MOVEA.L	CURRENTASTEROID,A0	;0f6fa: 
 	MOVEQ	#46,D0			;0f700: 
 	MOVEQ	#0,D5			;0f702: 
 	BSR.W	LAB_08A9		;0f704: 
-	BMI.S	LAB_0970		;0f708: 
+	BMI.S	Return_0970		;0f708: 
 	JSR	LAB_105D		;0f70a: 
 	MOVE.W	(A7)+,D2		;0f710: 
 LAB_096F:
 	MOVE.B	D2,D1			;0f712: 
 	ASR.W	#8,D2			;0f714: 
 	MOVE.B	D2,D0			;0f716: 
-	MOVEA.L	TARGETASTEROID,A0		;0f718: 
+	MOVEA.L	TARGETASTEROID,A0	;0f718: 
 	MOVEQ	#52,D2			;0f71e: 
 	MOVEQ	#0,D7			;0f720: 
 	MOVEQ	#16,D6			;0f722: 
-	BSR.W	Shipbuilding_0866		;0f724: 
-	BMI.S	LAB_0970		;0f728: 
+	BSR.W	SpawnObject		;0f724: vortex
+	BMI.S	Return_0970		;0f728: 
 	MOVE.B	#$11,20(A6)		;0f72a: 
 	MOVE.B	#$0f,24(A6)		;0f730: 
 	CLR.W	38(A6)			;0f736: 
 	MOVE.B	#$32,22(A6)		;0f73a: 
-LAB_0970:
+Return_0970:
 	RTS				;0f740: 
-LAB_0971:
+LAB_0971: ; per frame?
 	MOVE.L	A6,-(A7)		;0f742: 
 	CMPI.B	#$01,LAB_1308		;0f744: 
 	BNE.S	LAB_0972		;0f74c: 
-	MOVEA.L	CURRENTASTEROID,A0		;0f74e: 
-	CMPA.L	TARGETASTEROID,A0		;0f754: 
+	MOVEA.L	CURRENTASTEROID,A0	;0f74e: 
+	CMPA.L	TARGETASTEROID,A0	;0f754: 
 	BNE.S	LAB_0972		;0f75a: 
 	MOVEQ	#14,D0			;0f75c: 
-	JSR	LAB_1051		;0f75e: 
+	JSR	LAB_1051		;0f75e: sound #14?
 LAB_0972:
 	MOVE.B	#$32,22(A6)		;0f764: 
 	SUBQ.B	#1,19(A6)		;0f76a: 
@@ -19804,53 +19814,53 @@ LAB_0973:
 	BNE.W	LAB_097B		;0f77e: 
 LAB_0974:
 	MOVEQ	#100,D0			;0f782: 
-	JSR	GetRand		;0f784: 
+	JSR	GetRand			;0f784: 
 	CMPI.B	#$63,D0			;0f78a: 
-	BMI.S	LAB_0976		;0f78e: 
+	BMI.S	LAB_0976		;0f78e: 1% chance to split
 	MOVE.B	10(A6),D0		;0f790: 
 	MOVE.B	11(A6),D1		;0f794: 
-	MOVEA.L	TARGETASTEROID,A0		;0f798: 
+	MOVEA.L	TARGETASTEROID,A0	;0f798: 
 	MOVEQ	#52,D2			;0f79e: 
 	MOVEQ	#0,D7			;0f7a0: 
 	MOVEQ	#16,D6			;0f7a2: 
-	BSR.W	Shipbuilding_0866		;0f7a4: 
-	BMI.S	LAB_0975		;0f7a8: 
+	BSR.W	SpawnObject		;0f7a4:  ; split vortex?
+	BMI.S	Return_0975		;0f7a8: 
 	MOVE.B	#$11,20(A6)		;0f7aa: 
 	MOVE.B	#$0f,24(A6)		;0f7b0: 
 	CLR.W	38(A6)			;0f7b6: 
-LAB_0975:
+Return_0975:
 	MOVEA.L	(A7)+,A6		;0f7ba: 
 	MOVEQ	#0,D0			;0f7bc: 
 	RTS				;0f7be: 
-LAB_0976:
-	CMPI.B	#$33,D0			;0f7c0: 
-	BMI.S	LAB_0978		;0f7c4: 
+LAB_0976: ; on hit?
+	CMPI.B	#$33,D0			;0f7c0: 51
+	BMI.S	LAB_0978		;0f7c4: bdlg 0-50?
 	ST	12(A6)			;0f7c6: 
 	MOVEQ	#0,D0			;0f7ca: 
 	MOVEQ	#0,D1			;0f7cc: 
 	MOVE.B	10(A6),D0		;0f7ce: 
 	MOVE.B	11(A6),D1		;0f7d2: 
 	MOVEA.L	LAB_1286,A0		;0f7d6: 
-	ASL.W	#2,D0			;0f7dc: 
-	MULU	#$0044,D1		;0f7de: 
+	ASL.W	#2,D0			;0f7dc: x 4
+	MULU	#$0044,D1		;0f7de: x 68
 	ADD.W	D0,D1			;0f7e2: 
 	ADDA.L	D1,A0			;0f7e4: 
-	MOVE.W	2(A0),D0		;0f7e6: 
-	BPL.S	LAB_0974		;0f7ea: 
-	MOVEQ	#2,D7			;0f7ec: 
-	CMPI.W	#$0005,ALIENID		;0f7ee: 
+	MOVE.W	2(A0),D0		;0f7e6:
+	BPL.S	LAB_0974		;0f7ea: split instead of damage? huh
+	MOVEQ	#2,D7			;0f7ec: 2 damage?
+	CMPI.W	#$0005,ALIENID		;0f7ee: Rigellians weak to vortex?
 	BNE.S	LAB_0977		;0f7f6: 
-	MOVEQ	#5,D7			;0f7f8: 
+	MOVEQ	#5,D7			;0f7f8: 5 damage?
 LAB_0977:
 	BSR.W	LAB_09B5		;0f7fa: 
-	BRA.S	LAB_0975		;0f7fe: 
+	BRA.S	Return_0975		;0f7fe: 
 LAB_0978:
-	CMPI.B	#$30,D0			;0f800: 
+	CMPI.B	#$30,D0			;0f800: 48
 	BMI.S	LAB_0979		;0f804: 
 	BSR.W	LAB_08E1		;0f806: 
 	MOVEQ	#14,D0			;0f80a: 
 	JSR	LAB_1056		;0f80c: 
-	BRA.S	LAB_0975		;0f812: 
+	BRA.S	Return_0975		;0f812: 
 LAB_0979:
 	EXT.L	D0			;0f814: 
 	DIVU	#$0006,D0		;0f816: 
@@ -19880,13 +19890,13 @@ LAB_097A:
 	ADD.W	D3,D4			;0f85e: 
 	ADDA.L	D4,A0			;0f860: 
 	TST.W	2(A0)			;0f862: 
-	BEQ.W	LAB_0975		;0f866: 
+	BEQ.W	Return_0975		;0f866: 
 	MOVE.B	D5,12(A6)		;0f86a: 
 	MOVE.B	D6,13(A6)		;0f86e: 
 	MOVE.B	D7,9(A6)		;0f872: 
 LAB_097B:
 	BSR.W	LAB_086D		;0f876: 
-	BRA.W	LAB_0975		;0f87a: 
+	BRA.W	Return_0975		;0f87a: 
 LAB_097C:
 	MOVE.L	A6,-(A7)		;0f87e: 
 	CMPI.B	#$01,LAB_1308		;0f880: 
@@ -19908,7 +19918,7 @@ LAB_097E:
 LAB_097F:
 	MOVEQ	#100,D0			;0f8be: 
 	JSR	GetRand		;0f8c0: 
-	CMPI.B	#$61,D0			;0f8c6: 
+	CMPI.B	#$61,D0			;0f8c6: 3% chance to split
 	BMI.S	LAB_0981		;0f8ca: 
 	MOVE.B	10(A6),D0		;0f8cc: 
 	MOVE.B	11(A6),D1		;0f8d0: 
@@ -19916,7 +19926,7 @@ LAB_097F:
 	MOVEQ	#68,D2			;0f8da: 
 	MOVEQ	#0,D7			;0f8dc: 
 	MOVEQ	#16,D6			;0f8de: 
-	BSR.W	Shipbuilding_0866		;0f8e0: 
+	BSR.W	SpawnObject		;0f8e0: vortex split
 	BMI.S	LAB_0980		;0f8e4: 
 	MOVE.B	#$11,20(A6)		;0f8e6: 
 	MOVE.B	#$29,24(A6)		;0f8ec: 
@@ -20015,7 +20025,7 @@ LAB_0989:
 	ORI.B	#$00,D0			;0f9f8: 
 ;
 Warhead_08_Stasis:
-; Aliens 2, 3 and 6 use Stasis.
+; Aliens 2 and 3 use Stasis, 6 uses with alternate effect.
 	TST.B	21(A6)			;0f9fc: 
 	BPL.S	LAB_098B		;0fa00: 
 	CMPI.W	#$0006,ALIENID		;0fa02: 
@@ -20115,9 +20125,9 @@ LAB_0997:
 	BMI.S	LAB_0998		;0fb4a:
 	MOVEQ	#100,D0			;0fb4c:
 	JSR	GetRand			;0fb4e:
-	CMPI.B	#$19,D0			;0fb54:
+	CMPI.B	#$19,D0			;0fb54: 25% chance
 	BPL.W	LAB_0998		;0fb58:
-	MOVE.W	#$0d00,24(A0)		;0fb5c:
+	MOVE.W	#$0d00,24(A0)		;0fb5c: destroy ship
 LAB_0998:
 	TST.L	D1			;0fb62:
 	BEQ.S	LAB_0999		;0fb64:
@@ -20134,9 +20144,9 @@ LAB_099A:
 	BMI.S	LAB_099B		;0fb80:
 	MOVEQ	#100,D0			;0fb82:
 	JSR	GetRand			;0fb84:
-	CMPI.B	#$19,D0			;0fb8a:
+	CMPI.B	#$19,D0			;0fb8a: 25% chance
 	BPL.W	LAB_099B		;0fb8e:
-	MOVE.W	#$0d00,24(A0)		;0fb92:
+	MOVE.W	#$0d00,24(A0)		;0fb92: destroy ship
 LAB_099B:
 	TST.L	D1			;0fb98:
 	BEQ.S	LAB_099C		;0fb9a:
@@ -21673,7 +21683,7 @@ LAB_0A5A:
 	MOVEQ	#52,D2			;10d66:
 	MOVEQ	#0,D7			;10d68:
 	MOVEQ	#16,D6			;10d6a:
-	BSR.W	Shipbuilding_0866	;10d6c:
+	BSR.W	SpawnObject		;10d6c: vortex
 	BMI.S	Return_0A5B		;10d70:
 	MOVE.B	#$11,20(A6)		;10d72: 17
 	MOVE.B	#$0f,24(A6)		;10d78: 15
@@ -21703,7 +21713,7 @@ AlienHardpoint12: ; ground weapon, 10% chance of firing
 	MOVEQ	#68,D2			;10dca:
 	MOVEQ	#0,D7			;10dcc:
 	MOVEQ	#16,D6			;10dce:
-	BSR.W	Shipbuilding_0866	;10dd0:
+	BSR.W	SpawnObject		;10dd0:
 	BMI.S	Return_0A5D		;10dd4:
 	MOVE.B	#$11,20(A6)		;10dd6: 17
 	MOVE.B	#$29,24(A6)		;10ddc: 41
@@ -25318,9 +25328,9 @@ LAB_0C29:
 ;
 LAB_0C2A: ; main game loop here maybe
 	TST.B	LAB_12AD		;13b3c:
-	BNE.W	LAB_0C3F		;13b42:
+	BNE.W	Daily_0C3F		;13b42:
 	TST.B	LAB_12AF		;13b46:
-	BNE.W	LAB_0C3F		;13b4c:
+	BNE.W	Daily_0C3F		;13b4c:
 	JSR	LAB_0B7B		;13b50:
 	BTST	#4,LAB_12E6		;13b56:
 	BEQ.W	LAB_0C2E		;13b5e:
@@ -25452,22 +25462,22 @@ LAB_0C3D:
 	CMPI.B	#$01,CLOCK_12E7		;13d48: day 1 of each year
 	BNE.S	LAB_0C3E		;13d50: 
 	BSR.W	RecalcOrePrices		;13d52: fluctuate ore prices?
-LAB_0C3E: ; every other day of the year:
-	JSR	LAB_07DC		;13d56: 
-	JSR	LAB_07DB		;13d5c: 
-	JSR	LAB_07DA		;13d62: 
-	JSR	LAB_07AA		;13d68: 
-	JSR	LAB_07C0		;13d6e: 
-	JSR	LAB_108A		;13d74: 
-	JSR	LAB_05BD		;13d7a: 
+LAB_0C3E: ; every day of the year:
+	JSR	Daily_07DC		;13d56: 
+	JSR	Daily_07DB		;13d5c: 
+	JSR	Daily_07DA		;13d62: 
+	JSR	Daily_07AA		;13d68: 
+	JSR	Daily_07C0		;13d6e: 
+	JSR	Daily_108A		;13d74: 
+	JSR	Daily_05BD		;13d7a: 
 	TST.B	LAB_12F1		;13d80: 
-	BEQ.S	LAB_0C3F		;13d86: 
+	BEQ.S	Daily_0C3F		;13d86: 
 	TST.B	LAB_12F2		;13d88: 
-	BNE.S	LAB_0C3F		;13d8e: 
+	BNE.S	Daily_0C3F		;13d8e: 
 	MOVEQ	#5,D0			;13d90: 
-	JSR	LAB_104F		;13d92: 
+	JSR	Daily_104F		;13d92: 
 	ST	LAB_12F2		;13d98: 
-LAB_0C3F:
+Daily_0C3F:
 	BCLR	#0,LAB_12E6		;13d9e: 
 	RTS				;13da6: 
 LAB_0C40:
@@ -25521,7 +25531,7 @@ LAB_0C48:
 	DBF	D0,Loop_0C44		;13e3e: 
 	RTS				;13e42: 
 BUILDING_TRIGGERS:
-; Several buildings have some attribute that triggers once per interval,
+; Several buildings have some attribute that triggers once per day,
 ; such as a turret firing or repair facility repairing.
 	DC.L	NormalBuilding		;13e44: LIVING QUARTERS
 	DC.L	NormalBuilding		;13e48: POWER STORE
@@ -25781,7 +25791,7 @@ LAB_0C67:
 	MOVEQ	#0,D7			;14152: 
 	MOVEA.L	A5,A0			;14154: 
 	MOVEQ	#16,D6			;14156: 
-	JSR	Shipbuilding_0866		;14158: 
+	JSR	SpawnObject		;14158: 
 	MOVEA.L	A6,A0			;1415e: 
 	CLR.W	18(A6)			;14160: 
 	MOVE.B	#$91,20(A6)		;14164: 
@@ -26131,7 +26141,7 @@ LAB_0C8F: ; if orbital space dock
 	MOVEQ	#0,D7			;144ce:
 	MOVEQ	#57,D2			;144d0:
 	MOVEQ	#0,D6			;144d2:
-	JSR	Shipbuilding_0866	;144d4: (3,18,57,d3,d4,d5,0,0)
+	JSR	SpawnObject	;144d4: (3,18,57,d3,d4,d5,0,0)
 	BMI.S	ClearYard		;144da:
 	MOVEM.L	(A7)+,D1-D3/A2		;144dc:
 	MOVE.W	D1,50(A6)		;144e0:
@@ -26264,7 +26274,7 @@ Loop_0C9B:
 	BSET	#4,90(A0)		;14666:
 LAB_0C9C:
 	MOVEQ	#0,D6			;1466c:
-	JSR	Shipbuilding_0866	;1466e:
+	JSR	SpawnObject	;1466e:
 	MOVEM.L	(A7)+,D1-D3/A2/A5	;14674:
 	MOVE.W	D1,50(A6)		;14678:
 	MOVE.L	D2,42(A6)		;1467c:
@@ -26409,7 +26419,7 @@ LAB_0CAE:
 	MOVEQ	#0,D7			;147f2: 
 	MOVE.L	A2,-(A7)		;147f4: 
 	MOVEQ	#0,D6			;147f6: 
-	JSR	Shipbuilding_0866		;147f8: 
+	JSR	SpawnObject		;147f8: 
 	MOVEA.L	(A7)+,A2		;147fe: 
 	TST.B	D0			;14800: 
 	BMI.S	LAB_0CAD		;14802: 
@@ -27992,7 +28002,7 @@ Loop_0D71:
 	MOVEQ	#0,D7			;1594e:
 	LEA	LAB_128A,A0		;15950:
 	MOVEQ	#0,D6			;15956:
-	JSR	Shipbuilding_0866	;15958:
+	JSR	SpawnObject	;15958:
 	BMI.S	LAB_0D72		;1595e:
 	JSR	FitRandomHardpoints	;15960:
 	BSR.W	LAB_0A6D		;15966:
@@ -28038,7 +28048,7 @@ NewTransporter:
 	MOVEQ	#0,D7			;159f4: 
 	LEA	LAB_128A,A0		;159f6: 
 	MOVEQ	#0,D6			;159fc: 
-	JSR	Shipbuilding_0866		;159fe: 
+	JSR	SpawnObject		;159fe: 
 	BMI.S	LAB_0D77		;15a04: 
 	JSR	FitRandomHardpoints		;15a06: 
 	BSR.W	LAB_0A6D		;15a0c: 
@@ -28254,7 +28264,7 @@ LAB_0D90:
 	MOVEQ	#55,D2			;15cb0: 
 	MOVEQ	#0,D7			;15cb2: 
 	MOVEQ	#0,D6			;15cb4: 
-	JSR	Shipbuilding_0866		;15cb6: 
+	JSR	SpawnObject		;15cb6: 
 	MOVE.B	#$4a,8(A6)		;15cbc: [8]->74
 	ORI.B	#$30,21(A6)		;15cc2: [21]->OR($30,[21])
 	MOVE.W	#$2100,24(A6)		;15cc8: [24-25]->8448
@@ -29900,15 +29910,17 @@ Warhead_10_Rigel:
 Return_0E5B:
 	RTS				;1721c: 
 ;
-Warhead_09_Swix:
+Warhead_09_Swix: ; replaces vortex missile for Swixaran
 	MOVEA.L	LAB_1287,A0		;1721e: 
 	MOVEQ	#99,D0			;17224: 
 LAB_0E5D:
 	CMPI.B	#$11,0(A0)		;17226: 
-	BEQ.S	LAB_0E60		;1722c: 
+	BEQ.S	LAB_0E60		;1722c: destroy all building 17
+; repair facility? sensor array?
 LAB_0E5E:
 	LEA	14(A0),A0		;1722e: 
 	DBF	D0,LAB_0E5D		;17232: 
+;
 	TST.B	LAB_12EB		;17236: 
 	BNE.S	Return_0E5F		;1723c: 
 	MOVE.W	10(A6),D2		;1723e: 
@@ -32558,7 +32570,7 @@ LAB_0FB8:
 	MOVEQ	#0,D0			;192b6: 
 	RTS				;192b8: 
 AlienHardpoint11:
-; Ground weapon. Only the Kll-Kp-Qua's smallest ship uses this.
+; Ground weapon(?) Only the Kll-Kp-Qua's smallest ship uses this.
 	MOVE.L	#LAB_11E8,D0		;192ba: 
 	CMP.L	28(A6),D0		;192c0: 
 	BEQ.S	Return_0FBA		;192c4: 
@@ -32931,9 +32943,9 @@ LAB_0FE7:
 	DC.W	$0000			;19732
 LAB_0FE9:
 	TST.B	MAGSTORM		;19734: 
-	BNE.W	LAB_0FED		;1973a: 
+	BNE.W	Return_0FED		;1973a: 
 	TST.B	LAB_12B0		;1973e: 
-	BNE.W	LAB_0FED		;19744: 
+	BNE.W	Return_0FED		;19744: 
 	MOVEA.L	SAVEDATA7,A0		;19748: 
 	MOVEQ	#7,D4			;1974e: 
 LAB_0FEA:
@@ -32971,21 +32983,21 @@ LAB_0FEC:
 	ADDQ.B	#1,LAB_1222		;197b0: 
 	LEA	292(A0),A0		;197b6: 
 	DBF	D4,LAB_0FEC		;197ba: 
-LAB_0FED:
+Return_0FED:
 	RTS				;197be: 
 LAB_0FEE:
-	DC.L	LAB_0FED		;197c0: 
+	DC.L	Return_0FED		;197c0: 
 	DC.L	LAB_0FF8		;197c4: 
 	DC.L	LAB_1004		;197c8: 
 	DC.L	LAB_100B		;197cc: 
 	DC.L	LAB_0FF0		;197d0: 
 	DC.L	LAB_1012		;197d4: 
 LAB_0FEF:
-	DC.L	LAB_0FED		;197d8: 
+	DC.L	Return_0FED		;197d8: 
 	DC.L	LAB_1019		;197dc: 
 	DC.L	LAB_1026		;197e0: 
 	DC.L	LAB_1038		;197e4: 
-	DC.L	LAB_0FED		;197e8: 
+	DC.L	Return_0FED		;197e8: 
 	DC.L	LAB_103F		;197ec: 
 LAB_0FF0:
 	BSET	#5,30(A0)		;197f0: 
@@ -33836,7 +33848,7 @@ LAB_104A:
 	TST.B	FLAG_VOICE		;1a2cc: 
 	BNE.S	LAB_104B		;1a2d2: 
 	MOVE.W	D1,D0			;1a2d4: 
-	BRA.W	LAB_104F		;1a2d6: 
+	BRA.W	Daily_104F		;1a2d6: 
 LAB_104B:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;1a2da: 
 	TST.B	FLAG_VOICE		;1a2de: 
@@ -33869,7 +33881,7 @@ LAB_104D:
 LAB_104E:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;1a33e: 
 	RTS				;1a342: 
-LAB_104F:
+Daily_104F:
 	CMP.W	LAB_13A3,D0		;1a344: 
 	BEQ.S	LAB_1050		;1a34a: 
 	CMP.W	LAB_13A8,D0		;1a34c: 
@@ -34277,7 +34289,7 @@ SpawnShip:
 	MOVEQ	#0,D7			;1a8e0: 
 	MOVEA.L	CURRENTASTEROID,A0		;1a8e2: 
 	MOVEQ	#0,D6			;1a8e8: 
-	JSR	Shipbuilding_0866		;1a8ea: a6=pointer to empty ship slot
+	JSR	SpawnObject		;1a8ea: a6=pointer to empty ship slot
 	BMI.S	RET_1086		;1a8f0: if ship created:
 	JSR	FitRandomHardpoints	;1a8f2: 
 	JSR	LAB_0A6D		;1a8f8: 
@@ -34306,7 +34318,7 @@ DO_SKYSCRAPER: ; Cheat: Buildings construct in one day
 	NOT.B	FLAG_SKYSCRAPER		;1a942: 
 	RTS				;1a948:
 ;
-LAB_108A: ; check for code
+Daily_108A: ; check for code
 	MOVE.W	LAB_10A4,D0		;1a94a: key scancode?
 	LEA	LAB_10B7,A0		;1a950: 
 	MOVE.B	-1(A0,D0.W),D0		;1a956: 
