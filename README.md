@@ -1,7 +1,15 @@
 # K240 disassembly project
 
 This project analyzes the assembly language code for the Commodore Amiga game
-K240 in order to understand how it works.
+K240 in order to understand how it works. The project's findings will be
+gradually documented here: https://tetracorp.github.io/k240/
+
+## Files
+
+playk240.68k.asm is a heavily annotated disassembly of the main game
+executable, version v1.886. It is full of useful raw information. The
+other files are mainly extracted data, and tools which were useful in
+extracting data.
 
 ## Useful resources
 - http://68k.hax.com

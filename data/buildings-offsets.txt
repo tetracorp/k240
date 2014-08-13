@@ -1,0 +1,40 @@
+ 00 Living Quarters
+ 02 Power Store
+ 04 Storage Facility
+ 06 Anti-Missile Pod
+ 08 Solar Panel
+ 10 Decontamination Filter
+ 12 Solar Generator
+ 14 Weapons Factory
+ 16 Mine
+ 18 Satellite Silo
+ 20 Screen Generator
+ 22 Ore Teleporter
+ 24 Gravity Nullifier
+ 26 Deep Bore Mine
+ 28 Missile Silo
+ 30 Repair Facility
+ 32 Sensor Array
+ 34 Plasma Turret
+ 36 Photon Turret
+ 38 Life Support
+ 40 C.P.U
+ 42 Seismic Penetrator
+ 44 Asteroid Engines
+ 46 Powerplant
+ 48 Command Centre
+ 50 Construction Yard
+ 52 Landing Pad
+ 54 Laser Turret
+ 56 Solar Matrix
+ 58 Resiblock
+ 60 Storage Tower
+ 62 Protected Solar Matrix
+ 64 Protected Resiblock
+ 66 Protected Storage Tower
+ 68 Medical Centre
+ 70 Environment Control
+ 72 Protected Environment Control
+ 74 Hydroponics
+ 76 Hydration Plant
+ 78 Security Centre
