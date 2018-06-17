@@ -1,11 +1,8 @@
 name: Exploring K240
 baseurl: https://tetracorp.github.io/k240
 markdown: kramdown
-pygments: true
 kramdown:
   input: GFM
   hard_wrap: false
-redcarpet:
-  extensions: ['tables', 'strikethrough', 'no_intra_emphasis', 'autolink']
 permalink: none
 
