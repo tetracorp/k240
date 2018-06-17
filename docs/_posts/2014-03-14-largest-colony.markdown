@@ -14,6 +14,7 @@ food, air, water, medical and security requirements. Those buildings in turn hav
 power requirements. All this eats into the maximum number of Resiblocks we can have.
 
 ### Requirements
+
 | Building        | Power  | Pop. supported | Cost  |
 |-----------------|--------|----------------|-------|
 | Resiblock       |   2 MW |            150 |  3000 |

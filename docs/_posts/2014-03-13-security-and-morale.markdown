@@ -23,6 +23,7 @@ For each resource (air, food, water) that is currently unmet by
 either production or surplus, a colony gains 2 points of Unrest.
 
 ### Unrest Levels
+
 | Points   | Status                   |
 |----------|--------------------------|
 | 0-40     | ASTEROID SECURE.         |
