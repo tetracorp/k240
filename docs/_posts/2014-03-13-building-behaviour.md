@@ -16,7 +16,9 @@ ores in order until capacity is sufficient again.
 ### Anti-Missile Pod
 
 ### Decontamination Filter
-Each Decontamination Filter decreases the radiation at a colony by 30%.
+Each Decontamination Filter decreases the radiation at a colony by 30%. See
+[Health, Radiation and Population
+Growth](health-radiation-and-population-growth.html).
 
 ### Mine, Deep Bore Mine and Seismic Penetrator
 Each Mine recovers one ore per 4 days, or one per 2 days with the 2nd Generation
@@ -51,7 +53,9 @@ by 50%. The Screen Generator benefits from its own protection.
 
 ### Gravity Nullifier
 In the event of a power outage, the Gravity Nullifier will switch off, but when
-power returns, it does not automatically switch back on.
+power returns, it does not automatically switch back on. It cannot distinguish
+between intentionally turned off by the player and automatically turned off by
+power shortage.
 
 ### Missile Silo
 Every 8 days, one of each missile type on order is built.
@@ -75,10 +79,10 @@ to the manual, ships in orbit are never repaired, and ships in hangars only repa
 the colony has a Repair Facility.
 
 ### Laser, Plasma and Photon Turret
-Turrets have the following damage output:
+Terran turrets have the following damage output:
 
 | Turret | Damage | With Optimizer |
-|--------|--------|----------------|
+|:-------|-------:|---------------:|
 | Laser  | 2      |  4             |
 | Plasma | 5      | 10             |
 | Photon | 8      | 16             |
@@ -87,26 +91,32 @@ The Turret Optimizer blueprint doubles the output. "Protected" buildings operate
 exactly as a Laser Turret. Each Turret fires once every five days.
 
 ### Asteroid Engines
-A random event can cause Asteroid Engines to explode, increasing the colony's
-radiation level.
+
+A [random event](random-events.html) can cause Asteroid Engines to explode,
+increasing the colony's radiation level by 10%.
 
 Asteroid Engines require 2-7 power based on current speed (not 0-5 as
 described in the manual).
 
 ### Powerplant
-Due to a bug, un-mined Asteros depletes at a rate of one unit per four days
-even if no Powerplants have been built. As long as there is one unit of
-Asteros left un-mined, every Powerplant produces 32MW of power. Multiple
-Powerplants do not consume Asteros any more quickly, and they cannot use
-mined Asteros from storage.
+
+Un-mined Asteros depletes at a rate of one unit per four days, _even_ if no
+Powerplants hae been built. This is either a bug, or an attempt to represent the
+half-life of a radioactive element.
+
+Powerplants run on un-mined ore _in the asteroid_, not in store. As long as
+there is one unit of Asteros left un-mined, every Powerplant on the asteroid
+produces 32MW of power. Powerplants do not cause Asteros to deplete any more
+quickly, no matter how many Powerplants you have.
 
 When Asteros is depleted, the Powerplant produces no power. Although the
 manual states that it produces 8MW/day without Asteros, this appears to
 be a misinterpretation of the game code, which produces 8MW/day per
-C.P.U.
+C.P.U, the building appearing next to it in the code (since the four-square
+buildings appear to have been all added around the same time).
 
-A random event can cause a Powerplant to explode, increasing a colony's
-radiation level.
+A [random event](random-events.html) can cause a Powerplant to explode,
+increasing the colony's radiation level by 10%.
 
 ### Command Centre
 A Command Centre requires 8 colonists as workers.

@@ -9,6 +9,7 @@ after the first 50, i.e. none for 0-149 colonists, one for
 150-249 colonists, and so on.
 
 ### Rising Unrest
+
 Each day that a colony goes without sufficient Security Centres,
 it gains one point of Unrest, to a maximum of 310 points. Higher
 levels of Unrest lead to security events (see below).
@@ -16,11 +17,12 @@ levels of Unrest lead to security events (see below).
 After a security event, there is a random delay of 30 to 59 days
 before another security event can occur at that asteroid.
 
-A colony with enough Security Centres reduces its Unrest by one
-point per day.
+A colony with enough Security Centres (one for every full 100 colonists after
+the first 50) reduces its Unrest by one point per day.
 
 For each resource (air, food, water) that is currently unmet by
-either production or surplus, a colony gains 2 points of Unrest.
+either production or surplus, a colony gains 2 points of Unrest
+per day.
 
 ### Unrest Levels
 
@@ -36,19 +38,20 @@ either production or surplus, a colony gains 2 points of Unrest.
 No security breach events happen.
 
 ### Low Morale
-- Worker strike (50% chance): All mining, shipbuilding, and missile
-construction are reduced to 40% of normal speed. Command Centre is
-also affected. (No other buildings require workers.) Strike lasts
-10-29 days.
+
+- Worker strike (50% chance): All mining, shipbuilding, and missile construction
+  are reduced to 40% of normal speed. Command Centre is also affected (probably
+  only to build Orbital Space Dock). (No other buildings require workers.)
+  Strike lasts 10-29 days.
 - Theft (50% chance): 1,000 - 10,000 credits stolen. If there is not
-enough money in general fund to cover the loss, the rest is taken
-from Building fund, Vehicle fund, etc, and so on.
+  enough money in general fund to cover the loss, the rest is taken
+  from Building fund, Vehicle fund, etc, and so on.
 
 ### Social Unrest
 - Theft (33% chance): 10,000 - 50,000 credits stolen.
 - Worker strike (33% chance): Workers strike for 30-99 days.
-- Desertion (33% chance): If there are at least 50 colonists,
-5-14 disappear from the colony.
+- Desertion (33% chance): If there are at least 50 colonists, 5-14 disappear
+  from the colony.
 
 ### Major Criminal Activity
 - Theft (25% chance): 50,000 - 100,000 credits stolen.
