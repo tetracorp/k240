@@ -38,7 +38,8 @@ let you see asteroid speed.
 ### Asteros half-life
 
 Asteros depletes at the rate of one unit every four days. This starts from the
-moment you colonize the asteroid.
+moment you colonize the asteroid. It's not clear whether this is meant to
+represent radioactive decay, or is just a bug in the Powerplant code.
 
 ### Ax'Zilanth viral resistance
 

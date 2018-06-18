@@ -27,7 +27,7 @@ how does fire spread, how many hit points does each building have,
 and how does Vortex operate?)
 3. How do missiles work? (What is their damage and effect?)
 4. How do colonies operate? (What affects population growth, what effect does
-radiation have, what effect does population have,?)
+radiation have, what effect does population have?)
 5. How do buildings work? (What hitpoints do each building have, what
 effect does each building have?)
 6. How do aliens differ? (What are their tactics and  AI routines, do
