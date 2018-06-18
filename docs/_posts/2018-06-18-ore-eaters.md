@@ -1,0 +1,303 @@
+---
+layout: post
+title: "#2: Ore Eaters"
+categories:alien
+---
+
+The Ore Eaters, also called the Lak'Maj'Traal, are one of the easier aliens in
+K240.
+
+1. Table of Contents
+{:toc}
+
+### Unique traits
+
+The Ore Eaters literally consume ore. They need mines or ore storage buildings
+for population growth, and are the only alien to lack an equivalent to the
+Terran Hydroponics building. They only lose one colonist per day without life
+support, and are unaffected by radiation. In optimal circumstances, population
+growth is 2 per day.
+
+If you colonize an asteroid which had an Ore Eater colony, the asteroid
+explodes.
+
+### Buildings
+
+Each alien building has a name, a type (as it counts on a spy satellite report),
+Hit Points, build time (in days), a height (for the purpose of scaffold), a
+width (1, for one-square, or 4 for a 2x2 building), a softcap (buildings marked
+! have a hard cap instead), and the building at the equivalent position in the
+Terran building list.
+
+| Name                      | Type    |  HP |  BT | H | W |  Cap | Equivalent
+|:--------------------------|:--------|----:|----:|--:|--:|-----:|:-----------------------
+| Civilian Dome             | General |  22 |  18 | 0 | 1 |    4 | Living Quarters
+| Capacitor                 | Power   |  22 |  20 | 0 | 1 |    2 | Power Store
+| Ore Depot                 | General |  24 |  16 | 0 | 1 |    4 | Storage Facility
+| Defence Battery           | Defence |  32 |  36 | 1 | 1 |    8 | Anti-Missile Pod
+| Science Dome              | General |  20 |  32 | 0 | 1 |    1!| ~~Decontamination Filter~~
+| Military Research Dome    | Offense |  32 |  36 | 0 | 1 |    1 | Weapons Factory
+| Robotic Mining Drill      | General |  20 |  26 | 0 | 1 |    6 | Mine
+| Shield Generator          | Defence |  32 |  53 | 3 | 1 |    1 | Screen Generator
+| Advanced Mining Drill     | General |  20 |  36 | 1 | 1 |    4 | Deep Bore Mine
+| Rocket Battery            | Offense |  15 |  20 | 0 | 1 |    4 | Missile Silo
+| Detection Cluster         | General |  16 |  20 | 1 | 1 |    1!| Sensor Array
+| Turret                    | Offense |  24 |  35 | 0 | 1 |    2 | Plasma Turret
+| Turret                    | Offense |  24 |  42 | 0 | 1 |    2 | Photon Turret
+| Environment Processor     | General |  32 |  36 | 0 | 1 |    2 | Life Support
+| Turbine Array             | Power   |  32 |  48 | 1 | 4 |    1 | Powerplant
+| Command Bunker            | General |  40 |  44 | 1 | 4 |    1!| Command Centre
+| Launch Facility           | Offense |  24 |  40 | 1 | 4 |    2 | Construction Yard
+| Turret                    | Offense |  24 |  25 | 0 | 1 |    4 | Laser Turret
+
+Advanced Mining Drill
+: Mines two random units of the last five ores (Bytanium, Korellium, Dragonium,
+Traxium, or Nexos) per day. Only half the number of Advanced Mining Drills
+(rounded down, minimum zero) will function without a Command Bunker. Colony will
+additionally mine two of the last five ores without any advanced drill. At least
+one of either mine or Ore Depot is required for population growth (2/day) or to
+build ships.
+
+Capacitor
+: At least one Turbine Array or Capacitor is required to mine any ore.
+
+Civilian Dome
+: Housing, required for colony life. If there is not at least one, the colony is
+destroyed. Each dome houses up to 100 population.
+
+Command Bunker
+: One is built at colony start, and no more than one at a time will be built.
+Required to give the order to establish a new colony. The effectiveness of all
+mines is halved without a Command Bunker.
+
+Defence Battery
+: Has a 21% chance to shoot down incoming missiles. Each additional battery
+after the first adds an additional 4% chance, for a maximum of 71% at 14 pods,
+although the Ore Eaters will only build 8 before hitting a soft cap.
+
+Detection Cluster
+: Increases the chances of spotting Terran spy satellites. The base chance is 1%
+plus a cumulative 1% per day, and each additional Detection Cluster adds another
+chance per day.
+
+Environment Processor
+: Equivalent to Life Support, required for colony life. If there is not at least
+one Environment Processor, the colony loses 1 colonist per day. Required for
+population growth.
+
+Launch Facility
+: Construction Yard. Required to build ships. Caps out at two shipyards.
+
+Military Research Dome
+: Required to build missiles or ships.
+
+Ore Depot
+: At least one depot or drill is required for population growth or to build
+ships. Does not track the amount of mined ore, since aliens do not use ore.
+
+Robotic Mining Drill
+: Mines two random units of the first five ores (Selenium, Asteros, Barium,
+Crystalite, Quazinc) per day. Only half the number of Robotic Mining Drills
+(rounded down, minimum zero) will function without a Command Bunker. Colony will
+additionally mine two of the first five ores without any robotic drill. At least
+one of either mine or Ore Depot is required for population growth (2/day) or to
+build ships.
+
+Rocket Battery
+: Required to launch or build missiles.
+
+Science Dome
+: Unknown. A colony will never build more than one Science Dome.
+
+Shield Generator
+: Operates similarly to a Terran shield generator.
+
+Turbine Array
+: At least one Turbine Array or Capacitor is required to mine any ore. If
+neither exist, build priority will be set to Cluster 1, which includes Turbine
+Array. Turbine Array is required to build missiles or ships.. One Turbine Array
+is built at colony start.
+
+Turret
+: Laser turret. Deals 2 damage, the same as its Terran equivalent. Fires on a
+6-day cooldown.
+
+Turret
+: Plasma turret. Deals 4 damage, 20% weaker than its Terran equivalent. Fires on
+a 6-day cooldown.
+
+Turret
+: Photon Turret. Deals 6 damage, 25% weaker than its Terran equivalent. Fires on
+a 6-day cooldown.
+
+### Building strategy
+
+Each Ore Eater colony attempts a new build every 60 days. They do not require
+any currency or resources to do so. Unless there is an urgent need, they will
+randomly attempt to build one of the following clusters of four buildings:
+
+* 0: Robotic Mining Drill, Robotic Mining Drill, Ore Depot, Advanced Mining Drill
+* 1: Civilian Dome, Command Bunker, Turbine Array, Environment Processor
+* 2: Turret (Laser), Turret (Photon), Turret (Plasma), Rocket Battery
+* 3: Civilian Dome, Capacitor, Capacitor, Turbine Array
+* 4: Military Research Dome, Science Dome, Rocket Battery, Detection Cluster
+* 5: Shield Generator, Launch Facility, Defence Battery, Capacitor
+* 6: Robotic Mining Drill, Ore Depot, Civilian Dome, Environment Processor
+* 7: Robotic Mining Drill, Ore Depot, Defence Battery, Turret (Laser)
+
+If they attempt to build something which as already reached the soft cap, there
+is a 10% chance they will ignore the cap and build anyway. This is the lowest
+chance of any alien. They will never build more than 1 Command Bunker, Detection
+Cluster, or Science Dome.
+
+If there is not at least one Environment Processor, they will set priority to
+build Cluster 1 (Civilian Dome, Command Bunker, Turbine Array, Environment
+Processor). If there is not at least one Turbine Array or Capacitor, they will
+set priority to build Cluster 1.
+
+### Missiles
+
+Each Ore Eater asteroid attempts to build new missiles every 35 days, the
+slowest of any alien. They must have a Turbine Array, Military Research Dome,
+and Rocket Battery. If so, they roll on the following table and build that
+missile, to a maximum of 5 of that missile. No ore or currency is required. The
+"Yield" listed is what shows on a spy satellite survey.
+
+| Missile         | Build  | Yield |
+|-----------------|-------:|------:|
+| Explosive       |  32%   | Low   |
+| Area Explosive  |  22%   | Med   |
+| Scatter         |  15%   | Med   |
+| "Transmutation" |  10%   | Med   |
+| "Unknown"       |  8%    | High  |
+| Virus           |  5%    | Other |
+| Stasis          |  3%    | Other |
+| Nuclear         |  3%    | High  |
+| Mega            |  2%    | High  |
+
+Virus
+: As standard Virus, but converts random ores into Selenium. One unit is
+converted every 5 days.
+
+"Unknown"
+: A special missile which replaces the Vortex. Considered high yield.
+
+"Transmutation"
+: A special missile which replaces Anti-Virus. Melts a single random building
+instantly, then increases the amount of ore at the asteroid. That asteroid gains
+a random amount of 100 - 299 ore, to a maximum of 1,000 ore, of a type randomly
+chosen from Selenium, Asteros, Barium and Crystalite. Yes, this missile
+literally gives the player free ore (until the Ore Eaters take your colony; then
+it's their ore).
+
+Trivia:
+
+* The Ore Eaters do not use Napalm or Hellfire. They don't build Vortex or
+  Anti-Virus, since those slots are used for unique missiles.
+
+### Ships
+
+Each ship an armor value, speed, number of hardpoints (sometimes erroneous),
+ID number in the game code, and up to six hardpoints. The names here are
+arbitrary and do not appear in the code.
+
+Name                  | Armor | S | H | ID | HP1| HP2| HP3| HP4| HP5| HP6|
+----------------------|------:|--:|--:|:---|----|----|----|----|----|----|
+"Fighter"             |    20 | 2 | 1 | 3c | 06 |    |    |    |    |    |
+"Light Cruiser"       |    30 | 2 | 2 | 3d | 06 | 00 | 05 |    |    |    |
+"Heavy Cruiser"       |    30 | 1 | 2 | 3e | 06 | 05 | 00 | 02 |    |    |
+"Scoutship"           |    20 | 2 | 1 | 3f | 06 |    |    |    |    |    |
+"Heavy Bomber"        |    40 | 1 | 5 | 40 | 05 | 06 | 04 | 01 | 0a |    |
+"Orbital Station"     |    50 | 0 | 0 | 41 |    |    |    |    |    |    |
+"Transporter"         |    25 | 0 | 2 | 42 | 02 | 06 |    |    |    |    |
+"Battleship"          |    70 | 0 | 6 | 43 | 07 | 06 | 08 | 01 | 0a | 03 |
+
+Ship $3c "Fighter"
+: A small 20 Armor ship with one hardpoint: a Photon Cannon (6 damage).
+
+Ship $3d "Light Cruiser"
+: A small 30 Armor ship with three hardpoints: a Photon Cannon (6 damage), Ion
+Cannon, and Laser Cannon (5 damage). The game code lists it as having only two
+hardpoints.
+
+Ship $3e "Heavy Cruiser"
+: A slower 30 Armor ship with four hardpoints: a Photon Cannon (6), Laser Cannon
+(2), Ion Cannon, and Napalm Orb. However, the game code lists it as having only
+two hardpoints.
+
+Ship $3f "Scoutship"
+: A small 20 Armor ship with one hardpoint: a Photon Cannon (6 damage).
+The Ore Eaters scout every 30 days, the fastest of any alien.
+
+Ship $40 "Heavy Bomber"
+: A medium ship with 40 armor and 5 hardpoints: Laser Cannon (2), Photon Cannon
+(6), Vortex Mine, Disruptor, and a Deflector. The Deflector halves all damage,
+effectively giving it 80 armor. Since this alien doesn't use Vortex missiles,
+this is the only thing which can cause Vortex.
+
+Ship $41 "Orbital Station"
+: An immobile diamond-shaped ship with 50 Armor and no hardpoints. Purpose
+unknown.
+
+Ship $42 "Transporter"
+: A large ship with 25 Armor and two hardpoints: a Napalm Orb, and a Photon
+Cannon (6).
+
+Ship $43 "Battleship"
+: A large ship with 70 Armor and six hardpoints: a Plasma Cannon (4 damage), a
+Photon Cannon (6 damage), a Static Inducer, a Disruptor, a Deflector, and a
+Chaos Bomb. The Deflector halves all damage, effectively giving it 140 Armor.
+If you encounter a Static Inducer against this alien, this is the cause.
+
+### Starting resources
+
+When facing the Ore Eaters, the player starts with the following resources:
+
+* Cash: 300,000 credits
+* Guaranteed first event: Reinforcements
+
+The alien colony has the following building clusters:
+
+* 1: Civilian Dome, Command Bunker, Turbine Array, Environment Processor
+* 0: Robotic Mining Drill, Robotic Mining Drill, Ore Depot, Advanced Mining Drill
+
+They begin with the following ships:
+
+* $3f "Scoutship" x1
+* $42 "Transporter" x1
+* $3d "Light Cruiser" x6
+* $3e "Heavy Cruiser" x4
+
+### Colonization strategy
+
+Each Ore Eater asteroid considers starting a new colony every 30 days, the
+fastest of any alien. There is a 5% chance of starting a new colony, but this
+rises to 50% if there is less than 50 total ore at the current asteroid. If
+there is no Command Bunker, the colonization countdown freezes until one is
+built.
+
+A colony ship carries 50 population, although it does not actually decrease the
+existing number of citizens.
+
+The Ore Eaters will clear a virus-infected asteroid when they colonize it. This
+is useful, since their Virus missile has the special property of gradually
+transforming other ores into Selenium, and they are unaffected by radiation.
+
+When the Ore Eaters start a new colony, they build the following cluster of
+buildings:
+
+* 1: Civilian Dome, Command Bunker, Turbine Array, Environment Processor
+
+### Mining strategy
+
+Ore Eaters mine every day. They require at least one Turbine Array (built at
+colony start) or Capacitor to operate. The effective number of each type of mine
+is halved (rounded down, minimum zero) if there is no Command Bunker.
+
+Without any mining drills, each colony mines two units randomly chosen from the
+first five ores (all red ores and Quazinc), and two units randomly chosen from
+the second five ores (including potentially Traxium and Nexos). Each Robotic
+Mining Drill adds an extra two units of the first five, and each Advanced Mining
+Drill mines an extra two units of the last five.
+
+The game does not track how much ore is stored, but it does deplete normally.
