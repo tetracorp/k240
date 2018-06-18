@@ -7,15 +7,26 @@ categories: game-mechanics
 Random events can occur, such as a solar flare increasing radiation on all
 asteroids or a survey discovering more ore deposits than previously thought.
 
-The first random event to occur in a game is ignored and the manual protection code
-request appears in its place. The next random event will occur randomly
-between 10 and 39 days later. Each random event after that will occur
-between 4 and 60 days after one another, with a small chance of a 255
-day wait instead.
+The first random event is always a manual code protection request. It occurs
+after 60 days if playing against the first two aliens (Kll-Kp-Qua or Ore
+Eaters), or immediately against the later aliens.
+
+Only one manual request is necessary for each time you load the game, even if
+you play multiple aliens.  Starting a new game with the Kll-Kp-Qua or Ore Eaters
+will reset the wait to 60 days, while starting a new game with another alien
+will retain the existing timer.
+
+The next random event after a manual protection code will occur randomly
+between 10 and 39 days later. Each random event after that will occur between 60
+and 199 days apart.
+
+If you started with the Kll-Kp-Qua or Ore Eaters, your first request (after the
+manual protection request) will always be Reinforcements.
 
 If you have no Transporter, the random event is always "The Empire has sent
 you a new Transporter". Otherwise, it is chosen at random, with a 1 in 24
-chance of each, except for three events which have a 1 in 12 chance.
+chance of each, except for three events which appear twice on the list and
+thus have a 2 in 24 chance.
 
 ### None
 Nothing happens.
@@ -73,13 +84,16 @@ below zero and cannot retroactively remove ore that has already been mined.
 ### Powerplant Burnout
 A Powerplant at a random asteroid explodes. Radiation increases 10%.
 
-### Gravitational Anomaly (Asteroid Engine Burnout)
+### Gravitational Anomaly
 An Asteroid Engine at a random asteroid explodes. Radiation increases 10%
 for some reason, as with Powerplant burnout.
 
 ### Pressure Valve Failure
-Air surplus reduces to zero. Only a problem if you don't have enough
-Life Support for your population.
+
+Air surplus reduces to zero. Only a problem if you don't have enough Life
+Support for your population and were relying on surplus air, as lack of air is
+instantly fatal to Terrans. The odds of triggering this random event while under
+a resource deficiency of air are quite low.
 
 ### Ruptured Pipeline
 Water surplus reduces to zero. There's no "food reduces to zero" event.
@@ -101,8 +115,8 @@ You receive 10,000 to 100,000 CR. Your ore shipments are actually irrelevant:
 the size of bonus received and your chance of receiving another bribe are
 completely random.
 
-### (unknown event) (double chance)
-Currently unknown.
+### Comet!! (double chance)
+A comet appears.
 
 ### Reinforcements (double chance)
 Receive 5-10 ships randomly chosen from the following types:
@@ -113,7 +127,8 @@ Warp Generator, and the first hardpoint on each ship is always a weapon.
 ### Meteor Shower
 A shower of 5-19 meteors is scheduled for a random asteroid. It behaves like
 a missile strike. Meteors deal 30 damage, three times as much as Explosive
-missiles.
+missiles, and enough to insta-kill three-quarters of Terran buildings struck
+(see [building hitpoints](building-hitpoints.html)).
 
 ### Fixed Ore Prices
 Between 2 and 5 times, a random ore is fixed in price for 2-5 years each.
@@ -125,3 +140,5 @@ Receive a new Transporter. The hardpoints are always random, but cannot
 include Static Inducer or Warp Generator. The first hardpoint is always
 a weapon, which is why Transporters often seem to arrive with a ridiculous
 configuration like two Lasers or a Laser and a Napalm Orb.
+
+If you have no Transporter, the random event is always New Transporter.

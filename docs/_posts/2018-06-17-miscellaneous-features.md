@@ -59,10 +59,10 @@ the last one. The game doesn't keep track of which aliens you beat anywhere.
 
 These are documented in the manual, but some players may not be aware of them.
 
-* Press <code>spacebar</code> to toggle between building view and flat view
-* Press <code>S</code> to enable the Ship cursor for clicking on ships.
+* Press _spacebar_ to toggle between building view and flat view
+* Press _S_ to enable the Ship cursor for clicking on ships.
   Press again to return to the standard cursor.
-* Press <code>D</code> to enable to Demolish cursor (green bomb) for
+* Press _D_ to enable to Demolish cursor (green bomb) for
   demolishing buildings. Press again to return to the standard cursor.
 * Press the left and right cursor keys to rotate the asteroid. Useful for making
   the icons visible after a PANEL cheat.

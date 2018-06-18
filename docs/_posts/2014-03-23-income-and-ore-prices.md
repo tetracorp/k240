@@ -37,8 +37,8 @@ vital source of income in late game.
 
 Certain undocumented events grant valuable bonuses:
 
-- Destroy alien ship #42: 5,000 CR
-- Destroy alien ship #43: 10,000 CR
+- Destroy alien ship #42 (Transporter): 5,000 CR
+- Destroy alien ship #43 (Battleship): 10,000 CR
 - LOADSADOSH cheat: 100,000 CR
 
 Many events grant useful bonuses:

@@ -5,7 +5,9 @@ categories: game-mechanics
 ---
 
 While most buildings operate exactly as described in the game's manual,
-some behave in undocumented or unexpected ways.
+some behave in undocumented or unexpected ways. See also
+[PAFW and Resource Deficiency](pafw-and-resource-deficiency.html) for how
+buildings fail in a power outage.
 
 ### Storage Facility / Storage Tower
 If an ore storage building is destroyed, no ore is lost unless the total
@@ -14,6 +16,17 @@ When this happens, ore is lost starting with Selenium and going through the
 ores in order until capacity is sufficient again.
 
 ### Anti-Missile Pod
+
+Each incoming missile has a 21% chance to be shot down if you have one
+Anti-Missile Pod. Each additional pod increases the chance by 2%, to a maximum
+of 71% at 26 pods.
+
+However, for all aliens which use this technology (Ore Eater's Defence Battery,
+Rigellian Defence Battery, and Swixaran Tentacular Defender), each additional
+pod increases the chance by 4%, to a maximum of 71% at 14 pods.
+
+Anti-Missile Pods will fire at missiles you shoot at your own asteroids, but
+will ignore Anti-Virus missile.
 
 ### Decontamination Filter
 Each Decontamination Filter decreases the radiation at a colony by 30%. See
@@ -88,7 +101,11 @@ Terran turrets have the following damage output:
 | Photon | 8      | 16             |
 
 The Turret Optimizer blueprint doubles the output. "Protected" buildings operate
-exactly as a Laser Turret. Each Turret fires once every five days.
+exactly as a Laser Turret. Each Turret fires once every five days, and the
+cooldown resets on a power outage or a miss.
+
+Alien turrets have different (usually higher) damage and different (often worse)
+cooldown timers.
 
 ### Asteroid Engines
 
@@ -106,8 +123,8 @@ half-life of a radioactive element.
 
 Powerplants run on un-mined ore _in the asteroid_, not in store. As long as
 there is one unit of Asteros left un-mined, every Powerplant on the asteroid
-produces 32MW of power. Powerplants do not cause Asteros to deplete any more
-quickly, no matter how many Powerplants you have.
+produces 32MW of power. Powerplants do not use up the Asteros or cause it to
+deplete any more quickly, no matter how many Powerplants you have.
 
 When Asteros is depleted, the Powerplant produces no power. Although the
 manual states that it produces 8MW/day without Asteros, this appears to
@@ -119,7 +136,9 @@ A [random event](random-events.html) can cause a Powerplant to explode,
 increasing the colony's radiation level by 10%.
 
 ### Command Centre
-A Command Centre requires 8 colonists as workers.
+A Command Centre requires 8 colonists as workers. A worker shortage is likely to
+affect only the Command Center's speed at building an Orbital Space Dock, in
+which case it operates at 40% efficiency.
 
 ### Construction Yard
 In order to make a day's progress toward a construction job, the yard requires
