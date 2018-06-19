@@ -24,12 +24,15 @@ The possess the unique ability to adapt to Virus missiles. The second Virus
 missile fired by the player will have no effect. This is true even if you fire
 at yourself or an unoccupied asteroid.
 
-The AI takes note when it loses a colony due to its population reducing to zero
-due to lack of Personnel Podules, Atmospheric Regulator or Nutrient Podule. The
-exact actions it takes in response to this have yet to be analyzed.
+The AI for this alien sets a flag when it loses a colony due to its population
+reducing to zero due to lack of Personnel Podules, Atmospheric Regulator or
+Nutrient Podule (though not if the colony explodes due to Mega or asteroid
+collision). The exact actions it takes in response to this have yet to be
+analyzed.
 
 Their technology allows them to teleport their asteroid. A discovered asteroid
-becomes undiscovered after it teleports.
+becomes undiscovered after it teleports (see Mass Displacement Podule). They
+also have a missile which can intercept and neutralize incoming missiles.
 
 ### Buildings
 
@@ -249,7 +252,7 @@ Ship $3d "Light Cruiser"
 : A fast 40 Armor ship with a a Plasma Cannon (5 damage), Warp Generator, and
 Disruptor.
 
-Ship $3e "Heavt Cruiser"
+Ship $3e "Heavy Cruiser"
 : A slower 40 Armor ship with a Photon Cannon (8 damage), Warp Generator, Ion
 Cannon and Disruptor. Listed in the game code has having two hardpoints,
 although it has four.
@@ -310,8 +313,8 @@ A new colony builds the following cluster of buildings:
 ### Mining strategy
 
 The Ax'Zilanth mine every day. If there is at least one Ore Extractor, and at
-least one Reactor or Energy Accumulator, the asteroid mines five times, and
-depletes two units of a random ore each time. They can mine all ten ores.
+least one Reactor or Energy Accumulator, the colony mines five times, and
+depletes two units of a random ore each time. They can mine all ten ores types.
 
 Building additional Ore Extractors has no effect, although they will build as
 many as six before hitting the soft cap. The amount of ore mined is not stored
