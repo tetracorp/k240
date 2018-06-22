@@ -4,6 +4,8 @@ title: "#5: Rigellians"
 categories: alien
 ---
 
+The Rigellians are one of the harder aliens in the game.
+
 1. Table of Contents
 {:toc}
 
@@ -16,6 +18,10 @@ Vortex against himself.
 They gain 2 population per day, provided that they have a Farm to provide food
 and radiation is not 50% or higher. Even at high radiation, their population
 will not reduce. They require housing or their colony is immediately destroyed.
+
+Their particular technologies include long-range asteroid sensors, more powerful
+nuclear missiles, and a missile and ship hardpoint which halves power
+production.
 
 ### Buildings
 
@@ -65,7 +71,7 @@ Deep Space Probes
 to be fired. Further research is necessary.
 
 Defence Battery
-: Anti-missile pod.: Has a 21% chance to shoot down incoming missiles. Each
+: Anti-missile pod. Has a 21% chance to shoot down incoming missiles. Each
 additional battery after the first adds an additional 4% chance, for a maximum
 of 71% at 14 pods, although they will only build 4 before hitting a soft cap.
 
@@ -171,10 +177,10 @@ roll on the following random table to see which type of missile is built, to a
 maximum of 5 of each type. The "Yield" listed is what the missile shows as on a
 spy satellite report.
 
-| Missile         |Build  | Yield |
-|-----------------|------ |-------|
+| Missile         | Build | Yield |
+|-----------------|-------|-------|
 | Explosive       | 30%   | Low   |
-| Area Exp.       | 24%   | Med   |
+| Area Explosive  | 24%   | Med   |
 | Scatter         | 15%   | Med   |
 | "Nosferatu"     | 10%   | Other |
 | "Bioweapon"     | 10%   | Other |
@@ -253,7 +259,7 @@ Disruptors, an Ion Cannon, and a Laser Cannon (5 damage).
 
 ### Starting resources
 
-When facing the Swixarans, the player starts with the following resources:
+When facing the Rigellians, the player starts with the following resources:
 
 * Cash: 250,000 credits (Default)
 
