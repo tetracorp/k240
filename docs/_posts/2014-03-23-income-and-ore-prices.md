@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Income and Ore Prices"
+title: "Income and ore prices"
 categories: game-mechanics
 ---
 

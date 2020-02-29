@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Building Hitpoints"
+title: "Building hitpoints"
 categories: game-mechanics
 ---
 

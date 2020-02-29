@@ -1,22 +1,22 @@
 ---
 layout: post
-title: "About This Project"
+title: "About this project"
 categories: about
 ---
 
-Exploring K240 is a project to disassemble and decipher the undocumented
-game mechanics of K240, the space exploration game released on
-Commodore Amiga in 1994.
+_Exploring K240_ is a project to disassemble and analyze the executable and data
+files of _K240_, an asteroid mining simulation game released for the Commodore
+Amiga in 1994 by Gremlin Graphics.
 
-### Why explore K240?
-K240 was one of my favourite Amiga games of all time. Despite a heavy
-game manual, many of the game's underlying rules or mechanics were a
-complete mystery to the player. How much damage does each weapon do?
-How many hit points does each building have?
+This project began in 2014, twenty years after the game's original release. Its
+primary goal is to discover K240's numerous undocumented game mechanics, many of
+which were never revealed to the player despite the game's heavy manual.
 
-Twenty years later, this project sets out to find those answers.
+This website also serves as a reference site for information on the game in
+general.
 
 ### What can we learn?
+
 The biggest questions this projects seeks to answer:
 
 1. How does ship combat work? (How do ships choose their targets, how
@@ -30,7 +30,7 @@ and how does Vortex operate?)
 radiation have, what effect does population have?)
 5. How do buildings work? (What hitpoints do each building have, what
 effect does each building have?)
-6. How do aliens differ? (What are their tactics and  AI routines, do
+6. How do aliens differ? (What are their tactics and AI routines, do
 aliens play by the same rules as Terrans regarding cost and mining,
 what are the stats of their ships, missiles and buildings, and how does
 each alien differ? Does fire really affect Swixarans more, and why do
@@ -39,13 +39,16 @@ abandoned Ore Eater colonies explode?)
 K240 v2.000?
 
 ### How to explore K240?
-I began by running the main game executable through an Amiga disassembly
-program called IRA, which turns an Amiga executable file into 68000
-assembly language.
 
-The result is difficult to understand since it's over 40,000 lines of
-low-level code and has no comments or even variable names. Some useful
-approaches have helped to make sense of the code:
+Various tools aid in analysis of Amiga executables. The most important is Frank
+Wille's program
+[IRA](http://aminet.net/package/dev/asm/ira),
+a modern, non-interactive disassembler which turns an Amiga executable file into
+68000 assembly language.
+
+The resulting disassembly is hard to understand, as it's over 40,000 lines of
+low-level code with none of the original comments, variable names, or macros.
+Some helpful methods to make sense of this include:
 
 1. Searching for known numbers or strings, such as game text or the
 known price of a ship. This makes it easy to zero in on code relating
@@ -62,4 +65,7 @@ of what holds the current game state. We can also tell how the alien
 data files are stored based on how they're read into memory.
 
 Another useful tool is WinUAE, which has a built-in debugger and can
-generate save states during a game.
+generate uncompressed save states during a game.
+
+Some have recommended ReSource v6.06, an older Amiga interactive disassembler,
+though I have not used it for this project.

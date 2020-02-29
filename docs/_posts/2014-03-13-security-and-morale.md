@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Security and Morale"
+title: "Security and morale"
 categories: game-mechanics
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Health, Radiation and Population Growth"
+title: "Health, radiation and population growth"
 categories: game-mechanics
 ---
 

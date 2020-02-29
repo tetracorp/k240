@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Building Behaviour"
+title: "Building behaviour"
 categories: game-mechanics
 ---
 

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Random Events"
+title: "Random events"
 categories: game-mechanics
 ---
 

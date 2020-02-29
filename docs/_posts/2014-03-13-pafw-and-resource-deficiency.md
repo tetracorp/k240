@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "PAFW and Resource Deficiency"
+title: "PAFW and resource deficiency"
 categories: game-mechanics
 ---
 

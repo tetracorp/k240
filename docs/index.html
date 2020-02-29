@@ -9,7 +9,16 @@ title: Main Index
 
   {% assign sortedPosts = site.posts | sort: 'slug' %}
 
-  <h3>Undocumented Game Mechanics</h3>
+  <h3>History</h3>
+  <ul class="posts">
+    {% for post in sortedPosts %}
+      {% if post.categories contains "history" %}
+      <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+
+  <h3>Undocumented game mechanics</h3>
   <ul class="posts">
     {% for post in sortedPosts %}
       {% if post.categories contains "game-mechanics" %}
@@ -18,7 +27,7 @@ title: Main Index
     {% endfor %}
   </ul>
 
-  <h3>Undocumented Alien Mechanics</h3>
+  <h3>Undocumented alien mechanics</h3>
   <ul class="posts">
     {% for post in sortedPosts %}
       {% if post.categories contains "alien" %}
@@ -34,10 +43,28 @@ title: Main Index
     {% endfor %}
   </ul>
 
+  <h3>Data</h3>
+  <ul class="posts">
+    {% for post in sortedPosts %}
+      {% if post.categories contains "data" %}
+      <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
+      {% endif %}
+    {% endfor %}
+    <li><a href="https://github.com/tetracorp/k240/blob/master/src/playk240_1.68k.asm?raw=true">K240 source code</a>, first partial disassembly, v1.886 (1.7MB)</li>
+    <li><a href="https://github.com/tetracorp/k240/blob/master/src/playk240_2.68k.asm?raw=true">K240 source code</a>, second partial disassembly, v1.886 (1.8MB)</li>
+    <li><a href="https://github.com/tetracorp/k240/blob/master/src/playk240.68k.asm?raw=true">K240 source code</a>, current ongoing disassembly, v2.00</li>
+  </ul>
+
   <h3>Links</h3>
   <ul class="posts">
-    <li><a href="https://github.com/tetracorp/k240/blob/master/playk240.68k.asm?raw=true">K240 source code</a> (1.9MB)</li>
+    <li><a href="http://gremlinworld.emuunlim.com/amiga.htm">Authorized Gremlin Games download</a></li>
     <li><a href="http://www.lemonamiga.com/games/docs.php?id=904">K240 manual</a> at LemonAmiga</li>
+    <li><a href="http://hol.abime.net/2543">K240</a> at Hall of Light</li>
+    <li>YouTube:<br>
+      <a href="https://www.youtube.com/watch?v=aD6d0cH0nNA">GouldFish's K240 review</a>,
+      <a href="https://www.youtube.com/playlist?list=PL92ECCA8D803E2E92">Thiima's Tylaran playthrough</a>,
+      <a href="https://www.youtube.com/playlist?list=PL04BD4BBE079FF6AD">Thiima's Swixaran playthrough</a>
+    <li><a href="https://tetracorp.github.io/dungeons-of-avalon/">Exploring the Dungeons of Avalon</a>, a similar project for a 1992 RPG series</li>
   </ul>
 
   <h3>Todo</h3>

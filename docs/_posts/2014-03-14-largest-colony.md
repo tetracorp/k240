@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Largest Possible Colony"
+title: "Largest possible colony"
 categories: fun
 ---
 

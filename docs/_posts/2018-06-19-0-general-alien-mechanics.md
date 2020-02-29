@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "General Alien Mechanics"
+title: "General alien mechanics"
 categories: alien
 ---
 
