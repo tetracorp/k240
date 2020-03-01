@@ -7,11 +7,16 @@ categories: fun
 Just for fun, what's the most colonists that can fit on one asteroid?
 
 ### Limiting factors
-An asteroid has a maximum of 100 buildings, even if it has more open squares.
-In theory an asteroid could support 100 Resiblocks for a total of 15,000 colonists,
-but those colonists would never accumulate without first satisfying their
-food, air, water, medical and security requirements. Those buildings in turn have
-power requirements. All this eats into the maximum number of Resiblocks we can have.
+
+Each asteroid has a hard maximum of 100 buildings. Even if it has more open
+squares, you'll get an "Asteroid structure too weak!" error message, which
+exists because the data format only has room for 100 buildings.
+
+In theory, an asteroid could support 100 Resiblocks for a total of 15,000
+colonists, but those colonists would never accumulate without first satisfying
+their food, air, water, medical and security requirements. Those buildings in
+turn have power requirements. All this eats into the maximum number of
+Resiblocks we can have.
 
 ### Requirements
 
@@ -26,30 +31,33 @@ power requirements. All this eats into the maximum number of Resiblocks we can h
 | Solar Matrix    | -16 MW |            -   |  5000 |
 
 For maximum density, we'll use the Solar Matrix which generates 8 MW normally,
-and the Power Amplifier blueprint which increases that to 16 MW. We'll detonate
-our CPU for extra room.
+and the Power Amplifier blueprint which increases that to 16 MW. We'll even
+detonate our CPU for extra room.
 
 We have some leeway in the medical and security buildings. The first 50 population
-are exempt from their requirements, and only each full 100 after that are
-required.
+are exempt from their requirements, and require only one of each building for
+every full 100 citizens after that.
 
 ### A big happy colony
+
 A 1,950 population colony requires 4 Life Support, 4 Hydration Plant,
 5 Hydroponics, 19 Medical Centre, 19 Security Centre and 13 Resiblock. This
 requires 105 Power, or 7 Solar Matrix. Total building count: 71.
 
-This colony would cost 361,500 CR to establish, or 491,500 CR including the cost
-of the Solar Matrix and Power Amplifier blueprints.
-Without the blueprint tech, the same colony could be built with Solar Generators
-for 368,500 CR and 92 buildings.
+This colony would cost 361,500 CR to establish, or 491,500 CR including the
+initial cost of the Solar Matrix and Power Amplifier blueprints. Without the
+blueprint tech, the same colony could be built with Solar Generators for 368,500
+CR and 92 buildings.
 
 Either way, we don't need any Radiation Filters (10+ Medical Centres will treat
 100% Radiation). The colony will grow to maximum capacity within about 6,500 days,
-at which point it will be earning 4,000 CR per day.
+at which point it will be earning 4,000 CR per day from an undocumented game
+mechanic that pays you 2 credits per citizen and 100 per colony per day.
 
 But there's still room.
 
 ### The biggest, happiest colony
+
 At a population of 2,700, the colony is almost maxed out at 99 buildings:
 18 Resiblocks, 6 Life Support, 6 Hydration Plant, 7 Hydroponics,
 26 Medical Centres, 26 Security Centres and 10 Solar Matrix, at a total
@@ -63,6 +71,7 @@ reasonable as it adds only 50 capacity, but the final 2,750th colonist would
 still push security and medical over the limit.
 
 ### Forget happy
+
 If we're willing to take some risks and sacrifice the workers' quality of
 life, a colony can grow even bigger.
 
@@ -76,6 +85,7 @@ A 26th Resiblock instead of Living Quarters would raise that to 3,900,
 but colonist #3,850 would trigger the security shortage again.
 
 ### Forget security too
+
 If you're going to trigger security, there's no mechanical benefit to
 having even one Security Center. Since our colony has 37 of them and
 they each use up 2MW of power, we can grow our colony to absurd size
@@ -101,9 +111,9 @@ immediately drops by half (176MW to 88MW). This is exactly enough to power
 your Resiblocks, but everything else goes offline... including Life Support.
 
 ### In summary
-2,700 is the largest colony you can safely build, assuming you spend a lot
-on power blueprints. That raises to 3,800 if you ignore Medical Centres,
-but your colony will lose all that population if there's a virus outbreak.
-Finally, you can push the population up to 6,600 if you're willing to
-endure security alerts, but you're doomed as soon as someone steals your
-Power Amplifier tech.
+
+2,700 is the largest colony you can safely build, assuming you spend a lot on
+power blueprints. That raises to 3,800 if you ignore Medical Centres, but your
+colony will lose all that population once there's a virus outbreak. Finally, you
+can push the population up to 6,600 if you're willing to endure security alerts,
+but you're doomed as soon as someone steals your Power Amplifier tech.

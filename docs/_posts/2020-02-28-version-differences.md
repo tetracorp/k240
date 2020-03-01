@@ -66,16 +66,20 @@ within six days of being finished, or four working days, including printing and
 shipping the disks. The cracktro credits the supplier of the original disk to
 "Troops & Troll".
 
-I have a hypothesis that v1.886 was an early build for magazine reviewers, as
+One hypothesis is that v1.886 was an early build for magazine reviewers, as
 there is a rumour that staff at one of the Amiga magazines leaked review copies
-to pirate, leading some games to be pirated even before street date. However, it
-it also likely that was just a retail copy.
+to pirate, leading some games to be pirated even before street date. However, on
+further analysis I believe it to be the retail version, since magazines with
+reviews would have already been published before the v1.886 build date
+(see [development and release history](../history/development.html)).
 
 Many files are dated 01-Feb-78, which looks like a default Amiga file date for
 computers with no real-time clock. Notably, however, not all files are. Various
-files are dated 20 Sept 1991, 2 Sept 1992, 2 Mar 1994, and 16 May 1994. This
-gives us a sense of how long the game took in development if some files,
-specifically the background art, were already done in Sep 1991.
+files are dated 20 Sept 1991, 2 Sept 1992, 2 Mar 1994, and 16 May 1994. It's
+possible that many of the game's graphical assets were already in place in
+September 1991; however, I suspect that these are default dates from an Amiga
+with a hard disk but no real-time clock, which would therefore take its time
+from the hard disk's OS install date.
 
 ### Main game executable differences v.1886 to v2.000
 
@@ -104,7 +108,7 @@ Obviously, not all of the game files are present on this one disk.
 
 All six alien and planet graphics are there, unchanged, as are the six shop
 blueprint files and several backgrounds: `wireplan.mgl`, `hologram.mgl`,
-and `tetra.mgl`
+and `tetra.mgl`.
 
 However, there are no voice files, outro graphics, or language files.
 `welcome.mgl`, which I believe is the "welcome to sci-tek" audio, is not there,

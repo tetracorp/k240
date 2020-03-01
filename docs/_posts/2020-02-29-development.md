@@ -4,7 +4,8 @@ title: "Development and release history"
 categories: history
 ---
 
-This article chronicles the development and release of _K240_.
+This article chronicles the development and release of _K240_, a 1994 strategy
+game published by Gremlin Graphics for the Commodore Amiga.
 
 1. Table of Contents
 {:toc}
@@ -137,12 +138,18 @@ releasing further games for the platform.
 The final retail build of K240, version 1.886, was completed on Friday 20 May
 1994 at 13:31. K240 was, presumably, released shortly thereafter.
 
+A copy of the game was quickly acquired by someone credited as "Troops & Troll"
+and provided to pirate groups TRSI & Zenith (TRZ), who quickly stripped the
+manual copy-protection from the game and released a pirate copy on 26 May 1994.
+In other words, the game was cracked not within six days of going on sale, but
+within six days of the finished build.
+
 A second build of the game, v2.000, was completed on 7 June 1994 at 11:15. This
 version was almost certainly produced to fix bugs, though a more thorough
 analysis will be necessary to determine which bugs were fixed.
 
 Patrick Phelan is credited with providing the game's music. However, K240 has no
-music.
+music. This is a mystery.
 
 ### Reception
 
@@ -207,15 +214,15 @@ in mid-1994, it would have taken two and a half years.
   art. All have file dates around 9am and within 8 minutes of each other,
   suggesting they were copied to floppy disk from an existing source.
   Based on interviews, this date seems unlikely to be accurate, and may be a
-  false date from an Amiga with a hard disk installed in 1991.
+  false date from an Amiga with a hard disk installed in 1991, but no real-time
+  clock, such as an A500.
 
 #### 1992
 
 - __Jan 1992__: Amiga Action #28 publishes an in-depth early preview of K240.
 - __2 Sep 1992__: File dates for three rendered outro graphics displayed at the
   end of a scenario. Also the date of the disk icon. It's possible that this is
-  the default date of an A600HD or A1200HD, which had no real-time clock but set
-  their default date to their initial hard disk install date.
+  the default date of an Amiga with a hard disk.
 
 #### 1993
 
