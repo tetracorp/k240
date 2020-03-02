@@ -21,7 +21,74 @@ copy-protection and cracktro, these seem to be largely unchanged.
 1. Table of Contents
 {:toc}
 
-### File comparison between v1.886 and v2.000
+### Main game executable differences
+
+The following differences apply between the v1.886 and v2.000 versions of the
+main `playk240` executable file.
+
+#### Fleet bug fix
+
+The main game executable `playk240` appears to have only one significant change
+between the v1.886 and v2.000 release, which is to address a major
+[bug](../game-mechanics/bugs.html) which crashes the game when handling fleets.
+
+At address 0xc0da in both dissassemblies, at the end of a loop, it checks the
+value in (6,A0), leaving the loop on a negative value; otherwise, it loads a new
+value into (6,A0) and repeats the loop. In v2.000, it an extra `BNE.L`
+instruction is inserted at 0c0e0 between the `BMI.S` and `MOVE.L`, which repeats
+the loop without updating (6,A0) if it is equal to a non-zero value. This extra
+two-byte instruction increases all addresses after 0xc0e0 in the executable by
+2.
+
+#### Padding
+
+At the very end of the first hunk, after the cheats, the v2.000 disassembly has
+an additional two bytes, `0xb900`. This is never called by the program and is
+probably just padding to align the next section.
+
+The padding and fleet bug fix account for the four byte difference in filesize
+between the two versions.
+
+#### Version strings
+
+The version string at 0x6016 in both versions is also updated. This can be seen
+in-game by pressing the `V` key. The two version strings are:
+
+    K240 - VERSION 1.886,  20-5-94 13:25
+    CLICK MOUSE TO CONTINUE GAME...
+
+    K240 - VERSION 2.000,  7-6-94 11:15
+    CLICK MOUSE TO CONTINUE GAME...
+
+### Cracked version vs original
+
+The authorized free distribution of K240 comes from a cracked pirate version
+which has a single two-byte change allowing any authorisation code to work.
+
+At 0x40c6 in the v1.886 disassembly we can see where the manual protection check
+has been skipped by simply branching to the next label. The original
+instruction, `MOVE.W #$025c,D0`, in hexadecimal as `303c025c`, has simply had
+its first two bytes overwritten with `6016`, which branches forward 16 bytes as
+if the correct code had been entered.
+
+Incidentally, the variable 0x25c is the ID number of the game string
+"AUTHORISATION CODE INVALID!!" Only two strings appear later in the list, which
+are 0x25c, "AUTHORISATION CODE ACCEPTED...", and 0x25d, "ENTER A NAME FOR THE
+SAVED FILE:". This suggests that the copy protection system was added very late
+in development.
+
+Changing the bytes `6016` back to `303c` will restore the file to its original
+state. We can verify this by running the `checksum` program on disk 1, which
+will verify the restored `playk240` executable as having the correct checksum of
+$1cc3. You will need an unmodified version of Disk 1, however, or the checksum
+will fail on the cracked version's packed intro file and other modified files.
+
+The two bytes can be directly hex edited in either version of the executable
+starting at location 0x4104 (decimal 16644). This can be used to disable the
+authorisation code requirement on a legitimate copy, such as a harddisk install.
+`6016` will disable the code requirement, and `303c` will enable it again.
+
+### Directory comparison between v1.886 and v2.000
 
 My version history for [Dungeons of
 Avalon](https://tetracorp.github.io/dungeons-of-avalon/history/version-differences.html)
@@ -56,7 +123,7 @@ The cracktro program TRZ was added, and the startup-sequence modified to add it.
 The `intro` executable shrunk from 20,740 bytes to 10,524, which appears to be
 TRZ compressing it to make room for their 2,920 byte cracktro. Disassembly shows
 that the smaller version is obfuscated while the larger isn't, suggesting that
-it is indeed compressed. The v1.886 checksum program does not register these
+it is indeed compressed. The v1.886 checksum program does not recognise these
 changes, so we can infer that the compression is not part of the original disk.
 
 The file dates on these give us a good sense of just how rapidly the game was
@@ -81,19 +148,7 @@ September 1991; however, I suspect that these are default dates from an Amiga
 with a hard disk but no real-time clock, which would therefore take its time
 from the hard disk's OS install date.
 
-### Main game executable differences v.1886 to v2.000
-
-More analysis needs to be done to determine what the differences are between the
-two versions of the executable. The changes almost certainly consist of bugfixes
-(see [bugs](../game-mechanics/bugs.html)).
-
-Another change is that the pirate version has the copy protection check
-disabled. The pirate version v1.886 main game executable fails the checksum on
-its disk 3, which should be $1cc3. My hunch is that changing one or two
-instructions (a few bytes) would recreate the original EXE, which can be
-verified as it will pass the checksum.
-
-### File comparison of the CU Amiga demo
+### Directory comparison of the CU Amiga demo
 
 All file dates on the CU Amiga coverdisk #77 demo of K240 are given the false
 default date of 1978, so all we can say for certain is that it shipped with the
@@ -104,7 +159,7 @@ The 1978 dates actually span several months, so we might infer that whoever
 wrote these files used an Amiga which was left switched on for several months at
 a time. The latest is dated 20 July 1978.
 
-Obviously, not all of the game files are present on this one disk.
+Obviously, not all of the files from the full game are present on this one disk.
 
 All six alien and planet graphics are there, unchanged, as are the six shop
 blueprint files and several backgrounds: `wireplan.mgl`, `hologram.mgl`,
@@ -115,5 +170,13 @@ However, there are no voice files, outro graphics, or language files.
 and nor is `satpic.mgl`, since . None of the alien data files are there.
 
 There are two unique demo files: `demo.mgl` and `demo2.mgl`. These are probably
-graphics screens. The file `scitek.mgl` is present, but it has changed; it's
-18,052 bytes instead of 18,035, for reasons I have yet to discover.
+the unique intro and outro screens. The file `scitek.mgl` is present, but it has
+changed; it's 18,052 bytes instead of 18,035, for reasons I have yet to
+discover.
+
+### Executable analysis of the CU Amiga demo
+
+The demo version of K240 distributed exclusively with CU Amiga magazine is
+451,998 bytes, which is 17,780 or 17,776 bytes smaller than the final releases.
+However, an in-depth analysis of the code needs to be done to determine the
+differences between this demo and the final version.

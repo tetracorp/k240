@@ -11,9 +11,12 @@ title: Main Index
 
   <h3>Undocumented game mechanics</h3>
   <ul class="posts">
+      <li><a href="{{site.baseurl}}/game-mechanics/introduction.html">Introduction</a></li>
     {% for post in sortedPosts %}
       {% if post.categories contains "game-mechanics" %}
-      <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
+        {% unless post.slug contains "introduction"  %}
+        <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
+        {% endunless %}
       {% endif %}
     {% endfor %}
   </ul>
