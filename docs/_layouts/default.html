@@ -32,9 +32,7 @@
 
     <footer>
       <p class="copyright">
-{{ unless page.license or page.copyright }}
-        <a href="https://tetracorp.github.io/k240/about/copyright.html">CC BY</a>
-{{ endunless }}
+        <a href="https://tetracorp.github.io/k240/about/copyright.html">{% if page.copyright %}{{page.copyright}}{% elsif page.license %}{{page.license}}{% else %}CC BY{% endif %}</a>
       </p>
     </footer>
     
