@@ -43,6 +43,9 @@ deficiency](pafw-and-resource-deficiency.html),
 the number of workers required for each building, and some unexpected or
 counter-intuitive building effects.
 
+The exact causes and effects of [social unrest](security-and-morale.html) have
+been identified.
+
 ### Aliens
 
 Alien ships and buildings are even more mysterious. The game leaves us wondering
@@ -60,7 +63,7 @@ discovered. Additionally, detailed species-specific rules are known for the
 and [Swixarans](../alien/6-swixarans.html), including species-unique missiles
 and ship hardpoints.
 
-The exact AI routines of the aliens are reasonably complex, but only partially
+The exact AI routines of the aliens are reasonably complex, and only partially
 known.
 
 ### Bugs
@@ -69,9 +72,6 @@ Some game mechanics are undocumented because they are unintended; i.e.
 [bugs](bugs.html).
 
 ### Other
-
-The exact causes and effects of [social unrest](security-and-morale.html) have
-been identified.
 
 Various unexpected events, such as Magnetic Storm, Solar Flare, the appearance
 of a comet, or a bribe to increase ore shipments, are in fact completely
