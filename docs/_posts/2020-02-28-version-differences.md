@@ -28,26 +28,18 @@ main `playk240` executable file.
 
 #### Fleet bug fix
 
-The main game executable `playk240` appears to have only one significant change
-between the v1.886 and v2.000 release, which is to address a major
-[bug](../game-mechanics/bugs.html) which crashes the game when handling fleets.
+The main game executable `playk240` appears to have only one functional change
+between the v1.886 and v2.000 release, which is a single additional line of code
+to address a major [bug](../game-mechanics/bugs.html) that crashes the game
+when handling fleets.
 
-At address 0xc0da in both dissassemblies, at the end of a loop, it checks the
-value in (6,A0), leaving the loop on a negative value; otherwise, it loads a new
-value into (6,A0) and repeats the loop. In v2.000, it an extra `BNE.W`
-instruction is inserted at 0c0e0 between the `BMI.S` and `MOVE.L`, which repeats
-the loop without updating (6,A0) if it is equal to a non-zero value. This extra
-two-byte instruction increases all addresses after 0xc0e0 in the executable by
-2.
-
-#### Padding
-
-At the very end of the first hunk, after the cheats, the v2.000 disassembly has
-an additional two bytes, `0xb900`. This is never called by the program and is
-probably just padding to align the next section.
-
-The padding and fleet bug fix account for the four byte difference in filesize
-between the two versions.
+At address 0xc0d8 in v2.000 (0xc0da in v1.886), at the end of a loop, it checks
+the value in (6,A0), leaving the loop on a negative value; otherwise, it loads a
+new value into (6,A0) and repeats the loop. In v2.000, it an extra `BNE.W`
+instruction is inserted at 0xc0de between the `BMI.S` and `MOVE.L`, which
+repeats the loop without updating (6,A0) if it is equal to a non-zero value.
+This extra four-byte instruction increases all addresses after 0xc0de in the
+executable by 2.
 
 #### Version strings
 
@@ -59,6 +51,18 @@ in-game by pressing the `V` key. The two version strings are:
 
     K240 - VERSION 2.000,  7-6-94 11:15
     CLICK MOUSE TO CONTINUE GAME...
+
+The v2.000 version string is two bytes shorter overall.
+
+#### Padding
+
+At the very end of the first hunk, after the cheats, the v2.000 disassembly has
+an additional two bytes, `0xb900`. This is never called by the program and is
+probably just padding to align the next section.
+
+Overall, v2.000 gains four bytes from the fleet fix and two from the padding,
+but loses two from the shorter version string. The result is that v2.000 is four
+bytes larger overall.
 
 ### Cracked version vs original
 

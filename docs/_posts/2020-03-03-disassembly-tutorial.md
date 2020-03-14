@@ -81,6 +81,7 @@ high-level language like C or AMOS Basic, so there's no meaningful way to
 
 Some useful resources include:
 
+- [MarkyJester's 68k Tutorial](http://mrjester.hapisan.com/04_MC68/Index.html)
 - [68k.hax.com](http://68k.hax.com/), which explains the 68000 instruction set.
 - [NVG's 68k docs](https://oldwww.nvg.ntnu.no/amiga/MC680x0_Sections/alphabetical.HTML),
   another 68000 instruction set guide.
