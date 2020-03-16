@@ -25,21 +25,24 @@ something resembling the cadence of human speech.
 
 ### Land on hangar
 
-If you order a ship to Land on Surface, and it chooses a square with a hangar in
-it, it will land _in_ the hangar instead.
+If you order a ship to Land on Surface, it randomly chooses a square to ladn on.
+If it chooses a square with a hangar in it, it will land _in_ the hangar
+instead.
 
 ### Free temporary gravity nullifier
 
 At the start of the game, for a limited time period, your colony and the enemy
 colony is affected by a temporary Gravity Nullifier effect. This is hard to
-notice, because it has normally worn off by the time you buy the blueprints that
-let you see asteroid speed.
+notice, because it has normally worn off by the time you buy the Asteroid
+Tracker blueprint that lets you see asteroid speed.
 
 ### Asteros half-life
 
 Asteros depletes at the rate of one unit every four days. This starts from the
 moment you colonize the asteroid. It's not clear whether this is meant to
-represent radioactive decay, or is just a bug in the Powerplant code.
+represent radioactive decay, or is just a bug in the Powerplant code. See
+[building behaviour](../game-mechanics/building-behaviour.html) for the strange
+way Powerplant functions.
 
 ### Ax'Zilanth viral resistance
 
