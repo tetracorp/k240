@@ -6943,14 +6943,6 @@ SYMBOL	tblAsteroidMaps	$00020BEC
 COMMENT	$00020BEC	Map area is 53,856 bytes: 24 asteroids of 34x33 two-byte words.
 COMMENT	$00020BEC	Values used are 0000-000d, 002d-003c, 0100, 0105, 0109, 010c.
 COMMENT	$00020BEC	
-COMMENT	$00020BEC	
-COMMENT	$00020BEC	
-COMMENT	$00020BEC	
-COMMENT	$00020BEC	
-COMMENT	$00020BEC	
-COMMENT	$00020BEC	
-COMMENT	$00020BEC	
-COMMENT	$00020BEC	
 SYMBOL	lUnkAst51	$0002DE4C
 SYMBOL	lUnknown52	$0002DE50
 SYMBOL	lUnknown53	$0002DE54
@@ -6958,10 +6950,9 @@ SYMBOL	ptrCurrentAst	$0002DE58
 SYMBOL	lUnknown54	$0002DE5C
 SYMBOL	ptrEnemyHome	$0002DE60
 SYMBOL	lUnknown56	$0002DE64
-COMMENT	$0002DE68	If I measure correctly, this appears 54,284 bytes (0xd40c bytes)
-COMMENT	$0002DE68	into the save game file. Edit it to a nice value like
-COMMENT	$0002DE68	hexacdecimal 0x00987654 (9,991,764). There's a max of 9,999,999
-COMMENT	$0002DE68	anyway.
+COMMENT	$0002DE68	Default starting cash. Begins around 54,284 bytes (0xd40c) into the
+COMMENT	$0002DE68	save game file. Edit it from $0003d090 to,say, $00987654 to have
+COMMENT	$0002DE68	9,991,764 credits. Maxes out at 9,999,999.
 SYMBOL	intCashGeneral	$0002DE68
 SYMBOL	intCashBuilding	$0002DE6C
 SYMBOL	intCashVehicles	$0002DE70

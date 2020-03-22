@@ -38094,14 +38094,6 @@ tblAsteroidMaps:
 ; Map area is 53,856 bytes: 24 asteroids of 34x33 two-byte words.
 ; Values used are 0000-000d, 002d-003c, 0100, 0105, 0109, 010c.
 ; 
-; 
-; 
-; 
-; 
-; 
-; 
-; 
-; 
 	DS.L	58			;20bec
 	DC.L	$000a002e,$0007002f,$0003002f ;20cd4
 	DS.L	13			;20ce0
@@ -40191,10 +40183,9 @@ ptrEnemyHome:
 lUnknown56:
 	DS.L	1			;2de64
 intCashGeneral:
-; If I measure correctly, this appears 54,284 bytes (0xd40c bytes)
-; into the save game file. Edit it to a nice value like
-; hexacdecimal 0x00987654 (9,991,764). There's a max of 9,999,999
-; anyway.
+; Default starting cash. Begins around 54,284 bytes (0xd40c) into the
+; save game file. Edit it from $0003d090 to,say, $00987654 to have
+; 9,991,764 credits. Maxes out at 9,999,999.
 	DC.L	$0003d090		;2de68
 intCashBuilding:
 	DS.L	1			;2de6c
