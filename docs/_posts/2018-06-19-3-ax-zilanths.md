@@ -4,6 +4,11 @@ title: "#3: Ax'Zilanths"
 categories: alien
 ---
 
+![planet1.mgl](../images/planet1.gif "planet1.mgl")
+{:.right}
+
+![alienp2.mgl](../images/alienp2.png "alienp2.mgl")
+
 The Ax'Zilanths are the closest equivalent to the Terran player.
 
 1. Table of Contents

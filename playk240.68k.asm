@@ -411,7 +411,7 @@ tblBufferList:
 ; Buffer 01  40000 bytes chip            (Screen)
 ; Buffer 02  40000 bytes chip            (Screen)
 ; Buffer 03  28064 bytes chip            Unpacking buffer?
-; Buffer 04  22800 bytes chip            Alien data 2
+; Buffer 04  22800 bytes chip            Alien data 2, ship sprites
 ; Buffer 05   8000 bytes chip
 ; Buffer 06   1200 bytes chip
 ; Buffer 07    128 bytes public
@@ -461,7 +461,7 @@ ptrBuff03:
 	DS.L	1			;00536
 ptrBuff04_Alien:
 ; Pointer to data loaded from alien file a1data2, which can be
-; from 20450 to 22780 bytes.
+; from 20450 to 22780 bytes. Alien ship sprites.
 	DS.L	1			;0053a
 ptrBuff05:
 	DS.L	1			;0053e
@@ -905,7 +905,7 @@ _00AF0:
 	MOVE.W	D0,chip31AC6		;00b2a: 33c000031ac6
 	BRA.S	_00B9E			;00b30: 606c
 _00B32:
-	LEA	ptr31B80,A1		;00b32: 43f900031b80
+	LEA	ptrMousePtrs,A1		;00b32: 43f900031b80
 	TST.B	flg2E482		;00b38: 4a390002e482
 	BNE.S	_00B6C			;00b3e: 662c
 	MOVE.B	intScreen,D0		;00b40: 10390002e486
@@ -2981,7 +2981,7 @@ _LoadAlien:
 	MOVE.W	(A7),D0			;01fca: 3017
 	LEA	strA1data3,A0		;01fcc: 41f900002068
 	MOVE.B	D0,(15,A0)		;01fd2: 1140000f
-	LEA	tblbAlienFile3_0,A5	;01fd6: 4bf900033768
+	LEA	tblAlienFile3_0,A5	;01fd6: 4bf900033768
 	JSR	_LoadAlienFile		;01fdc: 4eb900000c60
 	BMI.S	_0201C			;01fe2: 6b38
 	MOVE.W	(A7),D0			;01fe4: 3017
@@ -3343,7 +3343,7 @@ loop02452:
 	ADDQ.L	#8,A0			;02456: 5088
 	DBF	D0,loop02452		;02458: 51c8fff8
 	MOVE.L	#blobAlienFile3_1,D1	;0245c: 223c000338f8
-	LEA	tblbAlienFile3_0,A0	;02462: 41f900033768
+	LEA	tblAlienFile3_0,A0	;02462: 41f900033768
 	MOVE.W	#$0027,D0		;02468: 303c0027
 loop0246C:
 	ADD.L	D1,(4,A0)		;0246c: d3a80004
@@ -4993,7 +4993,7 @@ _03AD8:
 	MOVEQ	#16,D1			;03b38: 7210
 	BSR.W	_07310			;03b3a: 610037d4
 	MOVEQ	#18,D0			;03b3e: 7012
-	JSR	_1A2DC			;03b40: 4eb90001a2dc
+	JSR	_PlayVoice		;03b40: 4eb90001a2dc
 	MOVEQ	#60,D0			;03b46: 703c
 	JSR	_00BB8			;03b48: 4eb900000bb8
 	ST	intTypeSpeed		;03b4e: 50f90001cb03
@@ -14568,7 +14568,7 @@ _0B532:
 	BEQ.S	_0B568			;0b55e: 6708
 _0B560:
 	MOVEQ	#10,D0			;0b560: 700a
-	JSR	_1A2DC			;0b562: 4eb90001a2dc
+	JSR	_PlayVoice		;0b562: 4eb90001a2dc
 _0B568:
 ; fleets
 	MOVEA.L	ptrBuff14_Fleet,A0	;0b568: 207900000562
@@ -19213,7 +19213,7 @@ _0EC7E:
 	BNE.S	_0ECB2			;0ec98: 6618
 	MOVE.B	#$08,flg2E471		;0ec9a: 13fc00080002e471
 	MOVEQ	#7,D0			;0eca2: 7007
-	JSR	_1A2DC			;0eca4: 4eb90001a2dc
+	JSR	_PlayVoice		;0eca4: 4eb90001a2dc
 	BRA.S	_0ECB2			;0ecaa: 6006
 _0ECAC:
 	BSET	#3,(21,A6)		;0ecac: 08ee00030015
@@ -34085,7 +34085,7 @@ _1990C:
 	BGT.W	ret1999E		;19912: 6e00008a
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;19916: 48e7fffe
 	MOVEQ	#17,D0			;1991a: 7011
-	BSR.W	_1A2DC			;1991c: 610009be
+	BSR.W	_PlayVoice		;1991c: 610009be
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;19920: 4cdf7fff
 	MOVE.L	(10,A0),(6,A0)		;19924: 2168000a0006
 	BTST	#5,(30,A0)		;1992a: 08280005001e
@@ -34169,7 +34169,7 @@ _19A1A:
 	BGT.W	ret1999E		;19a20: 6e00ff7c
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;19a24: 48e7fffe
 	MOVEQ	#17,D0			;19a28: 7011
-	BSR.W	_1A2DC			;19a2a: 610008b0
+	BSR.W	_PlayVoice		;19a2a: 610008b0
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;19a2e: 4cdf7fff
 	MOVE.L	(10,A0),(6,A0)		;19a32: 2168000a0006
 	MOVE.W	(22,A0),D0		;19a38: 30280016
@@ -34851,10 +34851,10 @@ _1A2C8:
 	RTS				;1a2cc: 4e75
 _1A2CE:
 	TST.B	flgVoice		;1a2ce: 4a390002e451
-	BNE.S	_1A2DC			;1a2d4: 6606
+	BNE.S	_PlayVoice		;1a2d4: 6606
 	MOVE.W	D1,D0			;1a2d6: 3001
 	BRA.W	_Daily08		;1a2d8: 6000006c
-_1A2DC:
+_PlayVoice:
 ; called by bjork speech cheat
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;1a2dc: 48e7fffe
 	TST.B	flgVoice		;1a2e0: 4a390002e451
@@ -35321,7 +35321,7 @@ _1A85A:
 ; A = 0. This differs from the noises cheat where A = 1
 	SUBI.B	#$41,D0			;1a872: 04000041
 	EXT.W	D0			;1a876: 4880
-	BSR.W	_1A2DC			;1a878: 6100fa62
+	BSR.W	_PlayVoice		;1a878: 6100fa62
 	BRA.S	_CheatBjork		;1a87c: 60ba
 ret1A87E:
 	RTS				;1a87e: 4e75
@@ -36696,6 +36696,7 @@ ptr1DA86:
 	DC.L	$00000140,$000001c0,$00100000,$01e00000 ;1e03a
 	DC.L	$02600010		;1e04a
 blobAlienFile1:
+; Loaded from a1data1. 610 bytes.
 	DS.L	154			;1e04e
 	DC.L	$0078000f,$00000096,$000000fe,$000d0000 ;1e2b6
 	DC.L	$01180000,$01a80012,$000001cc,$00000244 ;1e2c6
@@ -42565,7 +42566,7 @@ ptr31B36:
 	DC.W	$04d6			;31b7a
 ptr31B7C:
 	DC.L	$fffffffe		;31b7c
-ptr31B80:
+ptrMousePtrs:
 ; 2 sets of 2x72 bytes
 ; Mouse pointers: default, detonate, ship arrow
 ; "CTR1"
@@ -42610,6 +42611,7 @@ ptr31B80:
 	DC.L	$40e040e0,$00700070,$00200020 ;31d10
 	DS.L	5			;31d1c
 textarea:
+; 1200 byte text buffer for putting text on screen
 	DS.L	300			;31d30
 chip321E0:
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;321e0
@@ -42617,6 +42619,7 @@ chip321E0:
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;32200
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;32210
 ptr32220:
+; Sprites.
 	DC.L	$0000001f,$f0000000,$000000ff,$fe000000 ;32220
 	DC.L	$000007ff,$ffc00000,$00000fff,$ffe00000 ;32230
 	DC.L	$00003fff,$fff80000,$00007fff,$fffc0000 ;32240
@@ -43019,9 +43022,12 @@ ptr33452:
 	DC.L	$00000e36,$000b0000,$0e4c0000,$0ebc000e ;3374e
 	DC.L	$00000ed8,$00000f30	;3375e
 	DC.W	$000b			;33766
-tblbAlienFile3_0:
+tblAlienFile3_0:
+; File a1data3. 4240 to 8450 bytes per alien.
+; Contains building data
 	DS.L	100			;33768
 blobAlienFile3_1:
+; Contains alien building sprites.
 	DS.L	4150			;338f8
 chip379D0:
 	DC.L	$03c00df0,$07bccfef,$e5fbe5ff,$c7bfceef ;379d0
