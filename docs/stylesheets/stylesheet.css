@@ -271,6 +271,13 @@ a {
   color: #aaaaaa;
 }
 
+img.double, .double img {
+  transform:scale(2.0);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
 footer {
   width: 90%;
   max-width: 900px;
