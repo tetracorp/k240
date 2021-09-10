@@ -4,16 +4,15 @@ title: "Differences between versions"
 categories: history
 ---
 
-K240 was released in two main versions: v1.886, with a build date of 20 May
-1994; and v2.000, build date 7 June 1994. You can press "V" during play to find out
-which version you have. I believe v2.000 was a
-[bugfix](../game-mechanics/bugs.html) patch.
+K240 was released in two main versions: v1.886, the original retail release with
+a build date of 20 May 1994; and v2.000, which appears to be a
+[bug](../game-mechanics/bugs.html) fix, build date 7 June 1994. You can press
+"V" during play to find out which version you have.
 
 Additionally, a demo version of K240 was given away with CU Amiga issue #77 (Mar
-1994) as a coverdisk. There are some differences; notably some bugs, and
-different sprites for certain buildings. I intend to disassemble this for
-comparison eventually. I don't know whether or not any other magazines had a
-K240 coverdisk.
+1994) as an exclusive coverdisk. It appears to be based on an earlier build of
+the game and has some differences: some notable bugs, and different graphics. I
+intend to disassemble this for comparison eventually.
 
 There are also various cracked pirate releases, but aside from removed
 copy-protection and cracktro, these seem to be largely unchanged.
@@ -66,31 +65,42 @@ bytes larger overall.
 
 ### Cracked version vs original
 
-The authorized free distribution of K240 comes from a cracked pirate version
-which has a single two-byte change allowing any authorisation code to work.
+K240 has a manual protection code system which requires the entry of one of a
+hundred words from the game's manual. The authorized free download of K240 is
+based on a cracked pirate version of the v1.886 release, which made a single
+two-byte change allowing any manual protection code to be accepted.
 
-At 0x40c6 in the v1.886 disassembly we can see where the manual protection check
-has been skipped by simply branching to the next label. The original
-instruction, `MOVE.W #$025c,D0`, in hexadecimal as `303c025c`, has simply had
-its first two bytes overwritten with `6016`, which branches forward 24 bytes as
-if the correct code had been entered.
+The change occurs at location 0x40ee (decimal 16622 bytes) in the `playk240`
+executable, or at 0x40c6 in the disassembly. It is the same location for both
+v1.886 and v2.000.
 
-Incidentally, the variable 0x25c is the ID number of the game string
-"AUTHORISATION CODE INVALID!!" Only two strings appear later in the list, which
-are 0x25c, "AUTHORISATION CODE ACCEPTED...", and 0x25d, "ENTER A NAME FOR THE
-SAVED FILE:". This suggests that the copy protection system was added very late
-in development.
+The original instruction is `MOVE.W #$025b,D0` (hexadecimal `303c 025b`) , which
+places the ID number of the text string "AUTHORISATION CODE INVALID!!" into data
+register D0. The cracked version has overwritten the first two bytes, `303c`,
+with `6016`, which branches forward 24 bytes to the instructions normally
+executed on entry of a correct code. All incorrect codes are therefore
+effectively treated as correct codes.
 
-Changing the bytes `6016` back to `303c` will restore the file to its original
-state. We can verify this by running the `checksum` program on disk 1, which
-will verify the restored `playk240` executable as having the correct checksum of
-$1cc3. You will need an unmodified version of Disk 1, however, or the checksum
-will fail on the cracked version's packed intro file and other modified files.
+The authorisation code requirement can be enabled or disabled by hex editing the
+two bytes at location 0x40ee in the `playk240` executable. Setting the value to
+`6016` disables it, which may be useful if you have a retail version but have
+lost your manual. This is especially useful if you own a v2.000 copy of K240,
+since the official download is v.1886 and suffers from the fleet bug.
 
-The two bytes can be directly hex edited in either version of the executable
-starting at location 0x4104 (decimal 16644). This can be used to disable the
-authorisation code requirement on a legitimate copy, such as a harddisk install.
-`6016` will disable the code requirement, and `303c` will enable it again.
+Changing the two bytes back from `6016` to `303c` will restore the executable to
+its original state. You can verify this by running the `checksum` program on
+K240 disk 3, which will give a value of `$1cc3` for an unmodified v1.886
+`playk240` file or `$2471` on v2.000, although the program may fail on a cracked
+version due to other modified files, such as a packed `intro` file on disk 1.
+I'm not sure why you would actually need to re-enable the manual code system,
+but perhaps you need an unmodified original executable for speedrunning, or just
+want to see what it looks like when you input incorrect codes.
+
+It is interesting to note that string 0x25b, "AUTHORISATION CODE INVALID!!", is
+one of the last entries in the text string list. Only two strings appear later
+in the list, which are 0x25c, "AUTHORISATION CODE ACCEPTED...", and 0x25d,
+"ENTER A NAME FOR THE SAVED FILE:". This suggests that the copy protection
+system was added very late in development.
 
 ### Directory comparison between v1.886 and v2.000
 
@@ -105,7 +115,7 @@ v2.000.
 Here I'm comparing the v1.886 authorized download from [Gremlin Graphics
 World](http://gremlinworld.emuunlim.com/amiga.htm) to the v2.00 SPS .ipf
 release. The authorized release is cracked by TRSI & Zenith (TRZ); I assume the
-latter to be unmodified from retail.
+IPF to be unmodified from retail.
 
 The file date on the Gremlinworld ADFs is 3 Sept 1997, suggesting someone ripped
 these ADFs very early. CU Amiga magazine still existed when someone made ADFs of
@@ -137,7 +147,7 @@ within six days of being finished, or four working days, including printing and
 shipping the disks. The cracktro credits the supplier of the original disk to
 "Troops & Troll".
 
-One hypothesis is that v1.886 was an early build for magazine reviewers, as
+One hypothesis was that v1.886 was an early build for magazine reviewers, as
 there is a rumour that staff at one of the Amiga magazines leaked review copies
 to pirate, leading some games to be pirated even before street date. However, on
 further analysis I believe it to be the retail version, since magazines with
@@ -157,7 +167,8 @@ from the hard disk's OS install date.
 All file dates on the CU Amiga coverdisk #77 demo of K240 are given the false
 default date of 1978, so all we can say for certain is that it shipped with the
 magazine dated March 1994, probably released in February 1994 as was the custom,
-meaning that the disk was already completed in January or February 1994.
+meaning that the disk was already completed in January or February 1994, at
+least three months before the v1.886 retail build.
 
 The 1978 dates actually span several months, so we might infer that whoever
 wrote these files used an Amiga which was left switched on for several months at
@@ -171,7 +182,10 @@ and `tetra.mgl`.
 
 However, there are no voice files, outro graphics, or language files.
 `welcome.mgl`, which I believe is the "welcome to sci-tek" audio, is not there,
-and nor is `satpic.mgl`, since . None of the alien data files are there.
+and nor is `satpic.mgl`, which isn't needed since the demo's spy satellite
+feature is disabled. None of the alien data files are there (you can only fight
+one alien in the demo, although the English language strings for the alien
+descriptions are still in the game code).
 
 There are two unique demo files: `demo.mgl` and `demo2.mgl`. These are probably
 the unique intro and outro screens. The file `scitek.mgl` is present, but it has
@@ -184,3 +198,12 @@ The demo version of K240 distributed exclusively with CU Amiga magazine is
 451,998 bytes, which is 17,780 or 17,776 bytes smaller than the final releases.
 However, an in-depth analysis of the code needs to be done to determine the
 differences between this demo and the final version.
+
+### Amiga Down Under #9 Coverdisk demo
+
+_Amiga Down Under_ issue #9 (May 2019) included a coverdisk with a demo of K240.
+It is functionally identical to the CU Amiga demo, even including the special
+graphics declaring the game a CU Amiga exclusive. The disk has a creation
+date and time of 06-Apr-94 12:38:42 (different to the CU Amiga disk which has a
+false creation date of 1978), but all files and file dates are otherwise the
+same. 2021-09-10

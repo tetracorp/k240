@@ -241,12 +241,14 @@ in mid-1994, it would have taken two and a half years.
 - __28 Feb 1994__: Disk 1 startup-sequence written.
 - __Mar 1994__: CU Amiga's March 1994 issue, though probably published in
   February. It includes Coverdisk #77, an exclusive playable demo of K240. The
-  win screen gives its release date as March 1994, though the game would be
-  delayed.  CU Amiga also gives a preview article.
+  win screen gives its release date as March 1994, though the game would not be
+  released until at least late May. CU Amiga publishes a preview article.
 - __2 Mar 1994__: Installer added to disk 3. Scenario folder created/modified,
   probably to put scenario files in. Game seems to be nearing completion.
 - __4 Mar 1994__: Disk 2 startup-sequence written.
 - __Apr 1994__: Amiga Computing #74 publishes an in-depth preview.
+- __6 Apr 1994__: _Amiga Down Under_ #9 coverdisk of K240 created at 12:38:42.
+  It is effectively identical to the earlier CU Amiga coverdisk.
 - __29 Apr 1994__: Final game launch icon added. Coincidentally, Commodore
   International declares bankruptcy.
 - __May 1994__: Several Amiga magazines
@@ -255,7 +257,7 @@ in mid-1994, it would have taken two and a half years.
   Yard, but it uses the Intel background for the Swixaran win screen.
 - __16 May 1994__: A Monday. Directory `s` for startup-sequence written.
   Checksum program v1.0 written, according to internal version number.
-  However, this program may have been written on 20th May, assuming it contains
+  However, this program may have been updated on 20th May, as it contains
   a correct checksum for the main game EXE.
 - __20 May 1994__: A Friday. Final release build of K240 v1.886 main game
   executable, according to version string.
@@ -267,5 +269,9 @@ in mid-1994, it would have taken two and a half years.
 #### 1995 onward
 
 - __Dec 1996__: PC sequel Fragile Allegiance released.
-- __14 Oct 2001__: Someone makes a modified copy of the TRZ cracked release of
-  disk 1 is made. It removes the TRZ cracktro.
+- __3 Sep 1997__: Someone creates a zip file of K240 which would later be
+  uploaded to Gremlin Graphics World as an authorized download.
+- __30 July 2001__: Last modified date on the authorized download of K240
+  available from Gremlin Graphics World.
+- __14 Oct 2001__: Someone makes a slightly modified copy of the TRZ cracked release of
+  disk 1. It removes the TRZ cracktro.

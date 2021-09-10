@@ -25,16 +25,17 @@ something resembling the cadence of human speech.
 
 ### Land on hangar
 
-If you order a ship to Land on Surface, it randomly chooses a square to ladn on.
+If you order a ship to Land on Surface, it randomly chooses a square to land on.
 If it chooses a square with a hangar in it, it will land _in_ the hangar
 instead.
 
-### Free temporary gravity nullifier
+### Free temporary Gravity Nullifier
 
 At the start of the game, for a limited time period, your colony and the enemy
-colony is affected by a temporary Gravity Nullifier effect. This is hard to
+colony are affected by a temporary Gravity Nullifier effect. This is hard to
 notice, because it has normally worn off by the time you buy the Asteroid
-Tracker blueprint that lets you see asteroid speed.
+Tracker blueprint that lets you see asteroid speed. However, you receive
+Asteroid Tracker automatically when fighting the Tylarans.
 
 ### Asteros half-life
 
