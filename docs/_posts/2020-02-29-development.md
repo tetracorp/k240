@@ -10,75 +10,238 @@ game published by Gremlin Graphics for the Commodore Amiga.
 1. Table of Contents
 {:toc}
 
-### Development
+### Background
 
 #### Origins
 
-K240 was fundamentally a sequel to _Utopia_, a land-based futuristic real-time
-strategy game released around September 1991. The RTS genre was very new at this
+K240 is fundamentally a sequel to _Utopia_, a land-based futuristic real-time
+strategy game released around September 1991. The genre we nowadays call
+"real-time strategy" (RTS) was was very new at this
 point, and definitive titles like _Dune II_ and _Command & Conquer_ did not
-exist yet; magazines interpreted _Utopia_ as a god game like _Populous_, while
+yet exist. Magazines interpreted _Utopia_ as a god game like _Populous_, while
 Utopia's programmer Graeme Ing instead thought of it as a management strategy
 simulation like _Sim City_.
 
+The development of _Utopia_ was detailed in a series of articles in
+[Games-X](https://segaretro.org/Games-X) magazine. Games-X #1 page 44 describes
+how Utopia was originally planned as a fantasy city-building sim titled
+_Fantasym_, inspired by _Sim City_ (1989). The game was pitched to publisher
+Gremlin in June 1990 as the developers, Graeme Ing and Robert Crack, finished
+work on _BSS Jane Seymour_ (also called _Spacewrecked_).
+
+The game setting was soon changed from fantasy to futuristic in order to replace
+ground units with spaceships, in order to avoid the challenge of writing unit
+pathfinding code and make unit movement more dynamic (although the final game
+would feature ground units with terrain and pathfinding anyway). The game was
+given a working title of _World_, and by early August 1990 a roughly 100-page
+specification had been written. It was initially designed with a top-down view,
+with a custom-made map editor tool, although it would change to isometric view
+similar to _Populous_. The game used some code from _BSS Jane Seymour_. In
+September 1990, Ing acquired a development PC running SNASM68K, a cross-assembly
+system connected to the Amiga via SCSI.
+
+In Games-X #4 pages 40-41, Ing describes the technical challenges of actually
+turning his map builder into a working game. The simulation was kept relatively
+simple in order to retain sufficient CPU for the sprite engine. Ing advises
+developers to add game rules one at a time and test as they go, and to keep
+careful notes about game data structures. In November he incorporated Gremlin's
+in-house disk routines to make the game bootable without SNASM, and discovered
+that this actually made it difficult to copy his own disk, although he was able
+to find one disk copying tool which could copy it. (_Utopia_ used NDOS format
+disks which could not be copied normally by Workbench; _K240_ would later use
+the standard Amiga disk format, allowing for hard disk installs.)
+
+In Games-X #8 page 30 Ing describes that at the start of December 1990 he began
+work on the sprite engine, the largest piece of code. The code for actually
+drawing the sprites took a full day, while it took longer to write code to
+prevent from colliding with terrain or with one another.
+
+[The One Amiga #35](https://archive.org/details/TheOneIssue35Aug91/page/n47/mode/1up)
+(August 1991) pages 48-50 went into some detail on the game's development
+process. The switch from top-down to isometric created a lot of technical
+challenges, such as unit pathfinding and drawing sprites moving behind
+buildings. A modified version of the game was used as an isometric map editor.
+At time of the article's writing (probably June or July 1991), only the first
+scenario was completed, but there were already plans for an expansion disk. The
+trading and spying features were yet to be implemented. The article ended with a
+brief suggestion that Ing's next game would be an even bigger strategy title.
+
+The Utopia article series was concluded in August 1991 with a preview in
+Games-X #15 p.43. It was joined that month by previews in _The One Amiga_ #35
+(who complained that it was likely to draw out tired comparisons to _Populous_
+and _Sim City_) and _CU Amiga_ (who described it as a cross between _Populous_
+and _Sim City_).
+
+_Amiga Format_ #26 in September 1991 noted that the game's tactical control
+features were not finished at time of going to press (around August 1991).
+_Amiga Power_ #5 interviewed Ing, who described it as inspired by _Sim City_ but
+with the addition of an enemy, and with an isometric view in order to appear
+more visually impressive.
+
+_CU Amiga_ (Sep 1991) described that it took artist Berni Hill six weeks to create
+all of the game's graphics on an Amiga with Deluxe Paint III. Berni described
+his hopes of working on a Super Nintendo game next, which he would realize as a
+horizon artist in Gremlin's _Top Gear 2_. 
+
+Reviews of Utopia varied. Games-X #17 reviewed _Utopia_ on pages 16-17, rating
+it 4.5 out of 5 and announcing the Amiga release for September 1991, with an
+Atari ST release in October 1991. CU Amiga rated it 94%, awarding it the coveted
+Super Star and describing it as the best game Gremlin has ever released.
+However, Stuart Campbell rated it only three stars in _New Computer Express_,
+describing it as too easy and the game's goal of increasing a quality of life
+statistic to be unsatisfying. Campbell also reviewed it at 81% for
+_Amiga Power_ #6, complaining that it lacked depth and direction, and that the
+small screen size made it hard to get an overview of the entire colony.
+
+_Utopia_ thus took 15 months from initial conception to release with only a
+single programmer, although some game code was re-used from Ing's previous game
+and Gremlin libraries.
+
+#### Utopia: The New Worlds
+
+[CU Amiga's review](https://amr.abime.net/review_8966)
+of _Utopia_ in September 1991 hinted that a sequel was already in the works,
+quoting Graeme Ing as saying "I like my games to get bigger every time".
+
 [An interview](http://amr.abime.net/review_36809) with Graeme Ing appeared in
-Amiga Action #28, the Jan 1992 issue; though remember that magazines often hit
-the newsstands the month before their list date, and of course the articles were
-written earlier than that. Graeme describes Utopia's influences as Larry Niven's
-_Ringworld_ and Joe Haldeman's _The Forever War_.
+Amiga Action #28 (Jan 1992). Graeme describes Utopia's main literary influences
+as Larry Niven's _Ringworld_ and Joe Haldeman's _The Forever War_, while its
+game design was influenced by a desire to expand on the concepts introduced by
+_Sim City_. However, he admits that the off-screen final confrontation with the
+alien was anticlimactic. Ing predicted that the Amiga had at least five more
+years as a viable gaming platform, but that it would move toward big strategy
+titles. (An era of landmark strategy titles would indeed take place, but on the
+PC, not the Amiga.)
 
-He also announces two follow-ups to _Utopia_: an expansion disk, and a
-fully-fledged sequel _Utopia 2_. Utopia 2 was planned to include more advanced
-alien AI, would allow you to physically see the alien city, and would let you
-target individual key buildings. Gremlin Graphics even offered five signed
-copies of the game in a contest for innovative ideas.
+He also announced two follow-ups to _Utopia_: an expansion disk, and a
+fully-fledged sequel, _Utopia 2_. Early plans for _Utopia 2_ included more
+advanced alien AI, the ability to see the alien city, and the ability to target
+individual alien buildings. Gremlin Graphics even offered five signed copies of
+the game in a contest seeking innovative ideas for the game.
 
-At the end of 1991, Utopia 2 was still in the planning stage, but its release
-was scheduled for the end of 1992.
-
-#### 1992-1993
+At the end of 1991 when the interview took place (magazines usually released
+earlier than the month on the cover), Utopia 2 was still in the planning stage,
+but its release was scheduled for the end of 1992.
 
 However, according to [a preview](http://amr.abime.net/review_20463) in
 The One Amiga #59 (Aug 1993), development on Utopia 2 did not actually
 start until May of 1992. This may be due to Graeme first spending four months
-working on the Utopia expansion disk _Utopia: The New Worlds_, according to a
-[review](http://amr.abime.net/review_3994) in the April 1992 issue of CU
+of 1992 working on the Utopia expansion disk _Utopia: The New Worlds_, according
+to a [review](http://amr.abime.net/review_3994) in the April 1992 issue of CU
 Amiga.
 
-The One #59 announces the game's name as K240 (though it conflates it with the
-title of the Utopia 1 expansion, calling it _K240: The New Worlds_), with a
-planned release date of December 1993. It is now revealed to be an asteroid
-mining game, originally set in the
+The _Utopia_ expansion disk received middling reviews, rated only 72% by CU
+Amiga's Tony Dillon, who felt the price of £15 for new levels to an existing
+game was too steep. Amiga Power's Stuart Campbell argued that even reviewing a
+data disk was irrelevant: such expansions never radically change a game's core
+features, meaning that readers do not need any new information to inform their
+purchasing decision.
+
+Among the scenarios in the _Utopia_ data disk was a set of islands requring the
+player to build spaceships to cross between them, which would become a core
+mechanic of K240.
+
+### Development
+#### 1992
+
+Insight into K240's early development comes primarily from four magazine
+previews which interviewed Graeme Ing:
+[Amiga Action #28](https://amr.abime.net/review_36809) (Jan 1992) pages 60-61,
+[The One Amiga #59](http://amr.abime.net/review_20463) (Aug 1993) pages 40-41,
+[Amiga Action #48](https://amr.abime.net/review_25444) (Sep 1993) pages 58-49,
+and [CU Amiga](http://amr.abime.net/review_29004) (March 1994) pages 62-63.
+
+_The One_ #59 gives a start date of May 1992 for K240's development, originally
+given the working title of _Utopia 2_. March 1994's _CU Amiga_ describes it as
+being developed "on and off" for nearly two years, which would concur.
+
+Like _Utopia_, development of K240 began by writing a large design document. The
+original concept was a military space strategy game which would expand on
+_Utopia_. The concept of asteroids was added a few days into the design stage.
+Other early ideas included more advanced AI, the ability to see the enemy
+settlement directly, and the ability to control your units in a tactical
+fashion to target individual key buildings.
+
+However, the original design was massively over-ambitious, and Ing later
+admitted that it would have taken over five years to implement all the features
+originally planned. Many features were removed or changed from the original plan
+during the game's development, in some cases because gameplay issues were found
+with game mechanics in developer testing, and in others because they were found
+to be technically not feasible, such as null modem multiplayer.
+
+Despite initial claim of a release by the end of 1992, development continued
+through the second half of the year and into 1993. An screenshot from an early
+stage of development (no later than July 1993) appearing CU Amiga Mar 1994 shows
+a test of the dialog box system, an older version of the starfield background, a
+familiar asteroid layout, and buildings recognizable as the Protected Solar
+Matrix, Solar Generator, Plasma Turret, a Command Centre, an alien Ore Eaters'
+Civilian Dome, and scaffolding.
+
+#### 1993
+
+Much of the game's graphics and core features were completed by July 1993.
+Screenshots previewed in _The One_ #59 show largely finalized graphics,
+including the font, ship building window layout, missile targeting input screen
+with accuracy readout and asteroid direction marking, an updated starfield
+pattern, Vortex and fire-based weapon effects, and Asteroid Engines.
+
+However, we see older sprites for several ships and buildings, including the
+Battleship, Transporter, Transporter wireframe, more colourful palettes on
+several Terran ships (a trait mentioned in the game manual), Construction Yard,
+Environment Control, and a pagoda-like building sprite which does not appear to
+represent any Terran building in the final game.
+
+Buttons have been extracted for the fleet, ship cursor, missile, fleet submenu,
+asteroid submenu, building window, and detonate buttons; the PANEL cheat in the
+final game would show these plus the contents of the asteroid submenu, financial
+button, geological analysis button, and Sci-Tek button, suggesting that perhaps
+blueprints were not yet implemented, or at least not being tested.
+
+_The One_ #59 introduces it as an asteroid mining game with military strategy
+gameplay, originally intended to be set in the 
 [Large Magellanic Cloud](https://en.wikipedia.org/wiki/Large_Magellanic_Cloud),
-with a more military strategy gameplay.  Graeme Ing laments the features which
-had to be cut for technical limitations, including more advanced AI and
-null-modem type multiplayer. Another feature which didn't make it to the final
-game was more special scenario goals, such as to find something before the
-enemy does.
+which we still see referenced on the cover the final game's manual ("Magellanic
+Mining Guidelines"). _Amiga Action_ #48, the following month, gives a similar
+interview with many of the same screenshots, and we can see some slightly
+different ship statistics, including a Transporter which builds in 50 days
+instead of 114, Plasma Cannons priced at only 1000 credits, and ships with
+impossible configurations (high Armour values not possible in the final game
+even with Shield x50). The date format also begins with "Y" rather than "E".
 
-Screenshots in The One #93 show most of the game's recognizable visual features
-already in place by August 1993. Noteworthy changes include more colourful
-Terran ships, a different Protected Resiblock design, and a radically different
-Transporter design with a matching blueprint in the ship build screen. The
-Transporter builds in only 50 days, and Plasma Cannons cost only 1000.
-The Fleet Battleship is slightly different, but has the usual color scheme.
-We also see a green pagoda-like Terran building that doesn't appear in the final
-game.
+By this point, alien scenarios were still intended to include sub-missions like
+destroying shield generators, disabling convoys, locating bases, or finding
+before the enemy. None of these special missions would make it into the game
+except for the Swixaran cloak generator sub-mission. Ing already lamented at
+this point that certain features had to be cut for time or technical
+limitations, such as more advanced AI.
 
-The next [preview](http://amr.abime.net/review_25444) is in Amiga Action #48 (Sep
-1993), where Graeme describes the familiar count of 40 buildings, 7 ship types,
-and 16 weapons. He describes three scenario missions which didn't make it into
-the final game (disabling convoys, destroying shields, locating bases), and some
-cut lore about the Empire being encroached upon by two alien races, causing a
-resource shortage. We see the familiar missile control window. There is a fleet
-window where readout showing a Combat Eagle with 150 armor points and an Assault
-Fighter with 91; impossible configurations in the final release.
+Last-minute information in the _The One_ article announced the name: "K240",
+although it appears to conflates it with the title of the Utopia 1 expansion,
+calling it _K240 - the new worlds_. _Amiga Action_ #48 makes the same mistake,
+calling the game _K240: The New World_. The name change to K240 may have been to
+differentiate it from Utopia in order to stand as its own, more advanced game.
+
+The _Amiga Action_ #48 article gives us a familiar count of 40 buildings (as in
+the final game) and 16 weapons (technically 16 hardpoints, half of those being
+shields). It describes a count of 7 ship types, one short of the final game. I
+suspect the ship missing at this point (Aug 1993) is the Orbital Space Dock, the
+name string for which appears much later in the strings list than the rest. The
+NASA cheat code string in the CU Amiga demo reads "ENTER SHIP 1-7" rather than
+"ENTER SHIP 1-8", so the OSD may well have been added after August 1993.  It's
+entirely possible that the space dock was inspired by _Star Trek: Deep Space
+Nine_, the first episode of which aired in the UK for the first time on 1 August
+1993.
 
 A [preview](http://amr.abime.net/review_19688) in Amiga Power #30 (Oct 1993)
 suggests that you would have to invest time and money into research, though in
-the final game you just buy them as blueprints. It's unclear if research was one
-of the many features cut from the original design documents, or if this is just
-a miscommunication.
+the final game you just buy them as blueprints. Given that the Sci-Tek button
+didn't appear in the earlier screenshots, it's possible that technology was
+originally supposed to be researched rather than bought. A release date is given
+for "September", presumably meaning September 1993, another release date that
+the game would miss.
+
+Despite a release date on December 1993 given in _The One_ #59, the game would
+not be released until 1994.
 
 #### 1994
 
@@ -87,28 +250,23 @@ run-up to the game's release, as well as some more in-depth previews.
 
 A short [preview](http://amr.abime.net/review_35944) in Amiga Format #56 (Feb
 1994) has a screenshot which shows a few things of note. The layout of the
-extracted buttons is identical to that of the PANEL cheat. The Construction Yard
-sprite is similar to the CU Amiga demo rather than the final version. There are
-two non-Terran large ships at a Terran colony. We can also see two numbers in
-the top-left of the screen, some kind of debug information.
+extracted buttons is identical to that of the PANEL cheat, which means asteroid
+rotation and blueprint purchases are in the game at this point. The Construction
+Yard sprite is similar to the CU Amiga demo rather than the final version. There
+are two non-Terran large ships at a Terran colony. We can also see two numbers
+in the top-left of the screen, probably some kind of debug information (this
+also appears in the 1993 screenshots).
 
-Meanwhile, file dates in the retail release show the finishing touches being put
-on the game for distribution. In February and March 1994, disks 1 and 2 gain
-startup-sequence files, and disk 3 gains a hard disk installer (adapted from the
-installer for _HeroQuest 2: Legacy of Sorasil_).
+File dates in the retail release show the finishing touches being put on the
+game for distribution at this point. In February and March 1994, disks 1 and 2
+gain startup-sequence files, and disk 3 gains a hard disk installer (adapted
+from the installer for _HeroQuest 2: Legacy of Sorasil_).
 
 A lot of unique development information is revealed in an in-depth
 [preview](http://amr.abime.net/review_29004) in the March 1994 issue of CU
 Amiga. Tony Dillon drove to Sheffield to interview Graeme Ing in person,
 something CU Amiga often did, alllowing them access to some unique information,
-in this case sprite sheets and some early game graphics.
-
-The final version of the Transporter is shown, along with other original sprite
-sheets. A screenshot of a very early test windowing system is also depicted. We
-can see what looks like an alien Research Dome, but on a Terran colony; and an
-earlier starfield graphic. Despite this archaic screenshot, we can recognize
-Protected Solar Matrix, which one might otherwise have assumed to be a later
-addition.
+in this including case sprite sheets and the intro graphics.
 
 Something interesting appears in the screenshot of the alien load screen. We see
 the Swixaran sprite, but what looks like the Ax'Zilanth homeworld (and some
@@ -116,18 +274,23 @@ placeholder text). This makes sense because both of these have the ID number #1,
 being stored in `alienp1.mgl` and `planet1.mgl` respectively, despite neither
 actually being used for alien #1 in the game.
 
-The interview itself notes how the game was designed and developed, in an
-on-and-off fashion for nearly two years at that point (consistent with the dates
-of May 1992 to Feb 1994). The asteroid concept was added a few days after the
-original design brief, which was to make a military strategic space game. The
-full design specification was "immense", but was often changed during
-development when testing revealed issues. An entirely new feature was added just
-before the interview, though it's not certain what it was.
+The CU Amiga preview describes that an entirely new feature was added just
+before the interview, though the article doesn't say what it was.
 
-Included with that magazine is the K240 demo. More analysis of the executable
-needs to be done to determine what features already existed in that version,
-which was probably compiled in Jan/Feb 1994. The demo's win screen promises a
-release in March 1994.
+Included with that magazine is the K240 demo, which represents an earlier
+version of the game code than the final retail release, and presumably a similar
+state to that described in the magazine issue. Given publication deadlines for
+the March issue of CU Amiga, the demo was probably completed in January 1994,
+February at the latest. We can't tell exact dates from disk analysis as the
+filenames are dated 1978, meaning the disk was prepared on an Amiga without 
+
+More analysis of the demo executable needs to be done to determine what features
+already existed in that version.
+
+The CU Amiga demo's win screen promises a release in March 1994, which it would
+also miss. A possible reason for the delay is that Ing also worked on other
+games for Gremlin in 1993 and 1994, including CD development for the CD32 ports
+of _Striker_ and _Zool_.
 
 ### Publication
 
@@ -140,9 +303,9 @@ The final retail build of K240, version 1.886, was completed on Friday 20 May
 
 A copy of the game was quickly acquired by someone credited as "Troops & Troll"
 and provided to pirate groups TRSI & Zenith (TRZ), who quickly stripped the
-manual copy-protection from the game and released a pirate copy on 26 May 1994.
-In other words, the game was cracked not within six days of going on sale, but
-within six days of the finished build.
+manual copy-protection from the game (a two-byte change) and released a pirate
+copy on 26 May 1994. In other words, the game was cracked not within six days
+of going on sale, but within six days of the finished build.
 
 A second build of the game, v2.000, was completed on 7 June 1994 at 11:15. This
 version was almost certainly produced to fix bugs, though a more thorough
@@ -153,9 +316,9 @@ music. This is a mystery.
 
 ### Reception
 
-Several magazines produced [reviews](http://hol.abime.net/2543/review) of K240
+Several magazines produced [reviews of K240](http://hol.abime.net/2543/review)
 for their May 1994 issue. Almost certainly, these magazines received a review
-copy of an earlier build, since most magazines printed their May issue in late
+copy of an earlier build, since magazines generally printed their May issue in
 April.
 
 This review build is very close to the v1.886 release, and the review copies
@@ -169,9 +332,10 @@ release actually just uses the normal win screen graphic `outro1.mgl` for a
 Swixaran win.
 
 In an odd quirk, the [review](http://amr.abime.net/review_13565) by the
-Dutch-language Amiga Magazine #29 (Sept-Oct 1994) uses gameplay screenshots from
-the CU Amiga demo, not the final game. The giveaway is the asteroid layout and
-the old sprite for the Environment Control (the white building at the right).
+Dutch-language _Amiga Magazine_ #29 (Sept-Oct 1994) uses gameplay screenshots
+from the CU Amiga demo, not the final game. The giveaway is the asteroid layout
+and the old sprite for the Environment Control (the white building at the
+right).
 
 Reviews of K240 in the Amiga press were positive. CU Amiga rated it 91%,
 receiving the CU Screen Star award for games recieving 85-92%, though missing
@@ -180,13 +344,14 @@ out on the ultimate Super Star award. The One Amiga rated it 90%; Amiga Format
 
 These review scores would later appear in an
 [advertisement](https://www.lemonamiga.com/games/advert.php?id=625) for the game
-published in various Amiga magazines. Of note are the outdated screenshots from
-an earlier pre-release build of the game, which appear to pre-date the CU Amiga
-demo. They include an older version of the Sci-Tek screen with a bright blue
-background instead of the sophisticated graphics, and the byte font used in
-_Utopia_. There are also screens depicting the use of the PANEL and ICBM cheat
-codes. It also depicts the final box art; an earlier advertisement for Gremlin
-depicted a variant with art of an asteroid colony floating in space.
+published in various Amiga magazines. Of note in this advertisement are the
+outdated screenshots from an earlier pre-release build of the game, which appear
+to pre-date the CU Amiga demo. They include an older version of the Sci-Tek
+screen with a bright blue background instead of the sophisticated graphics, and
+the byte font used in _Utopia_. There are also screens depicting the use of the
+PANEL and ICBM cheat codes. It also depicts the final box art; an earlier
+advertisement for Gremlin depicted a variant with art of an asteroid colony
+floating in space.
 
 K240 was criticized by some reviewers for its complexity and unorthodox user
 interface. [It appears](https://www.youtube.com/watch?v=aD6d0cH0nNA&t=14m23s)
@@ -196,16 +361,29 @@ video for K240, recorded by Graeme Ing.
 Unlike _Utopia_, K240 did not receive an expansion disk, and the finished
 release did not include an option to load an optional scenario disk.
 
+### Legacy
+
 K240 received a remake/sequel, _Fragile Allegiance_, released for MS-DOS and
 Windows 95 in December 1996. This game was written by a completely different
 team of designers and programmers, but keeps most of K240's basic mechanics and
 even maintains continuity with its lore. For example,
-[the intro](https://www.youtube.com/watch?v=7ZCJ_16r8Sc)
+[the intro video](https://www.youtube.com/watch?v=7ZCJ_16r8Sc)
 cites Tetracorp's founding in the year 2221, consistent with
 [the K240 manual](https://www.lemonamiga.com/games/docs.php?id=904),
 which cites this as the year Tetracorp was founded to manufacture scoutships and
-sensors for the Imperial Fleet. Assuming development on the PC version started
-in mid-1994, it would have taken two and a half years.
+sensors for the Imperial Fleet.
+
+Assuming development on _Fragile Allegiance_ started in mid-1994, it would have
+taken two and a half years.
+
+Graeme Ing, sole programmer on _K240_, went on to work on a number of other
+titles, including _Newman/Haas IndyCar featuring Nigel Mansell_ for Sega Mega
+Drive, _Shadow Fighter_ (1995),_Normality_ (1996), _EverQuest_ (1999),
+_Everquest II_ (2004), and the _Star Wars: Galaxies_ series.
+
+Pete Daniels, K240's artist and co-designer, went on to work on games including
+_World Championship Snooker 2004_ (2004), _Kinect Sports: Rivals_, and _Sea of
+Thieves_ (2018).
 
 ### Detailed timeline
 #### 1991

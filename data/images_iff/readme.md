@@ -7,6 +7,11 @@ which was used to unpack MGL files.
 Of particular note is outro3.iff, which is unused in the game perhaps due to
 memory constraints.
 
+For the images converted into png/gif format, see
+[Extracted Images](https://tetracorp.github.io/k240/data/images.html).
+
+## Files
+
 * `hologram.iff`: Background to alien select screen.
 * `lang.iff`: Language select screen.
 * `outro1.iff`: Game win screen.
@@ -32,3 +37,5 @@ For future reference, the method used to get raw data from the `denormalize`
 tool was to upload the file, right-click the "Blob" in the inspector, store it
 as a global variable (e.g. temp1) and add a download instruction like
 `temp1.download ("hologram.mgl")`.
+
+
