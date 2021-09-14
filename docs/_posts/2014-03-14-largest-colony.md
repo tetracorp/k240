@@ -49,10 +49,11 @@ initial cost of the Solar Matrix and Power Amplifier blueprints. Without the
 blueprint tech, the same colony could be built with Solar Generators for 368,500
 CR and 92 buildings.
 
-Either way, we don't need any Radiation Filters (10+ Medical Centres will treat
-100% Radiation). The colony will grow to maximum capacity within about 6,500 days,
-at which point it will be earning 4,000 CR per day from an undocumented game
-mechanic that pays you 2 credits per citizen and 100 per colony per day.
+Either way, we don't need any Decontamination Filters (10+ Medical Centres will
+treat 100% Radiation). The colony will grow to maximum capacity within about
+6,500 days, at which point it will be earning 4,000 CR per day from an
+undocumented game mechanic that pays you 2 credits per citizen and 100 per
+colony per day.
 
 But there's still room.
 

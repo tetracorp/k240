@@ -70,6 +70,10 @@ can still end a virus outbreak.
 Repair Facility can still fail during a power outage even though it
 consumes no power.
 
+If you have the Improved Sensors blueprint, your improved sensor range fails
+whenever Sensor Array would fail, even though Improved Sensors do not consume
+power.
+
 ### Air, food and water shortages
 Each colonist needs one unit of air, food and water per day. If production
 is insufficient, the remaining colonists consume from stored surplus,

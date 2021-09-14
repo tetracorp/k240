@@ -20,6 +20,11 @@ title: Main Index
 
   {% assign sortedPosts = site.posts | sort: 'slug' %}
 
+  <h3>Summary</h3>
+  <ul class="posts">
+    <li><a href="{{site.baseurl}}/about/faq.html">Frequently Asked Questions</a></li>
+  </ul>
+
   <h3>Undocumented game mechanics</h3>
   <ul class="posts">
     {% for post in sortedPosts %}
