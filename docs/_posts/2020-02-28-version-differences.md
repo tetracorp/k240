@@ -204,6 +204,9 @@ differences between this demo and the final version.
 _Amiga Down Under_ issue #9 (May 2019) included a coverdisk with a demo of K240.
 It is functionally identical to the CU Amiga demo, even including the special
 graphics declaring the game a CU Amiga exclusive. The disk has a creation
-date and time of 06-Apr-94 12:38:42 (different to the CU Amiga disk which has a
-false creation date of 1978), but all files and file dates are otherwise the
-same. 2021-09-10
+date and time of 06-Apr-94 12:38:42, which is after CU Amiga released their
+coverdisk on the March 1994 issue. The CU Amiga disk has a false creation date
+of 1978 caused by being created on a standard Amiga without a real-time clock.
+There are a few minor quirks about the exact disk structure, but effectively all
+files and all file dates on the _Amiga Down Under_ coverdisk exactly the same as
+the CU Amiga dates.
