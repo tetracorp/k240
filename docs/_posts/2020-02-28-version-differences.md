@@ -201,7 +201,7 @@ differences between this demo and the final version.
 
 ### Amiga Down Under #9 Coverdisk demo
 
-_Amiga Down Under_ issue #9 (May 2019) included a coverdisk with a demo of K240.
+_Amiga Down Under_ issue #9 (May 1994) included a coverdisk with a demo of K240.
 It is functionally identical to the CU Amiga demo, even including the special
 graphics declaring the game a CU Amiga exclusive. The disk has a creation
 date and time of 06-Apr-94 12:38:42, which is after CU Amiga released their
