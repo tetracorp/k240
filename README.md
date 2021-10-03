@@ -29,7 +29,7 @@ completeness.
 
 The directory `src/` contains some earlier versions of the disassembly which
 disassembled the v1.886 executable. These may not reassemble cleanly, though the
-only significant version difference in v2.000 is the fleet bug fix.
+only significant version difference in v2.000 is the fleet bug fix. 
 
 Further information can be found at the [project website](https://tetracorp.github.io/k240/).
 
