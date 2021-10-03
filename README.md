@@ -37,3 +37,4 @@ Further information can be found at the [project website](https://tetracorp.gith
 
 - [Exploring the Dungeons of Avalon](https://tetracorp.github.io/dungeons-of-avalon/),
   a similar project analyzing the _Dungeons of Avalon_ RPG series.
+- [Tetracorp homepage](https://tetracorp.github.io/)
