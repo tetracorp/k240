@@ -313,12 +313,13 @@ attempting to find and fix the cause of the bug, which involved lead programmer
 Graeme Ing producing massive hex dumps and playing the game for hours.
 
 The final retail build of K240, version 1.886, was completed on Friday 20 May
-1994 at 13:31. Mark Glossop had to personally deliver the master floppies to
-the disk duplication company in Burnley or thereabouts (some 65 miles or so
-from Sheffield), signing off that the game was bug free. 30,000 copies
-were produced.
+1994 at 13:31.
+Due to how close this was to the deadline, Mark Glossop had to personally deliver
+the master floppies to the disk duplication company in Burnley or thereabouts
+(some 65 miles or so from Sheffield), signing off on the game as bug free.
+30,000 copies were produced.
 
-K240, presumably, appeared in the shelves shortly thereafter.
+K240, presumably, was released shortly thereafter.
 
 A copy of the game was quickly acquired by someone credited as "Troops & Troll"
 and provided to pirate groups TRSI & Zenith (TRZ), who quickly stripped the
