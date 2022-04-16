@@ -221,6 +221,14 @@ calling it _K240 - the new worlds_. _Amiga Action_ #48 makes the same mistake,
 calling the game _K240: The New World_. The name change to K240 may have been to
 differentiate it from Utopia in order to stand as its own, more advanced game.
 
+According to the game's producer, Mark Glossop, the name "K240" was coined when
+the team, unable to come up with a good name, looked around the room for ideas
+and spotted a VHS tape bearing the text "K 240". At a reasonable estimate, this
+may have been a TDK brand 240 minute tape. Several such tapes seen online bear
+the number "240" beneath the letter "K". The name was not really intended to
+mean anything, although it would eventually come to be the name of the sector
+in which the game takes place.
+
 The _Amiga Action_ #48 article gives us a familiar count of 40 buildings (as in
 the final game) and 16 weapons (technically 16 hardpoints, half of those being
 shields). It describes a count of 7 ship types, one short of the final game. I
@@ -298,8 +306,19 @@ On 29 April 1994, Commodore International declared bankruptcy. This did not
 prevent the release of K240, but likely discouraged Gremlin Graphics from
 releasing further games for the platform.
 
+According to producer Mark Glossop, a random crash bug occurred near the end
+of development, which was difficult to trace. The game could not be delayed,
+due to marketing and duplicating deadlines. Gremlin worked 12 to 14 hour days
+attempting to find and fix the cause of the bug, which involved lead programmer
+Graeme Ing producing massive hex dumps and playing the game for hours.
+
 The final retail build of K240, version 1.886, was completed on Friday 20 May
-1994 at 13:31. K240 was, presumably, released shortly thereafter.
+1994 at 13:31. Mark Glossop had to personally deliver the master floppies to
+the disk duplication company in Burnley or thereabouts (some 65 miles or so
+from Sheffield), signing off that the game was bug free. 30,000 copies
+were produced.
+
+K240, presumably, appeared in the shelves shortly thereafter.
 
 A copy of the game was quickly acquired by someone credited as "Troops & Troll"
 and provided to pirate groups TRSI & Zenith (TRZ), who quickly stripped the
@@ -307,9 +326,11 @@ manual copy-protection from the game (a two-byte change) and released a pirate
 copy on 26 May 1994. In other words, the game was cracked not within six days
 of going on sale, but within six days of the finished build.
 
-A second build of the game, v2.000, was completed on 7 June 1994 at 11:15. This
-version was almost certainly produced to fix bugs, though a more thorough
-analysis will be necessary to determine which bugs were fixed.
+A second build of the game, v2.000, was completed on Tuesday, 7 June 1994
+at 11:15 am. Lead programmer Graeme Ing recalls that it was produced to fix
+bugs. Analysis of the game shows that the only substantive change was to fix
+the [fleet bug](../game-mechanics/bugs.html),
+a random crash which sometimes occurred when moving fleets.
 
 Patrick Phelan is credited with providing the game's music. However, K240 has no
 music. This is a mystery.
@@ -356,7 +377,9 @@ floating in space.
 K240 was criticized by some reviewers for its complexity and unorthodox user
 interface. [It appears](https://www.youtube.com/watch?v=aD6d0cH0nNA&t=14m23s)
 that some copies of the game included a flyer advertising a 30-minute tutorial
-video for K240, recorded by Graeme Ing.
+video for K240, with commentary by Graeme Ing. It cost £4.50 including P&P and
+was recorded on C180 VHS tape. It's unknown how many copies were sold, if any,
+making this a rare artifact, perhaps a lost one.
 
 Unlike _Utopia_, K240 did not receive an expansion disk, and the finished
 release did not include an option to load an optional scenario disk.
@@ -385,6 +408,10 @@ Pete Daniels, K240's artist and co-designer, went on to work on games including
 _World Championship Snooker 2004_ (2004), _Kinect Sports: Rivals_, and _Sea of
 Thieves_ (2018).
 
+Gremlin Interactive retained numerous floppy disks and backup CDs, although
+whether any of those still exist, who might have them, and whether any of
+them contain K240 data, is a mystery.
+
 ### Detailed timeline
 #### 1991
 
@@ -405,7 +432,6 @@ Thieves_ (2018).
 #### 1993
 
 - __Aug 1993__: The One Amiga #59 publishes an in-depth preview of K240.
-- __Sep 1993__: Amiga Action #48 publishes an in-depth preview of K240.
 - __Sep 1993__: Amiga Action #48 publishes an in-depth preview of K240.
 - __Oct 1993__: Amiga Power #30 publishes an in-depth preview of K240.
   Amiga Joker also publishes a preview.
