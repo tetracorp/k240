@@ -9,13 +9,18 @@ a build date of 20 May 1994; and v2.000, which appears to be a
 [bug](../game-mechanics/bugs.html) fix, build date 7 June 1994. You can press
 "V" during play to find out which version you have.
 
-Additionally, a demo version of K240 was given away with CU Amiga issue #77 (Mar
-1994) as an exclusive coverdisk. It appears to be based on an earlier build of
-the game and has some differences: some notable bugs, and different graphics. I
-intend to disassemble this for comparison eventually.
+Additional non-retail versions of K240 are:
 
-There are also various cracked pirate releases, but aside from removed
-copy-protection and cracktro, these seem to be largely unchanged.
+- A demo version distributed with CU Amiga issue #77 (Mar 1994) as an exclusive
+  coverdisk. It appears to be based on an earlier build of the game circa
+  January 1994 and has some differences: some notable bugs, and different graphics.
+  I intend to disassemble this for comparison eventually.
+- A demo version available by limited mail order offer in Amiga Dream #7, which
+  may or may not be identical to the CU Amiga demo.
+- At least one elusive version distributed to Amiga magazines as a review copy,
+  mostly finished, and probably with a build date March 1994.
+- Various cracked pirate releases of v1.886 and v2.000. Aside from removed
+  copy-protection, cracktro, and trainers, these seem to be largely unchanged.
 
 1. Table of Contents
 {:toc}
@@ -200,7 +205,8 @@ The demo version of K240 distributed exclusively with CU Amiga magazine is
 However, an in-depth analysis of the code needs to be done to determine the
 differences between this demo and the final version.
 
-### Amiga Down Under #9 Coverdisk demo
+### Other demo versions
+#### Amiga Down Under #9 Coverdisk demo
 
 _Amiga Down Under_ issue #9 (May 1994) included a coverdisk with a demo of K240.
 It is functionally identical to the CU Amiga demo, even including the special
@@ -211,6 +217,18 @@ of 1978 caused by being created on a standard Amiga without a real-time clock.
 There are a few minor quirks about the exact disk structure, but effectively all
 files and all file dates on the _Amiga Down Under_ coverdisk are exactly the
 same as the CU Amiga dates.
+
+#### Amiga Dream mail-order demo
+
+[Amiga Dream issue 7](https://www.abandonware-magazines.org/affiche_mag.php?mag=13&num=1652&album=oui)
+(May 1994) not only reviewed K240, devoted the following page to a mail-order
+offer of 300 playable demos of K240 to give away. It's unknown what exactly this
+demo contains. There's a chance it is just an identical copy of the CU Amiga
+demo.
+
+If you have a copy, it would be a great help if you can respond to
+[this ticket](https://github.com/tetracorp/k240/issues/8) in the project's issue
+tracker.
 
 ### Physical media differences
 
@@ -228,3 +246,37 @@ The Polish release of the game was published by a separate company, Licomp, and
 had its own unique [box art](https://hol.abime.net/2543/boxscan) as a result,
 which is largely a recreation of the English box art. Likewise with the manual.
 Data-wise, the Polish disk contents are the same as the regular English release.
+
+### Elusive Amiga magazine review copies
+
+At least one build of the game was sent to Amiga magazines as a review copy in
+March 1994, so that the magazines could review the game in time for their May
+1994 issue. It's not the same build as the retail release, because that wasn't
+completed until 20 May 1994, and magazines released their May issues in April.
+
+Only a tiny number of review copies were distributed, and the fate of the disks
+after the magaziness closed down is unknown&mdash;if you have a copy, please
+[respond to the ticket](https://github.com/tetracorp/k240/issues/4) on the
+project issue tracker, as you'd be a major help to the project.
+
+What we do know about the review build is as follows:
+
+- It is nearly complete to the retail v1.886 version. Screenshots show the final
+  Construction Yard and Environment Control sprites, rather than the early
+  sprites in the CU Amiga demo.
+- The hard disk installer is included. This suggests a date of no earlier than 2
+  March 1994, which is when the HD installer was added in the final release.
+- It is English-only. [A review](https://www.abandonware-magazines.org/affiche_mag.php?mag=30&num=599&album=oui)
+  in French magazine Joystick issue 49 (May 1994) shows only English-language
+  screenshots (as do other French magazines' May 1994 reviews of K240), but
+  promises that the final release will have a French translation.
+- The victory screen background uses the intel screen background as a
+  placeholder, as seen in The One issue 68.
+- The intro disk appears to be included. Voice lines are in the game, according
+  to the Joystick review. This suggests the review copy included all three
+  disks.
+- The finished manual appears to have been distributed with the review copy.
+- Magazines which reviewed K240 for their May 1994 issue are assumed to have
+  received a review copy. These included Amiga Action, Amiga Computing, Amiga
+  Concept, Amiga Dream, Amiga Format, Amiga Power, CU Amiga, Joystick, and
+  The One Amiga.
