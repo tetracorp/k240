@@ -14,13 +14,15 @@ game published by Gremlin Graphics for the Commodore Amiga.
 
 #### Origins
 
-K240 is fundamentally a sequel to _Utopia_, a land-based futuristic real-time
-strategy game released around September 1991. The genre we nowadays call
-"real-time strategy" (RTS) was was very new at this
-point, and definitive titles like _Dune II_ and _Command & Conquer_ did not
-yet exist. Magazines interpreted _Utopia_ as a god game like _Populous_, while
-Utopia's programmer Graeme Ing instead thought of it as a management strategy
-simulation like _Sim City_.
+K240 is fundamentally a sequel to _Utopia: The Creation of a Nation_, a
+planetary colony management sim released around September 1991. We would today
+recognize Utopia's genre as a "real-time strategy" (RTS), although it was only
+after Utopia's release that the genre was named and defined by _Dune II_ (1992)
+and refined by games like _Warcraft: Orcs & Humans_ (1994) and
+_Command & Conquer_ (1995).
+Amiga magazines instead interpreted _Utopia_ as a god game like _Populous_,
+while Utopia's programmer Graeme Ing instead thought of it as a management
+strategy simulation like _Sim City_.
 
 The development of _Utopia_ was detailed in a series of articles in
 [Games-X](https://segaretro.org/Games-X) magazine. Games-X #1 page 44 describes
@@ -30,8 +32,8 @@ Gremlin in June 1990 as the developers, Graeme Ing and Robert Crack, finished
 work on _BSS Jane Seymour_ (also called _Spacewrecked_).
 
 The game setting was soon changed from fantasy to futuristic in order to replace
-ground units with spaceships, in order to avoid the challenge of writing unit
-pathfinding code and make unit movement more dynamic (although the final game
+ground units with spaceships, avoiding the challenge of writing unit
+pathfinding code and making unit movement more dynamic (although the final game
 would feature ground units with terrain and pathfinding anyway). The game was
 given a working title of _World_, and by early August 1990 a roughly 100-page
 specification had been written. It was initially designed with a top-down view,
@@ -117,7 +119,7 @@ He also announced two follow-ups to _Utopia_: an expansion disk, and a
 fully-fledged sequel, _Utopia 2_. Early plans for _Utopia 2_ included more
 advanced alien AI, the ability to see the alien city, and the ability to target
 individual alien buildings. Gremlin Graphics even offered five signed copies of
-the game in a contest seeking innovative ideas for the game.
+_Utopia_ in a contest seeking innovative ideas for the sequel.
 
 At the end of 1991 when the interview took place (magazines usually released
 earlier than the month on the cover), Utopia 2 was still in the planning stage,
@@ -135,7 +137,8 @@ Amiga's Tony Dillon, who felt the price of £15 for new levels to an existing
 game was too steep. Amiga Power's Stuart Campbell argued that even reviewing a
 data disk was irrelevant: such expansions never radically change a game's core
 features, meaning that readers do not need any new information to inform their
-purchasing decision.
+purchasing decision&mdash;if you liked the original you'll like the expansion,
+and if you didn't, you won't.
 
 Among the scenarios in the _Utopia_ data disk was a set of islands requring the
 player to build spaceships to cross between them, which would become a core
@@ -268,7 +271,7 @@ also appears in the 1993 screenshots).
 File dates in the retail release show the finishing touches being put on the
 game for distribution at this point. In February and March 1994, disks 1 and 2
 gain startup-sequence files, and disk 3 gains a hard disk installer (adapted
-from the installer for _HeroQuest 2: Legacy of Sorasil_).
+from the installer for _HeroQuest II: Legacy of Sorasil_ (1994)).
 
 A lot of unique development information is revealed in an in-depth
 [preview](http://amr.abime.net/review_29004) in the March 1994 issue of CU
@@ -314,10 +317,12 @@ Graeme Ing producing massive hex dumps and playing the game for hours.
 
 The final retail build of K240, version 1.886, was completed on Friday 20 May
 1994 at 13:31.
-Due to how close this was to the deadline, Mark Glossop had to personally deliver
+
+Due to how close it was to the deadline, Mark Glossop had to personally deliver
 the master floppies to the disk duplication company in Burnley or thereabouts
-(some 65 miles or so from Sheffield), signing off on the game as bug free.
-30,000 copies were produced.
+(some 65 miles or so from Sheffield), signing off on the game as bug free.  A
+run of 30,000 copies was produced. (It is uncertain whether Glossop is referring
+to the v1.886 release or the v2.000 release here.)
 
 K240, presumably, was released shortly thereafter.
 

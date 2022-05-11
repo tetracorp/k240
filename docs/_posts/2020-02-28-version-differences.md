@@ -93,8 +93,9 @@ K240 disk 3, which will give a value of `$1cc3` for an unmodified v1.886
 `playk240` file or `$2471` on v2.000, although the program may fail on a cracked
 version due to other modified files, such as a packed `intro` file on disk 1.
 I'm not sure why you would actually need to re-enable the manual code system,
-but perhaps you need an unmodified original executable for speedrunning, or just
-want to see what it looks like when you input incorrect codes.
+but perhaps you need an unmodified original executable for
+[speedrunning](../fun/speedrunning-k240.html), or just want to see what it looks
+like when you input an incorrect code.
 
 It is interesting to note that string 0x25b, "AUTHORISATION CODE INVALID!!", is
 one of the last entries in the text string list. Only two strings appear later
@@ -208,5 +209,22 @@ date and time of 06-Apr-94 12:38:42, which is after CU Amiga released their
 coverdisk on the March 1994 issue. The CU Amiga disk has a false creation date
 of 1978 caused by being created on a standard Amiga without a real-time clock.
 There are a few minor quirks about the exact disk structure, but effectively all
-files and all file dates on the _Amiga Down Under_ coverdisk exactly the same as
-the CU Amiga dates.
+files and all file dates on the _Amiga Down Under_ coverdisk are exactly the
+same as the CU Amiga dates.
+
+### Physical media differences
+
+Some K240 disks have the label printed in orange, while others are printed in
+white. Based on photos of copies of the game on eBay and elsewhere, the "white"
+disks were accompanied with the K240 tutorial VHS flyer and a Gremlin prize draw
+entry card, and their boxes had stickers attached advertising high review scores
+(CU Amiga 91%, The One 90%). Both versions were widely available.
+
+The most plausible explanation is that the white-label disks are from a second
+print run. I have a hypothesis that all orange disks are v1.886, while white
+disks are v2.000.
+
+The Polish release of the game was published by a separate company, Licomp, and
+had its own unique [box art](https://hol.abime.net/2543/boxscan) as a result,
+which is largely a recreation of the English box art. Likewise with the manual.
+Data-wise, the Polish disk contents are the same as the regular English release.
