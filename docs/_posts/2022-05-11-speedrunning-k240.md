@@ -42,6 +42,8 @@ same line on page 164 and French has two on page 210.
 Completing K240 only requires you to defeat the Swixarans. The hidden Swixaran
 home asteroid is always located in the space between the two asteroids with
 cloak generators, so I believe the optimal strategy is to Asteroid Engine it.
+You still need to defeat all the other Swixaran asteroids to win, however.
+
 As speedrunners tend to prefer whichever metric results in the lowest time, I
 imagine the Any% run begins when you click to continue on the Last Minute Intel
 screen, and ends when the win screen graphic apears. By this metric, the de

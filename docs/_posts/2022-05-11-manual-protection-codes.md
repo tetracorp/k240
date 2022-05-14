@@ -346,3 +346,11 @@ protection check.
 See 
 [Differences between versions: cracked version vs original](../history/version-differences.html#cracked-version-vs-original)
 for a more detailed breakdown of how this works.
+
+### Trivia
+
+The text entry on the manual protection code is a little janky, and can
+sometimes miss keystrokes. The most likely reason for this is that the manual
+protection appears to have been added late in development, and there was no time
+to improve it. This is inferred from the fact that the text strings for the save
+game and manual protection features are the last in the text strings list.
