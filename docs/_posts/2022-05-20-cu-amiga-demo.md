@@ -5,7 +5,7 @@ categories: prototypes
 ---
 
 ![K240: The Demo](../images/demo.png "K240: The Demo")
-{:right}
+{:.right}
 
 The March 1994 issue of CU Amiga Magazine came with coverdisk 77, an exclusive
 demo version of K240. It provides an insight into the state of development of
@@ -17,7 +17,7 @@ yet to be made.
 1. Table of Contents
 {:toc}
 
-## History
+### History
 
 Amiga magazines were generally written around two months in advance of the cover
 date. For example, old mailing list records note that the May 2000 issue of
@@ -35,31 +35,26 @@ file dates. Up to 300 copies of a demo were offered by French magazine _Amiga
 Dream_ (May 1994), although it's unknown if this was the same demo or a later
 French version.
 
-## Building sprites
+### Building sprites
 
 A number of game sprites reflect earlier versions than the finished release.
 
-| Demo | Full game |
-|------|-----------|
-| ![construction_yard](../images/buildings/construction_yard_demo.png "construction_yard_demo") | [construction_yard](../images/buildings/construction_yard.png "construction_yard") |
+| Building | Demo sprite | Full game |
+|----------|-------------|-----------|
+| Construction Yard      | ![construction_yard](../images/buildings/construction_yard_demo.png "construction_yard_demo") | ![construction_yard](../images/buildings/construction_yard.png "construction_yard") |
+| Environment Control    | ![environment_control](../images/buildings/environment_control_demo.png "environment_control_demo") |![environment_control](../images/buildings/environment_control.png "environment_control") |
+| Protected Env. Control | ![protected_env_control](../images/buildings/protected_env_control_demo.png "protected_env_control_demo") |![protected_env_control](../images/buildings/protected_env_control.png "protected_env_control") |
+| Seismic Penetrator     | ![seismic_penetrator](../images/buildings/seismic_penetrator_demo.gif "seismic_penetrator_demo") |![seismic_penetrator](../images/buildings/seismic_penetrator.gif "seismic_penetrator") |
 
-| Demo | Full game |
-|------|-----------|
-| ![environment_control](../images/buildings/environment_control_demo.png "environment_control_demo") | [environment_control](../images/buildings/environment_control.png "environment_control") |
-
-| Demo | Full game |
-|------|-----------|
-| ![protected_env_control](../images/buildings/protected_env_control_demo.png "protected_env_control_demo") | [protected_env_control](../images/buildings/protected_env_control.png "protected_env_control") |
-
-| Demo | Full game | Blueprint |
-|------|-----------|-----------|
-| ![seismic_penetrator](../images/buildings/seismic_penetrator_demo.gif "seismic_penetrator_demo") |![seismic_penetrator](../images/buildings/seismic_penetrator.gif "seismic_penetrator") | |![Seismic penetrator blueprint](../images/seismic-penetrator-blueprint.gif "Seismic penetrator blueprint") |
+<p class="right">![Seismic penetrator
+blueprint](../images/seismic-penetrator-blueprint.gif "Seismic penetrator
+blueprint")</p>
 
 The Seismic Penetrator cannot be acquired in the demo, but the building is still
 in the game. The sprite is very different, and more closely resembles the
 Seismic Penetrator's blueprint wireframe.
 
-## Missing features
+### Missing features
 
 Several major gameplay options are missing from the demo. Some of these are
 intentional limitations, but many probably reflect the unfinished state of the
@@ -79,7 +74,7 @@ instead of three.
 
 Cheat codes have been disabled, although game strings 
 
-## Gameplay differences
+### Gameplay differences
 
 You receive a notification when an enemy ship enters sensor range. The full game
 has a voice clip for this (`enemyves.mgl` or "enemy vessel detected"), but it's
@@ -96,7 +91,7 @@ only thing.
 
 You can see the enemy asteroid surface without a spy satellite.
 
-## Bugs
+### Bugs
 
 You can select an alien asteroid and fire their missiles. Another missile bug
 lets you re-open the missile window while they're firing and increase the number
