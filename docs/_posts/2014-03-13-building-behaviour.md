@@ -12,12 +12,16 @@ for how buildings behave when damaged.
 
 ### Storage Facility / Storage Tower
 
+![storage_tower](../images/buildings/storage_tower.png "storage_tower"){:.right}
+
 If an ore storage building is destroyed, no ore is lost unless the total
 amount of ore stored at the asteroid now exceeds the total storage capacity.
 When this happens, ore is lost starting with Selenium and going through the
 ores in order until capacity is sufficient again.
 
 ### Anti-Missile Pod
+
+![anti_missile_pod](../images/buildings/anti_missile_pod.png "anti_missile_pod"){:.right}
 
 Each incoming missile has a 21% chance to be shot down if you have one
 Anti-Missile Pod. Each additional pod increases the chance by 2%, to a maximum
@@ -32,11 +36,15 @@ will ignore Anti-Virus missile.
 
 ### Decontamination Filter
 
+![decontamination_filter](../images/buildings/decontamination_filter.png "decontamination_filter"){:.right}
+
 Each Decontamination Filter decreases the radiation at a colony by 30%. See
 [Health, Radiation and Population
 Growth](health-radiation-and-population-growth.html).
 
 ### Mine, Deep Bore Mine and Seismic Penetrator
+
+![seismic_penetrator](../images/buildings/seismic_penetrator.gif "seismic_penetrator"){:.right}
 
 Each Mine recovers one ore per 4 days, or one per 2 days with the 2nd Generation
 Mines blueprint. Each Deep Bore Mine recovers one every 16 days, or every 8
@@ -66,10 +74,14 @@ If the mine is without power, it does not mine any ore.
 
 ### Screen Generator
 
+![screen_generator](../images/buildings/screen_generator.png "screen_generator"){:.right}
+
 All buildings covered by at least one Screen Generator reduce all damage taken
 by 50%. The Screen Generator benefits from its own protection.
 
 ### Gravity Nullifier
+
+![gravity_nullifier](../images/buildings/gravity_nullifier.png "gravity_nullifier"){:.right}
 
 In the event of a power outage, the Gravity Nullifier will switch off, but when
 power returns, it does not automatically switch back on. It cannot distinguish
@@ -77,6 +89,8 @@ between intentionally turned off by the player and automatically turned off by
 power shortage.
 
 ### Missile Silo
+
+![missile_silo](../images/buildings/missile_silo.png "missile_silo"){:.right}
 
 Every 8 days, one of each missile type on order is built.
 
@@ -86,6 +100,8 @@ operates at 40% efficiency. Each day, there is only a 40% chance that
 one missile will be built. Workers are not required to fire missiles.
 
 ### Repair Facility
+
+![repair_facility](../images/buildings/repair_facility.png "repair_facility"){:.right}
 
 Each Repair Facility restores one point of damage to each building every eight
 days, up to the building's normal maximum. Multiple facilities stack.
@@ -100,6 +116,8 @@ to the manual, ships in orbit are never repaired, and ships in hangars only repa
 the colony has a Repair Facility.
 
 ### Laser, Plasma and Photon Turret
+
+![photon_turret](../images/buildings/photon_turret.png "photon_turret"){:.right}
 
 Terran turrets have the following damage output:
 
@@ -118,6 +136,8 @@ worse) cooldown timers.
 
 ### Asteroid Engines
 
+![asteroid_engines](../images/buildings/asteroid_engines.png "asteroid_engines"){:.right}
+
 A [random event](random-events.html) can cause Asteroid Engines to explode,
 increasing the colony's radiation level by 10%.
 
@@ -125,6 +145,8 @@ Asteroid Engines require 2-7 power based on current speed (not 0-5 as
 described in the manual).
 
 ### Powerplant
+
+![powerplant](../images/buildings/powerplant.png "powerplant"){:.right}
 
 Un-mined Asteros depletes at a rate of one unit per four days, _even_ if no
 Powerplants hae been built. This is either a bug, or an attempt to represent the
@@ -146,11 +168,15 @@ increasing the colony's radiation level by 10%.
 
 ### Command Centre
 
+![command_centre](../images/buildings/command_centre.png "command_centre"){:.right}
+
 A Command Centre requires 8 colonists as workers. A worker shortage is likely to
 affect only the Command Center's speed at building an Orbital Space Dock, in
 which case it operates at 40% efficiency.
 
 ### Construction Yard
+
+![construction_yard](../images/buildings/construction_yard.png "construction_yard"){:.right}
 
 In order to make a day's progress toward a construction job, the yard requires
 one day's worth of payment from Vehicle Fund. One of each ore is required per day
@@ -169,10 +195,14 @@ toward this limit.
 
 ### Landing Pad
 
+![landing_pad](../images/buildings/landing_pad.gif "landing_pad"){:.right}
+
 Ships landed in hangars do not repair damage unless the colony also has a
 Repair Facility.
 
 ### Medical Centre
+
+![medical_centre](../images/buildings/medical_centre.png "medical_centre"){:.right}
 
 Each Medical Centre reduces the effects of radiation (but not the radiation
 level itself) by 10%. In the event of a virus outbreak, a colony also
@@ -183,11 +213,15 @@ See [Health, Radiation and Population Growth](health-radiation-and-population-gr
 
 ### Security Centre
 
+![security_centre](../images/buildings/security_centre.png "security_centre"){:.right}
+
 A colony needs one Security Centre for every full 100 colonists after the
 first 50 to prevent social unrest.
 See [Security and Morale](security-and-morale.html).
 
 ### "Protected" buildings
+
+![protected_resiblock](../images/buildings/protected_resiblock.png "protected_resiblock"){:.right}
 
 In addition to the laser turret attached to the
 Protected Resiblock, Protected Solar Matrix, and Protected Environment Control,

@@ -271,6 +271,10 @@ a {
   color: #aaaaaa;
 }
 
+h3 {
+  clear: both;
+}
+
 img.double, .double img {
   transform:scale(2.0);
   image-rendering: pixelated;

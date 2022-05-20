@@ -19,6 +19,10 @@ yet to be made.
 
 ### History
 
+![K240: The Demo](../images/demo2.png "K240: The Demo")
+Actually delayed until May 1994.
+{:.right}
+
 Amiga magazines were generally written around two months in advance of the cover
 date. For example, old mailing list records note that the May 2000 issue of
 Amiga Format, its final issue, already hit the newsstands by 6 April, while the
@@ -45,7 +49,7 @@ A number of game sprites reflect earlier versions than the finished release.
 | Protected Env. Control | ![protected_env_control](../images/buildings/protected_env_control_demo.png "protected_env_control_demo") |![protected_env_control](../images/buildings/protected_env_control.png "protected_env_control") |
 | Seismic Penetrator     | ![seismic_penetrator](../images/buildings/seismic_penetrator_demo.gif "seismic_penetrator_demo") |![seismic_penetrator](../images/buildings/seismic_penetrator.gif "seismic_penetrator") |
 
-![Seismic penetrator blueprint](../images/seismic-penetrator-blueprint.gif "Seismic penetrator blueprint"){:.right}
+![Seismic penetrator blueprint](../images/seismic-penetrator-blueprint.png "Seismic penetrator blueprint"){:.right}
 
 The Seismic Penetrator cannot be acquired in the demo, but the building is still
 in the game. The sprite is very different, and more closely resembles the
@@ -63,6 +67,15 @@ necessary for the French and German translations, respectively. The lowercase
 characters. The French and German translations were added late in development,
 and the playtest copies available to French magazine reviewers in March 1994
 still lacked French support.
+
+### Sci-Tek background
+
+| Demo | Full game |
+|------|-----------|
+| ![scitek_demo](../images/scitek_demo.png "scitek demo") | ![scitek](../images/scitek.png "Sci-Tek") |
+
+The Sci-Tek screen in the demo uses a brighter palette. It was probably changed
+for the final release to aid readability.
 
 ### Missing features
 
