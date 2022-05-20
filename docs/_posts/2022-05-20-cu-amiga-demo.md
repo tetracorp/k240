@@ -28,31 +28,41 @@ The CU Amiga exclusive K240 demo, distributed with the March 1994 issue, must
 therefore have been January 1994, around five months before the first completed
 retail build.
 
-The CU Amiga demo isn't quiet as exclusive as it may seem. The same demo was
-given away with _Amiga Down Under_ #9 (May 1994), and was functionally identical
-(including the CU Amiga branding on the title screen) except for some changed
-file dates. Up to 300 copies of a demo were offered by French magazine _Amiga
-Dream_ (May 1994), although it's unknown if this was the same demo or a later
-French version.
+The CU Amiga demo isn't all that exclusive. The same demo was given away with
+_Amiga Down Under_ #9 (May 1994), and was functionally identical (including the
+CU Amiga branding on the title screen) except for some changed file dates. Up to
+300 copies of a demo were offered by French magazine _Amiga Dream_ (May 1994),
+although it's unknown if this was the same demo or a later French version.
 
 ### Building sprites
 
 A number of game sprites reflect earlier versions than the finished release.
 
 | Building | Demo sprite | Full game |
-|----------|-------------|-----------|
+|----------|:-----------:|:---------:|
 | Construction Yard      | ![construction_yard](../images/buildings/construction_yard_demo.png "construction_yard_demo") | ![construction_yard](../images/buildings/construction_yard.png "construction_yard") |
 | Environment Control    | ![environment_control](../images/buildings/environment_control_demo.png "environment_control_demo") |![environment_control](../images/buildings/environment_control.png "environment_control") |
 | Protected Env. Control | ![protected_env_control](../images/buildings/protected_env_control_demo.png "protected_env_control_demo") |![protected_env_control](../images/buildings/protected_env_control.png "protected_env_control") |
 | Seismic Penetrator     | ![seismic_penetrator](../images/buildings/seismic_penetrator_demo.gif "seismic_penetrator_demo") |![seismic_penetrator](../images/buildings/seismic_penetrator.gif "seismic_penetrator") |
 
-<p class="right">![Seismic penetrator
-blueprint](../images/seismic-penetrator-blueprint.gif "Seismic penetrator
-blueprint")</p>
+![Seismic penetrator blueprint](../images/seismic-penetrator-blueprint.gif "Seismic penetrator blueprint"){:.right}
 
 The Seismic Penetrator cannot be acquired in the demo, but the building is still
 in the game. The sprite is very different, and more closely resembles the
 Seismic Penetrator's blueprint wireframe.
+
+### Font changes
+
+| Demo | Full game |
+|------|-----------|
+| ![demofont](../images/demofont.png "demofont") | ![font](../images/font.png "K240 font") |
+
+The font at this point is missing the foreign language characters "ÇÜÄÖ"
+necessary for the French and German translations, respectively. The lowercase
+"yzmh" in their place may suggest that there were plans to include these
+characters. The French and German translations were added late in development,
+and the playtest copies available to French magazine reviewers in March 1994
+still lacked French support.
 
 ### Missing features
 
@@ -72,7 +82,8 @@ Only one alien is available. The voice sounds and intro are not available,
 although this should be obvious given that the demo fits on a single disk
 instead of three.
 
-Cheat codes have been disabled, although game strings 
+Cheat codes have been disabled, although game strings show that they were in the
+game at this point, known as "help codes".
 
 ### Gameplay differences
 
