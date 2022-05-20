@@ -37,7 +37,7 @@ title: Main Index
   <h3>Demo versions and unreleased prototypes</h3>
   <ul class="posts">
     {% for post in sortedPosts %}
-      {% if post.categories contains "prototype" %}
+      {% if post.categories contains "prototypes" %}
         <li><a href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></li>
       {% endif %}
     {% endfor %}
