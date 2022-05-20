@@ -19,8 +19,7 @@ yet to be made.
 
 ### History
 
-![K240: The Demo](../images/demo2.png "K240: The Demo")
-Actually delayed until May 1994.
+![K240: The Demo](../images/demo2.png "K240: The Demo")<br>Actually delayed until May 1994.
 {:.right}
 
 Amiga magazines were generally written around two months in advance of the cover
