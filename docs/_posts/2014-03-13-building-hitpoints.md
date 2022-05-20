@@ -60,7 +60,7 @@ survives one attack may fall in the next.
 ### Repair Facility
 
 Each repair facility heals one point of damage every eight days (see [building
-behaviour](building-behavior.html).)
+behaviour](building-behaviour.html).)
 
 ### Building Armour
 The Building Armour blueprint increases each building's maximum hit points
