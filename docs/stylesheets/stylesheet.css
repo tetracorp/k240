@@ -250,7 +250,7 @@ a {
 /* Images        */
 /*****************/
 
-.right, .rightalign {
+.right {
   float: right;
   font-size: 80%;
   color: #aaaaaa;
@@ -271,7 +271,7 @@ a {
   color: #aaaaaa;
 }
 
-h3 {
+h3[id] {
   clear: both;
 }
 
