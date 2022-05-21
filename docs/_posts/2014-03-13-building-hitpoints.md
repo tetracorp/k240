@@ -54,22 +54,24 @@ scaffold height and turret placement).
 ### Taking and repairing damage
 
 Buildings take damage when struck with weapons. Unless a Repair Facility exists
-on the asteroid, a damaged building will __never__ repair itself. A colony which
+on the asteroid, a damaged building will never repair itself. A colony which
 survives one attack may fall in the next.
 
 ### Repair Facility
 
 Each repair facility heals one point of damage every eight days (see [building
-behaviour](building-behaviour.html).)
+behaviour](building-behaviour.html)).
 
 ### Building Armour
+
 The Building Armour blueprint increases each building's maximum hit points
 by 10. This does not automatically affect buildings constructed before acquiring
 the blueprint, but a Repair Facility will retrofit old buildings to the new
 maximum.
 
 ### Protected Buildings
-In addition to the laser turret, most "protected" versions of buildings have
+
+In addition to the laser turret, most "Protected" versions of buildings have
 more hit points than their non-protected equivalent. The only one which does
 not is the Protected Storage Tower.
 

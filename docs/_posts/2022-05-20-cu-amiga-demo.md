@@ -23,13 +23,13 @@ yet to be made.
 {:.right}
 
 Amiga magazines were generally written around two months in advance of the cover
-date. For example, old mailing list records note that the May 2000 issue of
-Amiga Format, its final issue, already hit the newsstands by 6 April, while the
-magazine was completed on 21 March.
+date. For example, mailing list archives indicate that the May 2000 issue of
+Amiga Format, its final issue, already hit the newsstands by 6 April, and the
+page layout and editing were already completed by 21 March.
 
 The CU Amiga exclusive K240 demo, distributed with the March 1994 issue, must
-therefore have been January 1994, around five months before the first completed
-retail build.
+therefore have been completed in January 1994, around five months before the
+first completed retail build.
 
 The CU Amiga demo isn't all that exclusive. The same demo was given away with
 _Amiga Down Under_ #9 (May 1994), and was functionally identical (including the

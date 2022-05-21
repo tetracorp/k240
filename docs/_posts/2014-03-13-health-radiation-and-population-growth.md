@@ -5,6 +5,10 @@ categories: game-mechanics
 ---
 
 ### Gaining and Losing Colonists
+
+![CPU](../images/buildings/cpu.png "CPU")
+{:.right}
+
 Each colony has a 40% chance each day to gain a colonist. This is the
 only way to gain workers. Population size does not affect growth rate.
 
@@ -15,6 +19,10 @@ and sudden housing shortages caused by housing being blown up.
 A colony with zero colonists left is automatically destroyed.
 
 ### Medical Centres
+
+![Medical Centre](../images/buildings/medical-centre.png "Medical Centre")
+{:.right}
+
 Medical centres have exactly two uses: to stop virus outbreaks,
 and treat radiation sickness.
 
@@ -28,6 +36,9 @@ Each Medical Centre decreases the negative effects of radiation by 10%.
 
 ### Radiation
 
+![Radiation Filter](../images/buildings/radiation-filter.png "Radiation Filter")
+{:.right}
+
 An asteroid's radiation level increases by 10% for every 100 un-mined Asteros,
 for every 2 un-mined Traxium, and for every 1 un-mined Nexos. This is why it's
 possible to lose or demolish some Decontamination Filters later and remain at 0%
@@ -38,7 +49,8 @@ Each active Decontamination Filter reduces radiation by 30%.
 
 There is a percentage chance to lose a colonist to radiation sickness
 each day, which increases based on the amount of radiation not negated
-by Decontamination Filters or treated by Medical Centres.
+by Decontamination Filters or treated by Medical Centres. There's an off-by-one
+error in the code here which increases the chance by 1%.
 
 Radiation | Chance of losing one colonist
 ----------|------------------------------
@@ -55,6 +67,7 @@ Radiation | Chance of losing one colonist
      100% | 100%
 
 ### Rapidly Declining Population
+
 The "rapidly declining population" warning triggers whenever a colony's
 population drops to 30 or lower. If a reason is given (i.e. lack of food,
 air or water), this means the colony is out of surplus in that resource and

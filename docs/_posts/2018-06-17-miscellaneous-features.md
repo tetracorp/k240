@@ -40,8 +40,9 @@ Asteroid Tracker automatically when fighting the Tylarans.
 ### Asteros half-life
 
 Asteros depletes at the rate of one unit every four days. This starts from the
-moment you colonize the asteroid. It's not clear whether this is meant to
-represent radioactive decay, or is just a bug in the Powerplant code. See
+moment you colonize the asteroid. This is probably a bug in the Powerplant code,
+although it may represent radioactive decay, given that Asteros does increase
+radiation. See
 [building behaviour](../game-mechanics/building-behaviour.html) for the strange
 way Powerplant functions.
 
@@ -49,7 +50,7 @@ way Powerplant functions.
 
 When fighting against the Ax'Zilanth, the second Virus missile you fire against
 an asteroid has no effect. That alien appears to adapt after the first missile.
-This applies even if you fire a second virus at yourself.
+This applies even if you fire a second Virus at yourself.
 
 ### Where are my 5,000,000 credits?
 
