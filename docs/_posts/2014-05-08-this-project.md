@@ -38,6 +38,9 @@ abandoned Ore Eater colonies explode?)
 7. What are the differences between K240 v1.886 and the bug-fixed version
 K240 v2.000?
 
+See the [Frequently Asked Questions](../about/faq.html) list for answers to some
+of these.
+
 ### How to explore K240?
 
 Various tools aid in analysis of Amiga executables. The most important is Frank
@@ -69,3 +72,14 @@ generate uncompressed save states during a game.
 
 Some have recommended ReSource v6.06, an older Amiga interactive disassembler,
 though I have not used it for this project.
+
+Most recently I've been using Ghidra. See
+[Intro to Amiga reverse-engineering with Ghidra](https://tetracorp.github.io/guide/intro-amiga-ghidra.html)
+for an introductory tutorial on this tool.
+
+### Searching for lost resources
+
+I'm also researching various forgotten resources, such as the tutorial VHS tape
+and magazine review copies. If you have any old Amiga stuff which may be related
+to K240, please respond to one of the Materials Wanted posts on the
+[issue tracker](https://github.com/tetracorp/k240/issues/).

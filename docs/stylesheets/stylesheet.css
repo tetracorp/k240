@@ -271,7 +271,7 @@ a {
   color: #aaaaaa;
 }
 
-h3[id] {
+h2[id], h3[id] {
   clear: both;
 }
 
