@@ -21,7 +21,7 @@ ores in order until capacity is sufficient again.
 
 ### Anti-Missile Pod
 
-![anti_missile_pod](../images/buildings/anti_missile_pod.png "anti_missile_pod"){:.right}
+![anti-missile_pod](../images/buildings/anti-missile_pod.png "anti-missile_pod"){:.right}
 
 Each incoming missile has a 21% chance to be shot down if you have one
 Anti-Missile Pod. Each additional pod increases the chance by 2%, to a maximum
@@ -117,15 +117,13 @@ the colony has a Repair Facility.
 
 ### Laser, Plasma and Photon Turret
 
-![photon_turret](../images/buildings/photon_turret.png "photon_turret"){:.right}
-
 Terran turrets have the following damage output:
 
 | Turret | Damage | With Optimizer |
 |:-------|-------:|---------------:|
-| Laser  | 2      |  4             |
-| Plasma | 5      | 10             |
-| Photon | 8      | 16             |
+| ![laser_turret](../images/buildings/laser_turret.png "laser_turret"){:.right}     Laser  | 2      |  4             |
+| ![plasma_turret](../images/buildings/plasma_turret.png "plasma_turret"){:.right}  Plasma | 5      | 10             |
+| ![photon_turret](../images/buildings/photon_turret.png "photon_turret"){:.right}  Photon | 8      | 16             |
 
 The Turret Optimizer blueprint doubles the output. "Protected" buildings operate
 exactly as a Laser Turret. Each Turret fires once every five days, and the
