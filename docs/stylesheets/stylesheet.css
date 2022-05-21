@@ -250,7 +250,7 @@ a {
 /* Images        */
 /*****************/
 
-.right {
+.right, .rightalign {
   float: right;
   font-size: 80%;
   color: #aaaaaa;
