@@ -289,6 +289,7 @@ two Chaos Bombs, a Photon Cannon (8 damage) and a Disruptor.
 When facing the Ax'Zilanths, the player starts with the following resources:
 
 * Cash: 250,000 credits (default)
+* Blueprints: Gravity Nullifier, Shield X40, Solar Matrix
 
 The alien colony begins with the following building clusters:
 

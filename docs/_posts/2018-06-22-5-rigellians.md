@@ -267,6 +267,7 @@ Disruptors, an Ion Cannon, and a Laser Cannon (5 damage).
 When facing the Rigellians, the player starts with the following resources:
 
 * Cash: 250,000 credits (Default)
+* Blueprints: Building Armour, Construction Droids
 
 The alien colony begins with the following building clusters:
 
