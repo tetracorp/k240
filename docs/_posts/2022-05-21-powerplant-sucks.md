@@ -74,7 +74,7 @@ generates radiation 10% radiation per 100 Asteros until it's mined.
 In theory, the Powerplant has the most hit points of any power generation
 building aside from the C.P.U.:
 
-| Building                       |   Cost  | HP | HP +Armour&dagg; |
+| Building                       |   Cost  | HP | HP +Armour&dagger; |
 |:-------------------------------|--------:|---:|---:|
 | C.P.U                          |   8,000 | 36 | 46 |
 | Powerplant                     |  10,000 | 34 | 44 |
@@ -83,7 +83,7 @@ building aside from the C.P.U.:
 | Solar Generator                |   1,500 | 10 | 20 |
 | Solar Panel                    |     500 |  5 | 15 |
 
-&dagg; Hit points with Building Armour blueprint.
+&dagger; Hit points with Building Armour blueprint.
 
 However, this is mitigated by the fact that it's a four-square building.
 
@@ -127,7 +127,7 @@ point where four Solar Generators produces the same energy as a Powerplant in
 the same square count for less cost per building. Power Amplifier does not boost
 Powerplants.
 
-| Building                       | Power |  Cost   | CD/MW↑| Sq/32MW&ast; |
+| Building                       | Power |  Cost   | CD/MW↑| Sq/32MW&#42; |
 |:-------------------------------|------:|--------:|------:|----:|
 | Solar Panel +Amp               |  4 MW |    500  | 125   |  8  |
 | Solar Generator +Amp           |  8 MW |  1,500  | 187.5 |  4  |
@@ -137,12 +137,12 @@ Powerplants.
 | Solar Generator                |  4 MW |  1,500  | 375   |  8  |
 | Protected Solar Matrix +Amp    | 16 MW |  7,200  | 450   |  2  |
 | Solar Matrix                   |  8 MW |  5,000  | 625   |  4  |
-| Protected Solar Matrix &dagg;  |  8 MW |  7,200  | 900   |  4  |
+| Protected Solar Matrix &dagger;|  8 MW |  7,200  | 900   |  4  |
 | C.P.U                          |  8 MW |  n/a    | n/a   | n/a |
 
-&ast; Squares needed to generate 32 MW.
+&#42; Squares needed to generate 32 MW.
 
-&dagg; The turret on top of the Protected Solar Matrix is free to power.
+&dagger; The turret on top of the Protected Solar Matrix is free to power.
 Offsetting the usual cost of a Laser Turret and its power usage, it works out to
 380 credits per megawatt, or 211 CD/MW with Power Amplifier.
 
@@ -176,7 +176,7 @@ Suppose we build four squares of each power building:
 | Solar Generator +Amp           |  32 MW |    6,000 |
 | Powerplant                     |  32 MW |   10,000 |
 | Solar Matrix                   |  32 MW |   20,000 |
-| Protected Solar Matrix&dagg;   |  32 MW |   28,800 |
+| Protected Solar Matrix&dagger; |  32 MW |   28,800 |
 | Solar Generator                |  16 MW |    6,000 |
 | Solar Panel +Amp               |  16 MW |    2,000 |
 | Solar Panel                    |   8 MW |    2,000 |

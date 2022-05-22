@@ -102,7 +102,7 @@ game at this point, known as "help codes".
 You receive a notification when an enemy ship enters sensor range. The full game
 has a voice clip for this (`enemyves.mgl` or "enemy vessel detected"), but it's
 unused. This is probably because you can't intercept individual ships, and
-they're always Scout Ships or Transporters that never attack your asteroid
+they're always Scoutships or Transporters that never attack your asteroid
 intentionally.
 
 You start with an established colony on a large asteroid. You have the Missile

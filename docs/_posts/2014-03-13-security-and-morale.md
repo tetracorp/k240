@@ -4,7 +4,8 @@ title: "Security and morale"
 categories: game-mechanics
 ---
 
-![Security Centre](../images/buildings/security-centre.png "Security Centre")
+![Security Centre](../images/buildings/security_centre.png "Security Centre")
+{:.right}
 
 A colony requires one Security Centre for every 100 colonists after the first
 50, i.e. none for 0-149 colonists, one for 150-249 colonists, and so on.
@@ -93,7 +94,7 @@ Desertion (20% chance)
 
 Ship stolen (20% chance)
 : Randomly lose one of the following ships, in order of preference: Assault
-Fighter, Combat Eagle, Scout Ship, Transporter.
+Fighter, Combat Eagle, Scoutship, Transporter.
 
 Missile stolen (20% chance)
 : Lose all units of a random missile.

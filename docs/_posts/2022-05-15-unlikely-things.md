@@ -11,12 +11,12 @@ Here are some unusual happenings in the game.
 
 ### Surveying a destroyed asteroid
 
-Ore surveys aren't reported in until the Scout Ship returns to the asteroid it
-set out from. (You can save time by sending the Scout Ship to the asteroid, then
+Ore surveys aren't reported in until the Scoutship returns to the asteroid it
+set out from. (You can save time by sending the Scoutship to the asteroid, then
 conducting the survey, so that it "returns" to the asteroid it just surveyed and
 reports instantly.)
 
-But what happens if a surveyed asteroid is destroyed before the Scout Ship can
+But what happens if a surveyed asteroid is destroyed before the Scoutship can
 get back with its report?
 
 ![Survey Report Invalid](../images/survey-report-invalid.png "Survey Report Invalid")

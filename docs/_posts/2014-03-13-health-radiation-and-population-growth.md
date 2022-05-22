@@ -20,7 +20,7 @@ A colony with zero colonists left is automatically destroyed.
 
 ### Medical Centres
 
-![Medical Centre](../images/buildings/medical-centre.png "Medical Centre")
+![Medical Centre](../images/buildings/medical_centre.png "Medical Centre")
 {:.right}
 
 Medical centres have exactly two uses: to stop virus outbreaks,
@@ -36,7 +36,7 @@ Each Medical Centre decreases the negative effects of radiation by 10%.
 
 ### Radiation
 
-![Radiation Filter](../images/buildings/radiation-filter.png "Radiation Filter")
+![Radiation Filter](../images/buildings/radiation_filter.png "Radiation Filter")
 {:.right}
 
 An asteroid's radiation level increases by 10% for every 100 un-mined Asteros,
