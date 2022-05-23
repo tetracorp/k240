@@ -193,7 +193,7 @@ without the intro.
     k240_2:playk240 >nil: <nil:
 ```
 
-### k240\_2:scenario/\*
+### k240\_2:scenario/\*.mgl
 
 Amiga sprite data, compressed in MGL format. The files `alienp1.mgl` -
 `alienp2.mgl` contain the picture for that species. The files `planet1.mgl` -
@@ -258,7 +258,7 @@ k240_2:playk240 <nil: >nil:
 
 Amiga icon for "k240". Will be renamed to `k240.info` when copied.
 
-### k240\_3:outro1.mgl, outro2.mgl, outro3.mgl, satpic.mgl, scitek.mgl, wireplan.mgl
+### k240\_3:\*.mgl
 
 IFF ILBM images, 320x200 pixels, compressed in MGL format.
 
