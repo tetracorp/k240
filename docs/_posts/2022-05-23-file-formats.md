@@ -165,12 +165,13 @@ See [extracted images (MGL files)](../data/images.html) for the images.
 
 ### k240\_2:idfile
 
-An ASCII text file consisting of the text "Hard disk ID file". It's not copied
-by the HD installer, so by checking for `idfile` the game can tell if it's
-installed to hard disk or running from floppy disks. The main reason you might
-want to do this is to determine whether the game must save to floppy disk (in
-which case it saves to `DF0:` or to hard disk (in which case it saves to
-`k240_2:`.
+An ASCII text file consisting of the text "Hard disk ID file".
+
+It's not copied by the HD installer, so by checking for `idfile` the game can
+tell if it's installed to hard disk or running from floppy disks. The main
+reason you might want to do this is to determine whether the game must save to
+floppy disk (in which case it saves to `DF0:` or to hard disk (in which case it
+saves to `k240_2:`).
 
 ### k240\_2:playk240
 
@@ -192,11 +193,12 @@ without the intro.
     k240_2:playk240 >nil: <nil:
 ```
 
-### k240\_2:scenario/alienp1.mgl - alienp6.mgl, planet1.mgl - planet6.mgl
+### k240\_2:scenario/\*
 
-Amiga sprite data, compressed in MGL format. The "alienp" files contain the
-picture for that species. The `planet` files contain the rotating image of the
-alien's homeworld, stored as a series of 64x53 frames.
+Amiga sprite data, compressed in MGL format. The files `alienp1.mgl` -
+`alienp2.mgl` contain the picture for that species. The files `planet1.mgl` -
+`planet6.mgl` contain the rotating image of each alien's homeworld, stored as a
+series of 64x53 frames.
 
 The file numbers do not map directly to each alien as one might expect. Rather,
 they apply as follows:
@@ -220,11 +222,12 @@ Amiga icon file.
 
 K240 hard disk install script, written by Graeme Ing. Based on the _Heroquest 2:
 Legacy of Sorasil_ HD installer script by Kevin Dudley. It won't install unless
-you have at least 2,100,000 bytes free.
+you have at least 2,100,000 bytes free. The .info file is its icon, which
+launches it with the included Installer program.
 
 ### k240\_3:Installer
 
-Amiga hard disk Installer program v1.24 (1.9.92)
+Amiga hard disk Installer program v1.24 (1.9.92).
 
 ### k240\_3:checksum
 

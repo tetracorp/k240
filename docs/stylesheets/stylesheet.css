@@ -305,7 +305,7 @@ footer p a:hover{
   text-decoration: underline;
 }
 
-p code, li code {
+p code, li code, td code {
   font-size: 120%;
   background: #333333;
   padding: 0 2px;
@@ -328,4 +328,8 @@ table td em {
 table td strong {
   color: lime;
   font-weight: normal;
+}
+
+table tr, table td{
+  vertical-align: top;
 }
