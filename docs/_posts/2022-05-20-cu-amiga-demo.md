@@ -54,6 +54,29 @@ The Seismic Penetrator cannot be acquired in the demo, but the building is still
 in the game. The sprite is very different, and more closely resembles the
 Seismic Penetrator's blueprint wireframe.
 
+### Satellite sprites
+
+| Demo | Full game |
+|------|-----------|
+| ![intel](intel-0-3-demo.gif "intel") | ![intel](intel-0-3.gif "intel") |
+
+An almost imperceptible change is made to the four frames of the satellite
+launch animation. The full game removes a single grey pixel from the bottom of
+the thruster in the first and last frames. The middle two frames have their
+frame heights slightly adjusted to match adjacent frames, but the actual pixels
+are unchanged. (The images here have been scaled up 4x to show detail, but it's
+still nearly impossible to see the difference.)
+
+The intel alert icons do not appear in the demo files. These are the text
+"LAUNCH", the circled ship icon, and the circled missile icon, used when
+a satellite detects fleet deployment or missile launch. This is consistent with
+other evidence which suggests that spy satellite features were added late in
+development.
+
+An almost unnoticeable detail which appears in both versions is the use of the
+blinking color in the first frame. It's hard to see in the game because it only
+appears for a split second and it's moving fast when it does.
+
 ### Font changes
 
 | Demo | Full game |
@@ -66,6 +89,13 @@ necessary for the French and German translations, respectively. The lowercase
 characters. The French and German translations were added late in development,
 and the playtest copies available to French magazine reviewers in March 1994
 still lacked French support.
+
+### Other sprites
+
+All other sprites are the same as those in the final game. This includes the
+ship sprites, mouse pointers, window frames, fleet icons, and the alien building
+and ship sprites (which represent the Kll-Kp-Qua). Even the sprite for the
+unused Terran ship called the Orbital Shuttle is there.
 
 ### Sci-Tek background
 

@@ -20,6 +20,7 @@ But what happens if a surveyed asteroid is destroyed before the Scoutship can
 get back with its report?
 
 ![Survey Report Invalid](../images/survey-report-invalid.png "Survey Report Invalid")
+{:.center}
 
 There's actually a special dialog box for this eventuality, saying "Target
 asteroid has been destroyed! Survey report invalid."
