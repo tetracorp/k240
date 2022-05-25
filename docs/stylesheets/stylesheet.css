@@ -267,8 +267,10 @@ a {
 }
 
 .left {
+  float: left;
   font-size: 80%;
   color: #aaaaaa;
+  margin: 0 1em 0 0;
 }
 
 h2[id], h3[id], hr {
