@@ -106,6 +106,24 @@ unused Terran ship called the Orbital Shuttle is there.
 The Sci-Tek screen in the demo uses a brighter palette. It was probably changed
 for the final release to aid readability.
 
+### Changed or missing text strings
+
+Changes to text between the demo and the final release include:
+
+* Text strings relating to intel features, manual protection codes, save game,
+  and speech are not yet available.
+* The abbreviation for credits is CR, rather than CD.
+* The Power Amplifier blueprint was called Power Doubler.
+* Various game strings are changed to note certain functions missing in the demo
+  version. 
+
+You can find a full list of text strings in the file
+[gamestrings-demo.txt](https://github.com/tetracorp/k240/tree/main/data/gamestrings-demo.txt).
+Most are the same as the final English release and in the same location.
+
+A full detailed breakdown of differences appears in a separate article:
+[CU Amiga demo text string analysis](2022-05-25-cu-amiga-strings-analysis.html).
+
 ### Missing features
 
 Several major gameplay options are missing from the demo. Some of these are

@@ -3,6 +3,8 @@
 This directory contains various data from the game.
 
 - `buildings-offsets.txt`: Building IDs.
+- `gamestrings-demo.txt`: Game strings extracted from the CU Amiga demo from
+  memory, listed using correct offsets where possible.
 - `gamestrings-english.txt`: Game strings extracted from english.mgl correctly
   by reading offsets from the file. A peculiarity in string 102: it contains two
   strings, "AREA EXP." and "--- NONE ---" separated by a null byte (denoted by
@@ -16,4 +18,6 @@ This directory contains various data from the game.
 - `gamestrings-german.txt`: Same, but German.
 - `gamestrings.v1.886.txt`: Old version of game strings extracted from memory, ignore this.
 - `images_iff/`: Images in IFF ILBM format, extracted from .MGL files.
+- `intro_unpacked`: Extracted CrunchMania files from the intro. However, it's
+  still not easy to read.
 - `speech/`: Voice samples in raw format, extracted from .MGL files.
