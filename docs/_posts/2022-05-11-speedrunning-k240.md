@@ -15,7 +15,7 @@ Here are some suggestions and strategies.
 ### Platform standardization
 
 Naturally, K240 v2.000 should be used, since v1.886 suffers from the 
-[fleet bug](game-mechanics/bugs.html#fleet-bug), which can either end a run or
+[fleet bug](../game-mechanics/bugs.html#fleet-bug), which can either end a run or
 waste time mitigating the bug by decommissioning fleets. It is also likely that
 the Amiga community would accept emulation, rather than requiring the game be
 played on original hardware. An emulated Amiga 1200 with a hard disk install

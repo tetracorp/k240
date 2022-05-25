@@ -36,7 +36,7 @@ Each Medical Centre decreases the negative effects of radiation by 10%.
 
 ### Radiation
 
-![Radiation Filter](../images/buildings/radiation_filter.png "Radiation Filter")
+![Decontamination Filter](../images/buildings/decontamination_filter.png "Decontamination Filter")
 {:.right}
 
 An asteroid's radiation level increases by 10% for every 100 un-mined Asteros,

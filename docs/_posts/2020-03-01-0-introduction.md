@@ -53,7 +53,7 @@ if aliens follow the same rules as the human player; e.g. requiring ore or
 currency to build, susceptibility to radiation, what their building and ship
 stats are, and so on.
 
-Several [general alien mechanics](0-general-alien-mechanics.html) have been
+Several [general alien mechanics](../alien/0-general-alien-mechanics.html) have been
 discovered. Additionally, detailed species-specific rules are known for the
 [Kll-Kp-Qua](../alien/1-kll-kp-qua.html),
 [Lak'Maj'Traal](../alien/2-ore-eaters.html),
@@ -69,7 +69,7 @@ known.
 ### Bugs
 
 Some game mechanics are undocumented because they are unintended; i.e.
-[bugs](bugs.html).
+[bugs](../game-mechanics/bugs.html).
 
 ### Other
 

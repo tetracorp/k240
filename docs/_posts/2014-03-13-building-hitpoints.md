@@ -5,8 +5,7 @@ categories: game-mechanics
 ---
 
 Each building has a number of hit points. The table here lists each Terran
-building's cost, hit points, build time and height (for the purpose of building
-scaffold height and turret placement).
+building's cost, hit points, build time (BT) and height (Ht).
 
 | Building                       |   Cost  | HP | BT | Ht|
 |:-------------------------------|--------:|---:|---:|--:|
@@ -51,6 +50,10 @@ scaffold height and turret placement).
 | Hydration Plant                |   5,000 | 20 | 20 | 3 |
 | Security Centre                |   4,500 | 15 | 24 | 2 |
 
+"Height" is used for calculating the maximum scaffold height when the building
+is under construction. The actual scaffold height is one larger than this
+number, ranging from 1 to 4.
+
 ### Taking and repairing damage
 
 Buildings take damage when struck with weapons. Unless a Repair Facility exists
@@ -58,6 +61,9 @@ on the asteroid, a damaged building will never repair itself. A colony which
 survives one attack may fall in the next.
 
 ### Repair Facility
+
+![Repair Facility](../images/buildings/repair_facility.png "Repair Facility")
+{:.right}
 
 Each repair facility heals one point of damage every eight days (see [building
 behaviour](building-behaviour.html)).
@@ -70,6 +76,9 @@ the blueprint, but a Repair Facility will retrofit old buildings to the new
 maximum.
 
 ### Protected Buildings
+
+![Protected Storage Tower](../images/buildings/protected_storage_tower.png "Protected Storage Tower")
+{:.right}
 
 In addition to the laser turret, most "Protected" versions of buildings have
 more hit points than their non-protected equivalent. The only one which does

@@ -147,6 +147,7 @@ ends with `00 0a`. Non-English letters are represented by the following values:
 | 0x03  | Ä  |
 | 0x04  | Ö  |
 | 0x19  | █  |
+| 0xFF  | \n |
 
 See the [data directory](https://github.com/tetracorp/k240/tree/main/data/) for
 the game strings.

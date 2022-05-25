@@ -58,7 +58,7 @@ Seismic Penetrator's blueprint wireframe.
 
 | Demo | Full game |
 |------|-----------|
-| ![intel](intel-0-3-demo.gif "intel") | ![intel](intel-0-3.gif "intel") |
+| ![intel](../images/intel0-3-demo.gif "intel") | ![intel](../images/intel0-3.gif "intel") |
 
 An almost imperceptible change is made to the four frames of the satellite
 launch animation. The full game removes a single grey pixel from the bottom of

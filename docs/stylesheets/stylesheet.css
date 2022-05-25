@@ -273,7 +273,7 @@ a {
   margin: 0 1em 0 0;
 }
 
-h2[id], h3[id], hr {
+h2[id], h3[id], hr, dt {
   clear: both;
 }
 

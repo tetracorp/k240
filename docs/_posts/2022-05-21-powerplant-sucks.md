@@ -42,7 +42,7 @@ to 0 MW. A stipulation of 8 MW per building does indeed occur immediately after
 the Powerplant calculation, but it refers to the 8 MW produced by the C.P.U.
 Whoever prepared that section in the manual seems to have misread the code.
 
-![mine](../images/buildings/mine.png "mine") 
+![mine](../images/buildings/mine.gif "mine") 
 {:.right}
 
 What makes this worse is that only un-mined Asteros counts. If you have any
