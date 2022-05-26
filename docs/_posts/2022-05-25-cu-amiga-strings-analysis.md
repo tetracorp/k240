@@ -4,12 +4,16 @@ title: "CU Amiga demo text string analysis"
 categories: prototypes
 ---
 
+This is an analysis of the text strings which changed between the K240 demo and
+the full version.
+
 1. Table of Contents
 {:toc}
 
 ### Changed text strings
 
-The following is a complete table of text strings which changed between the game and final release, or which  
+The following is a complete table of text strings which changed between the K240
+demo and final release, or which were not added until the final release.
 
 | ID  | Demo text | Final game text |
 |-----|-------------|---------------|
@@ -17,7 +21,6 @@ The following is a complete table of text strings which changed between the game
 |  40 | MORE EFFICIENT THAN SOLAR PANELS. GENERATES 4MW/DAY, OR 8MW WITH A POWER DOUBLER. | MORE EFFICIENT THAN SOLAR PANELS. GENERATES 4MW/DAY, OR 8MW WITH A POWER AMPLIFIER. |
 |  60 | A HUGE MATRIX OF SOLAR PANELS TO USE SPACE MORE EFFECTIVELY. GENERATES 8MW/DAY, OR 16MW WITH A POWER DOUBLER. | A HUGE MATRIX OF SOLAR PANELS TO USE SPACE MORE EFFECTIVELY. GENERATES 8MW/DAY, OR 16MW WITH A POWER AMPLIFIER. |
 |  69 | BUTTON REMOVED | SELECT 'ALIEN' AND CHOOSE A SCENARIO... |
-| 102 | AREA EXP./--- NONE ---  | AREA EXP./--- NONE --- |
 | 215 | FLEET INTERCEPTION NOT AVAILABLE IN THIS DEMO, ONLY IN THE FULL GAME. | INTERCEPT AN ENEMY FLEET AND ATTACK.\nRETURN IF SUCCESSFUL. |
 | 216 |  | DEPLOY THE FLEET AROUND AN ASTEROID TO ACT AS SENTRIES. ALL APPROACHING ENEMIES WILL BE ATTACKED. |
 | 223 | TURRET | YOU ARE GIVEN THE FOLLOWING EQUIPMENT: |
@@ -49,7 +52,6 @@ The following is a complete table of text strings which changed between the game
 | 480 | GO AND BUY THE GAME TO GET THIS GREAT FEATURE! | INTELLIGENCE CONTROL...        FUND:          CD. |
 | 481 | SPY SATELLITES ARE UNAVAILABLE IN THIS DEMO. | EXIT |
 | 482 | TRANSPORTER HAS NOT STARTED A NEW COLONY. THIS IS UNAVAILABLE ON THIS DEMO. YOU ARE LIMITED TO ONE ASTEROID. | POPULATION |
-	
 | 483 |    | CD. |
 | 484 |    | MISSILE INVENTORY |
 | 485 |    | WE BELIEVE THE ENEMY IS PRESENT ON: |
@@ -158,6 +160,165 @@ The following is a complete table of text strings which changed between the game
 
 ### String change analysis
 
+38, 40, 60
+: The power building descriptions refer to the Power Amplifier as the Power
+Doubler, possibly an old name. The blueprint itself is already named Power
+Amplifier in the demo.
+
+69
+: In the demo, there is a message when a button is extracted and one when an
+extracted button is removed. A "boop" sound plays in both cases. In the final
+version, removing a button has no message and plays a click sound. The empty
+string entry was re-used for the text "SELECT 'ALIEN' AND CHOOSE A SCENARIO".
+
+215
+: String changed for demo features.
+
+216
+: A blank entry appears for the fleet sentry mode. The demo uses the previous
+string.
+
+223, 250, 251
+: String names for "TURRET", "TURRET1", and "TURRET2", appearing in the alien
+stats. The gap between 223 and 250 suggests the addition of two alternate
+turrets was a later addition, and that they were never given specific names. The
+string "TURRET" was placed back in with string 357 in an additional batch of
+alien building names. The original turret strings  appear to have been deleted,
+leaving gaps for starting blueprint string and alternate game over text, which
+was probably added quite late.
+
+272
+: Text used when a colony has been destroyed by a Mega missile - "BY A DEEP
+SPACE MISSILE" in the demo, but "BLOWN TO PIECES!" This makes it ambigious how
+the colony was destroyed. This might be because one of the Swixaran large ships
+has a self-destruct hardpoint that works as a Mega missile.
+
+291, 292, 310
+: Inbound ship, missile, and fleet warning. In the demo, this caused a text
+popup. In the full game, these are replaced with voice clips which don't
+interrupt the game. The ship and missile text strings are simply removed in the
+final version, and the fleet warning is replaced with the standard win text.
+
+307, 349
+: The abbreviation for "credits" changed from "CR" to "CD".
+
+314, 315
+: Game over strings for the demo only. Left empty in the full version.
+
+318
+: Comet warning text. The final game does not warn you about comets. Final
+version adds some additional win screen text into the unused slot.
+
+355
+: "Rapidly declining population" used to suggest "This may be due to high
+radiation!" The final game doesn't do this. This may be because other things can
+cause rapidly declining population, such as certain alien weapons.
+
+356
+: The original disk request used the byte `\x01` to represent the disk number.
+The final game uses that character for the symbol Ç in French translation. The
+character is changed to "x", since it's replaced with the disk number anyway.
+
+366
+: A warning that the save game disk is not Amiga formatted disk. The demo has
+internal strings referring to save games on `df0:`, so it was already intended
+at this point to save game to a standard-formatted Amiga floppy disk. The demo
+refers to a format the disk, which did not appear in the final game, perhaps to
+avoid players accidentally formatting over their game disk. The drawback is that
+you need a pre-formatted disk prepared to save on.
+
+391
+: Error message shown when you try to build on an asteroid you don't own. "No
+colony on this asteroid" became "no active CPU on this asteroid". This may be
+because the most common case is trying to build after you've colonized an
+asteroid but the C.P.U. hasn't finished building yet.
+
+412
+: One of several notices that a feature is unavailable in the demo. This is the
+blueprint "[PURCHASED]" text, but it's been repurposed to notify the player tha
+the feature has been disabled.
+
+451, 452, 453, 454, 455, 456 458, 479, 480, 481, 482
+: More notices of features disable in the demo. These are the most recent text
+strings in the numbered index of the demo. A few others appear subsequently in
+memory, but are not in the demo's string index. Replaced in the final version
+with new alien building names and intel screen text.
+
+457
+: In the demo, this says "UNKNOWN!", perhaps originally used as dummy text for
+the Intel screen. Replaced with "TURRET", which covers all alien turrets.
+
+483 - 502
+: First text not to have any numeric equivalent in the demo. Text strings from
+this point on reflect features added to the game after the demo was build circa
+Jan 1994. These in particular are Intel screen spy satellite report strings.
+
+503 - 520
+: Rigellian building names.
+
+521 - 535
+: Swixaran building names.
+
+536, 537
+: Swixaran self-destruct ship hardpoint warnings.
+
+538, 539
+: Swixaran ghost fleet notifications.
+
+540
+: Swixaran asteroid cloak string.
+
+541 - 547
+: Last minute intelligence text. Presumably added to account for things not
+mentioned in the game manual.
+
+548 - 553
+: Manual protection code text.
+
+554
+: "Fleet is not orbitting the current asteroid!" A rarely used text for 
+
+561
+: First text string which does appear in memory after the text list, but is not
+indexed as such, and has equivalents in the final game.  Abbreviation for
+credits changed from "CR" to "CD". Note that the demo hardcodes the starting
+text string as 3,740,000, which is also the default starting money in the demo.
+The full game just replaces them with the letter "x", since it's changed when
+the game begins anyway.
+
+564, 565
+: Enabling and disabling speech. The string in this approximate location
+in the demo says "TETRACORP SYSTEMS STATUS..."
+
+568
+: Another notice of features unavailable in the demo, used for the save game
+text in the full game.
+
+569 - 584
+: Load, save, and exit game text strings in the full game. Two demo strings
+574-575 say "USED." and "FREE.", referring to memory or disk usage.
+
+593
+: The text string for the bottom of the Tetracorp page, with the text for "LOAD
+SAVE ALIEN FX", etc. The difference is that the demo says "QUIT GAME END",
+whereas the full version adds a speech toggle button, saying SPEECH DOS END.
+This is the last text string in the demo.
+
+594, 595, 596
+: More Intel report strings which only appear in the final strings. This
+certainly confirms that Intel features were added very late in development.
+
+597, 598, 599, 600, 601
+: New game strings in the full game only, used when starting a new game or
+abandoning an old game in progress to select a new alien.
+
+602
+: Full version only. Notification that you haven't got enough memory to enable
+speech.
+
+603, 604, 605
+: Full version only. Manual protection and save game file naming.
+
 ### Other text strings
 
 Other text strings not in the text list include:
@@ -169,3 +330,18 @@ Other text strings not in the text list include:
 | ENTER SHIP 1-7:  | ENTER SHIP 1-8:         |
 | ENTER SFX A-Z:   | TEST: ENTER SFX A-W:    |
 |                  | TEST: ENTER SPEECH A-U: |
+
+- Copyright changed from 1993 to 1994. The game was originally intended to
+  be completed in 1993. The demo version may have been completed as late as
+  January 1993, however, without necessarily changing the date on the console
+  invocation.
+- `ENTER HELP CODE` suggests that cheat codes existed at the time of the demo,
+  but had been disabled. The original feature may have been to press a key
+  (perhaps the Amiga's Help key) to trigger cheat code entry.
+- `ENTER SHIP 1-7` shows that at one point, there were only seven ships. This is
+  probably prior to the implementation of the Orbital Space Dock (although the
+  OSD does appear in the demo).
+- `ENTER SFX A-Z` does not necessarily mean there are 26 sound samples; in fact,
+  the satellite silo launch audio is missing from the demo.
+- `ENTER SPEECH A-U` only appears in the full version. There was evidently no
+  voice test in the demo.

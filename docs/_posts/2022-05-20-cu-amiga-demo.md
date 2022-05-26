@@ -110,19 +110,55 @@ for the final release to aid readability.
 
 Changes to text between the demo and the final release include:
 
-* Text strings relating to intel features, manual protection codes, save game,
+- Text strings relating to intel features, manual protection codes, save game,
   and speech are not yet available.
-* The abbreviation for credits is CR, rather than CD.
-* The Power Amplifier blueprint was called Power Doubler.
-* Various game strings are changed to note certain functions missing in the demo
+- The abbreviation for credits is CR, rather than CD.
+- The Power Amplifier blueprint was called Power Doubler.
+- Various game strings are changed to note certain functions missing in the demo
   version. 
+- Some strings are still held as hardcoded variables, rather than in a
+  variable-offset list which would allow the game to be localized more easily.
+  The demo seems to have been built at a point where the conversion to the
+  localizable list format wast almost complete, but not quite finished.
 
 You can find a full list of text strings in the file
 [gamestrings-demo.txt](https://github.com/tetracorp/k240/tree/main/data/gamestrings-demo.txt).
 Most are the same as the final English release and in the same location.
 
 A full detailed breakdown of differences appears in a separate article:
-[CU Amiga demo text string analysis](2022-05-25-cu-amiga-strings-analysis.html).
+[CU Amiga demo text string analysis](../prototypes/cu-amiga-strings-analysis.html).
+
+### Cheat codes
+
+Cheat codes have been disabled in the demo, although there is evidence that they
+did exist:
+
+- Cheats are referenced in three text strings: `ENTER HELP CODE:`, `ENTER SHIP
+  1-7:` (suggesting the `NASA` cheat) and `ENTER SFX A-Z:` (suggesting the sound
+  test cheat). The keycode lists are not in the demo, suggesting perhaps that
+  the cheat codes themselves were debug-build only and not included in the demo.
+- The byte sequence
+  `0009 0006 0027 001D 001C 0025 0007 0010 002B 0014 0005 0011 0023 0024`
+  appears in the demo. This is the list of extracted buttons for the `PANEL`
+  cheat found in the full game. This also tells us that the PANEL layout was
+  complete by this point.
+
+However, code for at least several cheats is observed to be missing in the demo.
+There is no check for the `SKYSCRAPER` instant building flag, no code which adds
+50 population as per `LEMINGS`, no code which inverts the blueprint list as
+`WIDGET`, no code which adds 100,000 credits as `LOADSADOSH`, and none which
+adds missiles as `ICBM`. The key scancode sequences for these cheats are
+missing.
+
+### Missiles
+
+Stasis and Mega missiles are non-functional.
+
+You can't normally acquire these missiles in the demo, since missile
+construction is disabled, and you don't start with any Stasis, Mega, Nuclear, or
+Anti-Virus. However, if you add them with a memory editor, Mega and Stasis have
+no effect when they land. Nuclear and Anti-Virus seem to work more or less
+normally.
 
 ### Missing features
 
@@ -141,9 +177,6 @@ money based on colonist count, loading and saving the game.
 Only one alien is available. The voice sounds and intro are not available,
 although this should be obvious given that the demo fits on a single disk
 instead of three.
-
-Cheat codes have been disabled, although game strings show that they were in the
-game at this point, known as "help codes".
 
 ### Gameplay differences
 
