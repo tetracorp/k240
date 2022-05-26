@@ -322,8 +322,8 @@ Eight chunks of the game's memory are saved:
 
 | Bytes  | Description |
 |-------:|-------------|
-|     18 | Four unknown pointers and two bytes for the current alien ID. |
-|     30 | Alien data (`a1data{1-6}.bin` +4 bytes, for 30 bytes). |
+|     18 | Save game name (16 bytes) and current alien ID (2 bytes). |
+|     30 | Alien variables (`a1data{1-6}.bin` +4 bytes, for 30 bytes). |
 | 55,810 | Miscellaneous game state: Transporter cargo, extracted buttons, asteroid maps (53,856 bytes for 24 asteroids at 34x33 words each), current money, Imperial transporter timer, asteroid hotkeys, comet locations, blueprints owned, date, numerous others. |
 | 37,800 | Ships. 700 ships at 54 bytes per ship. "Ships" includes missiles, satellites, and Vortex storms. |
 | 33,600 | Buildings. 14 bytes per building, 100 buildings per asteroid, 24 asteroids. |
@@ -332,3 +332,5 @@ Eight chunks of the game's memory are saved:
 |  2,336 | Terran fleets. |
 |  2,336 | Alien fleets.  |
 |151,850 | TOTAL |
+
+A more detailed description of the save game format is planned.
