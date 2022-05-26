@@ -77,6 +77,8 @@ An almost unnoticeable detail which appears in both versions is the use of the
 blinking color in the first frame. It's hard to see in the game because it only
 appears for a split second and it's moving fast when it does.
 
+Of note, the satellite launch sound effect appears to be missing.
+
 ### Font changes
 
 | Demo | Full game |
@@ -113,7 +115,8 @@ Changes to text between the demo and the final release include:
 - Text strings relating to intel features, manual protection codes, save game,
   and speech are not yet available.
 - The abbreviation for credits is CR, rather than CD.
-- The Power Amplifier blueprint was called Power Doubler.
+- The Power Amplifier blueprint was referred to in several places as Power
+  Doubler.
 - Various game strings are changed to note certain functions missing in the demo
   version. 
 - Some strings are still held as hardcoded variables, rather than in a
@@ -128,10 +131,10 @@ Most are the same as the final English release and in the same location.
 A full detailed breakdown of differences appears in a separate article:
 [CU Amiga demo text string analysis](../prototypes/cu-amiga-strings-analysis.html).
 
-### Cheat codes
+### Cheat codes disbled
 
 Cheat codes have been disabled in the demo, although there is evidence that they
-did exist:
+did exist at this point in development and were merely stripped from the demo:
 
 - Cheats are referenced in three text strings: `ENTER HELP CODE:`, `ENTER SHIP
   1-7:` (suggesting the `NASA` cheat) and `ENTER SFX A-Z:` (suggesting the sound
@@ -142,6 +145,12 @@ did exist:
   appears in the demo. This is the list of extracted buttons for the `PANEL`
   cheat found in the full game. This also tells us that the PANEL layout was
   complete by this point.
+- There is a conspicious gap in the code where the key scancodes for the cheat
+  codes are normally located, including a 168-byte run of zeroes which would be
+  consistent with 14 bytes for each of 12 cheat codes. This may suggest that all
+  twelve cheat codes were present at this point, and similarity might be noted
+  with the manual protection codes which also use 14-byte rows of Amiga key
+  scancodes. The actual array of cheat codes in the final version is 139 bytes.
 
 However, code for at least several cheats is observed to be missing in the demo.
 There is no check for the `SKYSCRAPER` instant building flag, no code which adds

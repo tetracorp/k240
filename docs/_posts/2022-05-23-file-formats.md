@@ -322,11 +322,13 @@ Eight chunks of the game's memory are saved:
 
 | Bytes  | Description |
 |-------:|-------------|
-|     18 | Starts with alien ID. Various currently unknown variables. |
-|     30 | Alien data (first 30 bytes of `a1data{1-4}.bin`) |
-| 55,810 | Transporter cargo, extracted buttons, asteroid maps (53,856 bytes for 24 asteroids at 34x33 words each), current money, Imperial transporter timer, asteroid hotkeys, comet locations, blueprints owned, date, numerous others. |
-| 33,600 | Ships. 700 ships at 48 bytes per ship. Includes missiles, satellites, and Vortex storms. |
-| 18,000 | Buildings. 24 asteroids, 100 buildings per asteroid ... (unknown) |
+|     18 | Four unknown pointers and two bytes for the current alien ID. |
+|     30 | Alien data (`a1data{1-6}.bin` +4 bytes, for 30 bytes). |
+| 55,810 | Miscellaneous game state: Transporter cargo, extracted buttons, asteroid maps (53,856 bytes for 24 asteroids at 34x33 words each), current money, Imperial transporter timer, asteroid hotkeys, comet locations, blueprints owned, date, numerous others. |
+| 37,800 | Ships. 700 ships at 54 bytes per ship. "Ships" includes missiles, satellites, and Vortex storms. |
+| 33,600 | Buildings. 14 bytes per building, 100 buildings per asteroid, 24 asteroids. |
+| 18,000 | Asteroids. 24 asteroids at 750 bytes each. |
 |  1,920 | Building totals. 24 asteroids, 80 buildings per asteroid (40 Terran, 40 alien) |
-|  2,336 | Fleets? |
-|  2,336 | Fleets? |
+|  2,336 | Terran fleets. |
+|  2,336 | Alien fleets.  |
+|151,850 | TOTAL |
