@@ -5,9 +5,9 @@ categories: game-mechanics
 ---
 
 ### Ore prices
-Ore prices are recalculated on day 1 of every year. Each ore has a
-a random variance which is added to a fixed minimum price
-to calculate the current price.
+
+Ore prices are recalculated on day 1 of every year. Each ore has a a random
+variance which is added to a fixed minimum price to calculate the current price.
 
 | Ore        | Start   | Minimum |  Variance     | Maximum |
 |:-----------|--------:|--------:|--------------:|--------:|
@@ -22,15 +22,15 @@ to calculate the current price.
 | Traxium    |  50,000 |  50,000 |   400 x 0-249 | 149,600 |
 | Nexos      | 150,000 | 100,000 | 1,600 x 0-249 | 498,400 |
 
-Start value is recalculated at the beginning of the game, but appears in
-the game data and is included here for completeness.
+Start value is recalculated at the beginning of the game, but appears in the
+game data and is included here for completeness.
 
-An ore can have its price fixed by the Imperial Treasury for 2-5 years
-due to a [random event](random-events.html).
-It remains at whatever its current value is
+An ore can have its price fixed by the Imperial Treasury for 2-5 years due to a
+[random event](random-events.html). It remains at whatever its current value is
 and ignores the next 2-5 recalculation events.
 
 ### Alternate income streams
+
 You receive an undocumented income of 100 CR per day for each
 asteroid you own, plus 2 CR per day for each colonist. This becomes a
 vital source of income in late game.

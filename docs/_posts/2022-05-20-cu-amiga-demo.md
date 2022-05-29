@@ -131,7 +131,7 @@ Most are the same as the final English release and in the same location.
 A full detailed breakdown of differences appears in a separate article:
 [CU Amiga demo text string analysis](../prototypes/cu-amiga-strings-analysis.html).
 
-### Cheat codes disbled
+### Cheat codes disabled
 
 Cheat codes have been disabled in the demo, although there is evidence that they
 did exist at this point in development and were merely stripped from the demo:
