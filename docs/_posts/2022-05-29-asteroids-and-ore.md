@@ -67,14 +67,14 @@ the ore prices and how they are calculated.
 
 ### Asteroid direction and speed
 
-All asteroids spawn with a random speed between 1 and 4.
+All asteroids spawn with a random speed between 2 and 5.
 
 |Speed| Chance | Chance % |
 |:----|-------:|---------:|
-|   1 |  6/16  | 37.50%   |
-|   2 |  5/16  | 31.25%   |
-|   3 |  3/16  | 18.75%   |
-|   4 |  4/16  | 25.00%   |
+|  2  |  6/16  | 37.50%   |
+|  3  |  5/16  | 31.25%   |
+|  4  |  3/16  | 18.75%   |
+|  5  |  4/16  | 25.00%   |
 
 The exceptions are your starting asteroid and the enemy's starting asteroid,
 which always begin at zero speed.

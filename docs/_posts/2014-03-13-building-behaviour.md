@@ -182,7 +182,7 @@ See the article on why [powerplant is the worst building](../fun/powerplant-suck
 ![command_centre](../images/buildings/command_centre.png "command_centre"){:.right}
 
 A Command Centre requires 8 colonists as workers. A worker shortage is likely to
-affect only the Command Center's speed at building an Orbital Space Dock, in
+affect only the Command Centre's speed at building an Orbital Space Dock, in
 which case it operates at 40% efficiency.
 
 ### Construction Yard

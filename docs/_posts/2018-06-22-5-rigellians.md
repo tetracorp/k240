@@ -58,7 +58,7 @@ Terran building list.
 | Ground Dock               | Offense |  20 |  35 | 2 | 4 |    2 | Construction Yard
 | Turret                    | Offense |  10 |  16 | 1 | 1 |    6 | Laser Turret
 | Community                 | General |  24 |  32 | 3 | 1 |    4 | Resiblock
-| Science Labs              | General |  20 |  32 | 3 | 1 |    2 | ~~Medical Center~~
+| Science Labs              | General |  20 |  32 | 3 | 1 |    2 | ~~Medical Centre~~
 | Farm                      | General |  16 |  24 | 3 | 1 |    4 | Hydroponics
 
 Community

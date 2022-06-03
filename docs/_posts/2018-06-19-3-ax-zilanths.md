@@ -67,7 +67,7 @@ Terran building list.
 | Strategy Control          | General |  36 |  50 | 3 | 4 |    1!| Command Centre
 | Spacecraft Dock           | Offense |  24 |  25 | 2 | 4 |    2 | Construction Yard
 | Stabilising Platform      | General |   8 |  15 | 0 | 1 |    4 | Landing Pad
-| Science Podule            | General |  16 |  14 | 3 | 1 |    3 | ~~Medical Center~~
+| Science Podule            | General |  16 |  14 | 3 | 1 |    3 | ~~Medical Centre~~
 | Nutrient Podule           | General |  16 |  15 | 3 | 1 |    6 | Hydroponics
 | Mass Displacement Podule  | Defence |  32 | 100 | 1 | 1 |    1!| ~~Hydration Plant~~
 | Subspace Detectors        | Defence |  24 |  25 | 3 | 1 |    1!| ~~Security Centre~~
@@ -226,7 +226,7 @@ Trivia:
 
 * The Ax'Zilanths do not use Napalm, but do use Hellfire. They are the only
   alien to use Hellfire.
-* They are the only alien to use Vortex and Antivirus. Other aliens use those
+* They are the only alien to use the Vortex missile. Other aliens use those
   slots, but only as custom missiles.
 * They do not use Explosive or Antivirus, since special code replaces these
   warheads.

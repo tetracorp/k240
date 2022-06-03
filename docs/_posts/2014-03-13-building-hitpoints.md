@@ -43,7 +43,7 @@ building's cost, hit points, build time (BT) and height (Ht).
 | Protected Solar Matrix         |   7,200 | 20 | 48 | 3 |
 | Protected Resiblock            |   8,500 | 20 | 56 | 3 |
 | Protected Storage Tower        |   7,500 | 32 | 48 | 2 |
-| Medical Center                 |   5,000 | 15 | 30 | 3 |
+| Medical Centre                 |   5,000 | 15 | 30 | 3 |
 | Environment Control            |   3,200 | 34 | 20 | 2 |
 | Protected Env/Ctrl             |   8,500 | 52 | 32 | 3 |
 | Hydroponics                    |   7,000 | 24 | 16 | 3 |

@@ -88,7 +88,7 @@ but colonist #3,850 would trigger the security shortage again.
 ### Forget security too
 
 If you're going to trigger security, there's no mechanical benefit to
-having even one Security Center. Since our colony has 37 of them and
+having even one Security Centre. Since our colony has 37 of them and
 they each use up 2MW of power, we can grow our colony to absurd size
 if we're willing to put up with constant security alert status.
 
