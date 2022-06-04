@@ -83,9 +83,9 @@ Alien Vortex Mine has a 10% chance to shoot.
 
 Vortex deals 5 damage instead of 2 against Rigellians.
 
-### Laser Cannon
+### Laser
 
-![Laser Cannon](../images/hardpoints/laser_cannon.png "Laser Cannon")
+![Laser](../images/hardpoints/laser_cannon.png "Laser")
 {:.left}
  
 Has a 30% chance to hit. Deals 2 damage.
@@ -190,7 +190,7 @@ It deals 4 damage on a hit instead of 2.
 |-------:|:----------|
 |   3%   | Divide in two, effectively spawning a second Vortex storm. |
 |   5%   | Disappear. |
-|  44%   | Deal 2 damage to the building at the current location, or 5 damage if the current enemy is Rigellians. |
+|  44%   | Deal 4 damage to the building at the current location. |
 |  48%   | Move. |
 
 ### Alien hardpoint D
