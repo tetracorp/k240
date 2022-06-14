@@ -96,7 +96,10 @@ Engineering Plant
 Mass Displacement Podule
 : Allows asteroid to teleport. It can teleport in response to incoming missiles,
 if there are no Interceptor missiles left. It also has a 1% chance to teleport
-on an occasion when it would normally fire missiles. More research is required.
+on an occasion when it would normally fire missiles. If the asteroid gets too
+close to the edge of the screen and does not currently benefit from a gravity
+nullifier effect, it may also teleport to avoid zooming off the edge of the
+screen.
 
 Missile Silo
 : Required to build or launch missiles.
@@ -151,10 +154,10 @@ Strategy Control
 : Equivalent to Command Centre. Required to start new colony.
 
 Subspace Detectors
-: Increases the chances of spotting Terran spy satellites. The base chance is 1%
-plus a cumulative 1% per day, and each additional Sensory Matrix and Subspace
-Detectors adds another chance per day, although a colony will never build more
-than one of each, for a maximum of three chances per day.
+: Increases the chances of spotting Terran spy satellites. The base detection
+rate is 1% plus a cumulative 1% per 16 days, and each additional Sensory Matrix
+and Subspace Detectors adds another detection attempt per day, although a colony
+will never build more than one of each, for a maximum of three chances per day.
 
 Turret
 : A plasma turret which deals 5 damage, the same as Terran plasma turrets.
@@ -233,6 +236,11 @@ Trivia:
 
 ### Ships
 
+To build ships, an Ax'Zilanth colony requires at least one Reactor,
+Stabilising Platform, and Engineering Plant. It also requires at least one Ore
+Extractor or Resource Podule. They also require at least one Spacecraft Dock,
+and produce proportionally faster with up to a maximum of four docks.
+
 Each ship an armor value, speed, number of hardpoints (sometimes erroneous),
 ID number in the game code, and up to six hardpoints. The names here are
 arbitrary and do not appear in the code.
@@ -266,6 +274,7 @@ Ship $3f "Scoutship"
 : A slower 15 Armor ship with a Photon Cannon (8 damage). The weakest ship. The
 Ax'Zilanths and Rigellians are the only two species with a slow scout ship like
 this. The only small Ax'Zilanth ship without a Warp Generator.
+Each colony sends a scoutship every 130 days, the slowest of any alien.
 
 Ship $40 "Light Bomber"
 : A slower 50 Armor ship with a Warp Generator, Plasma Cannon (5 damage), Chaos

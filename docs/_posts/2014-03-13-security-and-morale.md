@@ -25,6 +25,11 @@ the first 50) reduces its Unrest by one point per day.
 For each resource (air, food, water) that is currently unmet by either
 production or surplus, a colony gains 2 points of Unrest per day.
 
+Building a Security Centre immediately reduces Unrest by 100. If Unrest is high
+enough, it may be worth building two or even three Security Centres to zero your
+Unrest immediately, since the 4,500 credit per building cost is cheaper than the
+financial loss from a single security event.
+
 ### Unrest Levels
 
 | Points   | Status                   |

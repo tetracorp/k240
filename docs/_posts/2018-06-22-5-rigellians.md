@@ -195,7 +195,7 @@ spy satellite report.
 
 "Nosferatu"
 : Drains the target asteroid's power. All power generation is halved for 20-39
-days.
+days. Replaces the Antivirus slot.
 
 "Big Nuclear"
 : A more powerful version of the Nuclear missile. Deals 10 base damage to every
@@ -204,6 +204,7 @@ building instead of 7.
 "Bioweapon"
 : Twenty population are killed instantly. Then, a virus outbreak occurs. The
 Kll-Kp-Qua have an almost identical weapon which does not cause an outbreak.
+Replaces the Vortex slot.
 
 Trivia:
 
@@ -213,6 +214,12 @@ Trivia:
   with custom weapons.
 
 ### Ships
+
+To make progress on shipbuilding, the Rigellians require at least one Reactor
+Core, Energy Gatherer, or Energy Globe. They also require a Weapons Facility.
+They require at least one Extractor of either type. Shipbuilding requires at
+least one Ground Dock, with progress increasing faster for each additional
+Ground Dock, to a maximum of four.
 
 Each ship an armor value, speed, number of hardpoints (sometimes erroneous),
 ID number in the game code, and up to six hardpoints. The names here are
@@ -244,6 +251,7 @@ technology.
 
 Ship $3f "Scoutship"
 : A fast 15 Armor scoutship with a Laser Cannon (5 damage).
+Each colony sends out a scoutship every 50 days, which is quite slow.
 
 Ship $40 "Stealth Bomber"
 : A slower 60 Armor ship with four hardpoints: Warp Generator, Plasma Cannon (7

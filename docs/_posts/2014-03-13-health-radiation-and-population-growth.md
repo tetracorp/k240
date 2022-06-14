@@ -18,22 +18,6 @@ virus outbreaks, certain alien bioweapons, desertion during civil unrest,
 and sudden housing shortages caused by housing being blown up.
 A colony with zero colonists left is automatically destroyed.
 
-### Medical Centres
-
-![Medical Centre](../images/buildings/medical_centre.png "Medical Centre")
-{:.right}
-
-Medical centres have exactly two uses: to stop virus outbreaks,
-and treat radiation sickness.
-
-An outbreak can begin due to [random event](random-events.html).
-Once the colony has one Medical Centre for every 100 colonists after the
-first 50, the outbreak ends. Otherwise, it loses two colonists per day.
-Medical Centres can end virus outbreaks even if the building is without
-power.
-
-Each Medical Centre decreases the negative effects of radiation by 10%.
-
 ### Radiation
 
 ![Decontamination Filter](../images/buildings/decontamination_filter.png "Decontamination Filter")
@@ -66,13 +50,41 @@ Radiation | Chance of losing one colonist
       90% |  51%
      100% | 100%
 
+### Medical Centres
+
+![Medical Centre](../images/buildings/medical_centre.png "Medical Centre")
+{:.right}
+
+Medical centres have exactly two uses: to stop virus outbreaks,
+and treat radiation sickness.
+
+Each Medical Centre decreases the negative effects of radiation by 10%.
+It requires power to do this.
+
+A viral outbreak usually begins due to a
+[random event](../game-mechanics/random-events.html). It can also be caused by a
+certain Rigellian missile, which causes a blue flash and kills 20 population on
+a hit.
+
+Once the colony has one Medical Centre for every 100 colonists after the first
+50, the outbreak ends. Otherwise, it loses two colonists per day. This means the
+outbreak automatically ends if the population is reduced to 49 or lower.
+Medical Centres can end virus outbreaks even if the building is without power.
+
 ### Rapidly Declining Population
 
 The "rapidly declining population" warning triggers whenever a colony's
-population drops to 30 or lower. If a reason is given (i.e. lack of food,
-air or water), this means the colony is out of surplus in that resource and
-may be losing colonists quickly.
+population is 30 or lower.
 
-If no reason is given, the most likely causes are recent housing
-destruction, high radiation, or certain alien population-reducing
-weapons.
+If there is currently a resource deficiency, the declining population is
+attributed to food, water, or air, in that order. If no reason is given, there
+may be some other cause, usually high radiation or alien bioweapons.
+
+Note that the population does not need to actually be declining to trigger this
+warning, just to be 30 or lower. It can even trigger if the population is
+currently increasing, as long as the total is still below 30. This can happen if
+you manage to stop the population loss just in time, and your population is now
+recovering.
+
+Viral outbreaks can't trigger the rapidly declining population warning on their
+own, since outbreaks stop at 49 population, and the warning only triggers at 30.
