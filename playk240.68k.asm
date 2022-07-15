@@ -105,14 +105,14 @@ SECSTRT_0:
 ; 
 ; Reassemble from the source code:
 ; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.asm
-; 
-	SF	flg1AAD6		;00000: 51f90001aad6
+;
+	SF	intErr			;00000: 51f90001aad6
 	SUBA.L	A1,A1			;00006: 93c9
 	MOVEA.L	ABSEXECBASE.W,A6	;00008: 2c780004
 	JSR	(_DOSFindTask,A6)	;0000c: 4eaefeda
 	MOVE.L	D0,ptrTaskPtr		;00010: 23c00001a9e4
 	BNE.S	_00024			;00016: 660c
-	MOVE.B	#$01,flg1AAD6		;00018: 13fc00010001aad6
+	MOVE.B	#$01,intErr		;00018: 13fc00010001aad6
 	BRA.W	_000C8			;00020: 600000a6
 _00024:
 	MOVEA.L	D0,A4			;00024: 2840
@@ -135,10 +135,10 @@ _00042:
 	JSR	(_DOSOpenLibrary,A6)	;00060: 4eaefdd8
 	MOVE.L	D0,ptrDOSBase		;00064: 23c00001a9f0
 	BSR.W	_001AA			;0006a: 6100013e
-	TST.B	flg1AAD6		;0006e: 4a390001aad6
+	TST.B	intErr			;0006e: 4a390001aad6
 	BNE.S	_000AA			;00074: 6634
 	BSR.W	_InitSound1		;00076: 610007be
-	TST.B	flg1AAD6		;0007a: 4a390001aad6
+	TST.B	intErr			;0007a: 4a390001aad6
 	BNE.S	_000A6			;00080: 6624
 	BSR.W	_CheckIDFile		;00082: 61001db8
 	BSR.W	_TakeBlit		;00086: 6100030e
@@ -147,7 +147,7 @@ _00042:
 	BSR.W	_SeedRNG		;00092: 61000b54
 	JSR	_01E6C			;00096: 4eb900001e6c
 	MOVEA.L	ptr1A9E8,A7		;0009c: 2e790001a9e8
-	BSR.W	_003BE			;000a2: 6100031a
+	BSR.W	_Blit003BE		;000a2: 6100031a
 _000A6:
 	BSR.W	_InitSound2		;000a6: 61000888
 _000AA:
@@ -161,14 +161,14 @@ _000AA:
 	JSR	(_DOSPermit,A6)		;000c4: 4eaeff76
 _000C8:
 	MOVEQ	#0,D0			;000c8: 7000
-	MOVE.B	flg1AAD6,D0		;000ca: 10390001aad6
+	MOVE.B	intErr,D0		;000ca: 10390001aad6
 	BEQ.S	_000D6			;000d0: 6704
 	BSR.W	_00220			;000d2: 6100014c
 _000D6:
 	BSR.W	_00374			;000d6: 6100029c
 	MOVEQ	#0,D0			;000da: 7000
 	RTS				;000dc: 4e75
-ptr000DE:
+arrErrMsgs:
 	DC.L	strTaskErr		;000de: 000000f2
 	DC.L	strTaskErr		;000e2: 000000f2
 	DC.L	strSignalErr		;000e6: 00000122
@@ -222,7 +222,7 @@ _001AA:
 	LEA	HARDBASE,A5		;001fc: 4bf900dff000
 	MOVE.W	(DMACONR_2,A5),dataDMACONR ;00202: 33ed00020001aa3a
 	BSR.W	_003E4			;0020a: 610001d8
-	TST.B	flg1AAD6		;0020e: 4a390001aad6
+	TST.B	intErr			;0020e: 4a390001aad6
 	BNE.S	_0021A			;00214: 6604
 	BSR.W	_0058E			;00216: 61000376
 _0021A:
@@ -240,7 +240,7 @@ _00220:
 _00240:
 	MOVE.L	(A7)+,D0		;00240: 201f
 	ASL.W	#2,D0			;00242: e540
-	LEA	(ptr000DE,PC),A0	;00244: 41fafe98
+	LEA	(arrErrMsgs,PC),A0	;00244: 41fafe98
 	MOVEA.L	(0,A0,D0.W),A0		;00248: 20700000
 	BSR.W	_00274			;0024c: 61000026
 	MOVEA.L	ptrDOSBase,A6		;00250: 2c790001a9f0
@@ -292,7 +292,7 @@ _002E8:
 _002F2:
 	MOVEM.L	D0-D2/A0-A6,-(A7)	;002f2: 48e7e0fe
 	LEA	HARDBASE,A5		;002f6: 4bf900dff000
-	TST.B	flg1AAD6		;002fc: 4a390001aad6
+	TST.B	intErr			;002fc: 4a390001aad6
 	BNE.S	_0030C			;00302: 6608
 	BSR.W	_00634			;00304: 6100032e
 	BSR.W	_00448			;00308: 6100013e
@@ -315,7 +315,6 @@ _0030C:
 	MOVE.L	data1A9F4,(184,A0)	;00360: 21790001a9f400b8
 	MOVEM.L	(A7)+,D0-D2/A0-A6	;00368: 4cdf7f07
 	RTS				;0036c: 4e75
-strSYS:
 	;0036e
 	;DC.B	$53,$59,$53,$3a,$00,$00
 	DC.B	"SYS:",0,0
@@ -345,7 +344,7 @@ ret003BA:
 	RTS				;003ba: 4e75
 flgBlitOwned:
 	DC.W	$0000			;003bc
-_003BE:
+_Blit003BE:
 	TST.B	flgBlitOwned		;003be: 4a39000003bc
 	BEQ.S	ret003E2		;003c4: 671c
 	MOVEM.L	D0-D1/A0-A1/A6,-(A7)	;003c6: 48e7c0c2
@@ -380,7 +379,7 @@ _00426:
 	BNE.S	_00406			;0042c: 66d8
 	CMPA.L	#ptrBuff19_Voice,A5	;0042e: bbfc00000576
 	BGT.S	_00442			;00434: 6e0c
-	MOVE.B	#$03,flg1AAD6		;00436: 13fc00030001aad6
+	MOVE.B	#$03,intErr		;00436: 13fc00030001aad6
 	BSR.W	_00448			;0043e: 61000008
 _00442:
 	JSR	(_DOSPermit,A6)		;00442: 4eaeff76
@@ -519,7 +518,7 @@ _0058E:
 	MOVE.L	D0,data1AA14		;005cc: 23c00001aa14
 	BEQ.S	_005E6			;005d2: 6712
 _005D4:
-	MOVE.B	#$04,flg1AAD6		;005d4: 13fc00040001aad6
+	MOVE.B	#$04,intErr		;005d4: 13fc00040001aad6
 	MOVEA.L	ABSEXECBASE.W,A6	;005dc: 2c780004
 	JSR	(_DOSEnable,A6)		;005e0: 4eaeff82
 	RTS				;005e4: 4e75
@@ -584,7 +583,7 @@ _00690:
 _006A8:
 	MOVE.W	D1,-(A7)		;006a8: 3f01
 	MOVE.L	A1,-(A7)		;006aa: 2f09
-	MOVE.W	data1AA38,D1		;006ac: 32390001aa38
+	MOVE.W	dataCheat1AA38,D1	;006ac: 32390001aa38
 	CMPI.W	#$0010,D1		;006b2: 0c410010
 	BMI.S	_006BA			;006b6: 6b02
 	MOVEQ	#0,D1			;006b8: 7200
@@ -594,7 +593,7 @@ _006BA:
 	BEQ.S	_006D2			;006c4: 670c
 	MOVE.B	D0,(0,A1,D1.W)		;006c6: 13801000
 	ADDQ.B	#1,D1			;006ca: 5201
-	MOVE.W	D1,data1AA38		;006cc: 33c10001aa38
+	MOVE.W	D1,dataCheat1AA38	;006cc: 33c10001aa38
 _006D2:
 	MOVEA.L	(A7)+,A1		;006d2: 225f
 	MOVE.W	(A7)+,D1		;006d4: 321f
@@ -604,13 +603,13 @@ _006D8:
 	MOVE.W	(6,A0),D0		;006d8: 30280006
 ; $e8: Left mouseup
 	CMPI.B	#$e8,D0			;006dc: 0c0000e8
-	BEQ.S	_LeftMouseUp		;006e0: 676a
+	BEQ.S	_006FC			;006e0: 676a
 ; $e9: Right mouseup
 	CMPI.B	#$e9,D0			;006e2: 0c0000e9
-	BEQ.S	_RightMouseUp		;006e6: 676e
+	BEQ.S	_006FC			;006e6: 676e
 ; $68: Left mousedown
 	CMPI.B	#$68,D0			;006e8: 0c000068
-	BEQ.S	_LeftMouseDown		;006ec: 674e
+	BEQ.S	_006FC			;006ec: 674e
 ; $69: Right mousedown
 	CMPI.B	#$69,D0			;006ee: 0c000069
 	BNE.S	_006FC			;006f2: 6608
@@ -618,7 +617,7 @@ _006D8:
 ; MouseBtn bit 0 = left click, bit 1 = right click
 	BSET	#1,MouseBtn		;006f4: 08f9000100000766
 _006FC:
-	MOVE.W	unk00760,D0		;006fc: 303900000760
+	MOVE.W	intMouseX,D0		;006fc: 303900000760
 	ADD.W	(10,A0),D0		;00702: d068000a
 	BPL.S	_0070A			;00706: 6a02
 	MOVEQ	#0,D0			;00708: 7000
@@ -628,8 +627,8 @@ _0070A:
 	BMI.S	_00714			;0070e: 6b04
 	MOVE.W	#$013b,D0		;00710: 303c013b
 _00714:
-	MOVE.W	D0,unk00760		;00714: 33c000000760
-	MOVE.W	unk00762,D0		;0071a: 303900000762
+	MOVE.W	D0,intMouseX		;00714: 33c000000760
+	MOVE.W	intMouseY,D0		;0071a: 303900000762
 	ADD.W	(12,A0),D0		;00720: d068000c
 	BPL.S	_00728			;00724: 6a02
 	MOVEQ	#0,D0			;00726: 7000
@@ -638,21 +637,21 @@ _00728:
 	BMI.S	_00732			;0072c: 6b04
 	MOVE.W	#$00c3,D0		;0072e: 303c00c3
 _00732:
-	MOVE.W	D0,unk00762		;00732: 33c000000762
+	MOVE.W	D0,intMouseY		;00732: 33c000000762
 	BRA.W	_00680			;00738: 6000ff46
-_LeftMouseDown:
+_006FC:
 	BSET	#0,MouseBtn		;0073c: 08f9000000000766
 	ST	flgClicked		;00744: 50f900000767
 	BRA.S	_006FC			;0074a: 60b0
-_LeftMouseUp:
+_006FC:
 	BCLR	#0,MouseBtn		;0074c: 08b9000000000766
 	BRA.S	_006FC			;00754: 60a6
-_RightMouseUp:
+_006FC:
 	BCLR	#1,MouseBtn		;00756: 08b9000100000766
 	BRA.S	_006FC			;0075e: 609c
-unk00760:
+intMouseX:
 	DS.W	1			;00760
-unk00762:
+intMouseY:
 	DS.W	1			;00762
 InKey:
 	DS.W	1			;00764
@@ -660,9 +659,10 @@ MouseBtn:
 	DS.B	1			;00766
 flgClicked:
 	DS.B	1			;00767
-_00768:
+_WaitKey:
+; Blocking key wait. Waits for a keypress.
 	MOVE.B	(InKey,PC),D0		;00768: 103afffa
-	BEQ.S	_00768			;0076c: 67fa
+	BEQ.S	_WaitKey		;0076c: 67fa
 	SF	InKey			;0076e: 51f900000764
 	RTS				;00774: 4e75
 	MOVEM.L	D1-D4/A0-A3/A6,-(A7)	;00776: 48e778f2
@@ -673,7 +673,7 @@ _00768:
 	JSR	(_DOSAllocSignal,A6)	;00784: 4eaefeb6
 	TST.W	D0			;00788: 4a40
 	BPL.S	_00796			;0078a: 6a0a
-	MOVE.B	#$02,flg1AAD6		;0078c: 13fc00020001aad6
+	MOVE.B	#$02,intErr		;0078c: 13fc00020001aad6
 	BRA.S	_007F8			;00794: 6062
 _00796:
 	MOVE.W	D0,D3			;00796: 3600
@@ -684,7 +684,7 @@ _00796:
 	BNE.S	_007B8			;007a6: 6610
 	MOVE.W	D3,D0			;007a8: 3003
 	JSR	(_DOSFreeSignal,A6)	;007aa: 4eaefeb0
-	MOVE.B	#$03,flg1AAD6		;007ae: 13fc00030001aad6
+	MOVE.B	#$03,intErr		;007ae: 13fc00030001aad6
 	BRA.S	_007F8			;007b6: 6040
 _007B8:
 	MOVEA.L	D0,A2			;007b8: 2440
@@ -735,7 +735,7 @@ _InitSound1:
 	LEA	ptr1AA52,A1		;0083e: 43f90001aa52
 	MOVE.B	#$02,(8,A1)		;00844: 137c00020008
 	MOVE.B	#$e2,(9,A1)		;0084a: 137c00e20009
-	MOVE.L	#unk0098C,(18,A1)	;00850: 237c0000098c0012
+	MOVE.L	#_0098C,(18,A1)		;00850: 237c0000098c0012
 	MOVEQ	#5,D0			;00858: 7005
 	JSR	(_DOSAddIntServer,A6)	;0085a: 4eaeff58
 	LEA	HARDBASE,A5		;0085e: 4bf900dff000
@@ -745,7 +745,7 @@ _InitSound1:
 	MOVE.L	A0,(10,A1)		;00876: 2348000a
 	MOVE.B	#$02,(8,A1)		;0087a: 137c00020008
 	MOVE.B	#$04,(9,A1)		;00880: 137c00040009
-	MOVE.L	#unk1A594,(18,A1)	;00886: 237c0001a5940012
+	MOVE.L	#_1A594,(18,A1)		;00886: 237c0001a5940012
 	MOVEQ	#7,D0			;0088e: 7007
 	JSR	(_DOSSetIntVector,A6)	;00890: 4eaeff5e
 	MOVE.L	D0,ptr1AA1C		;00894: 23c00001aa1c
@@ -754,7 +754,7 @@ _InitSound1:
 	MOVE.L	A0,(10,A1)		;008a6: 2348000a
 	MOVE.B	#$02,(8,A1)		;008aa: 137c00020008
 	MOVE.B	#$03,(9,A1)		;008b0: 137c00030009
-	MOVE.L	#unk1A5EA,(18,A1)	;008b6: 237c0001a5ea0012
+	MOVE.L	#_1A5EA,(18,A1)		;008b6: 237c0001a5ea0012
 	MOVEQ	#8,D0			;008be: 7008
 	JSR	(_DOSSetIntVector,A6)	;008c0: 4eaeff5e
 	MOVE.L	D0,ptr1AA20		;008c4: 23c00001aa20
@@ -763,7 +763,7 @@ _InitSound1:
 	MOVE.L	A0,(10,A1)		;008d6: 2348000a
 	MOVE.B	#$02,(8,A1)		;008da: 137c00020008
 	MOVE.B	#$02,(9,A1)		;008e0: 137c00020009
-	MOVE.L	#unk1A640,(18,A1)	;008e6: 237c0001a6400012
+	MOVE.L	#_1A640,(18,A1)		;008e6: 237c0001a6400012
 	MOVEQ	#9,D0			;008ee: 7009
 	JSR	(_DOSSetIntVector,A6)	;008f0: 4eaeff5e
 	MOVE.L	D0,ptr1AA24		;008f4: 23c00001aa24
@@ -772,7 +772,7 @@ _InitSound1:
 	MOVE.L	A0,(10,A1)		;00906: 2348000a
 	MOVE.B	#$02,(8,A1)		;0090a: 137c00020008
 	MOVE.B	#$01,(9,A1)		;00910: 137c00010009
-	MOVE.L	#unk1A696,(18,A1)	;00916: 237c0001a6960012
+	MOVE.L	#_1A696,(18,A1)		;00916: 237c0001a6960012
 	MOVEQ	#10,D0			;0091e: 700a
 	JSR	(_DOSSetIntVector,A6)	;00920: 4eaeff5e
 	MOVE.L	D0,ptr1AA28		;00924: 23c00001aa28
@@ -801,9 +801,9 @@ _InitSound2:
 	JSR	(_DOSRemIntServer,A6)	;00982: 4eaeff52
 	JSR	(_DOSEnable,A6)		;00986: 4eaeff82
 	RTS				;0098a: 4e75
-unk0098C:
+_0098C:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;0098c: 48e7fffe
-	ST	flg00BB2		;00990: 50f900000bb2
+	ST	flgWait			;00990: 50f900000bb2
 	LEA	HARDBASE,A0		;00996: 41f900dff000
 	LEA	SECSTRT_2,A1		;0099c: 43f900031a9c
 	MOVE.L	A1,(COP1LCH_128,A0)	;009a2: 21490080
@@ -830,7 +830,7 @@ _009EC:
 	MOVE.B	unk00BB3,D0		;009f4: 103900000bb3
 	ANDI.W	#$0003,D0		;009fa: 02400003
 	BNE.S	_00A2A			;009fe: 662a
-	LEA	ptr1AF16,A1		;00a00: 43f90001af16
+	LEA	paletteFlash,A1		;00a00: 43f90001af16
 	JSR	_059D2			;00a06: 4eb9000059d2
 	LEA	HARDBASE,A0		;00a0c: 41f900dff000
 	MOVE.W	unk059D0,D0		;00a12: 3039000059d0
@@ -850,26 +850,26 @@ _00A2A:
 _00A40:
 	TST.B	flgPaused		;00a40: 4a390002e458
 	BNE.W	_00AB0			;00a46: 66000068
-	MOVE.B	unk00BB6,D0		;00a4a: 103900000bb6
+	MOVE.B	intCycle100_00BB6,D0	;00a4a: 103900000bb6
 	CMPI.B	#$19,D0			;00a50: 0c000019
 	BNE.S	_00A5E			;00a54: 6608
-	BSET	#4,data2E45A		;00a56: 08f900040002e45a
+	BSET	#4,bFrameRule		;00a56: 08f900040002e45a
 _00A5E:
 	CMPI.B	#$32,D0			;00a5e: 0c000032
 	BNE.S	_00A7C			;00a62: 6618
-	BSET	#3,data2E45A		;00a64: 08f900030002e45a
-	BSET	#5,data2E45A		;00a6c: 08f900050002e45a
-	BSET	#4,data2E45A		;00a74: 08f900040002e45a
+	BSET	#3,bFrameRule		;00a64: 08f900030002e45a
+	BSET	#5,bFrameRule		;00a6c: 08f900050002e45a
+	BSET	#4,bFrameRule		;00a74: 08f900040002e45a
 _00A7C:
 	CMPI.B	#$4b,D0			;00a7c: 0c00004b
 	BNE.S	_00A8A			;00a80: 6608
-	BSET	#4,data2E45A		;00a82: 08f900040002e45a
+	BSET	#4,bFrameRule		;00a82: 08f900040002e45a
 _00A8A:
-	SUBQ.B	#1,unk00BB6		;00a8a: 533900000bb6
+	SUBQ.B	#1,intCycle100_00BB6	;00a8a: 533900000bb6
 	BNE.S	_00AB0			;00a90: 661e
-	MOVE.B	#$64,unk00BB6		;00a92: 13fc006400000bb6
-	BSET	#4,data2E45A		;00a9a: 08f900040002e45a
-	BSET	#3,data2E45A		;00aa2: 08f900030002e45a
+	MOVE.B	#$64,intCycle100_00BB6	;00a92: 13fc006400000bb6
+	BSET	#4,bFrameRule		;00a9a: 08f900040002e45a
+	BSET	#3,bFrameRule		;00aa2: 08f900030002e45a
 	ST	flg2E459		;00aaa: 50f90002e459
 _00AB0:
 	TST.W	data2E0A6		;00ab0: 4a790002e0a6
@@ -896,15 +896,16 @@ _00AF0:
 	MOVE.L	D0,(300,A0)		;00b02: 2140012c
 	MOVE.L	D0,(304,A0)		;00b06: 21400130
 	MOVE.L	D0,(308,A0)		;00b0a: 21400134
+; appears to be the only point where this variable is read
 	TST.B	flg2E483		;00b0e: 4a390002e483
-	BNE.S	_00B32			;00b14: 661c
+	BNE.S	_SetMousePtr		;00b14: 661c
 	MOVE.W	D0,chip31AD2		;00b16: 33c000031ad2
 	MOVE.W	D0,chip31ACA		;00b1c: 33c000031aca
 	SWAP	D0			;00b22: 4840
 	MOVE.W	D0,chip31ACE		;00b24: 33c000031ace
 	MOVE.W	D0,chip31AC6		;00b2a: 33c000031ac6
 	BRA.S	_00B9E			;00b30: 606c
-_00B32:
+_SetMousePtr:
 	LEA	ptrMousePtrs,A1		;00b32: 43f900031b80
 	TST.B	flg2E482		;00b38: 4a390002e482
 	BNE.S	_00B6C			;00b3e: 662c
@@ -925,7 +926,7 @@ _00B5E:
 	ADDA.W	D0,A1			;00b6a: d2c0
 _00B6C:
 	MOVEQ	#16,D4			;00b6c: 7810
-	MOVEM.W	(unk00760,PC),D2-D3	;00b6e: 4cba000cfbee
+	MOVEM.W	(intMouseX,PC),D2-D3	;00b6e: 4cba000cfbee
 	JSR	_024B4			;00b74: 4eb9000024b4
 	MOVE.L	A1,D0			;00b7a: 2009
 	MOVE.W	D0,chip31AD2		;00b7c: 33c000031ad2
@@ -945,9 +946,8 @@ _00BA8:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;00ba8: 4cdf7fff
 	MOVEQ	#0,D0			;00bac: 7000
 	RTS				;00bae: 4e75
-unk00BB0:
 	DS.W	1			;00bb0
-flg00BB2:
+flgWait:
 	DS.B	1			;00bb2
 unk00BB3:
 	DS.B	1			;00bb3
@@ -955,19 +955,17 @@ unk00BB4:
 	DS.B	1			;00bb4
 flg00BB5:
 	DC.B	$ff			;00bb5
-unk00BB6:
-	DC.B	$64			;00bb6
-unk00BB7:
-	DS.B	1			;00bb7
-_00BB8:
+intCycle100_00BB6:
+	DC.W	$6400			;00bb6
+_Wait:
 	EXT.W	D0			;00bb8: 4880
 	BEQ.S	ret00BD4		;00bba: 6718
-	SF	flg00BB2		;00bbc: 51f900000bb2
+	SF	flgWait			;00bbc: 51f900000bb2
 _00BC2:
-	TST.B	flg00BB2		;00bc2: 4a3900000bb2
+	TST.B	flgWait			;00bc2: 4a3900000bb2
 	BEQ.S	_00BC2			;00bc8: 67f8
-	SF	flg00BB2		;00bca: 51f900000bb2
-	DBF	D0,_00BB8		;00bd0: 51c8ffe6
+	SF	flgWait			;00bca: 51f900000bb2
+	DBF	D0,_Wait		;00bd0: 51c8ffe6
 ret00BD4:
 	RTS				;00bd4: 4e75
 _MouseWait:
@@ -984,8 +982,7 @@ _SeedRNG:
 	MOVE.L	D0,intRNG2		;00bec: 23c000000c5c
 	RTS				;00bf2: 4e75
 _GenerateSeed:
-; What's interesting about this is that it seeds RNG from the position of
-; the CRT scan beam.
+; What's interesting about this is that it seeds RNG from the position of the CRT scan beam.
 	MOVEQ	#0,D1			;00bf4: 7200
 	MOVE.W	VHPOSR,D1		;00bf6: 323900dff006
 	DIVU	#$0064,D1		;00bfc: 82fc0064
@@ -996,11 +993,7 @@ loop00C02:
 	DBF	D1,loop00C02		;00c06: 51c9fffa
 	RTS				;00c0a: 4e75
 _RandInt:
-; Random number generator. Important function used by many game mechanics.
-; Takes D0 as input, generating a number between 0 and D0 minus 1,
-; and storing the result in D0. This behaviour has been tested to work.
-; e.g. if d0 is 100, this function generates a number from 0 to 99.
-; Often used this way to calculate percentage chances.
+; Random number generator. Important function used by many game mechanics. Takes D0 as input, generating a number between 0 and D0 minus 1, and storing the result in D0. This behaviour has been tested to work. e.g. if d0 is 100, this function generates a number from 0 to 99. Often used this way to calculate percentage chances.
 	MOVEM.L	D1-D4,-(A7)		;00c0c: 48e77800
 	MOVE.B	intRNG5,D1		;00c10: 123900000c5f
 	MOVE.B	intRNG4,D2		;00c16: 143900000c5e
@@ -1040,7 +1033,7 @@ _LoadAlienFile:
 	MOVE.L	A5,ptrLoadBuffer	;00c66: 23cd00000d26
 	MOVE.L	A0,strAlienFilename	;00c6c: 23c800000d22
 	ST	flgReading		;00c72: 50f90001aad7
-	JSR	(_003BE,PC)		;00c78: 4ebaf744
+	JSR	(_Blit003BE,PC)		;00c78: 4ebaf744
 _00C7C:
 	MOVE.L	strAlienFilename,D1	;00c7c: 223900000d22
 	MOVE.L	#$000003ed,D2		;00c82: 243c000003ed
@@ -1057,10 +1050,10 @@ _00C7C:
 ; char 5 is the disk number (e.g. 2 in k240_2:)
 	MOVE.B	(5,A0),D0		;00cb0: 10280005
 	MOVE.L	A0,-(A7)		;00cb4: 2f08
-	JSR	_DiskReq		;00cb6: 4eb900007544
+	JSR	_DiskReqMakeString	;00cb6: 4eb900007544
 	MOVE.B	D0,(A0)			;00cbc: 1080
 	MOVEA.L	(A7)+,A0		;00cbe: 205f
-	JSR	_07C22			;00cc0: 4eb900007c22
+	JSR	_DiskReq_07C22		;00cc0: 4eb900007c22
 	ST	flg00D2A		;00cc6: 50f900000d2a
 	BRA.S	_00C7C			;00ccc: 60ae
 _00CCE:
@@ -1107,7 +1100,7 @@ _LoadMGLFile:
 	MOVE.L	A5,ptr00E4C		;00d4c: 23cd00000e4c
 	MOVE.L	A0,ptr00E48		;00d52: 23c800000e48
 	ST	flgReading		;00d58: 50f90001aad7
-	JSR	(_003BE,PC)		;00d5e: 4ebaf65e
+	JSR	(_Blit003BE,PC)		;00d5e: 4ebaf65e
 _00D62:
 	MOVE.L	ptr00E48,D1		;00d62: 223900000e48
 	MOVE.L	#$000003ed,D2		;00d68: 243c000003ed
@@ -1118,10 +1111,10 @@ _00D62:
 	TST.B	flg00E54		;00d80: 4a3900000e54
 	BNE.S	_00D62			;00d86: 66da
 	MOVEA.L	ptr00E48,A0		;00d88: 207900000e48
-; 5 = disk number for requestor
+; 5 = offset of disk number in filename
 	MOVE.B	(5,A0),D0		;00d8e: 10280005
 	MOVE.L	A0,-(A7)		;00d92: 2f08
-	JSR	_DiskReq		;00d94: 4eb900007544
+	JSR	_DiskReqMakeString	;00d94: 4eb900007544
 	MOVE.B	D0,(A0)			;00d9a: 1080
 	MOVEA.L	(A7)+,A0		;00d9c: 205f
 	TST.B	flg1B49D		;00d9e: 4a390001b49d
@@ -1129,7 +1122,7 @@ _00D62:
 	TST.B	flg1B49E		;00da6: 4a390001b49e
 	BNE.S	_00DBC			;00dac: 660e
 _00DAE:
-	JSR	_07C22			;00dae: 4eb900007c22
+	JSR	_DiskReq_07C22		;00dae: 4eb900007c22
 	ST	flg00E54		;00db4: 50f900000e54
 	BRA.S	_00D62			;00dba: 60a6
 _00DBC:
@@ -1142,7 +1135,7 @@ _00DC4:
 	MOVEA.L	(ptrBuff01,PC),A1	;00dce: 227af75e
 	MOVEQ	#24,D0			;00dd2: 7018
 	MOVEQ	#56,D1			;00dd4: 7238
-	JSR	_07310			;00dd6: 4eb900007310
+	JSR	_DisplayText		;00dd6: 4eb900007310
 	ST	flg00E54		;00ddc: 50f900000e54
 	BRA.W	_00D62			;00de2: 6000ff7e
 _00DE6:
@@ -1165,11 +1158,12 @@ _00E02:
 	JSR	(_DOSClose,A6)		;00e24: 4eaeffdc
 	MOVEA.L	ptr00E4C,A0		;00e28: 207900000e4c
 	MOVEA.L	ptr00E50,A1		;00e2e: 227900000e50
-	BSR.W	_ReadFile_00E56		;00e34: 61000020
+	BSR.W	_ReadMGL		;00e34: 61000020
 	JSR	(_TakeBlit,PC)		;00e38: 4ebaf55c
 	SF	flgReading		;00e3c: 51f90001aad7
 	RTS				;00e42: 4e75
 unk00E44:
+; -------Begin MGL file reading code-------
 	DS.L	1			;00e44
 ptr00E48:
 	DS.L	1			;00e48
@@ -1179,10 +1173,11 @@ ptr00E50:
 	DS.L	1			;00e50
 flg00E54:
 	DS.W	1			;00e54
-_ReadFile_00E56:
+_ReadMGL:
 ; Appears to be a loader for the .MGL compressed file format.
 ; All files the game loads are .mgl, except for the alien files
-; which have their own loader and appear to be uncompressed.
+; which have their own loader and appear to be uncompressed,
+; and save game files.
 	MOVEQ	#0,D7			;00e56: 7e00
 	MOVE.B	(A0)+,D7		;00e58: 1e18
 	ADD.W	D7,D7			;00e5a: de47
@@ -1572,7 +1567,7 @@ _012DC:
 	MOVE.B	(A0)+,(A1)+		;012dc: 12d8
 _012DE:
 	MOVE.B	(A0)+,(A1)+		;012de: 12d8
-	BRA.W	_ReadFile_00E56		;012e0: 6000fb74
+	BRA.W	_ReadMGL		;012e0: 6000fb74
 _012E4:
 	MOVE.B	(-1,A1),D0		;012e4: 1029ffff
 	MOVE.B	D0,D1			;012e8: 1200
@@ -1703,7 +1698,7 @@ _013FC:
 	MOVE.B	D0,(A1)+		;01402: 12c0
 	ADD.B	D1,D0			;01404: d001
 	MOVE.B	D0,(A1)+		;01406: 12c0
-	BRA.W	_ReadFile_00E56		;01408: 6000fa4c
+	BRA.W	_ReadMGL		;01408: 6000fa4c
 _0140C:
 	MOVE.B	(-2,A1),D0		;0140c: 1029fffe
 	MOVE.B	D0,D2			;01410: 1400
@@ -1930,20 +1925,20 @@ _01620:
 	ADDX.B	D1,D3			;0162a: d701
 	MOVE.B	D2,(A1)+		;0162c: 12c2
 	MOVE.B	D3,(A1)+		;0162e: 12c3
-	BRA.W	_ReadFile_00E56		;01630: 6000f824
+	BRA.W	_ReadMGL		;01630: 6000f824
 _01634:
 	MOVE.B	(-1,A1),D0		;01634: 1029ffff
 	MOVE.B	D0,(A1)+		;01638: 12c0
 	MOVE.B	D0,(A1)+		;0163a: 12c0
 	MOVE.B	D0,(A1)+		;0163c: 12c0
-	BRA.W	_ReadFile_00E56		;0163e: 6000f816
+	BRA.W	_ReadMGL		;0163e: 6000f816
 _01642:
 	MOVE.B	(-1,A1),D0		;01642: 1029ffff
 	MOVE.B	D0,(A1)+		;01646: 12c0
 	MOVE.B	D0,(A1)+		;01648: 12c0
 	MOVE.B	D0,(A1)+		;0164a: 12c0
 	MOVE.B	D0,(A1)+		;0164c: 12c0
-	BRA.W	_ReadFile_00E56		;0164e: 6000f806
+	BRA.W	_ReadMGL		;0164e: 6000f806
 _01652:
 	MOVE.B	(-1,A1),D0		;01652: 1029ffff
 	MOVE.B	D0,(A1)+		;01656: 12c0
@@ -1951,7 +1946,7 @@ _01652:
 	MOVE.B	D0,(A1)+		;0165a: 12c0
 	MOVE.B	D0,(A1)+		;0165c: 12c0
 	MOVE.B	D0,(A1)+		;0165e: 12c0
-	BRA.W	_ReadFile_00E56		;01660: 6000f7f4
+	BRA.W	_ReadMGL		;01660: 6000f7f4
 _01664:
 	MOVE.B	(-1,A1),D0		;01664: 1029ffff
 	MOVE.B	D0,(A1)+		;01668: 12c0
@@ -1960,7 +1955,7 @@ _01664:
 	MOVE.B	D0,(A1)+		;0166e: 12c0
 	MOVE.B	D0,(A1)+		;01670: 12c0
 	MOVE.B	D0,(A1)+		;01672: 12c0
-	BRA.W	_ReadFile_00E56		;01674: 6000f7e0
+	BRA.W	_ReadMGL		;01674: 6000f7e0
 _01678:
 	MOVE.B	(-1,A1),D0		;01678: 1029ffff
 	MOVE.B	D0,(A1)+		;0167c: 12c0
@@ -1970,7 +1965,7 @@ _01678:
 	MOVE.B	D0,(A1)+		;01684: 12c0
 	MOVE.B	D0,(A1)+		;01686: 12c0
 	MOVE.B	D0,(A1)+		;01688: 12c0
-	BRA.W	_ReadFile_00E56		;0168a: 6000f7ca
+	BRA.W	_ReadMGL		;0168a: 6000f7ca
 _0168E:
 	MOVE.B	(-1,A1),D0		;0168e: 1029ffff
 	MOVE.B	D0,(A1)+		;01692: 12c0
@@ -1981,7 +1976,7 @@ _0168E:
 	MOVE.B	D0,(A1)+		;0169c: 12c0
 	MOVE.B	D0,(A1)+		;0169e: 12c0
 	MOVE.B	D0,(A1)+		;016a0: 12c0
-	BRA.W	_ReadFile_00E56		;016a2: 6000f7b2
+	BRA.W	_ReadMGL		;016a2: 6000f7b2
 _016A6:
 	MOVE.B	(-1,A1),D0		;016a6: 1029ffff
 	MOVE.B	D0,(A1)+		;016aa: 12c0
@@ -1993,7 +1988,7 @@ _016A6:
 	MOVE.B	D0,(A1)+		;016b6: 12c0
 	MOVE.B	D0,(A1)+		;016b8: 12c0
 	MOVE.B	D0,(A1)+		;016ba: 12c0
-	BRA.W	_ReadFile_00E56		;016bc: 6000f798
+	BRA.W	_ReadMGL		;016bc: 6000f798
 _016C0:
 	MOVE.B	(-1,A1),D0		;016c0: 1029ffff
 	MOVE.B	D0,(A1)+		;016c4: 12c0
@@ -2006,7 +2001,7 @@ _016C0:
 	MOVE.B	D0,(A1)+		;016d2: 12c0
 	MOVE.B	D0,(A1)+		;016d4: 12c0
 	MOVE.B	D0,(A1)+		;016d6: 12c0
-	BRA.W	_ReadFile_00E56		;016d8: 6000f77c
+	BRA.W	_ReadMGL		;016d8: 6000f77c
 _016DC:
 	MOVE.B	(-1,A1),D0		;016dc: 1029ffff
 	MOVE.B	D0,(A1)+		;016e0: 12c0
@@ -2020,7 +2015,7 @@ _016DC:
 	MOVE.B	D0,(A1)+		;016f0: 12c0
 	MOVE.B	D0,(A1)+		;016f2: 12c0
 	MOVE.B	D0,(A1)+		;016f4: 12c0
-	BRA.W	_ReadFile_00E56		;016f6: 6000f75e
+	BRA.W	_ReadMGL		;016f6: 6000f75e
 _016FA:
 	MOVE.B	(-1,A1),D0		;016fa: 1029ffff
 	MOVE.B	D0,(A1)+		;016fe: 12c0
@@ -2035,7 +2030,7 @@ _016FA:
 	MOVE.B	D0,(A1)+		;01710: 12c0
 	MOVE.B	D0,(A1)+		;01712: 12c0
 	MOVE.B	D0,(A1)+		;01714: 12c0
-	BRA.W	_ReadFile_00E56		;01716: 6000f73e
+	BRA.W	_ReadMGL		;01716: 6000f73e
 _0171A:
 	MOVE.B	(-1,A1),D0		;0171a: 1029ffff
 	MOVE.B	D0,(A1)+		;0171e: 12c0
@@ -2051,7 +2046,7 @@ _0171A:
 	MOVE.B	D0,(A1)+		;01732: 12c0
 	MOVE.B	D0,(A1)+		;01734: 12c0
 	MOVE.B	D0,(A1)+		;01736: 12c0
-	BRA.W	_ReadFile_00E56		;01738: 6000f71c
+	BRA.W	_ReadMGL		;01738: 6000f71c
 _0173C:
 	MOVE.B	(-1,A1),D0		;0173c: 1029ffff
 	MOVE.B	D0,(A1)+		;01740: 12c0
@@ -2068,7 +2063,7 @@ _0173C:
 	MOVE.B	D0,(A1)+		;01756: 12c0
 	MOVE.B	D0,(A1)+		;01758: 12c0
 	MOVE.B	D0,(A1)+		;0175a: 12c0
-	BRA.W	_ReadFile_00E56		;0175c: 6000f6f8
+	BRA.W	_ReadMGL		;0175c: 6000f6f8
 _01760:
 	MOVE.B	(-1,A1),D0		;01760: 1029ffff
 	MOVE.B	D0,(A1)+		;01764: 12c0
@@ -2086,7 +2081,7 @@ _01760:
 	MOVE.B	D0,(A1)+		;0177c: 12c0
 	MOVE.B	D0,(A1)+		;0177e: 12c0
 	MOVE.B	D0,(A1)+		;01780: 12c0
-	BRA.W	_ReadFile_00E56		;01782: 6000f6d2
+	BRA.W	_ReadMGL		;01782: 6000f6d2
 _01786:
 	MOVE.B	(-1,A1),D0		;01786: 1029ffff
 	MOVE.B	D0,(A1)+		;0178a: 12c0
@@ -2105,7 +2100,7 @@ _01786:
 	MOVE.B	D0,(A1)+		;017a4: 12c0
 	MOVE.B	D0,(A1)+		;017a6: 12c0
 	MOVE.B	D0,(A1)+		;017a8: 12c0
-	BRA.W	_ReadFile_00E56		;017aa: 6000f6aa
+	BRA.W	_ReadMGL		;017aa: 6000f6aa
 _017AE:
 	MOVE.B	(-1,A1),D0		;017ae: 1029ffff
 	MOVE.B	D0,(A1)+		;017b2: 12c0
@@ -2125,7 +2120,7 @@ _017AE:
 	MOVE.B	D0,(A1)+		;017ce: 12c0
 	MOVE.B	D0,(A1)+		;017d0: 12c0
 	MOVE.B	D0,(A1)+		;017d2: 12c0
-	BRA.W	_ReadFile_00E56		;017d4: 6000f680
+	BRA.W	_ReadMGL		;017d4: 6000f680
 _017D8:
 	MOVE.B	(-1,A1),D0		;017d8: 1029ffff
 	MOVE.B	D0,(A1)+		;017dc: 12c0
@@ -2146,7 +2141,7 @@ _017D8:
 	MOVE.B	D0,(A1)+		;017fa: 12c0
 	MOVE.B	D0,(A1)+		;017fc: 12c0
 	MOVE.B	D0,(A1)+		;017fe: 12c0
-	BRA.W	_ReadFile_00E56		;01800: 6000f654
+	BRA.W	_ReadMGL		;01800: 6000f654
 _01804:
 	MOVE.B	(-2,A1),D0		;01804: 1029fffe
 	MOVE.B	(-1,A1),D1		;01808: 1229ffff
@@ -2154,7 +2149,7 @@ _01804:
 	MOVE.B	D1,(A1)+		;0180e: 12c1
 	MOVE.B	D0,(A1)+		;01810: 12c0
 	MOVE.B	D1,(A1)+		;01812: 12c1
-	BRA.W	_ReadFile_00E56		;01814: 6000f640
+	BRA.W	_ReadMGL		;01814: 6000f640
 _01818:
 	MOVE.B	(-2,A1),D0		;01818: 1029fffe
 	MOVE.B	(-1,A1),D1		;0181c: 1229ffff
@@ -2164,7 +2159,7 @@ _01818:
 	MOVE.B	D1,(A1)+		;01826: 12c1
 	MOVE.B	D0,(A1)+		;01828: 12c0
 	MOVE.B	D1,(A1)+		;0182a: 12c1
-	BRA.W	_ReadFile_00E56		;0182c: 6000f628
+	BRA.W	_ReadMGL		;0182c: 6000f628
 _01830:
 	MOVE.B	(-2,A1),D0		;01830: 1029fffe
 	MOVE.B	(-1,A1),D1		;01834: 1229ffff
@@ -2176,7 +2171,7 @@ _01830:
 	MOVE.B	D1,(A1)+		;01842: 12c1
 	MOVE.B	D0,(A1)+		;01844: 12c0
 	MOVE.B	D1,(A1)+		;01846: 12c1
-	BRA.W	_ReadFile_00E56		;01848: 6000f60c
+	BRA.W	_ReadMGL		;01848: 6000f60c
 _0184C:
 	MOVE.B	(-2,A1),D0		;0184c: 1029fffe
 	MOVE.B	(-1,A1),D1		;01850: 1229ffff
@@ -2190,7 +2185,7 @@ _0184C:
 	MOVE.B	D1,(A1)+		;01862: 12c1
 	MOVE.B	D0,(A1)+		;01864: 12c0
 	MOVE.B	D1,(A1)+		;01866: 12c1
-	BRA.W	_ReadFile_00E56		;01868: 6000f5ec
+	BRA.W	_ReadMGL		;01868: 6000f5ec
 _0186C:
 	MOVE.B	(-2,A1),D0		;0186c: 1029fffe
 	MOVE.B	(-1,A1),D1		;01870: 1229ffff
@@ -2206,7 +2201,7 @@ _0186C:
 	MOVE.B	D1,(A1)+		;01886: 12c1
 	MOVE.B	D0,(A1)+		;01888: 12c0
 	MOVE.B	D1,(A1)+		;0188a: 12c1
-	BRA.W	_ReadFile_00E56		;0188c: 6000f5c8
+	BRA.W	_ReadMGL		;0188c: 6000f5c8
 _01890:
 	MOVE.B	(-2,A1),D0		;01890: 1029fffe
 	MOVE.B	(-1,A1),D1		;01894: 1229ffff
@@ -2224,7 +2219,7 @@ _01890:
 	MOVE.B	D1,(A1)+		;018ae: 12c1
 	MOVE.B	D0,(A1)+		;018b0: 12c0
 	MOVE.B	D1,(A1)+		;018b2: 12c1
-	BRA.W	_ReadFile_00E56		;018b4: 6000f5a0
+	BRA.W	_ReadMGL		;018b4: 6000f5a0
 _018B8:
 	MOVE.B	(-2,A1),D0		;018b8: 1029fffe
 	MOVE.B	(-1,A1),D1		;018bc: 1229ffff
@@ -2244,7 +2239,7 @@ _018B8:
 	MOVE.B	D1,(A1)+		;018da: 12c1
 	MOVE.B	D0,(A1)+		;018dc: 12c0
 	MOVE.B	D1,(A1)+		;018de: 12c1
-	BRA.W	_ReadFile_00E56		;018e0: 6000f574
+	BRA.W	_ReadMGL		;018e0: 6000f574
 _018E4:
 	MOVE.B	(-2,A1),D0		;018e4: 1029fffe
 	MOVE.B	(-1,A1),D1		;018e8: 1229ffff
@@ -2266,7 +2261,7 @@ _018E4:
 	MOVE.B	D1,(A1)+		;0190a: 12c1
 	MOVE.B	D0,(A1)+		;0190c: 12c0
 	MOVE.B	D1,(A1)+		;0190e: 12c1
-	BRA.W	_ReadFile_00E56		;01910: 6000f544
+	BRA.W	_ReadMGL		;01910: 6000f544
 _01914:
 	MOVE.B	(-2,A1),D0		;01914: 1029fffe
 	MOVE.B	(-1,A1),D1		;01918: 1229ffff
@@ -2290,7 +2285,7 @@ _01914:
 	MOVE.B	D1,(A1)+		;0193e: 12c1
 	MOVE.B	D0,(A1)+		;01940: 12c0
 	MOVE.B	D1,(A1)+		;01942: 12c1
-	BRA.W	_ReadFile_00E56		;01944: 6000f510
+	BRA.W	_ReadMGL		;01944: 6000f510
 _01948:
 	MOVE.B	(-2,A1),D0		;01948: 1029fffe
 	MOVE.B	(-1,A1),D1		;0194c: 1229ffff
@@ -2316,7 +2311,7 @@ _01948:
 	MOVE.B	D1,(A1)+		;01976: 12c1
 	MOVE.B	D0,(A1)+		;01978: 12c0
 	MOVE.B	D1,(A1)+		;0197a: 12c1
-	BRA.W	_ReadFile_00E56		;0197c: 6000f4d8
+	BRA.W	_ReadMGL		;0197c: 6000f4d8
 _01980:
 	MOVE.B	(-2,A1),D0		;01980: 1029fffe
 	MOVE.B	(-1,A1),D1		;01984: 1229ffff
@@ -2344,7 +2339,7 @@ _01980:
 	MOVE.B	D1,(A1)+		;019b2: 12c1
 	MOVE.B	D0,(A1)+		;019b4: 12c0
 	MOVE.B	D1,(A1)+		;019b6: 12c1
-	BRA.W	_ReadFile_00E56		;019b8: 6000f49c
+	BRA.W	_ReadMGL		;019b8: 6000f49c
 _019BC:
 	MOVE.B	(-2,A1),D0		;019bc: 1029fffe
 	MOVE.B	(-1,A1),D1		;019c0: 1229ffff
@@ -2374,7 +2369,7 @@ _019BC:
 	MOVE.B	D1,(A1)+		;019f2: 12c1
 	MOVE.B	D0,(A1)+		;019f4: 12c0
 	MOVE.B	D1,(A1)+		;019f6: 12c1
-	BRA.W	_ReadFile_00E56		;019f8: 6000f45c
+	BRA.W	_ReadMGL		;019f8: 6000f45c
 _019FC:
 	MOVE.B	(-2,A1),D0		;019fc: 1029fffe
 	MOVE.B	(-1,A1),D1		;01a00: 1229ffff
@@ -2406,7 +2401,7 @@ _019FC:
 	MOVE.B	D1,(A1)+		;01a36: 12c1
 	MOVE.B	D0,(A1)+		;01a38: 12c0
 	MOVE.B	D1,(A1)+		;01a3a: 12c1
-	BRA.W	_ReadFile_00E56		;01a3c: 6000f418
+	BRA.W	_ReadMGL		;01a3c: 6000f418
 _01A40:
 	MOVE.B	(-2,A1),D0		;01a40: 1029fffe
 	MOVE.B	(-1,A1),D1		;01a44: 1229ffff
@@ -2440,7 +2435,7 @@ _01A40:
 	MOVE.B	D1,(A1)+		;01a7e: 12c1
 	MOVE.B	D0,(A1)+		;01a80: 12c0
 	MOVE.B	D1,(A1)+		;01a82: 12c1
-	BRA.W	_ReadFile_00E56		;01a84: 6000f3d0
+	BRA.W	_ReadMGL		;01a84: 6000f3d0
 _01A88:
 	MOVE.B	(-2,A1),D0		;01a88: 1029fffe
 	MOVE.B	(-1,A1),D1		;01a8c: 1229ffff
@@ -2476,7 +2471,7 @@ _01A88:
 	MOVE.B	D1,(A1)+		;01aca: 12c1
 	MOVE.B	D0,(A1)+		;01acc: 12c0
 	MOVE.B	D1,(A1)+		;01ace: 12c1
-	BRA.W	_ReadFile_00E56		;01ad0: 6000f384
+	BRA.W	_ReadMGL		;01ad0: 6000f384
 _01AD4:
 	MOVE.B	(-2,A1),D0		;01ad4: 1029fffe
 	MOVE.B	(-1,A1),D1		;01ad8: 1229ffff
@@ -2514,14 +2509,14 @@ _01AD4:
 	MOVE.B	D1,(A1)+		;01b1a: 12c1
 	MOVE.B	D0,(A1)+		;01b1c: 12c0
 	MOVE.B	D1,(A1)+		;01b1e: 12c1
-	BRA.W	_ReadFile_00E56		;01b20: 6000f334
+	BRA.W	_ReadMGL		;01b20: 6000f334
 _01B24:
 	LEA	(-3,A1),A2		;01b24: 45e9fffd
 _01B28:
 	MOVE.B	(A2)+,(A1)+		;01b28: 12da
 	MOVE.B	(A2)+,(A1)+		;01b2a: 12da
 	MOVE.B	(A2)+,(A1)+		;01b2c: 12da
-	BRA.W	_ReadFile_00E56		;01b2e: 6000f326
+	BRA.W	_ReadMGL		;01b2e: 6000f326
 _01B32:
 	LEA	(-4,A1),A2		;01b32: 45e9fffc
 	BRA.S	_01B28			;01b36: 60f0
@@ -2722,7 +2717,7 @@ _01D04:
 	MOVE.B	(A2)+,(A1)+		;01d16: 12da
 	MOVE.B	(A2)+,(A1)+		;01d18: 12da
 	MOVE.B	(A2)+,(A1)+		;01d1a: 12da
-	BRA.W	_ReadFile_00E56		;01d1c: 6000f138
+	BRA.W	_ReadMGL		;01d1c: 6000f138
 _01D20:
 	LSL.W	#6,D7			;01d20: ed4f
 	MOVE.B	(A0)+,D7		;01d22: 1e18
@@ -2735,7 +2730,7 @@ _01D20:
 	MOVE.B	(A2)+,(A1)+		;01d34: 12da
 	MOVE.B	(A2)+,(A1)+		;01d36: 12da
 	MOVE.B	(A2)+,(A1)+		;01d38: 12da
-	BRA.W	_ReadFile_00E56		;01d3a: 6000f11a
+	BRA.W	_ReadMGL		;01d3a: 6000f11a
 _01D3E:
 	LSL.W	#6,D7			;01d3e: ed4f
 	MOVE.B	(A0)+,D7		;01d40: 1e18
@@ -2749,7 +2744,7 @@ _01D3E:
 	MOVE.B	(A2)+,(A1)+		;01d54: 12da
 	MOVE.B	(A2)+,(A1)+		;01d56: 12da
 	MOVE.B	(A2)+,(A1)+		;01d58: 12da
-	BRA.W	_ReadFile_00E56		;01d5a: 6000f0fa
+	BRA.W	_ReadMGL		;01d5a: 6000f0fa
 _01D5E:
 	LSL.W	#6,D7			;01d5e: ed4f
 	MOVE.B	(A0)+,D7		;01d60: 1e18
@@ -2764,7 +2759,7 @@ _01D5E:
 	MOVE.B	(A2)+,(A1)+		;01d76: 12da
 	MOVE.B	(A2)+,(A1)+		;01d78: 12da
 	MOVE.B	(A2)+,(A1)+		;01d7a: 12da
-	BRA.W	_ReadFile_00E56		;01d7c: 6000f0d8
+	BRA.W	_ReadMGL		;01d7c: 6000f0d8
 _01D80:
 	LSL.W	#6,D7			;01d80: ed4f
 	MOVE.B	(A0)+,D7		;01d82: 1e18
@@ -2780,7 +2775,7 @@ _01D80:
 	MOVE.B	(A2)+,(A1)+		;01d9a: 12da
 	MOVE.B	(A2)+,(A1)+		;01d9c: 12da
 	MOVE.B	(A2)+,(A1)+		;01d9e: 12da
-	BRA.W	_ReadFile_00E56		;01da0: 6000f0b4
+	BRA.W	_ReadMGL		;01da0: 6000f0b4
 _01DA4:
 	LSL.W	#6,D7			;01da4: ed4f
 	MOVE.B	(A0)+,D7		;01da6: 1e18
@@ -2797,7 +2792,7 @@ _01DA4:
 	MOVE.B	(A2)+,(A1)+		;01dc0: 12da
 	MOVE.B	(A2)+,(A1)+		;01dc2: 12da
 	MOVE.B	(A2)+,(A1)+		;01dc4: 12da
-	BRA.W	_ReadFile_00E56		;01dc6: 6000f08e
+	BRA.W	_ReadMGL		;01dc6: 6000f08e
 _01DCA:
 	LSL.W	#6,D7			;01dca: ed4f
 	MOVE.B	(A0)+,D7		;01dcc: 1e18
@@ -2815,7 +2810,7 @@ _01DCA:
 	MOVE.B	(A2)+,(A1)+		;01de8: 12da
 	MOVE.B	(A2)+,(A1)+		;01dea: 12da
 	MOVE.B	(A2)+,(A1)+		;01dec: 12da
-	BRA.W	_ReadFile_00E56		;01dee: 6000f066
+	BRA.W	_ReadMGL		;01dee: 6000f066
 _01DF2:
 	LSL.W	#6,D7			;01df2: ed4f
 	MOVE.B	(A0)+,D7		;01df4: 1e18
@@ -2834,7 +2829,7 @@ _01DF2:
 	MOVE.B	(A2)+,(A1)+		;01e12: 12da
 	MOVE.B	(A2)+,(A1)+		;01e14: 12da
 	MOVE.B	(A2)+,(A1)+		;01e16: 12da
-	BRA.W	_ReadFile_00E56		;01e18: 6000f03c
+	BRA.W	_ReadMGL		;01e18: 6000f03c
 _01E1C:
 	LSL.W	#6,D7			;01e1c: ed4f
 	MOVE.B	(A0)+,D7		;01e1e: 1e18
@@ -2848,8 +2843,10 @@ _01E1C:
 loop01E32:
 	MOVE.B	(A2)+,(A1)+		;01e32: 12da
 	DBF	D0,loop01E32		;01e34: 51c8fffc
-	BRA.W	_ReadFile_00E56		;01e38: 6000f01c
+	BRA.W	_ReadMGL		;01e38: 6000f01c
 _CheckIDFile:
+; -------End MGL file reading code-------
+; 
 ; Checks for presence of ID file which determines whether or not
 ; the game is running from HD / prevents you from saving on disk 2
 	ST	flgIDFile		;01e3c: 50f90001af15
@@ -2865,111 +2862,110 @@ _CheckIDFile:
 	JSR	(_DOSUnLock,A6)		;01e60: 4eaeffa6
 ret01E64:
 	RTS				;01e64: 4e75
-strNONE:
 	;01e66
 	;DC.B	$4e,$4f,$4e,$45,$00,$00
 	DC.B	"NONE",0,0
 _01E6C:
 	BSR.W	_LoadVoice		;01e6c: 6100035c
-	SF	flg1B69D		;01e70: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;01e70: 51f90001b69d
 	BSR.W	_05644			;01e76: 610037cc
 	MOVE.L	ptrBuff01,D0		;01e7a: 20390000052e
 	BSR.W	_053A4			;01e80: 61003522
-	LEA	ptr1AF96,A0		;01e84: 41f90001af96
+	LEA	palette,A0		;01e84: 41f90001af96
 	BSR.W	_053CA			;01e8a: 6100353e
-	BSR.W	_LoadLanguage		;01e8e: 6100276a
+	BSR.W	_LoadLanguageScreen	;01e8e: 6100276a
 	MOVE.B	#$06,intScreen		;01e92: 13fc00060002e486
-	CLR.W	data2E484		;01e9a: 42790002e484
+	CLR.W	intAsteroidFacing	;01e9a: 42790002e484
 	MOVE.B	intScreen,D0		;01ea0: 10390002e486
-	BRA.S	_01F08			;01ea6: 6060
+	BRA.S	_ScreenSwitch		;01ea6: 6060
 _SurfaceView:
 ; Attempting to look at an asteroid
 	TST.W	intCurrentAlienID	;01ea8: 4a790002df02
 	BEQ.W	_01FA0			;01eae: 670000f0
 	TST.B	flgTelescope		;01eb2: 4a390001d4b6
-	BNE.S	_01F04			;01eb8: 664a
+	BNE.S	_ScreenSwitch2_01F04	;01eb8: 664a
 ; Checks if you can see the asteroid
 	MOVEA.L	ptrCurrentAst,A0	;01eba: 20790002de58
 	MOVE.B	(89,A0),D0		;01ec0: 10280059
 	ANDI.B	#$03,D0			;01ec4: 02000003
 	CMPI.B	#$01,D0			;01ec8: 0c000001
-	BNE.S	_01F04			;01ecc: 6636
+	BNE.S	_ScreenSwitch2_01F04	;01ecc: 6636
 	TST.L	(0,A0)			;01ece: 4aa80000
-	BNE.S	_01F04			;01ed2: 6630
+	BNE.S	_ScreenSwitch2_01F04	;01ed2: 6630
 	TST.B	(96,A0)			;01ed4: 4a280060
-	BNE.S	_01F04			;01ed8: 662a
+	BNE.S	_ScreenSwitch2_01F04	;01ed8: 662a
 ; 479: YOU HAVE NO SPY SATELLITE ORBITING THAT ASTEROID!
 	MOVE.W	#$01df,D0		;01eda: 303c01df
-	MOVE.B	data2E476,data2E477	;01ede: 13f90002e4760002e477
-	MOVE.B	#$0b,data2E476		;01ee8: 13fc000b0002e476
+	MOVE.B	textcolor,tmpTextcolor	;01ede: 13f90002e4760002e477
+	MOVE.B	#$0b,textcolor		;01ee8: 13fc000b0002e476
 	BSR.W	_ErrMsgLine		;01ef0: 61005930
-	MOVE.B	data2E477,data2E476	;01ef4: 13f90002e4770002e476
+	MOVE.B	tmpTextcolor,textcolor	;01ef4: 13f90002e4770002e476
 	MOVE.B	#$04,D0			;01efe: 103c0004
-	BRA.S	_01F08			;01f02: 6004
-_01F04:
+	BRA.S	_ScreenSwitch		;01f02: 6004
+_ScreenSwitch2_01F04:
 	BSR.W	_05C4E			;01f04: 61003d48
-_01F08:
+_ScreenSwitch:
 ; Screen switcher, probably.
 ; "E", or 69
 	CMPI.B	#$45,D0			;01f08: 0c000045
 	BEQ.W	ret01F9E		;01f0c: 67000090
 	MOVE.B	D0,intScreen		;01f10: 13c00002e486
-	SF	intScrn3		;01f16: 51f90002e488
-	ST	flg1B69D		;01f1c: 50f90001b69d
+	SF	intNewScreen		;01f16: 51f90002e488
+	ST	flgScreenSwitch_1B69D	;01f1c: 50f90001b69d
 	CMPI.B	#$01,D0			;01f22: 0c000001
 	BEQ.S	_SurfaceView		;01f26: 6780
 	CMPI.B	#$04,D0			;01f28: 0c000004
 	BNE.S	_01F36			;01f2c: 6608
 ; view 4
-	JSR	_11B5A			;01f2e: 4eb900011b5a
-	BRA.S	_01F08			;01f34: 60d2
+	JSR	_ScreenSpace		;01f2e: 4eb900011b5a
+	BRA.S	_ScreenSwitch		;01f34: 60d2
 _01F36:
 	CMPI.B	#$05,D0			;01f36: 0c000005
 	BNE.S	_01F44			;01f3a: 6608
-	JSR	_1251C			;01f3c: 4eb90001251c
-	BRA.S	_01F08			;01f42: 60c4
+	JSR	_Screen5_1251C		;01f3c: 4eb90001251c
+	BRA.S	_ScreenSwitch		;01f42: 60c4
 _01F44:
 	CMPI.B	#$06,D0			;01f44: 0c000006
 	BNE.S	_01F50			;01f48: 6606
 	BSR.W	_LoadSaveScreen		;01f4a: 6100109a
-	BRA.S	_01F08			;01f4e: 60b8
+	BRA.S	_ScreenSwitch		;01f4e: 60b8
 _01F50:
 	CMPI.B	#$07,D0			;01f50: 0c000007
 	BNE.S	_01F5C			;01f54: 6606
 	BSR.W	_ScitekScreen		;01f56: 61001ada
-	BRA.S	_01F08			;01f5a: 60ac
+	BRA.S	_ScreenSwitch		;01f5a: 60ac
 _01F5C:
 	CMPI.B	#$0a,D0			;01f5c: 0c00000a
 	BNE.S	_01F68			;01f60: 6606
 ; win screen
-	BSR.W	_02E54			;01f62: 61000ef0
-	BRA.S	_01F08			;01f66: 60a0
+	BSR.W	_ScreenWin_02E54	;01f62: 61000ef0
+	BRA.S	_ScreenSwitch		;01f66: 60a0
 _01F68:
 	CMPI.B	#$08,D0			;01f68: 0c000008
 	BNE.S	_01F7E			;01f6c: 6610
 	MOVEQ	#0,D0			;01f6e: 7000
-	BSR.W	_04738			;01f70: 610027c6
+	BSR.W	_Screen8Alien_04738	;01f70: 610027c6
 	MOVE.W	D0,-(A7)		;01f74: 3f00
-	BSR.W	_041CA			;01f76: 61002252
+	BSR.W	_ScreenAlien0_041CA	;01f76: 61002252
 	MOVE.W	(A7)+,D0		;01f7a: 301f
-	BRA.S	_01F08			;01f7c: 608a
+	BRA.S	_ScreenSwitch		;01f7c: 608a
 _01F7E:
 	CMPI.B	#$09,D0			;01f7e: 0c000009
 	BNE.S	_01F8C			;01f82: 6608
-	BSR.W	_02B76			;01f84: 61000bf0
-	BRA.W	_01F08			;01f88: 6000ff7e
+	BSR.W	_IntelScreen		;01f84: 61000bf0
+	BRA.W	_ScreenSwitch		;01f88: 6000ff7e
 _01F8C:
 	CMPI.B	#$03,D0			;01f8c: 0c000003
 	BNE.W	_SurfaceView		;01f90: 6600ff16
-	JSR	_11834			;01f94: 4eb900011834
-	BRA.W	_01F08			;01f9a: 6000ff6c
+	JSR	_OrbitView		;01f94: 4eb900011834
+	BRA.W	_ScreenSwitch		;01f9a: 6000ff6c
 ret01F9E:
 	RTS				;01f9e: 4e75
 _01FA0:
 	MOVEQ	#1,D1			;01fa0: 7201
-	BSR.W	_041CA			;01fa2: 61002226
+	BSR.W	_ScreenAlien0_041CA	;01fa2: 61002226
 	MOVEQ	#1,D0			;01fa6: 7001
-	BRA.W	_01F08			;01fa8: 6000ff5e
+	BRA.W	_ScreenSwitch		;01fa8: 6000ff5e
 _LoadAlien:
 	ADDI.B	#$30,D0			;01fac: 06000030
 	MOVE.W	D0,-(A7)		;01fb0: 3f00
@@ -3045,24 +3041,29 @@ _020A2:
 	ADDI.W	#$0016,D0		;020b2: 06400016
 ; d0 = random 22-38
 	JSR	_12B4E			;020b6: 4eb900012b4e
-	MOVE.L	A0,lUnknown56		;020bc: 23c80002de64
+	MOVE.L	A0,ptrHomeAst		;020bc: 23c80002de64
 	MOVE.L	A0,ptrCurrentAst	;020c2: 23c80002de58
 	MOVE.L	A0,ptrThisAstStats	;020c8: 23c80002ded8
 	JSR	_138E6			;020ce: 4eb9000138e6
-	MOVE.L	A6,ptr2DEEC		;020d4: 23ce0002deec
+	MOVE.L	A6,ptrAstMap_2DEEC	;020d4: 23ce0002deec
 	MOVE.L	A6,ptrThisAstMap	;020da: 23ce0002decc
-	MOVE.L	A5,ptr2DEF0		;020e0: 23cd0002def0
+	MOVE.L	A5,ptrAstBldg_2DEF0	;020e0: 23cd0002def0
 	MOVE.L	A5,ptrThisAstBldg	;020e6: 23cd0002ded0
-	MOVE.L	A4,ptr2DEF4		;020ec: 23cc0002def4
+	MOVE.L	A4,ptrBldCount_2DEF4	;020ec: 23cc0002def4
 	MOVE.L	A4,ptrThisAstBldgCount	;020f2: 23cc0002ded4
 	MOVE.B	(25,A0),flgUnknown64	;020f8: 13e800190002e00d
-; 0110 0111
-; Bit 2: Gravity Nulifier active. Player and alien start with a free
-; temporary gravity nullifier effect for fairness. It's rarely noticed
-; because you don't start with Asteroid Tracker.
+; Bit 0: Asteroid occupied
+; Bit 1: Asteroid viewable by player
+; Bit 2: Gravity Nullifier active. Player and alien start with
+; a free temporary gravity nullifier effect for fairness. It's
+; rarely noticed because you don't start with Asteroid Tracker
+; except against the Tylarans.
+; Bit 4: Asteroid known to player
+; Bit 5: Asteroid has been surveyed for ore
 	MOVE.B	#$37,(89,A0)		;02100: 117c00370059
-; Zero radiation. You start off with 30% radiation anyway, because
-; of background radiation caused by the starting asteroid's 300 Asteros
+; Zero radiation. You start off with 30% radiation anyway,
+; because of background radiation caused by the starting
+; asteroid's 300 Asteros.
 	CLR.W	(80,A0)			;02106: 42680050
 	ST	(24,A0)			;0210a: 50e80018
 ; Start CPU production at 500.
@@ -3076,7 +3077,7 @@ loop02120:
 	DBF	D0,loop02120		;02122: 51c8fffc
 	MOVEQ	#21,D4			;02126: 7815
 ; Terran place CPU for startup
-	BSR.W	_PlaceCPU		;02128: 61004f9a
+	BSR.W	_RandomlyPlaceBldg	;02128: 61004f9a
 	MOVEA.L	ptrThisAstBldg,A0	;0212c: 20790002ded0
 ; -127 build time. Will auto-build in one turn.
 	MOVE.B	#$81,(2,A0)		;02132: 117c00810002
@@ -3088,6 +3089,7 @@ loop02120:
 	MOVEA.L	ptrCurrentAst,A0	;02140: 20790002de58
 	MOVEQ	#0,D6			;02146: 7c00
 	JSR	_AddShip		;02148: 4eb90000dc9a
+; A6 = ship
 ; Hardpoints: Disruptor, Shield x10
 	MOVE.W	#$050c,(42,A6)		;0214e: 3d7c050c002a
 	MOVEQ	#-1,D0			;02154: 70ff
@@ -3098,9 +3100,10 @@ loop02120:
 	MOVEQ	#0,D0			;02166: 7000
 	MOVE.W	D0,(24,A6)		;02168: 3d400018
 	MOVE.L	D0,(28,A6)		;0216c: 2d40001c
+; alien
 	MOVE.W	(A7)+,D1		;02170: 321f
 	ASL.W	#4,D1			;02172: e941
-	LEA	ptr1F736,A0		;02174: 41f90001f736
+	LEA	ptrAlienAst_1F736,A0	;02174: 41f90001f736
 	MOVEQ	#8,D0			;0217a: 7008
 	JSR	_RandInt		;0217c: 4eb900000c0c
 	ADD.W	D0,D0			;02182: d040
@@ -3109,36 +3112,39 @@ loop02120:
 ; + [0, 2, 4, 6, 8, 10, 12, 14]
 	ADDA.L	D1,A0			;02186: d1c1
 	MOVE.W	(A0)+,D0		;02188: 3018
-	MOVE.L	A0,ptr2021E		;0218a: 23c80002021e
+	MOVE.L	A0,ptrAlienAst_2021E	;0218a: 23c80002021e
 	JSR	_12B4E			;02190: 4eb900012b4e
 	MOVE.L	A0,ptrEnemyHome		;02196: 23c80002de60
-	MOVE.B	intAlienSpec,bAlienSpec	;0219c: 13f9000203210002e48d
+	MOVE.B	intAlienSpec,bAlienSpecial ;0219c: 13f9000203210002e48d
 	MOVE.W	intAlienID,intCurrentAlienID ;021a6: 33f9000203040002df02
 	JSR	_InitEnemy		;021b0: 4eb90001771e
+; probably establish empty asteroids
 	MOVEQ	#15,D1			;021b6: 720f
 loop021B8:
 	MOVE.L	D1,-(A7)		;021b8: 2f01
 	MOVEQ	#-1,D1			;021ba: 72ff
-	JSR	_12B34			;021bc: 4eb900012b34
+	JSR	_PlaceEmptyAst		;021bc: 4eb900012b34
 	MOVE.L	(A7)+,D1		;021c2: 221f
 	DBF	D1,loop021B8		;021c4: 51c9fff2
 	RTS				;021c8: 4e75
 _LoadVoice:
 	ST	flgVoice		;021ca: 50f90002e451
 	TST.L	ptrBuff19_Voice		;021d0: 4ab900000576
-	BNE.S	_021DE			;021d6: 6606
+	BNE.S	_LoadSprites021DE	;021d6: 6606
 	SF	flgVoice		;021d8: 51f90002e451
-_021DE:
-	LEA	ptr33452,A0		;021de: 41f900033452
-	MOVE.L	#chip379D0,D1		;021e4: 223c000379d0
+_LoadSprites021DE:
+; Update sprite buffer references to the correct offset.
+	LEA	arrBuildingSpriteList,A0 ;021de: 41f900033452
+	MOVE.L	#spr_TerranBuildings_44,D1 ;021e4: 223c000379d0
 	MOVE.W	#$002b,D0		;021ea: 303c002b
 loop021EE:
+; Load 44 Terran building sprites
 	ADD.L	D1,(4,A0)		;021ee: d3a80004
 	ADD.L	D1,(A0)			;021f2: d390
 	ADDQ.L	#8,A0			;021f4: 5088
 	ADDQ.L	#2,A0			;021f6: 5488
 	DBF	D0,loop021EE		;021f8: 51c8fff4
-	MOVE.L	#chip3B06C,D1		;021fc: 223c0003b06c
+	MOVE.L	#spr_Terrain_x35,D1	;021fc: 223c0003b06c
 	MOVE.W	#$0022,D0		;02202: 303c0022
 loop02206:
 	ADD.L	D1,(4,A0)		;02206: d3a80004
@@ -3146,8 +3152,8 @@ loop02206:
 	ADDQ.L	#8,A0			;0220c: 5088
 	ADDQ.L	#2,A0			;0220e: 5488
 	DBF	D0,loop02206		;02210: 51c8fff4
-	LEA	ptr1D8F6,A0		;02214: 41f90001d8f6
-	MOVE.L	#chip3D628,D1		;0221a: 223c0003d628
+	LEA	arrShipSpriteList,A0	;02214: 41f90001d8f6
+	MOVE.L	#spr_Ships_x32,D1	;0221a: 223c0003d628
 	MOVE.W	#$001f,D0		;02220: 303c001f
 loop02224:
 	ADD.L	D1,(A0)			;02224: d390
@@ -3155,8 +3161,8 @@ loop02224:
 	ADDQ.L	#8,A0			;0222a: 5088
 	ADDQ.L	#2,A0			;0222c: 5488
 	DBF	D0,loop02224		;0222e: 51c8fff4
-	MOVE.L	#chip3E438,D1		;02232: 223c0003e438
-	LEA	ptr1F356,A1		;02238: 43f90001f356
+	MOVE.L	#spr_Asteroids_x28,D1	;02232: 223c0003e438
+	LEA	ptr1f356,A1		;02238: 43f90001f356
 	MOVE.W	#$001b,D0		;0223e: 303c001b
 loop02242:
 	ADD.L	D1,(A0)			;02242: d390
@@ -3166,7 +3172,7 @@ loop02242:
 	ADDQ.L	#2,A0			;02250: 5488
 	LEA	(10,A1),A1		;02252: 43e9000a
 	DBF	D0,loop02242		;02256: 51c8ffea
-	MOVE.L	#chip40C88,D1		;0225a: 223c00040c88
+	MOVE.L	#spr_Missiles_x11,D1	;0225a: 223c00040c88
 	MOVE.W	#$000a,D0		;02260: 303c000a
 loop02264:
 	ADD.L	D1,(A0)			;02264: d390
@@ -3174,7 +3180,7 @@ loop02264:
 	ADDQ.L	#8,A0			;0226a: 5088
 	ADDQ.L	#2,A0			;0226c: 5488
 	DBF	D0,loop02264		;0226e: 51c8fff4
-	MOVE.L	#chip41732,D1		;02272: 223c00041732
+	MOVE.L	#spr_BuildingAnim_x45,D1 ;02272: 223c00041732
 	MOVEQ	#44,D0			;02278: 702c
 loop0227A:
 	ADD.L	D1,(A0)			;0227a: d390
@@ -3182,7 +3188,7 @@ loop0227A:
 	ADDQ.L	#8,A0			;02280: 5088
 	ADDQ.L	#2,A0			;02282: 5488
 	DBF	D0,loop0227A		;02284: 51c8fff4
-	MOVE.L	#chip42C04,D1		;02288: 223c00042c04
+	MOVE.L	#spr_Explosions_x27,D1	;02288: 223c00042c04
 	MOVEQ	#26,D0			;0228e: 701a
 loop02290:
 	ADD.L	D1,(A0)			;02290: d390
@@ -3190,7 +3196,7 @@ loop02290:
 	ADDQ.L	#8,A0			;02296: 5088
 	ADDQ.L	#2,A0			;02298: 5488
 	DBF	D0,loop02290		;0229a: 51c8fff4
-	MOVE.L	#chip46C64,D1		;0229e: 223c00046c64
+	MOVE.L	#spr_Vortex_x6,D1	;0229e: 223c00046c64
 	MOVEQ	#5,D0			;022a4: 7005
 loop022A6:
 	ADD.L	D1,(A0)			;022a6: d390
@@ -3198,7 +3204,7 @@ loop022A6:
 	ADDQ.L	#8,A0			;022ac: 5088
 	ADDQ.L	#2,A0			;022ae: 5488
 	DBF	D0,loop022A6		;022b0: 51c8fff4
-	MOVE.L	#chip47A2E,D1		;022b4: 223c00047a2e
+	MOVE.L	#spr_Destroyer_x8,D1	;022b4: 223c00047a2e
 	MOVE.W	#$0007,D0		;022ba: 303c0007
 loop022BE:
 	ADD.L	D1,(A0)			;022be: d390
@@ -3206,7 +3212,7 @@ loop022BE:
 	ADDQ.L	#8,A0			;022c4: 5088
 	ADDQ.L	#2,A0			;022c6: 5488
 	DBF	D0,loop022BE		;022c8: 51c8fff4
-	MOVE.L	#chip482EE,D1		;022cc: 223c000482ee
+	MOVE.L	#spr_Terminator_x8,D1	;022cc: 223c000482ee
 	MOVE.W	#$0007,D0		;022d2: 303c0007
 loop022D6:
 	ADD.L	D1,(A0)			;022d6: d390
@@ -3216,18 +3222,18 @@ loop022D6:
 	DBF	D0,loop022D6		;022e0: 51c8fff4
 	MOVEQ	#1,D0			;022e4: 7001
 loop022E6:
-	MOVE.L	#chip4922A,D1		;022e6: 223c0004922a
+	MOVE.L	#spr_LargeShips_x2,D1	;022e6: 223c0004922a
 	ADD.L	D1,(A0)			;022ec: d390
 	ADD.L	D1,(4,A0)		;022ee: d3a80004
 	ADDQ.L	#8,A0			;022f2: 5088
 	ADDQ.L	#2,A0			;022f4: 5488
 	DBF	D0,loop022E6		;022f6: 51c8ffee
-	MOVE.L	#chip3BFB2,D1		;022fa: 223c0003bfb2
+	MOVE.L	#spr_OSD_x1,D1		;022fa: 223c0003bfb2
 	ADD.L	D1,(A0)			;02300: d390
 	ADD.L	D1,(4,A0)		;02302: d3a80004
 	ADDQ.L	#8,A0			;02306: 5088
 	ADDQ.L	#2,A0			;02308: 5488
-	MOVE.L	#chip4A102,D1		;0230a: 223c0004a102
+	MOVE.L	#spr_Hardpoints_x16,D1	;0230a: 223c0004a102
 	MOVE.W	#$000f,D0		;02310: 303c000f
 loop02314:
 	ADD.L	D1,(A0)			;02314: d390
@@ -3235,7 +3241,7 @@ loop02314:
 	ADDQ.L	#8,A0			;0231a: 5088
 	ADDQ.L	#2,A0			;0231c: 5488
 	DBF	D0,loop02314		;0231e: 51c8fff4
-	MOVE.L	#chip3D3A8,D1		;02322: 223c0003d3a8
+	MOVE.L	#spr_ShipScaffold_x4,D1	;02322: 223c0003d3a8
 	MOVE.W	#$0003,D0		;02328: 303c0003
 loop0232C:
 	ADD.L	D1,(A0)			;0232c: d390
@@ -3245,7 +3251,7 @@ loop0232C:
 	DBF	D0,loop0232C		;02336: 51c8fff4
 	ADDA.L	#$000001f4,A0		;0233a: d1fc000001f4
 	ADDA.L	#$0000006e,A0		;02340: d1fc0000006e
-	MOVE.L	#chip4BC82,D1		;02346: 223c0004bc82
+	MOVE.L	#spr_Meteors_x20,D1	;02346: 223c0004bc82
 	MOVE.W	#$0013,D0		;0234c: 303c0013
 loop02350:
 	ADD.L	D1,(A0)			;02350: d390
@@ -3253,11 +3259,11 @@ loop02350:
 	ADDQ.L	#8,A0			;02356: 5088
 	ADDQ.L	#2,A0			;02358: 5488
 	DBF	D0,loop02350		;0235a: 51c8fff4
-	MOVE.L	#chip4C984,D1		;0235e: 223c0004c984
+	MOVE.L	#spr_ImpTransporter_x1,D1 ;0235e: 223c0004c984
 	ADD.L	D1,(A0)			;02364: d390
 	ADD.L	D1,(4,A0)		;02366: d3a80004
 	ADDA.L	#$00000014,A0		;0236a: d1fc00000014
-	MOVE.L	#chip4D1B8,D1		;02370: 223c0004d1b8
+	MOVE.L	#spr_Satellite_x8,D1	;02370: 223c0004d1b8
 	MOVE.W	#$0007,D0		;02376: 303c0007
 loop0237A:
 	ADD.L	D1,(A0)			;0237a: d390
@@ -3265,7 +3271,7 @@ loop0237A:
 	ADDQ.L	#8,A0			;02380: 5088
 	ADDQ.L	#2,A0			;02382: 5488
 	DBF	D0,loop0237A		;02384: 51c8fff4
-	MOVE.L	#chip4D488,D1		;02388: 223c0004d488
+	MOVE.L	#spr_IntelIcons_x3,D1	;02388: 223c0004d488
 	MOVE.W	#$0002,D0		;0238e: 303c0002
 loop02392:
 	ADD.L	D1,(A0)			;02392: d390
@@ -3274,7 +3280,7 @@ loop02392:
 	ADDQ.L	#2,A0			;0239a: 5488
 	DBF	D0,loop02392		;0239c: 51c8fff4
 	RTS				;023a0: 4e75
-_023A2:
+_LoadAlienFiles023A2:
 	MOVE.W	intAlienID,D0		;023a2: 303900020304
 	SUBQ.W	#1,D0			;023a8: 5340
 	LEA	ptr4D780,A1		;023aa: 43f90004d780
@@ -3316,11 +3322,11 @@ loop02406:
 	ADDQ.L	#2,A0			;0240e: 5488
 	DBF	D0,loop02406		;02410: 51c8fff4
 	ADD.L	(A1),D1			;02414: d291
-	LEA	ptr1E382,A0		;02416: 41f90001e382
+	LEA	arrSattSpriteList,A0	;02416: 41f90001e382
 	MOVE.L	D1,(A0)			;0241c: 2081
 	ADDI.L	#$00000c90,D1		;0241e: 068100000c90
 	MOVE.L	D1,(4,A0)		;02424: 21410004
-	MOVE.L	#chip4BA8E,D1		;02428: 223c0004ba8e
+	MOVE.L	#spr_ShipFire0,D1	;02428: 223c0004ba8e
 	LEA	tblAlienShip26,A0	;0242e: 41f9000205f4
 	MOVEQ	#63,D0			;02434: 703f
 loop02436:
@@ -3342,7 +3348,7 @@ loop02452:
 	ADD.L	D1,(A0)+		;02454: d398
 	ADDQ.L	#8,A0			;02456: 5088
 	DBF	D0,loop02452		;02458: 51c8fff8
-	MOVE.L	#blobAlienFile3_1,D1	;0245c: 223c000338f8
+	MOVE.L	#sprAlienBuildings,D1	;0245c: 223c000338f8
 	LEA	tblAlienFile3_0,A0	;02462: 41f900033768
 	MOVE.W	#$0027,D0		;02468: 303c0027
 loop0246C:
@@ -3454,7 +3460,7 @@ _0257E:
 	MOVE.L	A2,(4,A0)		;02588: 214a0004
 	MOVEA.L	(A7)+,A2		;0258c: 245f
 	RTS				;0258e: 4e75
-_02590:
+_Hotkeys_02590:
 ; hotkeys ($50-$59 = F1-F10)
 ; A bug lets you see an enemy asteroid without a spy satellite
 ; by hotkey, as long as you are currently at another asteroid
@@ -3467,85 +3473,87 @@ _02590:
 	MOVE.L	D0,ptrCurrentAst	;025a4: 23c00002de58
 	MOVEA.L	D0,A0			;025aa: 2040
 	JSR	_138E6			;025ac: 4eb9000138e6
-	MOVE.L	A6,ptr2DEEC		;025b2: 23ce0002deec
-	MOVE.L	A5,ptr2DEF0		;025b8: 23cd0002def0
-	MOVE.L	A4,ptr2DEF4		;025be: 23cc0002def4
+	MOVE.L	A6,ptrAstMap_2DEEC	;025b2: 23ce0002deec
+	MOVE.L	A5,ptrAstBldg_2DEF0	;025b8: 23cd0002def0
+	MOVE.L	A4,ptrBldCount_2DEF4	;025be: 23cc0002def4
 	MOVE.B	(25,A0),flgUnknown64	;025c4: 13e800190002e00d
-	MOVE.B	#$01,intScrn3		;025cc: 13fc00010002e488
-	ST	flg2E48B		;025d4: 50f90002e48b
+	MOVE.B	#$01,intNewScreen	;025cc: 13fc00010002e488
+	ST	flgRedraw		;025d4: 50f90002e48b
 ret025DA:
 	RTS				;025da: 4e75
-_025DC:
-	TST.W	data1F984		;025dc: 4a790001f984
+_Pause_025DC:
+	TST.W	pauseTimer		;025dc: 4a790001f984
 	BEQ.W	ret026A6		;025e2: 670000c2
 	SF	InKey			;025e6: 51f900000764
 	MOVEA.L	ptrBuff01,A1		;025ec: 22790000052e
-	BSR.W	_08348			;025f2: 61005d54
+	BSR.W	_MsgLineCoords08348	;025f2: 61005d54
 	MOVEA.L	ptrBuff01,A1		;025f6: 22790000052e
 ; GAME PAUSED.
 	MOVE.W	#$022d,D0		;025fc: 303c022d
 	BSR.W	_GetStringA0		;02600: 61004f1e
 	MOVEQ	#16,D0			;02604: 7010
 	MOVE.W	#$00be,D1		;02606: 323c00be
-	BSR.W	_07310			;0260a: 61004d04
+	BSR.W	_DisplayText		;0260a: 61004d04
 _0260E:
-	SF	flg00BB2		;0260e: 51f900000bb2
+	SF	flgWait			;0260e: 51f900000bb2
 _02614:
-	TST.B	flg00BB2		;02614: 4a3900000bb2
+	TST.B	flgWait			;02614: 4a3900000bb2
 	BEQ.S	_02614			;0261a: 67f8
-	SF	flg00BB2		;0261c: 51f900000bb2
+	SF	flgWait			;0261c: 51f900000bb2
 	TST.B	InKey			;02622: 4a3900000764
-	BNE.S	_0266E			;02628: 6644
+	BNE.S	_Unpause_0266E		;02628: 6644
 	TST.B	MouseBtn		;0262a: 4a3900000766
-	BNE.S	_0266E			;02630: 663c
-	SUBQ.W	#1,data1F984		;02632: 53790001f984
+	BNE.S	_Unpause_0266E		;02630: 663c
+	SUBQ.W	#1,pauseTimer		;02632: 53790001f984
 	BNE.S	_0260E			;02638: 66d4
-	LEA	ptr1AF96,A0		;0263a: 41f90001af96
-	LEA	ptr1B016,A1		;02640: 43f90001b016
+; Switch to dark palette after 7200 frames (144 seconds PAL)
+	LEA	palette,A0		;0263a: 41f90001af96
+	LEA	palette_dark,A1		;02640: 43f90001b016
 	MOVEQ	#31,D0			;02646: 701f
 loop02648:
 	MOVE.W	(A1)+,(A0)+		;02648: 30d9
 	DBF	D0,loop02648		;0264a: 51c8fffc
-	LEA	ptr1AF96,A0		;0264e: 41f90001af96
+	LEA	palette,A0		;0264e: 41f90001af96
 	BSR.W	_053CA			;02654: 61002d74
 	SF	InKey			;02658: 51f900000764
 _0265E:
 	TST.B	InKey			;0265e: 4a3900000764
-	BNE.S	_0266E			;02664: 6608
+	BNE.S	_Unpause_0266E		;02664: 6608
 	TST.B	MouseBtn		;02666: 4a3900000766
 	BEQ.S	_0265E			;0266c: 67f0
-_0266E:
-	LEA	ptr1AF96,A0		;0266e: 41f90001af96
-	LEA	ptr1AFD6,A1		;02674: 43f90001afd6
+_Unpause_0266E:
+	LEA	palette,A0		;0266e: 41f90001af96
+	LEA	palette_standard,A1	;02674: 43f90001afd6
 	MOVEQ	#31,D0			;0267a: 701f
 loop0267C:
+; restore normal non-dark palette
 	MOVE.W	(A1)+,(A0)+		;0267c: 30d9
 	DBF	D0,loop0267C		;0267e: 51c8fffc
-	LEA	ptr1AF96,A0		;02682: 41f90001af96
+	LEA	palette,A0		;02682: 41f90001af96
 	BSR.W	_053CA			;02688: 61002d40
 	MOVEQ	#0,D0			;0268c: 7000
-	MOVE.W	D0,data1F984		;0268e: 33c00001f984
+	MOVE.W	D0,pauseTimer		;0268e: 33c00001f984
 	MOVE.B	D0,InKey		;02694: 13c000000764
 	MOVE.B	D0,MouseBtn		;0269a: 13c000000766
-	ST	flg2E48B		;026a0: 50f90002e48b
+	ST	flgRedraw		;026a0: 50f90002e48b
 ret026A6:
 	RTS				;026a6: 4e75
-_Intel_026A8:
-	MOVE.W	unk02E4C,D0		;026a8: 303900002e4c
+_IntelReport:
+	MOVE.W	unkIntel02E4C,D0	;026a8: 303900002e4c
 	MOVE.W	D0,D1			;026ae: 3200
 	LSL.W	#2,D0			;026b0: e548
-	LEA	ptr026DE,A0		;026b2: 41f9000026de
+	LEA	arrIntelFields,A0	;026b2: 41f9000026de
 	MOVEA.L	(0,A0,D0.W),A1		;026b8: 22700000
-	LEA	ptr1D54E,A2		;026bc: 45f90001d54e
+	LEA	flgIntelHonest,A2	;026bc: 45f90001d54e
 	MOVE.B	(0,A2,D1.W),D7		;026c2: 1e321000
-	LEA	ptr1B248,A0		;026c6: 41f90001b248
+	LEA	intelPricePop,A0	;026c6: 41f90001b248
 	ADD.W	D1,D1			;026cc: d241
 	MOVEQ	#0,D2			;026ce: 7400
 	MOVE.W	(0,A0,D1.W),D2		;026d0: 34301000
 	MOVEA.L	ptr02E48,A0		;026d4: 207900002e48
 	JSR	(A1)			;026da: 4e91
 	RTS				;026dc: 4e75
-ptr026DE:
+arrIntelFields:
 	DC.L	_IntelPop		;026de: 000028b8
 	DC.L	_IntelMislInv		;026e2: 00002a0c
 	DC.L	_IntelEnemyAsts		;026e6: 00002902
@@ -3557,20 +3565,24 @@ ptr026DE:
 _IntelMislDest:
 	TST.W	(728,A0)		;026fe: 4a6802d8
 	BEQ.S	_02756			;02702: 6752
+; cache information in case it is asked for a second time
 	MOVE.L	ptrMislTargetName,D0	;02704: 203900002b6e
 	BPL.S	_02732			;0270a: 6a26
+; spy satellite spot chance increases
 	ADDQ.B	#1,(97,A0)		;0270c: 52280061
 	SUB.L	D2,intCashIntel		;02710: 95b90002de74
 	CLR.L	ptrMislTargetName	;02716: 42b900002b6e
 	TST.B	D7			;0271c: 4a07
 	BEQ.S	_02768			;0271e: 6748
+; missile target
 	MOVE.L	(178,A0),D0		;02720: 202800b2
 	BEQ.S	_02732			;02724: 670c
 	MOVEA.L	D0,A0			;02726: 2040
+; asteroid name
 	LEA	(40,A0),A0		;02728: 41e80028
 	MOVE.L	A0,ptrMislTargetName	;0272c: 23c800002b6e
 _02732:
-	LEA	ptr3150C,A6		;02732: 4df90003150c
+	LEA	ptrMislTarget3150C,A6	;02732: 4df90003150c
 	MOVE.L	ptrMislTargetName,D0	;02738: 203900002b6e
 	MOVE.L	D0,textField01		;0273e: 23c00001c8ca
 	BNE.S	_0275C			;02744: 6616
@@ -3583,10 +3595,10 @@ _02756:
 	LEA	ptr31528,A6		;02756: 4df900031528
 _0275C:
 	MOVEA.L	ptrBuff00,A1		;0275c: 22790000052a
-	BSR.W	_0757A			;02762: 61004e16
+	BSR.W	_Window_0757A		;02762: 61004e16
 	RTS				;02766: 4e75
 _02768:
-	JSR	_155E4			;02768: 4eb9000155e4
+	JSR	_RandomPlayerAst	;02768: 4eb9000155e4
 	LEA	(40,A0),A0		;0276e: 41e80028
 	MOVE.L	A0,ptrMislTargetName	;02772: 23c800002b6e
 	BRA.S	_02732			;02778: 60b8
@@ -3621,22 +3633,22 @@ _027D6:
 	LEA	ptr314F8,A6		;027d6: 4df9000314f8
 _027DC:
 	MOVEA.L	ptrBuff00,A1		;027dc: 22790000052a
-	BSR.W	_0757A			;027e2: 61004d96
+	BSR.W	_Window_0757A		;027e2: 61004d96
 	RTS				;027e6: 4e75
 _027E8:
-	JSR	_155E4			;027e8: 4eb9000155e4
+	JSR	_RandomPlayerAst	;027e8: 4eb9000155e4
 	LEA	(40,A0),A0		;027ee: 41e80028
 	MOVE.L	A0,ptrFleetTargetName	;027f2: 23c800002b6a
 	BRA.S	_027B2			;027f8: 60b8
 _IntelFleetMakeup:
 	MOVE.L	(730,A0),D1		;027fa: 222802da
 	BEQ.S	_027D6			;027fe: 67d6
-	TST.W	unk02B3E		;02800: 4a7900002b3e
+	TST.W	intSpyShips		;02800: 4a7900002b3e
 	BPL.W	_02892			;02806: 6a00008a
 	ADDQ.B	#1,(97,A0)		;0280a: 52280061
 	SUB.L	D2,intCashIntel		;0280e: 95b90002de74
-	MOVE.W	#$0001,unk02B3E		;02814: 33fc000100002b3e
-	CLR.W	unk02B40		;0281c: 427900002b40
+	MOVE.W	#$0001,intSpyShips	;02814: 33fc000100002b3e
+	CLR.W	intSpyBattleships	;0281c: 427900002b40
 	MOVEA.L	D1,A0			;02822: 2041
 	LEA	(32,A0),A0		;02824: 41e80020
 	MOVEQ	#64,D0			;02828: 7040
@@ -3654,35 +3666,35 @@ loop0282E:
 	SUBQ.W	#1,D1			;02840: 5341
 _02842:
 	DBF	D0,loop0282E		;02842: 51c8ffea
-	MOVE.W	D1,unk02B3E		;02846: 33c100002b3e
-	MOVE.W	D2,unk02B40		;0284c: 33c200002b40
+	MOVE.W	D1,intSpyShips		;02846: 33c100002b3e
+	MOVE.W	D2,intSpyBattleships	;0284c: 33c200002b40
 	TST.B	D7			;02852: 4a07
 	BNE.S	_02892			;02854: 663c
 ; vary by -2 to +1
 	MOVEQ	#4,D0			;02856: 7004
 	JSR	_RandInt		;02858: 4eb900000c0c
 	SUBQ.W	#2,D0			;0285e: 5540
-	ADD.W	D0,unk02B40		;02860: d17900002b40
+	ADD.W	D0,intSpyBattleships	;02860: d17900002b40
 	BPL.S	_0286E			;02866: 6a06
-	CLR.W	unk02B40		;02868: 427900002b40
+	CLR.W	intSpyBattleships	;02868: 427900002b40
 _0286E:
 	MOVEQ	#20,D0			;0286e: 7014
 	JSR	_RandInt		;02870: 4eb900000c0c
 	SUBQ.W	#8,D0			;02876: 5140
 	SUBQ.W	#2,D0			;02878: 5540
-	ADD.W	D0,unk02B3E		;0287a: d17900002b3e
-	CMPI.W	#$0005,unk02B3E		;02880: 0c79000500002b3e
+	ADD.W	D0,intSpyShips		;0287a: d17900002b3e
+	CMPI.W	#$0005,intSpyShips	;02880: 0c79000500002b3e
 	BGT.S	_02892			;02888: 6e08
-	MOVE.W	#$0005,unk02B3E		;0288a: 33fc000500002b3e
+	MOVE.W	#$0005,intSpyShips	;0288a: 33fc000500002b3e
 _02892:
 	LEA	ptr3153C,A6		;02892: 4df90003153c
-	MOVE.W	unk02B3E,textField01	;02898: 33f900002b3e0001c8ca
-	MOVE.W	unk02B40,textField02	;028a2: 33f900002b400001c8ce
+	MOVE.W	intSpyShips,textField01	;02898: 33f900002b3e0001c8ca
+	MOVE.W	intSpyBattleships,textField02 ;028a2: 33f900002b400001c8ce
 	MOVEA.L	ptrBuff00,A1		;028ac: 22790000052a
-	BSR.W	_0757A			;028b2: 61004cc6
+	BSR.W	_Window_0757A		;028b2: 61004cc6
 	RTS				;028b6: 4e75
 _IntelPop:
-	MOVE.W	unk02B3A,D0		;028b8: 303900002b3a
+	MOVE.W	intIntelPop02B3A,D0	;028b8: 303900002b3a
 	BPL.S	_028F0			;028be: 6a30
 	ADDQ.B	#1,(97,A0)		;028c0: 52280061
 	SUB.L	D2,intCashIntel		;028c4: 95b90002de74
@@ -3696,40 +3708,40 @@ _IntelPop:
 	JSR	_RandInt		;028da: 4eb900000c0c
 	ANDI.W	#$fff0,D0		;028e0: 0240fff0
 _028E4:
-	MOVE.W	D0,unk02B3A		;028e4: 33c000002b3a
+	MOVE.W	D0,intIntelPop02B3A	;028e4: 33c000002b3a
 	LEA	ptr313E4,A6		;028ea: 4df9000313e4
 _028F0:
 	MOVE.W	D0,textField01		;028f0: 33c00001c8ca
 	MOVEA.L	ptrBuff00,A1		;028f6: 22790000052a
-	BSR.W	_0757A			;028fc: 61004c7c
+	BSR.W	_Window_0757A		;028fc: 61004c7c
 	RTS				;02900: 4e75
 _IntelEnemyAsts:
-	MOVE.W	unk02B3C,D0		;02902: 303900002b3c
+	MOVE.W	intIntelAsts_02B3C,D0	;02902: 303900002b3c
 	BPL.S	_02920			;02908: 6a16
 	ADDQ.B	#1,(97,A0)		;0290a: 52280061
 	SUB.L	D2,intCashIntel		;0290e: 95b90002de74
 	TST.B	D7			;02914: 4a07
-	BEQ.S	_0292E			;02916: 6716
-	JSR	_12848			;02918: 4eb900012848
+	BEQ.S	_FakeCountEnemyAsts	;02916: 6716
+	JSR	_CountAsteroids		;02918: 4eb900012848
 	MOVE.W	D2,D0			;0291e: 3002
 _02920:
-	MOVE.W	D0,unk02B3C		;02920: 33c000002b3c
+	MOVE.W	D0,intIntelAsts_02B3C	;02920: 33c000002b3c
 	LEA	ptr31402,A6		;02926: 4df900031402
 	BRA.S	_028F0			;0292c: 60c2
-_0292E:
+_FakeCountEnemyAsts:
 	MOVEQ	#4,D0			;0292e: 7004
 	JSR	_RandInt		;02930: 4eb900000c0c
 	ADDQ.B	#1,D0			;02936: 5200
 	BRA.S	_02920			;02938: 60e6
 _IntelAstKnown:
-	TST.B	unk02B74		;0293a: 4a3900002b74
-	BEQ.S	_029BA			;02940: 6778
+	TST.B	unkIntelAstsKnown	;0293a: 4a3900002b74
+	BEQ.S	_NoAstsKnown_029BA	;02940: 6778
 	ADDQ.B	#1,(97,A0)		;02942: 52280061
 	SUB.L	D2,intCashIntel		;02946: 95b90002de74
-	JSR	_12848			;0294c: 4eb900012848
-	SF	unk02B74		;02952: 51f900002b74
+	JSR	_CountAsteroids		;0294c: 4eb900012848
+	SF	unkIntelAstsKnown	;02952: 51f900002b74
 	MOVEQ	#0,D0			;02958: 7000
-	LEA	ptr02B52,A2		;0295a: 45f900002b52
+	LEA	flgAstsKnown,A2		;0295a: 45f900002b52
 	MOVE.L	D0,(A2)			;02960: 2480
 	MOVE.L	D0,(4,A2)		;02962: 25400004
 	MOVE.L	D0,(8,A2)		;02966: 25400008
@@ -3737,36 +3749,36 @@ _IntelAstKnown:
 	MOVE.L	D0,(16,A2)		;0296e: 25400010
 	MOVE.L	D0,(20,A2)		;02972: 25400014
 	TST.B	D7			;02976: 4a07
-	BEQ.S	_02998			;02978: 671e
-	LEA	ptr1F856,A1		;0297a: 43f90001f856
+	BEQ.S	_FakeAstsKnown		;02978: 671e
+	LEA	arrPlayerAstsKnown,A1	;0297a: 43f90001f856
 	TST.B	D1			;02980: 4a01
-	BEQ.S	_029BA			;02982: 6736
+	BEQ.S	_NoAstsKnown_029BA	;02982: 6736
 	MOVEQ	#5,D0			;02984: 7005
 loop02986:
 	MOVE.L	(A1)+,D1		;02986: 2219
-	BMI.S	_029BA			;02988: 6b30
+	BMI.S	_NoAstsKnown_029BA	;02988: 6b30
 	MOVEA.L	D1,A0			;0298a: 2041
 	LEA	(40,A0),A0		;0298c: 41e80028
 	MOVE.L	A0,(A2)+		;02990: 24c8
 	DBF	D0,loop02986		;02992: 51c8fff2
-	BRA.S	_029BA			;02996: 6022
-_02998:
-	LEA	ptr1F91E,A1		;02998: 43f90001f91e
+	BRA.S	_NoAstsKnown_029BA	;02996: 6022
+_FakeAstsKnown:
+	LEA	arrPlayerAsts,A1	;02998: 43f90001f91e
 	MOVEQ	#3,D6			;0299e: 7c03
 loop029A0:
 	MOVE.L	(A1)+,D1		;029a0: 2219
-	BMI.S	_029BA			;029a2: 6b16
+	BMI.S	_NoAstsKnown_029BA	;029a2: 6b16
 	MOVEQ	#2,D0			;029a4: 7002
 	JSR	_RandInt		;029a6: 4eb900000c0c
-	BEQ.S	_029B6			;029ac: 6708
+	BEQ.S	_next_029B6		;029ac: 6708
 	MOVEA.L	D1,A0			;029ae: 2041
 	LEA	(40,A0),A0		;029b0: 41e80028
 	MOVE.L	A0,(A2)+		;029b4: 24c8
-_029B6:
+_next_029B6:
 	DBF	D6,loop029A0		;029b6: 51ceffe8
-_029BA:
+_NoAstsKnown_029BA:
 	LEA	ptr31498,A6		;029ba: 4df900031498
-	LEA	ptr02B52,A0		;029c0: 41f900002b52
+	LEA	flgAstsKnown,A0		;029c0: 41f900002b52
 	MOVE.L	(A0)+,textField01	;029c6: 23d80001c8ca
 	MOVE.L	(A0)+,textField02	;029cc: 23d80001c8ce
 	MOVE.L	(A0)+,textField03	;029d2: 23d80001c8d2
@@ -3781,12 +3793,12 @@ _029BA:
 	MOVE.L	A0,textField01		;029fa: 23c80001c8ca
 _02A00:
 	MOVEA.L	ptrBuff00,A1		;02a00: 22790000052a
-	BSR.W	_0757A			;02a06: 61004b72
+	BSR.W	_Window_0757A		;02a06: 61004b72
 	RTS				;02a0a: 4e75
 _IntelMislInv:
-	LEA	ptr02B42,A1		;02a0c: 43f900002b42
-	TST.B	flg02B72		;02a12: 4a3900002b72
-	BEQ.S	_02A72			;02a18: 6758
+	LEA	arrIntelMislCount,A1	;02a0c: 43f900002b42
+	TST.B	flgIntelMislcount	;02a12: 4a3900002b72
+	BEQ.S	_ShowIntelMislInv	;02a18: 6758
 	ADDQ.B	#1,(97,A0)		;02a1a: 52280061
 	SUB.L	D2,intCashIntel		;02a1e: 95b90002de74
 	MOVEQ	#10,D6			;02a24: 7c0a
@@ -3805,9 +3817,9 @@ loop02A3A:
 	ADD.W	D1,(0,A1,D2.W)		;02a42: d3712000
 _02A46:
 	DBF	D6,loop02A3A		;02a46: 51cefff2
-	SF	flg02B72		;02a4a: 51f900002b72
+	SF	flgIntelMislcount	;02a4a: 51f900002b72
 	TST.B	D7			;02a50: 4a07
-	BNE.S	_02A72			;02a52: 661e
+	BNE.S	_ShowIntelMislInv	;02a52: 661e
 	MOVEQ	#3,D6			;02a54: 7c03
 loop02A56:
 	MOVEQ	#8,D0			;02a56: 7008
@@ -3818,26 +3830,26 @@ loop02A56:
 	CLR.W	(-2,A1)			;02a64: 4269fffe
 _02A68:
 	DBF	D6,loop02A56		;02a68: 51ceffec
-	LEA	ptr02B42,A1		;02a6c: 43f900002b42
-_02A72:
+	LEA	arrIntelMislCount,A1	;02a6c: 43f900002b42
+_ShowIntelMislInv:
 	MOVE.W	(A1)+,textField01	;02a72: 33d90001c8ca
 	MOVE.W	(A1)+,textField02	;02a78: 33d90001c8ce
 	MOVE.W	(A1)+,textField03	;02a7e: 33d90001c8d2
 	MOVE.W	(A1),textField04	;02a84: 33d10001c8d6
 	LEA	ptr31420,A6		;02a8a: 4df900031420
 	MOVEA.L	ptrBuff00,A1		;02a90: 22790000052a
-	BSR.W	_0757A			;02a96: 61004ae2
+	BSR.W	_Window_0757A		;02a96: 61004ae2
 	RTS				;02a9a: 4e75
 _IntelBldg:
-; spy on buildings
-	LEA	ptr02B4A,A1		;02a9c: 43f900002b4a
-	TST.B	unk02B73		;02aa2: 4a3900002b73
+; spy building count
+	LEA	arrIntelBldgCount,A1	;02a9c: 43f900002b4a
+	TST.B	unkIntelBldg_02B73	;02aa2: 4a3900002b73
 	BEQ.S	_02B10			;02aa8: 6766
 	ADDQ.B	#1,(97,A0)		;02aaa: 52280061
 	SUB.L	D2,intCashIntel		;02aae: 95b90002de74
 	JSR	_138E6			;02ab4: 4eb9000138e6
 	MOVEQ	#39,D6			;02aba: 7c27
-	LEA	ptr02B4A,A1		;02abc: 43f900002b4a
+	LEA	arrIntelBldgCount,A1	;02abc: 43f900002b4a
 	MOVEQ	#0,D0			;02ac2: 7000
 	MOVE.L	D0,(A1)			;02ac4: 2280
 	MOVE.L	D0,(4,A1)		;02ac6: 23400004
@@ -3853,7 +3865,7 @@ _02AE0:
 	ADDQ.L	#8,A0			;02ae0: 5088
 	ADDQ.L	#2,A0			;02ae2: 5488
 	DBF	D6,loop02AD0		;02ae4: 51ceffea
-	SF	unk02B73		;02ae8: 51f900002b73
+	SF	unkIntelBldg_02B73	;02ae8: 51f900002b73
 	TST.B	D7			;02aee: 4a07
 	BNE.S	_02B10			;02af0: 661e
 	MOVEQ	#3,D6			;02af2: 7c03
@@ -3867,7 +3879,7 @@ loop02AF4:
 	CLR.W	(-2,A1)			;02b02: 4269fffe
 _02B06:
 	DBF	D6,loop02AF4		;02b06: 51ceffec
-	LEA	ptr02B4A,A1		;02b0a: 43f900002b4a
+	LEA	arrIntelBldgCount,A1	;02b0a: 43f900002b4a
 _02B10:
 	MOVE.W	(A1)+,textField01	;02b10: 33d90001c8ca
 	MOVE.W	(A1)+,textField02	;02b16: 33d90001c8ce
@@ -3875,36 +3887,37 @@ _02B10:
 	MOVE.W	(A1),textField04	;02b22: 33d10001c8d6
 	LEA	ptr3145C,A6		;02b28: 4df90003145c
 	MOVEA.L	ptrBuff00,A1		;02b2e: 22790000052a
-	BSR.W	_0757A			;02b34: 61004a44
+	BSR.W	_Window_0757A		;02b34: 61004a44
 	RTS				;02b38: 4e75
-unk02B3A:
+intIntelPop02B3A:
 	DS.W	1			;02b3a
-unk02B3C:
+intIntelAsts_02B3C:
 	DS.W	1			;02b3c
-unk02B3E:
+intSpyShips:
 	DS.W	1			;02b3e
-unk02B40:
+intSpyBattleships:
 	DS.W	1			;02b40
-ptr02B42:
+arrIntelMislCount:
 	DS.L	2			;02b42
-ptr02B4A:
+arrIntelBldgCount:
 	DS.L	2			;02b4a
-ptr02B52:
+flgAstsKnown:
+; Our asteroids known to enemy - intel
 	DS.L	6			;02b52
 ptrFleetTargetName:
 	DS.L	1			;02b6a
 ptrMislTargetName:
 	DS.L	1			;02b6e
-flg02B72:
+flgIntelMislcount:
 	DS.B	1			;02b72
-unk02B73:
+unkIntelBldg_02B73:
 	DS.B	1			;02b73
-unk02B74:
+unkIntelAstsKnown:
 	DS.W	1			;02b74
-_02B76:
-	MOVE.L	lUnknown54,ptr02E48	;02b76: 23f90002de5c00002e48
+_IntelScreen:
+	MOVE.L	lUnknownSat54,ptr02E48	;02b76: 23f90002de5c00002e48
 	BEQ.W	ret02E42		;02b80: 670002c0
-	CLR.L	lUnknown54		;02b84: 42b90002de5c
+	CLR.L	lUnknownSat54		;02b84: 42b90002de5c
 	MOVEQ	#-1,D0			;02b8a: 70ff
 	JSR	_1A3BA			;02b8c: 4eb90001a3ba
 	ST	flgPaused		;02b92: 50f90002e458
@@ -3923,21 +3936,21 @@ _02BB8:
 	JSR	_LoadMGLFile		;02bc4: 4eb900000d2c
 _02BCA:
 	MOVEA.L	ptr1AF0C,A0		;02bca: 20790001af0c
-	LEA	ptr1AF56,A1		;02bd0: 43f90001af56
+	LEA	paletteScreen,A1	;02bd0: 43f90001af56
 	MOVE.L	ptrBuff02,D0		;02bd6: 203900000532
-	BSR.W	_05290			;02bdc: 610026b2
+	BSR.W	_IFF_ILBM_05290		;02bdc: 610026b2
 	MOVEA.L	ptrBuff02,A5		;02be0: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;02be6: 2c790000052a
-	BSR.W	_05584			;02bec: 61002996
+	BSR.W	_DiskReq_05584		;02bec: 61002996
 	SF	flg00BB5		;02bf0: 51f900000bb5
-	SF	flg1B69D		;02bf6: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;02bf6: 51f90001b69d
 	ST	flg2E482		;02bfc: 50f90002e482
-	MOVE.L	#data1CBE6,ptr1C8E2	;02c02: 23fc0001cbe60001c8e2
-	MOVE.L	#data1D084,ptr1C8E6	;02c0c: 23fc0001d0840001c8e6
-	MOVE.B	data2E476,data2E477	;02c16: 13f90002e4760002e477
-	MOVE.B	#$1e,data2E476		;02c20: 13fc001e0002e476
+	MOVE.L	#dataIntel1CBE6,textField07 ;02c02: 23fc0001cbe60001c8e2
+	MOVE.L	#dataIntel1D084,textField08 ;02c0c: 23fc0001d0840001c8e6
+	MOVE.B	textcolor,tmpTextcolor	;02c16: 13f90002e4760002e477
+	MOVE.B	#$1e,textcolor		;02c20: 13fc001e0002e476
 	ST	intTypeSpeed		;02c28: 50f90001cb03
-	LEA	ptr1D54E,A0		;02c2e: 41f90001d54e
+	LEA	flgIntelHonest,A0	;02c2e: 41f90001d54e
 	MOVEQ	#7,D7			;02c34: 7e07
 loop02C36:
 	MOVEQ	#100,D0			;02c36: 7064
@@ -3949,62 +3962,63 @@ loop02C36:
 _02C4C:
 	DBF	D7,loop02C36		;02c4c: 51cfffe8
 	MOVEQ	#-1,D7			;02c50: 7eff
-	MOVE.W	D7,unk02B3A		;02c52: 33c700002b3a
-	MOVE.W	D7,unk02B3C		;02c58: 33c700002b3c
-	MOVE.W	D7,unk02B3E		;02c5e: 33c700002b3e
-	MOVE.B	D7,flg02B72		;02c64: 13c700002b72
-	MOVE.B	D7,unk02B73		;02c6a: 13c700002b73
-	MOVE.B	D7,unk02B74		;02c70: 13c700002b74
+	MOVE.W	D7,intIntelPop02B3A	;02c52: 33c700002b3a
+	MOVE.W	D7,intIntelAsts_02B3C	;02c58: 33c700002b3c
+	MOVE.W	D7,intSpyShips		;02c5e: 33c700002b3e
+	MOVE.B	D7,flgIntelMislcount	;02c64: 13c700002b72
+	MOVE.B	D7,unkIntelBldg_02B73	;02c6a: 13c700002b73
+	MOVE.B	D7,unkIntelAstsKnown	;02c70: 13c700002b74
 	MOVE.L	D7,ptrFleetTargetName	;02c76: 23c700002b6a
 	MOVE.L	D7,ptrMislTargetName	;02c7c: 23c700002b6e
 _02C82:
-	LEA	ptr31312,A0		;02c82: 41f900031312
+	LEA	tblIntel31312,A0	;02c82: 41f900031312
 	MOVEQ	#7,D0			;02c88: 7007
 loop02C8A:
 	MOVE.W	#$f200,(A0)		;02c8a: 30bcf200
 	ADDA.L	#$0000001a,A0		;02c8e: d1fc0000001a
 	DBF	D0,loop02C8A		;02c94: 51c8fff4
-	MOVE.W	D0,unk02E4C		;02c98: 33c000002e4c
+	MOVE.W	D0,unkIntel02E4C	;02c98: 33c000002e4c
 	MOVEQ	#0,D0			;02c9e: 7000
-	MOVE.W	D0,unk02E4E		;02ca0: 33c000002e4e
-	MOVE.W	D0,unk02E50		;02ca6: 33c000002e50
+	MOVE.W	D0,unkIntel02E4E	;02ca0: 33c000002e4e
+	MOVE.W	D0,intIntelFunds02E50	;02ca6: 33c000002e50
 	MOVE.B	D0,flgClicked		;02cac: 13c000000767
 _02CB2:
 	MOVEA.L	ptrBuff02,A5		;02cb2: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;02cb8: 2c790000052a
-	BSR.W	_05584			;02cbe: 610028c4
+	BSR.W	_DiskReq_05584		;02cbe: 610028c4
 	LEA	ptr312F4,A6		;02cc2: 4df9000312f4
 	MOVEA.L	ptrBuff00,A1		;02cc8: 22790000052a
-	MOVE.B	#$0c,data2E476		;02cce: 13fc000c0002e476
-	BSR.W	_0757A			;02cd6: 610048a2
-	MOVE.B	#$14,data2E476		;02cda: 13fc00140002e476
-	TST.W	unk02E50		;02ce2: 4a7900002e50
+	MOVE.B	#$0c,textcolor		;02cce: 13fc000c0002e476
+	BSR.W	_Window_0757A		;02cd6: 610048a2
+; blue text
+	MOVE.B	#$14,textcolor		;02cda: 13fc00140002e476
+	TST.W	intIntelFunds02E50	;02ce2: 4a7900002e50
 	BEQ.S	_02D08			;02ce8: 671e
-	SUBQ.W	#1,unk02E50		;02cea: 537900002e50
+	SUBQ.W	#1,intIntelFunds02E50	;02cea: 537900002e50
 	MOVEA.L	ptr02E44,A0		;02cf0: 207900002e44
 	MOVEQ	#16,D0			;02cf6: 7010
 	MOVE.W	#$008c,D1		;02cf8: 323c008c
 	MOVEA.L	ptrBuff00,A1		;02cfc: 22790000052a
-	BSR.W	_07310			;02d02: 6100460c
+	BSR.W	_DisplayText		;02d02: 6100460c
 	BRA.S	_02D14			;02d06: 600c
 _02D08:
-	TST.W	unk02E4C		;02d08: 4a7900002e4c
+	TST.W	unkIntel02E4C		;02d08: 4a7900002e4c
 	BMI.S	_02D14			;02d0e: 6b04
-	BSR.W	_Intel_026A8		;02d10: 6100f996
+	BSR.W	_IntelReport		;02d10: 6100f996
 _02D14:
-	LEA	ptr1AF56,A0		;02d14: 41f90001af56
+	LEA	paletteScreen,A0	;02d14: 41f90001af56
 	BSR.W	_053CA			;02d1a: 610026ae
 	BSR.W	_05724			;02d1e: 61002a04
 	TST.B	MouseBtn		;02d22: 4a3900000766
 	BNE.S	_02D70			;02d28: 6646
 	TST.B	flgClicked		;02d2a: 4a3900000767
 	BNE.S	_02D70			;02d30: 663e
-	TST.W	unk02E4E		;02d32: 4a7900002e4e
+	TST.W	unkIntel02E4E		;02d32: 4a7900002e4e
 	BEQ.W	_02CB2			;02d38: 6700ff78
-	SUBQ.W	#1,unk02E4E		;02d3c: 537900002e4e
+	SUBQ.W	#1,unkIntel02E4E	;02d3c: 537900002e4e
 	BEQ.W	_02C82			;02d42: 6700ff3e
-	MOVE.W	unk02E4C,D0		;02d46: 303900002e4c
-	LEA	ptr31312,A0		;02d4c: 41f900031312
+	MOVE.W	unkIntel02E4C,D0	;02d46: 303900002e4c
+	LEA	tblIntel31312,A0	;02d4c: 41f900031312
 	MULU	#$001a,D0		;02d52: c0fc001a
 	MOVE.W	#$f2ff,D1		;02d56: 323cf2ff
 	BTST	#0,unk02E4F		;02d5a: 0839000000002e4f
@@ -4015,7 +4029,7 @@ _02D68:
 	BRA.W	_02CB2			;02d6c: 6000ff44
 _02D70:
 	SF	flgClicked		;02d70: 51f900000767
-	MOVE.W	unk00762,D1		;02d76: 323900000762
+	MOVE.W	intMouseY,D1		;02d76: 323900000762
 	CMPI.W	#$00b4,D1		;02d7c: 0c4100b4
 	BPL.S	_02DF4			;02d80: 6a72
 	SUBI.W	#$0028,D1		;02d82: 04410028
@@ -4023,35 +4037,35 @@ _02D70:
 	DIVU	#$000a,D1		;02d8a: 82fc000a
 	CMPI.W	#$0008,D1		;02d8e: 0c410008
 	BPL.W	_02CB2			;02d92: 6a00ff1e
-	LEA	ptr31312,A0		;02d96: 41f900031312
-	MOVE.W	unk02E4C,D0		;02d9c: 303900002e4c
+	LEA	tblIntel31312,A0	;02d96: 41f900031312
+	MOVE.W	unkIntel02E4C,D0	;02d9c: 303900002e4c
 	MULU	#$001a,D0		;02da2: c0fc001a
 	MOVE.W	#$f200,(0,A0,D0.W)	;02da6: 31bcf2000000
-	MOVE.W	D1,unk02E4C		;02dac: 33c100002e4c
-	MOVE.W	#$0064,unk02E4E		;02db2: 33fc006400002e4e
-	LEA	ptr1B248,A0		;02dba: 41f90001b248
+	MOVE.W	D1,unkIntel02E4C	;02dac: 33c100002e4c
+	MOVE.W	#$0064,unkIntel02E4E	;02db2: 33fc006400002e4e
+	LEA	intelPricePop,A0	;02dba: 41f90001b248
 	ADD.W	D1,D1			;02dc0: d241
 	MOVEQ	#0,D0			;02dc2: 7000
 	MOVE.W	(0,A0,D1.W),D0		;02dc4: 30301000
 	CMP.L	intCashIntel,D0		;02dc8: b0b90002de74
 	BLE.S	_02DEA			;02dce: 6f1a
-	MOVE.W	#$0064,unk02E50		;02dd0: 33fc006400002e50
+	MOVE.W	#$0064,intIntelFunds02E50 ;02dd0: 33fc006400002e50
 ; INSUFFICIENT FUNDS FOR THAT REPORT
 	MOVE.W	#$0252,D0		;02dd8: 303c0252
 	BSR.W	_GetStringA0		;02ddc: 61004742
 	MOVE.L	A0,ptr02E44		;02de0: 23c800002e44
 	BRA.W	_02CB2			;02de6: 6000feca
 _02DEA:
-	CLR.W	unk02E50		;02dea: 427900002e50
+	CLR.W	intIntelFunds02E50	;02dea: 427900002e50
 	BRA.W	_02CB2			;02df0: 6000fec0
 _02DF4:
 	MOVE.B	#$01,unk02E52		;02df4: 13fc000100002e52
 	BSR.W	_05644			;02dfc: 61002846
 	SF	flg2E482		;02e00: 51f90002e482
 	ST	flg00BB5		;02e06: 50f900000bb5
-	MOVE.L	#data1CB0A,ptr1C8E2	;02e0c: 23fc0001cb0a0001c8e2
-	MOVE.L	#data1CD36,ptr1C8E6	;02e16: 23fc0001cd360001c8e6
-	MOVE.B	data2E477,data2E476	;02e20: 13f90002e4770002e476
+	MOVE.L	#data1CB0A,textField07	;02e0c: 23fc0001cb0a0001c8e2
+	MOVE.L	#data1CD36,textField08	;02e16: 23fc0001cd360001c8e6
+	MOVE.B	tmpTextcolor,textcolor	;02e20: 13f90002e4770002e476
 	ST	intTypeSpeed		;02e2a: 50f90001cb03
 	SF	flg1B496		;02e30: 51f90001b496
 	SF	flgPaused		;02e36: 51f90002e458
@@ -4062,17 +4076,17 @@ ptr02E44:
 	DS.L	1			;02e44
 ptr02E48:
 	DS.L	1			;02e48
-unk02E4C:
+unkIntel02E4C:
 	DS.W	1			;02e4c
-unk02E4E:
+unkIntel02E4E:
 	DS.B	1			;02e4e
 unk02E4F:
 	DS.B	1			;02e4f
-unk02E50:
+intIntelFunds02E50:
 	DS.W	1			;02e50
 unk02E52:
 	DS.W	1			;02e52
-_02E54:
+_ScreenWin_02E54:
 ; win screen
 	MOVEQ	#-1,D0			;02e54: 70ff
 	JSR	_1A3BA			;02e56: 4eb90001a3ba
@@ -4081,47 +4095,47 @@ _02E54:
 	MOVEA.L	ptrOutroImg,A0		;02e68: 20790002defe
 	JSR	_LoadMGLFile		;02e6e: 4eb900000d2c
 	MOVEA.L	ptrBuff03,A0		;02e74: 207900000536
-	LEA	ptr1AF56,A1		;02e7a: 43f90001af56
+	LEA	paletteScreen,A1	;02e7a: 43f90001af56
 	MOVE.L	ptrBuff02,D0		;02e80: 203900000532
-	BSR.W	_05290			;02e86: 61002408
+	BSR.W	_IFF_ILBM_05290		;02e86: 61002408
 	MOVEA.L	ptrBuff02,A5		;02e8a: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;02e90: 2c790000052a
-	BSR.W	_05584			;02e96: 610026ec
+	BSR.W	_DiskReq_05584		;02e96: 610026ec
 	SF	flg00BB5		;02e9a: 51f900000bb5
-	SF	flg1B69D		;02ea0: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;02ea0: 51f90001b69d
 	ST	flg2E482		;02ea6: 50f90002e482
-	MOVE.L	#data1CBE6,ptr1C8E2	;02eac: 23fc0001cbe60001c8e2
-	MOVE.L	#data1D084,ptr1C8E6	;02eb6: 23fc0001d0840001c8e6
-	MOVE.B	data2E476,data2E477	;02ec0: 13f90002e4760002e477
-	MOVE.B	#$1f,data2E476		;02eca: 13fc001f0002e476
+	MOVE.L	#dataIntel1CBE6,textField07 ;02eac: 23fc0001cbe60001c8e2
+	MOVE.L	#dataIntel1D084,textField08 ;02eb6: 23fc0001d0840001c8e6
+	MOVE.B	textcolor,tmpTextcolor	;02ec0: 13f90002e4760002e477
+	MOVE.B	#$1f,textcolor		;02eca: 13fc001f0002e476
 	MOVE.B	#$02,intTypeSpeed	;02ed2: 13fc00020001cb03
 	LEA	textarea,A0		;02eda: 41f900031d30
 	BSR.W	_053CA			;02ee0: 610024e8
-	SF	flg00BB2		;02ee4: 51f900000bb2
+	SF	flgWait			;02ee4: 51f900000bb2
 _02EEA:
-	TST.B	flg00BB2		;02eea: 4a3900000bb2
+	TST.B	flgWait			;02eea: 4a3900000bb2
 	BEQ.S	_02EEA			;02ef0: 67f8
-	SF	flg00BB2		;02ef2: 51f900000bb2
+	SF	flgWait			;02ef2: 51f900000bb2
 	BSR.W	_05724			;02ef8: 6100282a
-	LEA	ptr1AF56,A0		;02efc: 41f90001af56
+	LEA	paletteScreen,A0	;02efc: 41f90001af56
 	BSR.W	_053CA			;02f02: 610024c6
 	MOVEQ	#60,D0			;02f06: 703c
-	JSR	_00BB8			;02f08: 4eb900000bb8
+	JSR	_Wait			;02f08: 4eb900000bb8
 ; 318: INCOMING, ENCODED MESSAGE FROM TETRACORP...
 	MOVE.W	#$013e,D0		;02f0e: 303c013e
 	BSR.W	_GetStringA0		;02f12: 6100460c
 	MOVEA.L	ptrBuff01,A1		;02f16: 22790000052e
 	MOVEQ	#16,D0			;02f1c: 7010
 	MOVEQ	#16,D1			;02f1e: 7210
-	BSR.W	_07310			;02f20: 610043ee
+	BSR.W	_DisplayText		;02f20: 610043ee
 	MOVEQ	#100,D0			;02f24: 7064
-	JSR	_00BB8			;02f26: 4eb900000bb8
+	JSR	_Wait			;02f26: 4eb900000bb8
 	MOVE.W	intOutroMsg,D0		;02f2c: 30390002defc
 	BSR.W	_GetStringA0		;02f32: 610045ec
 	MOVEA.L	ptrBuff01,A1		;02f36: 22790000052e
 	MOVEQ	#16,D0			;02f3c: 7010
 	MOVEQ	#56,D1			;02f3e: 7238
-	BSR.W	_07310			;02f40: 610043ce
+	BSR.W	_DisplayText		;02f40: 610043ce
 _02F44:
 ; 251: CONGRATULATIONS ON DEFEATING THE SWIXARANS!
 ; THE EMPRESS HERSELF SENDS HER APPRECIATION OF
@@ -4141,9 +4155,9 @@ _02F44:
 	BSR.W	_05644			;02f54: 610026ee
 	SF	flg2E482		;02f58: 51f90002e482
 	ST	flg00BB5		;02f5e: 50f900000bb5
-	MOVE.L	#data1CB0A,ptr1C8E2	;02f64: 23fc0001cb0a0001c8e2
-	MOVE.L	#data1CD36,ptr1C8E6	;02f6e: 23fc0001cd360001c8e6
-	MOVE.B	data2E477,data2E476	;02f78: 13f90002e4770002e476
+	MOVE.L	#data1CB0A,textField07	;02f64: 23fc0001cb0a0001c8e2
+	MOVE.L	#data1CD36,textField08	;02f6e: 23fc0001cd360001c8e6
+	MOVE.B	tmpTextcolor,textcolor	;02f78: 13f90002e4770002e476
 	ST	intTypeSpeed		;02f82: 50f90001cb03
 	SF	flg1B496		;02f88: 51f90001b496
 	ST	flgUnknown61		;02f8e: 50f90002df04
@@ -4156,14 +4170,14 @@ _02FAA:
 	ST	intTypeSpeed		;02faa: 50f90001cb03
 	MOVEA.L	ptrBuff02,A5		;02fb0: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;02fb6: 2c790000052a
-	BSR.W	_05584			;02fbc: 610025c6
+	BSR.W	_DiskReq_05584		;02fbc: 610025c6
 ; LOAD   SAVE   ALIEN   FX   SPEECH   DOS   END
 	MOVE.W	#$0251,D0		;02fc0: 303c0251
 	BSR.W	_GetStringA0		;02fc4: 6100455a
 	MOVEA.L	ptrBuff00,A1		;02fc8: 22790000052a
 	MOVEQ	#16,D0			;02fce: 7010
 	MOVE.W	#$00b6,D1		;02fd0: 323c00b6
-	BSR.W	_07310			;02fd4: 6100433a
+	BSR.W	_DisplayText		;02fd4: 6100433a
 	BSR.W	_05724			;02fd8: 6100274a
 	MOVE.B	#$01,intTypeSpeed	;02fdc: 13fc00010001cb03
 	RTS				;02fe4: 4e75
@@ -4175,29 +4189,29 @@ _LoadSaveScreen:
 	LEA	strTetraMGL,A0		;02ffa: 41f90001ab6e
 	JSR	_LoadMGLFile		;03000: 4eb900000d2c
 	MOVEA.L	ptrBuff03,A0		;03006: 207900000536
-	LEA	ptr1AF56,A1		;0300c: 43f90001af56
+	LEA	paletteScreen,A1	;0300c: 43f90001af56
 	MOVE.L	ptrBuff02,D0		;03012: 203900000532
-	BSR.W	_05290			;03018: 61002276
+	BSR.W	_IFF_ILBM_05290		;03018: 61002276
 	MOVEA.L	ptrBuff02,A5		;0301c: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;03022: 2c790000052a
-	BSR.W	_05584			;03028: 6100255a
+	BSR.W	_DiskReq_05584		;03028: 6100255a
 	SF	flg00BB5		;0302c: 51f900000bb5
-	SF	flg1B69D		;03032: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;03032: 51f90001b69d
 	ST	flg2E482		;03038: 50f90002e482
 	LEA	textarea,A0		;0303e: 41f900031d30
 	BSR.W	_053CA			;03044: 61002384
-	SF	flg00BB2		;03048: 51f900000bb2
+	SF	flgWait			;03048: 51f900000bb2
 _0304E:
-	TST.B	flg00BB2		;0304e: 4a3900000bb2
+	TST.B	flgWait			;0304e: 4a3900000bb2
 	BEQ.S	_0304E			;03054: 67f8
-	SF	flg00BB2		;03056: 51f900000bb2
+	SF	flgWait			;03056: 51f900000bb2
 	BSR.W	_05724			;0305c: 610026c6
-	LEA	ptr1AF56,A0		;03060: 41f90001af56
+	LEA	paletteScreen,A0	;03060: 41f90001af56
 	BSR.W	_053CA			;03066: 61002362
-	MOVE.L	#data1CBE6,ptr1C8E2	;0306a: 23fc0001cbe60001c8e2
-	MOVE.L	#data1D084,ptr1C8E6	;03074: 23fc0001d0840001c8e6
-	MOVE.B	data2E476,data2E477	;0307e: 13f90002e4760002e477
-	MOVE.B	#$1e,data2E476		;03088: 13fc001e0002e476
+	MOVE.L	#dataIntel1CBE6,textField07 ;0306a: 23fc0001cbe60001c8e2
+	MOVE.L	#dataIntel1D084,textField08 ;03074: 23fc0001d0840001c8e6
+	MOVE.B	textcolor,tmpTextcolor	;0307e: 13f90002e4760002e477
+	MOVE.B	#$1e,textcolor		;03088: 13fc001e0002e476
 	MOVE.B	#$01,intTypeSpeed	;03090: 13fc00010001cb03
 	MOVEA.L	ptrBuff01,A1		;03098: 22790000052e
 ; 562: WELCOME TO TETRACORP.......
@@ -4205,7 +4219,7 @@ _0304E:
 	BSR.W	_GetStringA0		;030a2: 6100447c
 	MOVEQ	#16,D0			;030a6: 7010
 	MOVEQ	#16,D1			;030a8: 7210
-	BSR.W	_07310			;030aa: 61004264
+	BSR.W	_DisplayText		;030aa: 61004264
 	TST.B	flgUnknown61		;030ae: 4a390002df04
 	BEQ.S	_030D2			;030b4: 671c
 	MOVEA.L	ptrBuff01,A1		;030b6: 22790000052e
@@ -4214,12 +4228,12 @@ _0304E:
 	BSR.W	_GetStringA0		;030be: 61004460
 	MOVEQ	#16,D0			;030c2: 7010
 	MOVEQ	#32,D1			;030c4: 7220
-	BSR.W	_07310			;030c6: 61004248
+	BSR.W	_DisplayText		;030c6: 61004248
 	MOVEQ	#60,D0			;030ca: 703c
-	JSR	_00BB8			;030cc: 4eb900000bb8
+	JSR	_Wait			;030cc: 4eb900000bb8
 _030D2:
 	MOVEQ	#60,D0			;030d2: 703c
-	JSR	_00BB8			;030d4: 4eb900000bb8
+	JSR	_Wait			;030d4: 4eb900000bb8
 _030DA:
 	MOVE.W	#$0190,data1B46E	;030da: 33fc01900001b46e
 	BSR.W	_02FAA			;030e2: 6100fec6
@@ -4233,7 +4247,7 @@ _030E6:
 _030FC:
 	MOVE.W	#$0190,data1B46E	;030fc: 33fc01900001b46e
 	LEA	ptr1B20E,A0		;03104: 41f90001b20e
-	MOVEM.W	unk00760,D0-D1		;0310a: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;0310a: 4cb9000300000760
 	JSR	_1156E			;03112: 4eb90001156e
 	BMI.S	_030E6			;03118: 6bcc
 	BNE.S	_03122			;0311a: 6606
@@ -4246,7 +4260,7 @@ _03122:
 	BNE.S	_0315C			;0312e: 662c
 ; 566: SOUND EFFECTS: ACTIVATED.
 	MOVE.W	#$0236,D0		;03130: 303c0236
-	NOT.B	flgSound		;03134: 46390002e450
+	NOT.B	flgSoundEnabled		;03134: 46390002e450
 	BNE.S	_03140			;0313a: 6604
 ; SOUND EFFECTS: DEACTIVATED.
 	MOVE.W	#$0237,D0		;0313c: 303c0237
@@ -4258,7 +4272,7 @@ _03140:
 	MOVEA.L	ptrBuff01,A1		;0314c: 22790000052e
 	MOVEQ	#16,D0			;03152: 7010
 	MOVEQ	#16,D1			;03154: 7210
-	BSR.W	_07310			;03156: 610041b8
+	BSR.W	_DisplayText		;03156: 610041b8
 	BRA.S	_030E6			;0315a: 608a
 _0315C:
 	CMPI.B	#$04,D2			;0315c: 0c020004
@@ -4280,7 +4294,7 @@ _0317E:
 	MOVEA.L	ptrBuff01,A1		;0318a: 22790000052e
 	MOVEQ	#16,D0			;03190: 7010
 	MOVEQ	#16,D1			;03192: 7210
-	BSR.W	_07310			;03194: 6100417a
+	BSR.W	_DisplayText		;03194: 6100417a
 	BRA.W	_030E6			;03198: 6000ff4c
 _0319C:
 	CMPI.B	#$01,D2			;0319c: 0c020001
@@ -4307,8 +4321,8 @@ _031BA:
 	MOVEA.L	ptrBuff01,A1		;031ce: 22790000052e
 	MOVEQ	#16,D0			;031d4: 7010
 	MOVEQ	#16,D1			;031d6: 7210
-	BSR.W	_07310			;031d8: 61004136
-	JSR	_00768			;031dc: 4eb900000768
+	BSR.W	_DisplayText		;031d8: 61004136
+	JSR	_WaitKey		;031dc: 4eb900000768
 	CMPI.B	#$15,D0			;031e2: 0c000015
 	BNE.W	_030DA			;031e6: 6600fef2
 	MOVE.B	#$45,unk03254		;031ea: 13fc004500003254
@@ -4324,9 +4338,9 @@ _0320C:
 	BSR.W	_05644			;0320c: 61002436
 	SF	flg2E482		;03210: 51f90002e482
 	ST	flg00BB5		;03216: 50f900000bb5
-	MOVE.L	#data1CB0A,ptr1C8E2	;0321c: 23fc0001cb0a0001c8e2
-	MOVE.L	#data1CD36,ptr1C8E6	;03226: 23fc0001cd360001c8e6
-	MOVE.B	data2E477,data2E476	;03230: 13f90002e4770002e476
+	MOVE.L	#data1CB0A,textField07	;0321c: 23fc0001cb0a0001c8e2
+	MOVE.L	#data1CD36,textField08	;03226: 23fc0001cd360001c8e6
+	MOVE.B	tmpTextcolor,textcolor	;03230: 13f90002e4770002e476
 	ST	intTypeSpeed		;0323a: 50f90001cb03
 	SF	flgPaused		;03240: 51f90002e458
 	SF	flg1B496		;03246: 51f90001b496
@@ -4342,7 +4356,7 @@ _03256:
 	MOVEA.L	ptrBuff01,A1		;03262: 22790000052e
 	MOVEQ	#16,D0			;03268: 7010
 	MOVEQ	#16,D1			;0326a: 7210
-	BSR.W	_07310			;0326c: 610040a2
+	BSR.W	_DisplayText		;0326c: 610040a2
 _03270:
 ; Randomly select Tetracorp slogans from #358-365
 	MOVEQ	#8,D0			;03270: 7008
@@ -4355,7 +4369,7 @@ _03270:
 	MOVEA.L	ptrBuff01,A1		;0328e: 22790000052e
 	MOVEQ	#16,D0			;03294: 7010
 	MOVEQ	#40,D1			;03296: 7228
-	BSR.W	_07310			;03298: 61004076
+	BSR.W	_DisplayText		;03298: 61004076
 	MOVE.W	#$0190,data1B46E	;0329c: 33fc01900001b46e
 	RTS				;032a4: 4e75
 _SaveGame:
@@ -4372,22 +4386,23 @@ _SaveGame:
 	MOVEA.L	ptrBuff01,A1		;032c0: 22790000052e
 	MOVEQ	#16,D0			;032c6: 7010
 	MOVEQ	#10,D1			;032c8: 720a
-	BSR.W	_07310			;032ca: 61004044
+	BSR.W	_DisplayText		;032ca: 61004044
 _032CE:
 	TST.B	MouseBtn		;032ce: 4a3900000766
 	BEQ.S	_032CE			;032d4: 67f8
 	MOVE.W	#$0096,D0		;032d6: 303c0096
-	JSR	_00BB8			;032da: 4eb900000bb8
+	JSR	_Wait			;032da: 4eb900000bb8
 	JSR	(_02FAA,PC)		;032e0: 4ebafcc8
+; ANALYSING DISK
 	MOVE.W	#$0239,D0		;032e4: 303c0239
 	BSR.W	_GetStringA0		;032e8: 61004236
 	MOVEA.L	ptrBuff01,A1		;032ec: 22790000052e
 	MOVEQ	#16,D0			;032f2: 7010
 	MOVEQ	#10,D1			;032f4: 720a
-	BSR.W	_07310			;032f6: 61004018
+	BSR.W	_DisplayText		;032f6: 61004018
 	MOVEQ	#100,D0			;032fa: 7064
-	JSR	_00BB8			;032fc: 4eb900000bb8
-	JSR	_003BE			;03302: 4eb9000003be
+	JSR	_Wait			;032fc: 4eb900000bb8
+	JSR	_Blit003BE		;03302: 4eb9000003be
 	MOVE.L	#strDF0,D1		;03308: 223c0001b497
 	MOVEQ	#-2,D2			;0330e: 74fe
 	MOVEA.L	ptrDOSBase,A6		;03310: 2c790001a9f0
@@ -4411,7 +4426,7 @@ _0334A:
 	BEQ.S	_0334A			;03350: 67f8
 	BTST	#1,D0			;03352: 08000001
 	BNE.W	_03562			;03356: 6600020a
-	MOVE.W	unk00762,D0		;0335a: 303900000762
+	MOVE.W	intMouseY,D0		;0335a: 303900000762
 	SUBI.W	#$0024,D0		;03360: 04400024
 	BMI.S	_0334A			;03364: 6be4
 	EXT.L	D0			;03366: 48c0
@@ -4424,6 +4439,7 @@ _0334A:
 	LEA	ptr1B3F4,A0		;0337c: 41f90001b3f4
 	TST.L	(0,A0,D0.W)		;03382: 4ab00000
 	BEQ.S	_033C2			;03386: 673a
+; POSITION X CURRENTY HOLDS A SAVE GAME
 	MOVE.W	#$0241,D0		;03388: 303c0241
 	BSR.W	_GetStringA0		;0338c: 61004192
 	MOVE.W	data1B404,D0		;03390: 30390001b404
@@ -4435,7 +4451,7 @@ _0334A:
 	MOVEA.L	ptrBuff01,A1		;033a6: 22790000052e
 	MOVEQ	#24,D0			;033ac: 7018
 	MOVEQ	#16,D1			;033ae: 7210
-	BSR.W	_07310			;033b0: 61003f5e
+	BSR.W	_DisplayText		;033b0: 61003f5e
 _033B4:
 	MOVE.B	MouseBtn,D0		;033b4: 103900000766
 	BEQ.S	_033B4			;033ba: 67f8
@@ -4451,8 +4467,8 @@ _033C2:
 	MOVEA.L	ptrBuff01,A1		;033dc: 22790000052e
 	MOVEQ	#16,D0			;033e2: 7010
 	MOVEQ	#16,D1			;033e4: 7210
-	BSR.W	_07310			;033e6: 61003f28
-	JSR	_003BE			;033ea: 4eb9000003be
+	BSR.W	_DisplayText		;033e6: 61003f28
+	JSR	_Blit003BE		;033ea: 4eb9000003be
 	MOVEA.L	ptrDOSBase,A6		;033f0: 2c790001a9f0
 	MOVE.W	data1B404,D0		;033f6: 30390001b404
 	ADD.W	D0,D0			;033fc: d040
@@ -4466,14 +4482,15 @@ _033C2:
 _03414:
 ; SAVE FILE FORMAT
 ; BYTES  DATA START
-; 18  saved_1b4f4 onward
-; 30  iAlienID onward
+; 18  $1b4f8 - save name and alien ID
+; 30  $20304 - alien data
 ; 55,810  tblTransporters onward
-; 33,600  pBuff09_Ships
-; 18,000  pBuff10_Buildings
+; 37,800  pBuff09_Ships
+; 33,600  pBuff10_Buildings
+; 18,000  asteroids
 ; 1,920  pBuff17_BldgTotal
-; 2,336  pBuff14_Save7
-; 2,336  pBuff15_Save8
+; 2,336  pBuff14_Save7 terran fleets
+; 2,336  pBuff15_Save8 alien fleets
 	MOVE.L	(0,A0,D0.W),D1		;03414: 22300000
 ; Set the filename aside in case one of the writes fails, in which case
 ; it will be deleted.
@@ -4489,7 +4506,7 @@ _03414:
 	MOVE.L	D0,ptrFilePtr		;03428: 23c00001a9dc
 	BEQ.W	_WriteError		;0342e: 67000146
 	MOVE.L	ptrFilePtr,D1		;03432: 22390001a9dc
-	MOVE.L	#saved_1B4F8,D2		;03438: 243c0001b4f8
+	MOVE.L	#strSaveName,D2		;03438: 243c0001b4f8
 ; Write 18 bytes.
 	MOVEQ	#18,D3			;0343e: 7612
 ; write to disk
@@ -4561,7 +4578,7 @@ _03414:
 	MOVE.L	ptrFilePtr,D1		;0352a: 22390001a9dc
 	JSR	(_DOSClose,A6)		;03530: 4eaeffdc
 	MOVE.W	#$00c8,D0		;03534: 303c00c8
-	JSR	_00BB8			;03538: 4eb900000bb8
+	JSR	_Wait			;03538: 4eb900000bb8
 	JSR	_TakeBlit		;0353e: 4eb900000396
 ; SAVE SUCCESSFUL.
 	MOVE.W	#$0243,D0		;03544: 303c0243
@@ -4569,9 +4586,9 @@ _03414:
 	MOVEA.L	ptrBuff01,A1		;0354c: 22790000052e
 	MOVEQ	#16,D0			;03552: 7010
 	MOVEQ	#36,D1			;03554: 7224
-	BSR.W	_07310			;03556: 61003db8
+	BSR.W	_DisplayText		;03556: 61003db8
 	MOVEQ	#60,D0			;0355a: 703c
-	JSR	_00BB8			;0355c: 4eb900000bb8
+	JSR	_Wait			;0355c: 4eb900000bb8
 _03562:
 	MOVE.W	#$0190,data1B46E	;03562: 33fc01900001b46e
 	JSR	_TakeBlit		;0356a: 4eb900000396
@@ -4616,13 +4633,13 @@ _035C6:
 	MOVEA.L	ptrBuff01,A1		;035d4: 22790000052e
 	MOVEQ	#16,D0			;035da: 7010
 	MOVEQ	#10,D1			;035dc: 720a
-	BSR.W	_07310			;035de: 61003d30
+	BSR.W	_DisplayText		;035de: 61003d30
 	MOVE.W	(A7)+,D0		;035e2: 301f
 	JSR	_GetStringA0		;035e4: 4eb900007520
 	MOVEA.L	ptrBuff01,A1		;035ea: 22790000052e
 	MOVEQ	#16,D0			;035f0: 7010
 	MOVEQ	#36,D1			;035f2: 7224
-	BSR.W	_07310			;035f4: 61003d1a
+	BSR.W	_DisplayText		;035f4: 61003d1a
 ; OPERATION ABORTED!
 ; RECTIFY THE FAULT AND TRY AGAIN
 	MOVE.W	#$023b,D0		;035f8: 303c023b
@@ -4630,9 +4647,9 @@ _035C6:
 	MOVEA.L	ptrBuff01,A1		;03600: 22790000052e
 	MOVEQ	#16,D0			;03606: 7010
 	MOVEQ	#66,D1			;03608: 7242
-	BSR.W	_07310			;0360a: 61003d04
+	BSR.W	_DisplayText		;0360a: 61003d04
 	MOVE.W	#$0096,D0		;0360e: 303c0096
-	JSR	_00BB8			;03612: 4eb900000bb8
+	JSR	_Wait			;03612: 4eb900000bb8
 	RTS				;03618: 4e75
 _0361A:
 ; SCANNING FOR SAVED GAMES....
@@ -4641,7 +4658,7 @@ _0361A:
 	MOVEA.L	ptrBuff01,A1		;03622: 22790000052e
 	MOVEQ	#16,D0			;03628: 7010
 	MOVEQ	#22,D1			;0362a: 7216
-	BSR.W	_07310			;0362c: 61003ce2
+	BSR.W	_DisplayText		;0362c: 61003ce2
 	MOVEQ	#3,D7			;03630: 7e03
 	LEA	arrDF0Saves,A4		;03632: 49f90001b25c
 	TST.B	flgIDFile		;03638: 4a390001af15
@@ -4699,7 +4716,7 @@ _036B8:
 	MOVEA.L	ptrBuff01,A1		;036c4: 22790000052e
 	MOVEQ	#24,D0			;036ca: 7018
 	MOVEQ	#16,D1			;036cc: 7210
-	BSR.W	_07310			;036ce: 61003c40
+	BSR.W	_DisplayText		;036ce: 61003c40
 	MOVEQ	#3,D7			;036d2: 7e03
 	LEA	ptr1B4B8,A5		;036d4: 4bf90001b4b8
 	MOVEQ	#36,D1			;036da: 7224
@@ -4708,7 +4725,7 @@ loop036DC:
 	MOVEA.L	ptrBuff01,A1		;036de: 22790000052e
 	MOVEQ	#100,D0			;036e4: 7064
 	MOVEM.L	D1/D7/A5,-(A7)		;036e6: 48e74104
-	BSR.W	_07310			;036ea: 61003c24
+	BSR.W	_DisplayText		;036ea: 61003c24
 	MOVEM.L	(A7)+,D1/D7/A5		;036ee: 4cdf2082
 	ADDQ.L	#8,A5			;036f2: 508d
 	ADDQ.L	#8,A5			;036f4: 508d
@@ -4722,7 +4739,7 @@ loop036DC:
 	MOVEA.L	ptrBuff01,A1		;03706: 22790000052e
 	MOVEQ	#24,D0			;0370c: 7018
 	MOVEQ	#86,D1			;0370e: 7256
-	BSR.W	_07310			;03710: 61003bfe
+	BSR.W	_DisplayText		;03710: 61003bfe
 	RTS				;03714: 4e75
 _LoadGame:
 	BSR.W	_02FAA			;03716: 6100f892
@@ -4737,12 +4754,12 @@ _LoadGame:
 	MOVEA.L	ptrBuff01,A1		;0372a: 22790000052e
 	MOVEQ	#16,D0			;03730: 7010
 	MOVEQ	#10,D1			;03732: 720a
-	BSR.W	_07310			;03734: 61003bda
+	BSR.W	_DisplayText		;03734: 61003bda
 _03738:
 	TST.B	MouseBtn		;03738: 4a3900000766
 	BEQ.S	_03738			;0373e: 67f8
 	MOVE.W	#$0096,D0		;03740: 303c0096
-	JSR	_00BB8			;03744: 4eb900000bb8
+	JSR	_Wait			;03744: 4eb900000bb8
 	BSR.W	_02FAA			;0374a: 6100f85e
 ; ANALYSING DISK....
 	MOVE.W	#$0239,D0		;0374e: 303c0239
@@ -4750,8 +4767,8 @@ _03738:
 	MOVEA.L	ptrBuff01,A1		;03756: 22790000052e
 	MOVEQ	#16,D0			;0375c: 7010
 	MOVEQ	#10,D1			;0375e: 720a
-	BSR.W	_07310			;03760: 61003bae
-	JSR	_003BE			;03764: 4eb9000003be
+	BSR.W	_DisplayText		;03760: 61003bae
+	JSR	_Blit003BE		;03764: 4eb9000003be
 	MOVE.L	#strDF0,D1		;0376a: 223c0001b497
 	MOVEQ	#-2,D2			;03770: 74fe
 	MOVEA.L	ptrDOSBase,A6		;03772: 2c790001a9f0
@@ -4767,7 +4784,7 @@ _0378E:
 	BEQ.S	_0378E			;03794: 67f8
 	BTST	#1,D0			;03796: 08000001
 	BNE.W	_03A0E			;0379a: 66000272
-	MOVE.W	unk00762,D0		;0379e: 303900000762
+	MOVE.W	intMouseY,D0		;0379e: 303900000762
 	SUBI.W	#$0024,D0		;037a4: 04400024
 	BMI.S	_0378E			;037a8: 6be4
 	EXT.L	D0			;037aa: 48c0
@@ -4780,7 +4797,7 @@ _0378E:
 	LEA	ptr1B3F4,A0		;037c0: 41f90001b3f4
 	TST.L	(0,A0,D0.W)		;037c6: 4ab00000
 	BEQ.S	_0378E			;037ca: 67c2
-	JSR	_003BE			;037cc: 4eb9000003be
+	JSR	_Blit003BE		;037cc: 4eb9000003be
 	MOVEA.L	ptrDOSBase,A6		;037d2: 2c790001a9f0
 	MOVE.W	data1B404,D0		;037d8: 30390001b404
 	ADD.W	D0,D0			;037de: d040
@@ -4797,7 +4814,7 @@ _037F6:
 	MOVE.L	D0,ptrFilePtr2		;0380a: 23c00001a9e0
 	BEQ.W	_03A1E			;03810: 6700020c
 	MOVE.L	ptrFilePtr2,D1		;03814: 22390001a9e0
-	MOVE.L	#saved_1B4F8,D2		;0381a: 243c0001b4f8
+	MOVE.L	#strSaveName,D2		;0381a: 243c0001b4f8
 	MOVEQ	#18,D3			;03820: 7612
 	JSR	(_DOSRead,A6)		;03822: 4eaeffd6
 	TST.L	D0			;03826: 4a80
@@ -4823,15 +4840,15 @@ _0384A:
 	MOVEA.L	ptrBuff01,A1		;03864: 22790000052e
 	MOVEQ	#24,D0			;0386a: 7018
 	MOVEQ	#16,D1			;0386c: 7210
-	BSR.W	_07310			;0386e: 61003aa0
-	JSR	_003BE			;03872: 4eb9000003be
+	BSR.W	_DisplayText		;0386e: 61003aa0
+	JSR	_Blit003BE		;03872: 4eb9000003be
 	JSR	_MouseWait		;03878: 4eb900000bd6
 	MOVE.W	#$0064,D0		;0387e: 303c0064
-	JSR	_00BB8			;03882: 4eb900000bb8
+	JSR	_Wait			;03882: 4eb900000bb8
 _03888:
 	ST	flg1AF12		;03888: 50f90001af12
 	MOVE.W	intAlienID,D0		;0388e: 303900020304
-	BSR.W	_043EA			;03894: 61000b54
+	BSR.W	_NewAlien043EA		;03894: 61000b54
 	BMI.S	_0384A			;03898: 6bb0
 	SF	flg1AF12		;0389a: 51f90001af12
 	TST.B	flgIDFile		;038a0: 4a390001af15
@@ -4845,11 +4862,11 @@ _03888:
 	MOVEA.L	ptrBuff01,A1		;038ba: 22790000052e
 	MOVEQ	#24,D0			;038c0: 7018
 	MOVEQ	#16,D1			;038c2: 7210
-	BSR.W	_07310			;038c4: 61003a4a
-	JSR	_003BE			;038c8: 4eb9000003be
+	BSR.W	_DisplayText		;038c4: 61003a4a
+	JSR	_Blit003BE		;038c8: 4eb9000003be
 	JSR	_MouseWait		;038ce: 4eb900000bd6
 	MOVE.W	#$0064,D0		;038d4: 303c0064
-	JSR	_00BB8			;038d8: 4eb900000bb8
+	JSR	_Wait			;038d8: 4eb900000bb8
 _038DE:
 	JSR	_TakeBlit		;038de: 4eb900000396
 	BSR.W	_02FAA			;038e4: 6100f6c4
@@ -4859,8 +4876,8 @@ _038DE:
 	MOVEA.L	ptrBuff01,A1		;038f0: 22790000052e
 	MOVEQ	#16,D0			;038f6: 7010
 	MOVEQ	#10,D1			;038f8: 720a
-	BSR.W	_07310			;038fa: 61003a14
-	JSR	_003BE			;038fe: 4eb9000003be
+	BSR.W	_DisplayText		;038fa: 61003a14
+	JSR	_Blit003BE		;038fe: 4eb9000003be
 	MOVEA.L	ptrDOSBase,A6		;03904: 2c790001a9f0
 	MOVE.L	ptrFilePtr2,D1		;0390a: 22390001a9e0
 	MOVE.L	#tblTransporters,D2	;03910: 243c00020a8c
@@ -4914,9 +4931,9 @@ _038DE:
 	MOVEA.L	ptrBuff01,A1		;039e8: 22790000052e
 	MOVEQ	#16,D0			;039ee: 7010
 	MOVEQ	#10,D1			;039f0: 720a
-	BSR.W	_07310			;039f2: 6100391c
+	BSR.W	_DisplayText		;039f2: 6100391c
 	MOVEQ	#60,D0			;039f6: 703c
-	JSR	_00BB8			;039f8: 4eb900000bb8
+	JSR	_Wait			;039f8: 4eb900000bb8
 	BSR.W	_04F2C			;039fe: 6100152c
 	JSR	_MouseWait		;03a02: 4eb900000bd6
 	SF	flgUnknown61		;03a08: 51f90002df04
@@ -4957,30 +4974,30 @@ _03A78:
 	JSR	_LoadMGLFile		;03a84: 4eb900000d2c
 _03A8A:
 	MOVEA.L	ptr1AF08,A0		;03a8a: 20790001af08
-	LEA	ptr1AF56,A1		;03a90: 43f90001af56
+	LEA	paletteScreen,A1	;03a90: 43f90001af56
 	MOVE.L	ptrBuff02,D0		;03a96: 203900000532
-	BSR.W	_05290			;03a9c: 610017f2
-	CLR.W	data1AF5C		;03aa0: 42790001af5c
+	BSR.W	_IFF_ILBM_05290		;03a9c: 610017f2
+	CLR.W	LAB_10C4		;03aa0: 42790001af5c
 	MOVEA.L	ptrBuff02,A5		;03aa6: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;03aac: 2c790000052a
-	BSR.W	_05584			;03ab2: 61001ad0
+	BSR.W	_DiskReq_05584		;03ab2: 61001ad0
 	SF	flg00BB5		;03ab6: 51f900000bb5
-	SF	flg1B69D		;03abc: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;03abc: 51f90001b69d
 	ST	flg2E482		;03ac2: 50f90002e482
 	LEA	textarea,A0		;03ac8: 41f900031d30
 	BSR.W	_053CA			;03ace: 610018fa
-	SF	flg00BB2		;03ad2: 51f900000bb2
+	SF	flgWait			;03ad2: 51f900000bb2
 _03AD8:
-	TST.B	flg00BB2		;03ad8: 4a3900000bb2
+	TST.B	flgWait			;03ad8: 4a3900000bb2
 	BEQ.S	_03AD8			;03ade: 67f8
-	SF	flg00BB2		;03ae0: 51f900000bb2
+	SF	flgWait			;03ae0: 51f900000bb2
 	BSR.W	_05724			;03ae6: 61001c3c
-	LEA	ptr1AF56,A0		;03aea: 41f90001af56
+	LEA	paletteScreen,A0	;03aea: 41f90001af56
 	BSR.W	_053CA			;03af0: 610018d8
-	MOVE.L	#data1CBE6,ptr1C8E2	;03af4: 23fc0001cbe60001c8e2
-	MOVE.L	#data1D084,ptr1C8E6	;03afe: 23fc0001d0840001c8e6
-	MOVE.B	data2E476,data2E477	;03b08: 13f90002e4760002e477
-	MOVE.B	#$1c,data2E476		;03b12: 13fc001c0002e476
+	MOVE.L	#dataIntel1CBE6,textField07 ;03af4: 23fc0001cbe60001c8e2
+	MOVE.L	#dataIntel1D084,textField08 ;03afe: 23fc0001d0840001c8e6
+	MOVE.B	textcolor,tmpTextcolor	;03b08: 13f90002e4760002e477
+	MOVE.B	#$1c,textcolor		;03b12: 13fc001c0002e476
 	MOVE.B	#$01,intTypeSpeed	;03b1a: 13fc00010001cb03
 	ST	flg1B49D		;03b22: 50f90001b49d
 	MOVEA.L	ptrBuff01,A1		;03b28: 22790000052e
@@ -4991,18 +5008,18 @@ _03AD8:
 	BSR.W	_GetStringA0		;03b32: 610039ec
 	MOVEQ	#24,D0			;03b36: 7018
 	MOVEQ	#16,D1			;03b38: 7210
-	BSR.W	_07310			;03b3a: 610037d4
+	BSR.W	_DisplayText		;03b3a: 610037d4
 	MOVEQ	#18,D0			;03b3e: 7012
 	JSR	_PlayVoice		;03b40: 4eb90001a2dc
 	MOVEQ	#60,D0			;03b46: 703c
-	JSR	_00BB8			;03b48: 4eb900000bb8
+	JSR	_Wait			;03b48: 4eb900000bb8
 	ST	intTypeSpeed		;03b4e: 50f90001cb03
 	CLR.W	data1B27C		;03b54: 42790001b27c
 	BRA.W	_03BF0			;03b5a: 60000094
 _03B5E:
 	MOVEA.L	ptrBuff02,A5		;03b5e: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;03b64: 2c790000052a
-	BSR.W	_05584			;03b6a: 61001a18
+	BSR.W	_DiskReq_05584		;03b6a: 61001a18
 	BSR.W	_03D40			;03b6e: 610001d0
 ; PREV   NEXT   PURCHASE   CLEAR   END
 	MOVE.W	#$0250,D0		;03b72: 303c0250
@@ -5010,11 +5027,11 @@ _03B5E:
 	MOVEA.L	ptrBuff00,A1		;03b7a: 22790000052a
 	MOVEQ	#40,D0			;03b80: 7028
 	MOVE.W	#$00b6,D1		;03b82: 323c00b6
-	BSR.W	_07310			;03b86: 61003788
+	BSR.W	_DisplayText		;03b86: 61003788
 	BSR.W	_05724			;03b8a: 61001b98
 _03B8E:
 	JSR	_MouseWait		;03b8e: 4eb900000bd6
-	MOVEM.W	unk00760,D0-D1		;03b94: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;03b94: 4cb9000300000760
 	LEA	ptr1B1E4,A0		;03b9c: 41f90001b1e4
 	JSR	_1156E			;03ba2: 4eb90001156e
 	BMI.S	_03B8E			;03ba8: 6be4
@@ -5101,7 +5118,7 @@ _03CC0:
 	MOVE.B	#$01,intTypeSpeed	;03cc0: 13fc00010001cb03
 	MOVEA.L	ptrBuff02,A5		;03cc8: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;03cce: 2c790000052a
-	BSR.W	_05584			;03cd4: 610018ae
+	BSR.W	_DiskReq_05584		;03cd4: 610018ae
 	BSR.W	_05724			;03cd8: 61001a4a
 ; THANKYOU FOR ORDERING FROM SCI-TEK....
 ; ;
@@ -5112,16 +5129,16 @@ _03CC0:
 	MOVEA.L	ptrBuff01,A1		;03ce4: 22790000052e
 	MOVEQ	#40,D0			;03cea: 7028
 	MOVEQ	#20,D1			;03cec: 7214
-	BSR.W	_07310			;03cee: 61003620
+	BSR.W	_DisplayText		;03cee: 61003620
 	MOVE.W	#$0064,D0		;03cf2: 303c0064
-	JSR	_00BB8			;03cf6: 4eb900000bb8
+	JSR	_Wait			;03cf6: 4eb900000bb8
 _03CFC:
 	BSR.W	_05644			;03cfc: 61001946
 	SF	flg2E482		;03d00: 51f90002e482
 	ST	flg00BB5		;03d06: 50f900000bb5
-	MOVE.L	#data1CB0A,ptr1C8E2	;03d0c: 23fc0001cb0a0001c8e2
-	MOVE.L	#data1CD36,ptr1C8E6	;03d16: 23fc0001cd360001c8e6
-	MOVE.B	data2E477,data2E476	;03d20: 13f90002e4770002e476
+	MOVE.L	#data1CB0A,textField07	;03d0c: 23fc0001cb0a0001c8e2
+	MOVE.L	#data1CD36,textField08	;03d16: 23fc0001cd360001c8e6
+	MOVE.B	tmpTextcolor,textcolor	;03d20: 13f90002e4770002e476
 	ST	intTypeSpeed		;03d2a: 50f90001cb03
 	SF	flgPaused		;03d30: 51f90002e458
 	SF	flg1B49D		;03d36: 51f90001b49d
@@ -5146,7 +5163,7 @@ _03D58:
 	MOVE.L	A0,-(A7)		;03d80: 2f08
 	MOVEA.L	ptrBuff02,A5		;03d82: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;03d88: 2c790000052a
-	BSR.W	_05584			;03d8e: 610017f4
+	BSR.W	_DiskReq_05584		;03d8e: 610017f4
 	BSR.W	_05724			;03d92: 61001990
 ; LOADING FROM DATABASE....
 	MOVE.W	#$024b,D0		;03d96: 303c024b
@@ -5155,7 +5172,7 @@ _03D58:
 	MOVEA.L	ptrBuff01,A1		;03da6: 22790000052e
 	MOVEQ	#24,D0			;03dac: 7018
 	MOVEQ	#16,D1			;03dae: 7210
-	BSR.W	_07310			;03db0: 6100355e
+	BSR.W	_DisplayText		;03db0: 6100355e
 	MOVE.B	flg1B49C,D0		;03db4: 10390001b49c
 	SUBQ.B	#1,D0			;03dba: 5300
 	EXT.W	D0			;03dbc: 4880
@@ -5171,7 +5188,7 @@ _03DDA:
 	MOVE.L	A0,-(A7)		;03ddc: 2f08
 	MOVEA.L	ptrBuff02,A5		;03dde: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;03de4: 2c790000052a
-	BSR.W	_05584			;03dea: 61001798
+	BSR.W	_DiskReq_05584		;03dea: 61001798
 	SUBQ.B	#1,D0			;03dee: 5300
 	EXT.W	D0			;03df0: 4880
 	MULU	#$0d80,D0		;03df2: c0fc0d80
@@ -5190,7 +5207,7 @@ _03DDA:
 	LEA	ptr3113E,A6		;03e20: 4df90003113e
 	MOVEA.L	ptrBuff00,A1		;03e26: 22790000052a
 	ST	intTypeSpeed		;03e2c: 50f90001cb03
-	BSR.W	_0757A			;03e32: 61003746
+	BSR.W	_Window_0757A		;03e32: 61003746
 	RTS				;03e36: 4e75
 _03E38:
 	LEA	ptr2E40B,A0		;03e38: 41f90002e40b
@@ -5220,7 +5237,7 @@ _03E6E:
 	RTS				;03e76: 4e75
 _03E78:
 ; whatever saved_1b4f4 is, 16 bytes appear in the save file
-	LEA	saved_1B4F8,A2		;03e78: 45f90001b4f8
+	LEA	strSaveName,A2		;03e78: 45f90001b4f8
 	MOVE.L	A2,ptr03F60		;03e7e: 23ca00003f60
 	MOVE.B	#$13,(A2)+		;03e84: 14fc0013
 	SF	(A2)			;03e88: 51d2
@@ -5229,26 +5246,26 @@ _03E90:
 	ST	intTypeSpeed		;03e90: 50f90001cb03
 	MOVEA.L	ptrBuff02,A5		;03e96: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;03e9c: 2c790000052a
-	BSR.W	_05584			;03ea2: 610016e0
+	BSR.W	_DiskReq_05584		;03ea2: 610016e0
 ; 593: LOAD   SAVE   ALIEN   FX   SPEECH   DOS   END
 	MOVE.W	#$0251,D0		;03ea6: 303c0251
 	BSR.W	_GetStringA0		;03eaa: 61003674
 	MOVEA.L	ptrBuff00,A1		;03eae: 22790000052a
 	MOVEQ	#16,D0			;03eb4: 7010
 	MOVE.W	#$00b6,D1		;03eb6: 323c00b6
-	BSR.W	_07310			;03eba: 61003454
+	BSR.W	_DisplayText		;03eba: 61003454
 	MOVEA.L	ptrBuff00,A1		;03ebe: 22790000052a
 ; 605: ENTER A NAME FOR THE SAVED FILE:
 	MOVE.W	#$025d,D0		;03ec4: 303c025d
 	BSR.W	_GetStringA0		;03ec8: 61003656
 	MOVEQ	#16,D1			;03ecc: 7210
 	MOVEQ	#40,D0			;03ece: 7028
-	BSR.W	_07310			;03ed0: 6100343e
+	BSR.W	_DisplayText		;03ed0: 6100343e
 	MOVEA.L	ptrBuff00,A1		;03ed4: 22790000052a
-	LEA	saved_1B4F8,A0		;03eda: 41f90001b4f8
+	LEA	strSaveName,A0		;03eda: 41f90001b4f8
 	MOVEQ	#40,D1			;03ee0: 7228
 	MOVEQ	#40,D0			;03ee2: 7028
-	BSR.W	_07310			;03ee4: 6100342a
+	BSR.W	_DisplayText		;03ee4: 6100342a
 	BSR.W	_05724			;03ee8: 6100183a
 _03EEC:
 	MOVE.B	InKey,D0		;03eec: 103900000764
@@ -5296,8 +5313,8 @@ flg03F64:
 _ManualCodeScreen:
 	MOVEA.L	ptrBuff02,A0		;03f66: 207900000532
 	BSR.W	_056A6			;03f6c: 61001738
-	CLR.W	data2E484		;03f70: 42790002e484
-	BSR.W	_06840			;03f76: 610028c8
+	CLR.W	intAsteroidFacing	;03f70: 42790002e484
+	BSR.W	_RandomScreenCoordsThing_06840 ;03f76: 610028c8
 	MOVE.B	#$03,unk04195		;03f7a: 13fc000300004195
 _03F82:
 	LEA	field_1D564,A2		;03f82: 45f90001d564
@@ -5330,37 +5347,37 @@ _03FE2:
 	BSR.W	_05540			;03fee: 61001550
 	LEA	ptr31564,A6		;03ff2: 4df900031564
 	MOVEA.L	ptrBuff00,A1		;03ff8: 22790000052a
-	BSR.W	_0757A			;03ffe: 6100357a
+	BSR.W	_Window_0757A		;03ffe: 6100357a
 	MOVEA.L	ptrBuff00,A5		;04002: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;04008: 2c790000052e
-	BSR.W	_05584			;0400e: 61001574
-_04012:
+	BSR.W	_DiskReq_05584		;0400e: 61001574
+_TextInput_04012:
 	MOVE.B	InKey,D0		;04012: 103900000764
-	BEQ.S	_04012			;04018: 67f8
+	BEQ.S	_TextInput_04012	;04018: 67f8
 	SF	InKey			;0401a: 51f900000764
 	MOVEA.L	ptr04174,A0		;04020: 207900004174
 	MOVEA.L	ptr04178,A3		;04026: 267900004178
 	MOVE.B	flg04194,D7		;0402c: 1e3900004194
 ; $44 = return (numpad), $43 = Enter, $41 = Backspace
 	CMPI.B	#$44,D0			;04032: 0c000044
-	BEQ.S	_0408A			;04036: 6752
+	BEQ.S	_TypeEnter_0408A	;04036: 6752
 	CMPI.B	#$43,D0			;04038: 0c000043
-	BEQ.S	_0408A			;0403c: 674c
+	BEQ.S	_TypeEnter_0408A	;0403c: 674c
 	CMPI.B	#$41,D0			;0403e: 0c000041
-	BNE.S	_04054			;04042: 6610
+	BNE.S	_NormalKey04054		;04042: 6610
 	TST.B	D7			;04044: 4a07
-	BEQ.S	_04012			;04046: 67ca
+	BEQ.S	_TextInput_04012	;04046: 67ca
 	SUBQ.L	#1,A0			;04048: 5388
 	SUBQ.L	#1,A3			;0404a: 538b
 	SUBQ.B	#1,flg04194		;0404c: 533900004194
 	BRA.S	_04074			;04052: 6020
-_04054:
+_NormalKey04054:
 	CMPI.B	#$0f,D7			;04054: 0c07000f
-	BEQ.S	_04012			;04058: 67b8
+	BEQ.S	_TextInput_04012	;04058: 67b8
 	LEA	ptr1CCC4,A1		;0405a: 43f90001ccc4
 _04060:
 	MOVE.B	(A1)+,D1		;04060: 1219
-	BMI.S	_04012			;04062: 6bae
+	BMI.S	_TextInput_04012	;04062: 6bae
 	MOVE.B	(A1)+,D2		;04064: 1419
 	CMP.B	D0,D1			;04066: b200
 	BNE.S	_04060			;04068: 66f6
@@ -5373,7 +5390,7 @@ _04074:
 	MOVE.B	#$13,(A0)+		;04080: 10fc0013
 	SF	(A0)			;04084: 51d0
 	BRA.W	_03FE2			;04086: 6000ff5a
-_0408A:
+_TypeEnter_0408A:
 	LEA	unk04182,A0		;0408a: 41f900004182
 	MOVEA.L	ptr0417C,A1		;04090: 22790000417c
 	MOVEQ	#0,D0			;04096: 7000
@@ -5402,16 +5419,16 @@ _CodeInvalid:
 ; Manual protection check. The cracked version changes the first two
 ; bytes from 303c to 6016, branching forward 24 bytes to "code accepted".
 	MOVE.W	#$025b,D0		;040c6: 303c025b
-	MOVE.W	D0,unk04180		;040ca: 33c000004180
+	MOVE.W	D0,msgManual04180	;040ca: 33c000004180
 	BSR.W	_GetStringA0		;040d0: 6100344e
-	MOVE.B	#$09,data2E476		;040d4: 13fc00090002e476
+	MOVE.B	#$09,textcolor		;040d4: 13fc00090002e476
 	BRA.S	_040F4			;040dc: 6016
 _CodeAccepted:
 ; 0x025c: AUTHORISATION CODE ACCEPTED...
 	MOVE.W	#$025c,D0		;040de: 303c025c
-	MOVE.W	D0,unk04180		;040e2: 33c000004180
+	MOVE.W	D0,msgManual04180	;040e2: 33c000004180
 	BSR.W	_GetStringA0		;040e8: 61003436
-	MOVE.B	#$07,data2E476		;040ec: 13fc00070002e476
+	MOVE.B	#$07,textcolor		;040ec: 13fc00070002e476
 _040F4:
 	MOVE.L	A0,ptr04174		;040f4: 23c800004174
 	MOVEA.L	ptrBuff02,A5		;040fa: 2a7900000532
@@ -5423,12 +5440,12 @@ _040F4:
 	MOVEQ	#80,D0			;0411c: 7050
 	MOVEQ	#90,D1			;0411e: 725a
 	MOVEA.L	ptr04174,A0		;04120: 207900004174
-	BSR.W	_07310			;04126: 610031e8
+	BSR.W	_DisplayText		;04126: 610031e8
 	ST	intTypeSpeed		;0412a: 50f90001cb03
-	MOVE.B	#$0c,data2E476		;04130: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;04130: 13fc000c0002e476
 	MOVEQ	#80,D0			;04138: 7050
-	JSR	_00BB8			;0413a: 4eb900000bb8
-	CMPI.W	#$025c,unk04180		;04140: 0c79025c00004180
+	JSR	_Wait			;0413a: 4eb900000bb8
+	CMPI.W	#$025c,msgManual04180	;04140: 0c79025c00004180
 	BEQ.S	_04166			;04148: 671c
 	SUBQ.B	#1,unk04195		;0414a: 533900004195
 	BNE.W	_03F82			;04150: 6600fe30
@@ -5440,7 +5457,7 @@ loop04160:
 	DBF	D0,loop04160		;04162: 51c8fffc
 _04166:
 	ST	flgManualCodeGiven	;04166: 50f90001af14
-	ST	flg2E48B		;0416c: 50f90002e48b
+	ST	flgRedraw		;0416c: 50f90002e48b
 	RTS				;04172: 4e75
 ptr04174:
 	DS.L	1			;04174
@@ -5448,7 +5465,7 @@ ptr04178:
 	DS.L	1			;04178
 ptr0417C:
 	DS.L	1			;0417c
-unk04180:
+msgManual04180:
 	DS.W	1			;04180
 unk04182:
 	DS.L	4			;04182
@@ -5460,16 +5477,16 @@ unk04195:
 _04196:
 	MOVEA.L	ptrBuff02,A0		;04196: 207900000532
 	BSR.W	_056A6			;0419c: 61001508
-	CLR.W	data2E484		;041a0: 42790002e484
-	BSR.W	_06840			;041a6: 61002698
+	CLR.W	intAsteroidFacing	;041a0: 42790002e484
+	BSR.W	_RandomScreenCoordsThing_06840 ;041a6: 61002698
 	MOVEA.L	ptrBuff02,A5		;041aa: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;041b0: 2c790000052a
 	BSR.W	_05540			;041b6: 61001388
-	LEA	ptr1AF96,A0		;041ba: 41f90001af96
+	LEA	palette,A0		;041ba: 41f90001af96
 	BSR.W	_053CA			;041c0: 61001208
 	BSR.W	_056D0			;041c4: 6100150a
 	RTS				;041c8: 4e75
-_041CA:
+_ScreenAlien0_041CA:
 	ST	flg315CD		;041ca: 50f9000315cd
 	MOVE.W	D1,unk043E8		;041d0: 33c1000043e8
 	BSR.S	_04196			;041d6: 61be
@@ -5493,10 +5510,10 @@ _041FC:
 	MOVEA.L	ptrBuff01,A1		;04204: 22790000052e
 	MOVEQ	#16,D0			;0420a: 7010
 	MOVEQ	#32,D1			;0420c: 7220
-	BSR.W	_07310			;0420e: 61003100
+	BSR.W	_DisplayText		;0420e: 61003100
 _04212:
 	MOVEQ	#100,D0			;04212: 7064
-	JSR	_00BB8			;04214: 4eb900000bb8
+	JSR	_Wait			;04214: 4eb900000bb8
 	ST	intTypeSpeed		;0421a: 50f90001cb03
 	SF	flg315CD		;04220: 51f9000315cd
 	RTS				;04226: 4e75
@@ -5516,7 +5533,7 @@ _04228:
 	MOVEA.L	ptrBuff01,A1		;04240: 22790000052e
 	MOVEQ	#16,D0			;04246: 7010
 	MOVEQ	#32,D1			;04248: 7220
-	BSR.W	_07310			;0424a: 610030c4
+	BSR.W	_DisplayText		;0424a: 610030c4
 _0424E:
 	TST.B	MouseBtn		;0424e: 4a3900000766
 	BEQ.S	_0424E			;04254: 67f8
@@ -5532,7 +5549,7 @@ _0424E:
 	MOVEA.L	ptrBuff01,A1		;0427c: 22790000052e
 	MOVEQ	#16,D0			;04282: 7010
 	MOVEQ	#32,D1			;04284: 7220
-	BSR.W	_07310			;04286: 61003088
+	BSR.W	_DisplayText		;04286: 61003088
 	BRA.S	_04212			;0428a: 6086
 _0428C:
 ; 600: YOU HAVE ELECTED TO BEGIN A NEW MISSION
@@ -5544,9 +5561,9 @@ _0428C:
 	MOVEA.L	ptrBuff01,A1		;04294: 22790000052e
 	MOVEQ	#16,D0			;0429a: 7010
 	MOVEQ	#32,D1			;0429c: 7220
-	BSR.W	_07310			;0429e: 61003070
+	BSR.W	_DisplayText		;0429e: 61003070
 	MOVE.W	unk043E8,D0		;042a2: 3039000043e8
-	BSR.W	_043EA			;042a8: 61000140
+	BSR.W	_NewAlien043EA		;042a8: 61000140
 	BSR.W	_InitPlayerAst		;042ac: 6100ddd0
 	MOVE.B	#$01,intTypeSpeed	;042b0: 13fc00010001cb03
 	MOVEA.L	ptrBuff02,A5		;042b8: 2a7900000532
@@ -5559,8 +5576,8 @@ _0428C:
 	MOVEA.L	ptrBuff01,A1		;042d4: 22790000052e
 	MOVEQ	#16,D0			;042da: 7010
 	MOVEQ	#16,D1			;042dc: 7210
-	MOVE.B	#$0b,data2E476		;042de: 13fc000b0002e476
-	BSR.W	_07310			;042e6: 61003028
+	MOVE.B	#$0b,textcolor		;042de: 13fc000b0002e476
+	BSR.W	_DisplayText		;042e6: 61003028
 	MOVE.W	intCurrentAlienID,D0	;042ea: 30390002df02
 	ADDI.W	#$021c,D0		;042f0: 0640021c
 ; Last minute intelligence strings 541 to 546 for aliens 1-6.
@@ -5568,17 +5585,17 @@ _0428C:
 	MOVEA.L	ptrBuff01,A1		;042f8: 22790000052e
 	MOVEQ	#16,D0			;042fe: 7010
 	MOVEQ	#42,D1			;04300: 722a
-	MOVE.B	#$0c,data2E476		;04302: 13fc000c0002e476
-	BSR.W	_07310			;0430a: 61003004
+	MOVE.B	#$0c,textcolor		;04302: 13fc000c0002e476
+	BSR.W	_DisplayText		;0430a: 61003004
 ; YOU ARE GIVEN THE FOLLOWING EQUIPMENT:
 	MOVE.W	#$00df,D0		;0430e: 303c00df
 	BSR.W	_GetStringA0		;04312: 6100320c
 	MOVEA.L	ptrBuff01,A1		;04316: 22790000052e
 	MOVEQ	#16,D0			;0431c: 7010
 	MOVEQ	#92,D1			;0431e: 725c
-	MOVE.B	#$0b,data2E476		;04320: 13fc000b0002e476
-	BSR.W	_07310			;04328: 61002fe6
-	MOVE.B	#$0c,data2E476		;0432c: 13fc000c0002e476
+	MOVE.B	#$0b,textcolor		;04320: 13fc000b0002e476
+	BSR.W	_DisplayText		;04328: 61002fe6
+	MOVE.B	#$0c,textcolor		;0432c: 13fc000c0002e476
 	LEA	arrStartingBP,A5	;04334: 4bf90001b4a0
 ; 0b000000 0b000000 0b1a1c00 06101600 07080000 08141800
 ; Four bytes for each alien determining which blueprints you start with.
@@ -5593,7 +5610,7 @@ loop0434A:
 	MOVE.B	(A5)+,D6		;0434c: 1c1d
 	BEQ.S	_04392			;0434e: 6742
 	BPL.S	_0435A			;04350: 6a08
-	BSR.W	_0756C			;04352: 61003218
+	BSR.W	_GetNoneStr		;04352: 61003218
 	MOVEQ	#0,D7			;04356: 7e00
 	BRA.S	_04376			;04358: 601c
 _0435A:
@@ -5607,7 +5624,7 @@ _04376:
 	MOVEM.L	D1/D7/A5,-(A7)		;04376: 48e74104
 	MOVEA.L	ptrBuff01,A1		;0437a: 22790000052e
 	MOVEQ	#16,D0			;04380: 7010
-	BSR.W	_07310			;04382: 61002f8c
+	BSR.W	_DisplayText		;04382: 61002f8c
 	MOVEM.L	(A7)+,D1/D7/A5		;04386: 4cdf2082
 	ADDQ.W	#8,D1			;0438a: 5041
 	ADDQ.W	#2,D1			;0438c: 5441
@@ -5619,14 +5636,15 @@ _04392:
 	MOVEA.L	ptrBuff01,A1		;0439a: 22790000052e
 	MOVEQ	#16,D0			;043a0: 7010
 	MOVE.W	#$00b4,D1		;043a2: 323c00b4
-	MOVE.B	#$0b,data2E476		;043a6: 13fc000b0002e476
-	BSR.W	_07310			;043ae: 61002f60
-	MOVE.B	#$0c,data2E476		;043b2: 13fc000c0002e476
+	MOVE.B	#$0b,textcolor		;043a6: 13fc000b0002e476
+	BSR.W	_DisplayText		;043ae: 61002f60
+	MOVE.B	#$0c,textcolor		;043b2: 13fc000c0002e476
 	CMPI.W	#$0004,intCurrentAlienID ;043ba: 0c7900040002df02
 	BNE.S	_043D4			;043c2: 6610
 ; Tylaran-specific init variables
-	BSET	#0,alien_2E00F		;043c4: 08f900000002e00f
-	BSET	#7,alien_2E00F		;043cc: 08f900070002e00f
+; Enable Asteroid Tracker display by default
+	BSET	#0,info_display		;043c4: 08f900000002e00f
+	BSET	#7,info_display		;043cc: 08f900070002e00f
 _043D4:
 	ST	intTypeSpeed		;043d4: 50f90001cb03
 	JSR	_MouseWait		;043da: 4eb900000bd6
@@ -5634,16 +5652,17 @@ _043D4:
 	RTS				;043e6: 4e75
 unk043E8:
 	DC.W	$0000			;043e8
-_043EA:
+_NewAlien043EA:
 	BSR.W	_LoadAlien		;043ea: 6100dbc0
 	BMI.S	ret043F8		;043ee: 6b08
-	BSR.S	_043FA			;043f0: 6108
-	BSR.W	_023A2			;043f2: 6100dfae
+	BSR.S	_InitializeGame_043FA	;043f0: 6108
+	BSR.W	_LoadAlienFiles023A2	;043f2: 6100dfae
 	MOVEQ	#0,D0			;043f6: 7000
 ret043F8:
 	RTS				;043f8: 4e75
-_043FA:
-	LEA	ptr1F856,A0		;043fa: 41f90001f856
+_InitializeGame_043FA:
+; Initialize new game. Reset memory values.
+	LEA	arrPlayerAstsKnown,A0	;043fa: 41f90001f856
 	MOVE.L	#ptr1FA0A,D0		;04400: 203c0001fa0a
 	SUB.L	A0,D0			;04406: 9088
 	SUBQ.L	#1,D0			;04408: 5380
@@ -5651,20 +5670,21 @@ loop0440A:
 	SF	(A0)+			;0440a: 51d8
 	DBF	D0,loop0440A		;0440c: 51c8fffc
 	MOVEQ	#0,D0			;04410: 7000
-	MOVE.B	D0,flg315F0		;04412: 13c0000315f0
+	MOVE.B	D0,flgDidGroundHit	;04412: 13c0000315f0
 	MOVEQ	#-1,D7			;04418: 7eff
-	MOVE.W	D7,data315EE		;0441a: 33c7000315ee
+	MOVE.W	D7,currentVoice		;0441a: 33c7000315ee
 	MOVE.W	D7,data1F0B0		;04420: 33c70001f0b0
 	MOVE.W	D7,data1B68E		;04426: 33c70001b68e
 	MOVE.L	D7,data1FA06		;0442c: 23c70001fa06
 	MOVE.W	#$0001,data1B27C	;04432: 33fc00010001b27c
-	MOVE.W	flgSound,-(A7)		;0443a: 3f390002e450
-	LEA	lUnkAst51,A0		;04440: 41f90002de4c
+	MOVE.W	flgSoundEnabled,-(A7)	;0443a: 3f390002e450
+; Iterate over 6400 bytes and set it to false
+	LEA	ptrAsteroids2de4c,A0	;04440: 41f90002de4c
 	MOVE.L	#$00000641,D1		;04446: 223c00000641
 loop0444C:
 	SF	(A0)+			;0444c: 51d8
 	DBF	D1,loop0444C		;0444e: 51c9fffc
-	MOVE.W	(A7)+,flgSound		;04452: 33df0002e450
+	MOVE.W	(A7)+,flgSoundEnabled	;04452: 33df0002e450
 	MOVE.L	#$0003d090,intCashGeneral ;04458: 23fc0003d0900002de68
 	LEA	tblTransporters,A0	;04462: 41f900020a8c
 	MOVEQ	#9,D1			;04468: 7209
@@ -5672,17 +5692,18 @@ loop0446A:
 	CLR.L	(A0)			;0446a: 4290
 	ADDQ.L	#8,A0			;0446c: 5088
 	DBF	D1,loop0446A		;0446e: 51c9fffa
-	MOVE.B	#$18,flgUnknown63	;04472: 13fc00180002e00c
-; Set bit 5
-	MOVE.B	#$20,alien_2E00F	;0447a: 13fc00200002e00f
-; 150
+	MOVE.B	#$18,intAstUnknown63	;04472: 13fc00180002e00c
+; Set bit 5 (PAFW enabled)
+	MOVE.B	#$20,info_display	;0447a: 13fc00200002e00f
+; Imperial transport countdown: 150 days
 	MOVE.W	#$0096,intImpTransport	;04482: 33fc00960002e058
 	MOVE.W	#$0064,data2E08E	;0448a: 33fc00640002e08e
-	MOVE.W	#$0019,data2E090	;04492: 33fc00190002e090
-	MOVE.W	#$0fff,data2E0A8	;0449a: 33fc0fff0002e0a8
-	LEA	arrUnknown42,A0		;044a2: 41f900020b96
+	MOVE.W	#$0019,dataAst2E090	;04492: 33fc00190002e090
+	MOVE.W	#$0fff,screenFlashColor	;0449a: 33fc0fff0002e0a8
+	LEA	arrButton1,A0		;044a2: 41f900020b96
 	MOVEQ	#13,D1			;044a8: 720d
 loop044AA:
+; Clear extracted buttons
 	CLR.W	(A0)			;044aa: 4250
 	ADDQ.L	#6,A0			;044ac: 5c88
 	DBF	D1,loop044AA		;044ae: 51c9fffa
@@ -5691,7 +5712,7 @@ loop044AA:
 	MOVE.B	D1,intEventCountdown	;044ba: 13c10002e452
 	MOVE.B	D1,intNextEvent		;044c0: 13c10002e453
 	MOVE.B	D1,intDay		;044c6: 13c10002e45b
-	MOVE.B	#$fe,flg2E455		;044cc: 13fc00fe0002e455
+	MOVE.B	#$fe,int2E455		;044cc: 13fc00fe0002e455
 ; 380
 	MOVE.W	#$017c,intClockYear	;044d4: 33fc017c0002e45c
 	LEA	strClock,A0		;044dc: 41f90002e45e
@@ -5700,11 +5721,11 @@ loop044AA:
 	MOVE.L	#$38302e30,(A0)+	;044e8: 20fc38302e30
 	MOVE.B	#$31,(A0)		;044ee: 10bc0031
 	MOVEQ	#12,D2			;044f2: 740c
-	MOVE.B	D2,data2E476		;044f4: 13c20002e476
-	MOVE.B	D2,data2E477		;044fa: 13c20002e477
+	MOVE.B	D2,textcolor		;044f4: 13c20002e476
+	MOVE.B	D2,tmpTextcolor		;044fa: 13c20002e477
 	ST	flg2E483		;04500: 50f90002e483
-	ST	flg2E48A		;04506: 50f90002e48a
-	LEA	arrUnknown40,A0		;0450c: 41f900020b7c
+	ST	flgShowUI		;04506: 50f90002e48a
+	LEA	arrBlueButtonBldgs,A0	;0450c: 41f900020b7c
 	MOVE.W	#$001e,(A0)+		;04512: 30fc001e
 	MOVE.W	#$0001,(A0)+		;04516: 30fc0001
 	MOVE.W	#$000f,(A0)+		;0451a: 30fc000f
@@ -5715,7 +5736,7 @@ loop044AA:
 	MOVE.W	#$0007,(A0)+		;0452e: 30fc0007
 	MOVE.W	#$001a,(A0)+		;04532: 30fc001a
 	MOVE.W	#$0019,(A0)		;04536: 30bc0019
-	MOVE.W	#$0001,data2E088	;0453a: 33fc00010002e088
+	MOVE.W	#$0001,currBlueBuild	;0453a: 33fc00010002e088
 	MOVEQ	#0,D1			;04542: 7200
 	MOVEA.L	ptrBuff09_Ships,A0	;04544: 20790000054e
 	MOVE.L	unk004B2,D0		;0454a: 2039000004b2
@@ -5760,9 +5781,6 @@ loop045C2:
 _045CE:
 ; Triggers on values 0100, 0105, 0109 and 010c.
 ; Deploys a random value from $2d to $2f.
-; 
-; 
-; 
 	MOVEQ	#3,D0			;045ce: 7003
 	JSR	_RandInt		;045d0: 4eb900000c0c
 	ADDI.W	#$002d,D0		;045d6: 0640002d
@@ -5777,28 +5795,28 @@ loop045EC:
 	LEA	(750,A0),A0		;045f0: 41e802ee
 	DBF	D0,loop045EC		;045f4: 51c8fff6
 	RTS				;045f8: 4e75
-_LoadLanguage:
+_LoadLanguageScreen:
 ; Probably actually load language select screen
 	LEA	strLangMGL,A0		;045fa: 41f90001abbe
 	MOVEA.L	ptrBuff03,A5		;04600: 2a7900000536
 	JSR	_LoadMGLFile		;04606: 4eb900000d2c
 	MOVEA.L	ptrBuff03,A0		;0460c: 207900000536
-	LEA	ptr1AF56,A1		;04612: 43f90001af56
+	LEA	paletteScreen,A1	;04612: 43f90001af56
 	MOVE.L	ptrBuff02,D0		;04618: 203900000532
-	BSR.W	_05290			;0461e: 61000c70
+	BSR.W	_IFF_ILBM_05290		;0461e: 61000c70
 	MOVEA.L	ptrBuff02,A5		;04622: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;04628: 2c790000052a
 	BSR.W	_05540			;0462e: 61000f10
 	ST	flgPaused		;04632: 50f90002e458
 	SF	flg00BB5		;04638: 51f900000bb5
-	SF	flg1B69D		;0463e: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;0463e: 51f90001b69d
 	SF	flg2E482		;04644: 51f90002e482
-	SF	flg00BB2		;0464a: 51f900000bb2
+	SF	flgWait			;0464a: 51f900000bb2
 _04650:
-	TST.B	flg00BB2		;04650: 4a3900000bb2
+	TST.B	flgWait			;04650: 4a3900000bb2
 	BEQ.S	_04650			;04656: 67f8
-	SF	flg00BB2		;04658: 51f900000bb2
-	LEA	ptr1AF56,A0		;0465e: 41f90001af56
+	SF	flgWait			;04658: 51f900000bb2
+	LEA	paletteScreen,A0	;0465e: 41f90001af56
 	MOVEQ	#15,D0			;04664: 700f
 	BSR.W	_053CC			;04666: 61000d64
 	MOVE.L	ptrBuff01,D0		;0466a: 20390000052e
@@ -5815,7 +5833,7 @@ _04650:
 	MOVE.W	D0,intRNG2		;046a2: 33c000000c5c
 	MOVEQ	#0,D0			;046a8: 7000
 	LEA	strEnglishMGL,A0	;046aa: 41f90001aeb8
-	MOVE.W	unk00762,D1		;046b0: 323900000762
+	MOVE.W	intMouseY,D1		;046b0: 323900000762
 	CMPI.W	#$0046,D1		;046b6: 0c410046
 	BMI.S	_046D2			;046ba: 6b16
 	MOVEQ	#2,D0			;046bc: 7002
@@ -5836,30 +5854,30 @@ _AlienScreen:
 	MOVEA.L	ptrBuff03,A5		;046f8: 2a7900000536
 	JSR	_LoadMGLFile		;046fe: 4eb900000d2c
 	MOVEA.L	ptrBuff03,A0		;04704: 207900000536
-	LEA	ptr1AF56,A1		;0470a: 43f90001af56
+	LEA	paletteScreen,A1	;0470a: 43f90001af56
 	MOVE.L	ptrBuff02,D0		;04710: 203900000532
-	BSR.W	_05290			;04716: 61000b78
+	BSR.W	_IFF_ILBM_05290		;04716: 61000b78
 	MOVEA.L	ptrBuff02,A5		;0471a: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;04720: 2c790000052a
 	BSR.W	_05540			;04726: 61000e18
 	ST	unk04A3A		;0472a: 50f900004a3a
 	SF	flg1B49E		;04730: 51f90001b49e
 	RTS				;04736: 4e75
-_04738:
+_Screen8Alien_04738:
 	MOVE.W	D0,-(A7)		;04738: 3f00
 	MOVEQ	#-1,D0			;0473a: 70ff
 	JSR	_1A3BA			;0473c: 4eb90001a3ba
 	BSR.S	_AlienScreen		;04742: 61a8
 	ST	flgPaused		;04744: 50f90002e458
 	SF	flg00BB5		;0474a: 51f900000bb5
-	SF	flg1B69D		;04750: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;04750: 51f90001b69d
 	SF	flg2E482		;04756: 51f90002e482
-	SF	flg00BB2		;0475c: 51f900000bb2
+	SF	flgWait			;0475c: 51f900000bb2
 _04762:
-	TST.B	flg00BB2		;04762: 4a3900000bb2
+	TST.B	flgWait			;04762: 4a3900000bb2
 	BEQ.S	_04762			;04768: 67f8
-	SF	flg00BB2		;0476a: 51f900000bb2
-	LEA	ptr1AF56,A0		;04770: 41f90001af56
+	SF	flgWait			;0476a: 51f900000bb2
+	LEA	paletteScreen,A0	;04770: 41f90001af56
 	MOVE.W	(A7)+,D0		;04776: 301f
 	BNE.S	_04780			;04778: 6606
 	BSR.W	_053CA			;0477a: 61000c4e
@@ -5876,12 +5894,12 @@ _04786:
 	ADDA.L	#$00007d00,A0		;047a2: d1fc00007d00
 	MOVE.L	#$00001f40,D0		;047a8: 203c00001f40
 	BSR.W	_054A8			;047ae: 61000cf8
-	MOVE.L	#data1CBE6,ptr1C8E2	;047b2: 23fc0001cbe60001c8e2
-	MOVE.L	#data1D084,ptr1C8E6	;047bc: 23fc0001d0840001c8e6
-	MOVE.B	data2E476,data2E477	;047c6: 13f90002e4760002e477
-	MOVE.B	#$0d,data2E476		;047d0: 13fc000d0002e476
-	MOVE.W	#$0001,unk04A38		;047d8: 33fc000100004a38
-	MOVE.B	#$0a,unk04A3B		;047e0: 13fc000a00004a3b
+	MOVE.L	#dataIntel1CBE6,textField07 ;047b2: 23fc0001cbe60001c8e2
+	MOVE.L	#dataIntel1D084,textField08 ;047bc: 23fc0001d0840001c8e6
+	MOVE.B	textcolor,tmpTextcolor	;047c6: 13f90002e4760002e477
+	MOVE.B	#$0d,textcolor		;047d0: 13fc000d0002e476
+	MOVE.W	#$0001,intNewAlienID	;047d8: 33fc000100004a38
+	MOVE.B	#$0a,intScreen_04A3B	;047e0: 13fc000a00004a3b
 _047E8:
 	TST.B	unk04A3A		;047e8: 4a3900004a3a
 	BNE.S	_047F8			;047ee: 6608
@@ -5889,8 +5907,8 @@ _047E8:
 	BSR.W	_056D0			;047f4: 61000eda
 _047F8:
 	LEA	arrAlienPMGL,A0		;047f8: 41f90001ad7a
-	LEA	ptr1B0E6,A1		;047fe: 43f90001b0e6
-	MOVE.W	unk04A38,D0		;04804: 303900004a38
+	LEA	arr1B0E6,A1		;047fe: 43f90001b0e6
+	MOVE.W	intNewAlienID,D0	;04804: 303900004a38
 	SUBQ.W	#1,D0			;0480a: 5340
 	ASL.W	#2,D0			;0480c: e540
 	MOVEA.L	(0,A1,D0.W),A1		;0480e: 22710000
@@ -5918,8 +5936,8 @@ loop0484C:
 	DBF	D5,loop0484C		;04854: 51cdfff6
 	BSR.W	_04B12			;04858: 610002b8
 	LEA	arrPlanetMGL,A0		;0485c: 41f90001ac8a
-	LEA	ptr1B056,A1		;04862: 43f90001b056
-	MOVE.W	unk04A38,D0		;04868: 303900004a38
+	LEA	arrAli_1B056,A1		;04862: 43f90001b056
+	MOVE.W	intNewAlienID,D0	;04868: 303900004a38
 	SUBQ.W	#1,D0			;0486e: 5340
 	ASL.W	#2,D0			;04870: e540
 	MOVEA.L	(0,A1,D0.W),A1		;04872: 22710000
@@ -5953,9 +5971,10 @@ loop04894:
 	MOVE.W	D3,chip31B06		;048dc: 33c300031b06
 	MOVEM.L	D5/D7/A0,-(A7)		;048e2: 48e70580
 	BSR.W	_04A3C			;048e6: 61000154
-	LEA	ptr1B19A,A0		;048ea: 41f90001b19a
+; alien text list
+	LEA	arrAlienIntros,A0	;048ea: 41f90001b19a
 	MOVEQ	#0,D0			;048f0: 7000
-	MOVE.W	unk04A38,D0		;048f2: 303900004a38
+	MOVE.W	intNewAlienID,D0	;048f2: 303900004a38
 	SUBQ.W	#1,D0			;048f8: 5340
 	ASL.W	#3,D0			;048fa: e740
 	ADDA.L	D0,A0			;048fc: d1c0
@@ -5965,17 +5984,17 @@ loop04894:
 	MOVE.W	(A0),textField04	;04910: 33d00001c8d6
 	LEA	ptr3123E,A6		;04916: 4df90003123e
 	MOVEA.L	ptrBuff00,A1		;0491c: 22790000052a
-	BSR.W	_0757A			;04922: 61002c56
-	CMPI.B	#$08,unk04A3B		;04926: 0c39000800004a3b
+	BSR.W	_Window_0757A		;04922: 61002c56
+	CMPI.B	#$08,intScreen_04A3B	;04926: 0c39000800004a3b
 	BPL.S	_04950			;0492e: 6a20
-	MOVE.B	#$0d,data2E476		;04930: 13fc000d0002e476
+	MOVE.B	#$0d,textcolor		;04930: 13fc000d0002e476
 ; NEXT   PLAY   END
 	MOVE.W	#$024f,D0		;04938: 303c024f
 	BSR.W	_GetStringA0		;0493c: 61002be2
 	MOVEA.L	ptrBuff00,A1		;04940: 22790000052a
 	MOVEQ	#16,D0			;04946: 7010
 	MOVE.W	#$00ac,D1		;04948: 323c00ac
-	BSR.W	_07310			;0494c: 610029c2
+	BSR.W	_DisplayText		;0494c: 610029c2
 _04950:
 	BSR.W	_056D0			;04950: 61000d7e
 	MOVEM.L	(A7)+,D5/D7/A0		;04954: 4cdf01a0
@@ -5983,7 +6002,7 @@ _04950:
 loop0495A:
 	TST.B	MouseBtn		;0495a: 4a3900000766
 	BEQ.S	_049AA			;04960: 6748
-	MOVEM.W	unk00760,D0-D1		;04962: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;04962: 4cb9000300000760
 	MOVE.L	A0,-(A7)		;0496a: 2f08
 	LEA	ptr1B1CA,A0		;0496c: 41f90001b1ca
 	JSR	_1156E			;04972: 4eb90001156e
@@ -5993,21 +6012,21 @@ loop0495A:
 	BNE.S	_049DC			;0497e: 665c
 	SF	flgUnknown61		;04980: 51f90002df04
 	SF	unk04A3A		;04986: 51f900004a3a
-	ADDQ.W	#1,unk04A38		;0498c: 527900004a38
-	CMPI.W	#$0007,unk04A38		;04992: 0c79000700004a38
+	ADDQ.W	#1,intNewAlienID	;0498c: 527900004a38
+	CMPI.W	#$0007,intNewAlienID	;04992: 0c79000700004a38
 	BMI.W	_047E8			;0499a: 6b00fe4c
-	MOVE.W	#$0001,unk04A38		;0499e: 33fc000100004a38
+	MOVE.W	#$0001,intNewAlienID	;0499e: 33fc000100004a38
 	BRA.W	_047E8			;049a6: 6000fe40
 _049AA:
-	SF	flg00BB2		;049aa: 51f900000bb2
+	SF	flgWait			;049aa: 51f900000bb2
 _049B0:
-	TST.B	flg00BB2		;049b0: 4a3900000bb2
+	TST.B	flgWait			;049b0: 4a3900000bb2
 	BEQ.S	_049B0			;049b6: 67f8
-	SF	flg00BB2		;049b8: 51f900000bb2
+	SF	flgWait			;049b8: 51f900000bb2
 	DBF	D6,loop0495A		;049be: 51ceff9a
-	SUBQ.B	#1,unk04A3B		;049c2: 533900004a3b
+	SUBQ.B	#1,intScreen_04A3B	;049c2: 533900004a3b
 	BNE.S	_049D2			;049c8: 6608
-	MOVE.B	#$0a,unk04A3B		;049ca: 13fc000a00004a3b
+	MOVE.B	#$0a,intScreen_04A3B	;049ca: 13fc000a00004a3b
 _049D2:
 	ADDA.L	D7,A0			;049d2: d1c7
 	DBF	D5,loop04894		;049d4: 51cdfebe
@@ -6017,26 +6036,26 @@ _049DC:
 	BNE.S	_049DC			;049e2: 66f8
 	CMPI.W	#$0001,D2		;049e4: 0c420001
 	BEQ.S	_049F0			;049e8: 6706
-	CLR.W	unk04A38		;049ea: 427900004a38
+	CLR.W	intNewAlienID		;049ea: 427900004a38
 _049F0:
 	BSR.W	_05644			;049f0: 61000c52
-	SF	flg1B69D		;049f4: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;049f4: 51f90001b69d
 	ST	flg00BB5		;049fa: 50f900000bb5
-	MOVE.L	#data1CB0A,ptr1C8E2	;04a00: 23fc0001cb0a0001c8e2
-	MOVE.L	#data1CD36,ptr1C8E6	;04a0a: 23fc0001cd360001c8e6
-	MOVE.B	data2E477,data2E476	;04a14: 13f90002e4770002e476
+	MOVE.L	#data1CB0A,textField07	;04a00: 23fc0001cb0a0001c8e2
+	MOVE.L	#data1CD36,textField08	;04a0a: 23fc0001cd360001c8e6
+	MOVE.B	tmpTextcolor,textcolor	;04a14: 13f90002e4770002e476
 	SF	flgPaused		;04a1e: 51f90002e458
-	ST	flg2E48B		;04a24: 50f90002e48b
-	MOVE.W	unk04A38,D1		;04a2a: 323900004a38
+	ST	flgRedraw		;04a24: 50f90002e48b
+	MOVE.W	intNewAlienID,D1	;04a2a: 323900004a38
 	MOVEQ	#1,D0			;04a30: 7001
 	RTS				;04a32: 4e75
 ptr04A34:
 	DS.L	1			;04a34
-unk04A38:
+intNewAlienID:
 	DS.W	1			;04a38
 unk04A3A:
 	DS.B	1			;04a3a
-unk04A3B:
+intScreen_04A3B:
 	DS.B	1			;04a3b
 _04A3C:
 	LEA	HARDBASE,A5		;04a3c: 4bf900dff000
@@ -6190,13 +6209,13 @@ _04BFC:
 	CLR.L	(A0)+			;04bfc: 4298
 	DBF	D0,loop04BF2		;04bfe: 51c8fff2
 	MOVE.L	ptrBuff12_Asteroids,D3	;04c02: 26390000055a
-	SUB.L	D3,lUnkAst51		;04c08: 97b90002de4c
+	SUB.L	D3,ptrAsteroids2de4c	;04c08: 97b90002de4c
 	CLR.L	lUnknown53		;04c0e: 42b90002de54
 	SUB.L	D3,ptrCurrentAst	;04c14: 97b90002de58
-	CLR.L	lUnknown54		;04c1a: 42b90002de5c
+	CLR.L	lUnknownSat54		;04c1a: 42b90002de5c
 	SUB.L	D3,ptrEnemyHome		;04c20: 97b90002de60
-	SUB.L	D3,lUnknown56		;04c26: 97b90002de64
-	LEA	ptr2DE7C,A0		;04c2c: 41f90002de7c
+	SUB.L	D3,ptrHomeAst		;04c26: 97b90002de64
+	LEA	ptrAstTarget,A0		;04c2c: 41f90002de7c
 	TST.L	(A0)			;04c32: 4a90
 	BNE.S	_04C3A			;04c34: 6604
 	MOVE.L	D7,(A0)			;04c36: 2087
@@ -6204,7 +6223,7 @@ _04BFC:
 _04C3A:
 	SUB.L	D3,(A0)			;04c3a: 9790
 _04C3C:
-	LEA	ptr2DE80,A0		;04c3c: 41f90002de80
+	LEA	ptrAst2DE80,A0		;04c3c: 41f90002de80
 	TST.L	(A0)			;04c42: 4a90
 	BNE.S	_04C4A			;04c44: 6604
 	MOVE.L	D7,(A0)			;04c46: 2087
@@ -6233,7 +6252,7 @@ _04C6E:
 	DBF	D0,loop04C64		;04c6e: 51c8fff4
 	CLR.L	ptr2DEB4		;04c72: 42b90002deb4
 	CLR.L	ptr2DEB8		;04c78: 42b90002deb8
-	CLR.L	ptr2DEC4		;04c7e: 42b90002dec4
+	CLR.L	ptrFleet_2DEC4		;04c7e: 42b90002dec4
 	CLR.L	ptr2DEC8		;04c84: 42b90002dec8
 	LEA	ptrShips_2DEDC,A0	;04c8a: 41f90002dedc
 	TST.L	(A0)			;04c90: 4a90
@@ -6539,11 +6558,11 @@ _04F52:
 	ADDA.L	#$00000014,A1		;04f54: d3fc00000014
 	DBF	D0,loop04F48		;04f5a: 51c8ffec
 	MOVE.L	ptrBuff12_Asteroids,D3	;04f5e: 26390000055a
-	ADD.L	D3,lUnkAst51		;04f64: d7b90002de4c
+	ADD.L	D3,ptrAsteroids2de4c	;04f64: d7b90002de4c
 	ADD.L	D3,ptrCurrentAst	;04f6a: d7b90002de58
 	ADD.L	D3,ptrEnemyHome		;04f70: d7b90002de60
-	ADD.L	D3,lUnknown56		;04f76: d7b90002de64
-	LEA	ptr2DE7C,A0		;04f7c: 41f90002de7c
+	ADD.L	D3,ptrHomeAst		;04f76: d7b90002de64
+	LEA	ptrAstTarget,A0		;04f7c: 41f90002de7c
 	CMP.L	(A0),D7			;04f82: be90
 	BNE.S	_04F8A			;04f84: 6604
 	CLR.L	(A0)			;04f86: 4290
@@ -6551,7 +6570,7 @@ _04F52:
 _04F8A:
 	ADD.L	D3,(A0)			;04f8a: d790
 _04F8C:
-	LEA	ptr2DE80,A0		;04f8c: 41f90002de80
+	LEA	ptrAst2DE80,A0		;04f8c: 41f90002de80
 	CMP.L	(A0),D7			;04f92: be90
 	BNE.S	_04F9A			;04f94: 6604
 	CLR.L	(A0)			;04f96: 4290
@@ -6864,13 +6883,13 @@ _0524C:
 	MOVE.L	A0,ptrThisAstStats	;0525e: 23c80002ded8
 	JSR	_138E6			;05264: 4eb9000138e6
 	MOVE.L	A6,ptrThisAstMap	;0526a: 23ce0002decc
-	MOVE.L	A6,ptr2DEEC		;05270: 23ce0002deec
-	MOVE.L	A5,ptr2DEF0		;05276: 23cd0002def0
+	MOVE.L	A6,ptrAstMap_2DEEC	;05270: 23ce0002deec
+	MOVE.L	A5,ptrAstBldg_2DEF0	;05276: 23cd0002def0
 	MOVE.L	A5,ptrThisAstBldg	;0527c: 23cd0002ded0
-	MOVE.L	A4,ptr2DEF4		;05282: 23cc0002def4
+	MOVE.L	A4,ptrBldCount_2DEF4	;05282: 23cc0002def4
 	MOVE.L	A4,ptrThisAstBldgCount	;05288: 23cc0002ded4
 	RTS				;0528e: 4e75
-_05290:
+_IFF_ILBM_05290:
 ; IFF ILBM image files
 	MOVEQ	#4,D1			;05290: 7204
 	LEA	ptr05364,A2		;05292: 45f900005364
@@ -7007,7 +7026,7 @@ loop053AE:
 _053CA:
 	MOVEQ	#31,D0			;053ca: 701f
 _053CC:
-	TST.B	flg1B69D		;053cc: 4a390001b69d
+	TST.B	flgScreenSwitch_1B69D	;053cc: 4a390001b69d
 	BNE.S	_053E8			;053d2: 6614
 	MOVE.L	A1,-(A7)		;053d4: 2f09
 	LEA	ptr31AFE,A1		;053d6: 43f900031afe
@@ -7021,50 +7040,50 @@ _053E8:
 	MOVE.L	A0,ptr1B50A		;053e8: 23c80001b50a
 	RTS				;053ee: 4e75
 _053F0:
-	SF	flg00BB2		;053f0: 51f900000bb2
+	SF	flgWait			;053f0: 51f900000bb2
 _053F6:
-	TST.B	flg00BB2		;053f6: 4a3900000bb2
+	TST.B	flgWait			;053f6: 4a3900000bb2
 	BEQ.S	_053F6			;053fc: 67f8
-	SF	flg00BB2		;053fe: 51f900000bb2
+	SF	flgWait			;053fe: 51f900000bb2
 	BSR.S	_053A4			;05404: 619e
 	MOVE.W	#$4200,chip31AA6	;05406: 33fc420000031aa6
 	SF	flg2E482		;0540e: 51f90002e482
-	LEA	ptr1AF96,A0		;05414: 41f90001af96
+	LEA	palette,A0		;05414: 41f90001af96
 	MOVEQ	#15,D0			;0541a: 700f
 	BSR.S	_053CC			;0541c: 61ae
-	SF	flg00BB2		;0541e: 51f900000bb2
+	SF	flgWait			;0541e: 51f900000bb2
 _05424:
-	TST.B	flg00BB2		;05424: 4a3900000bb2
+	TST.B	flgWait			;05424: 4a3900000bb2
 	BEQ.S	_05424			;0542a: 67f8
-	SF	flg00BB2		;0542c: 51f900000bb2
-	SF	flg00BB2		;05432: 51f900000bb2
+	SF	flgWait			;0542c: 51f900000bb2
+	SF	flgWait			;05432: 51f900000bb2
 _05438:
-	TST.B	flg00BB2		;05438: 4a3900000bb2
+	TST.B	flgWait			;05438: 4a3900000bb2
 	BEQ.S	_05438			;0543e: 67f8
-	SF	flg00BB2		;05440: 51f900000bb2
+	SF	flgWait			;05440: 51f900000bb2
 	RTS				;05446: 4e75
 _05448:
-	SF	flg00BB2		;05448: 51f900000bb2
+	SF	flgWait			;05448: 51f900000bb2
 _0544E:
-	TST.B	flg00BB2		;0544e: 4a3900000bb2
+	TST.B	flgWait			;0544e: 4a3900000bb2
 	BEQ.S	_0544E			;05454: 67f8
-	SF	flg00BB2		;05456: 51f900000bb2
+	SF	flgWait			;05456: 51f900000bb2
 	BSR.W	_053A0			;0545c: 6100ff42
 	MOVE.W	#$5200,chip31AA6	;05460: 33fc520000031aa6
 	ST	flg2E482		;05468: 50f90002e482
-	LEA	ptr1B016,A0		;0546e: 41f90001b016
+	LEA	palette_dark,A0		;0546e: 41f90001b016
 	MOVEQ	#15,D0			;05474: 700f
 	BSR.W	_053CC			;05476: 6100ff54
-	SF	flg00BB2		;0547a: 51f900000bb2
+	SF	flgWait			;0547a: 51f900000bb2
 _05480:
-	TST.B	flg00BB2		;05480: 4a3900000bb2
+	TST.B	flgWait			;05480: 4a3900000bb2
 	BEQ.S	_05480			;05486: 67f8
-	SF	flg00BB2		;05488: 51f900000bb2
-	SF	flg00BB2		;0548e: 51f900000bb2
+	SF	flgWait			;05488: 51f900000bb2
+	SF	flgWait			;0548e: 51f900000bb2
 _05494:
-	TST.B	flg00BB2		;05494: 4a3900000bb2
+	TST.B	flgWait			;05494: 4a3900000bb2
 	BEQ.S	_05494			;0549a: 67f8
-	SF	flg00BB2		;0549c: 51f900000bb2
+	SF	flgWait			;0549c: 51f900000bb2
 	RTS				;054a2: 4e75
 _054A4:
 	MOVEQ	#-1,D1			;054a4: 72ff
@@ -7141,7 +7160,7 @@ _05540:
 	BSR.W	_05378			;0557a: 6100fdfc
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;0557e: 4cdf7fff
 	RTS				;05582: 4e75
-_05584:
+_DiskReq_05584:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;05584: 48e7fffe
 	MOVEA.L	A5,A0			;05588: 204d
 	MOVEA.L	A6,A1			;0558a: 224e
@@ -7208,11 +7227,11 @@ _05626:
 _05644:
 	LEA	textarea,A0		;05644: 41f900031d30
 	BSR.W	_053CA			;0564a: 6100fd7e
-	SF	flg00BB2		;0564e: 51f900000bb2
-_05654:
-	TST.B	flg00BB2		;05654: 4a3900000bb2
-	BEQ.S	_05654			;0565a: 67f8
-	SF	flg00BB2		;0565c: 51f900000bb2
+	SF	flgWait			;0564e: 51f900000bb2
+loop05654:
+	TST.B	flgWait			;05654: 4a3900000bb2
+	BEQ.S	loop05654		;0565a: 67f8
+	SF	flgWait			;0565c: 51f900000bb2
 	MOVEA.L	ptrBuff00,A0		;05662: 20790000052a
 	BSR.S	_056A6			;05668: 613c
 	MOVEA.L	ptrBuff02,A0		;0566a: 207900000532
@@ -7232,24 +7251,18 @@ _05654:
 _056A6:
 	LEA	HARDBASE,A5		;056a6: 4bf900dff000
 	BSR.W	_05378			;056ac: 6100fcca
-; COP2LCH
 	MOVE.L	A0,(BLTDPTH_84,A5)	;056b0: 2b480054
-; BLTAMOD - blitter source A modulo.
 	MOVE.W	#$0100,(BLTCON0_64,A5)	;056b4: 3b7c01000040
 	MOVEQ	#0,D0			;056ba: 7000
-; BLPCON1 - bitplane control register. horizontal scroll
-; curious, because K240 doesn't appear to use scrolling
 	MOVE.W	D0,(BLTDMOD_102,A5)	;056bc: 3b400066
-; BLTDMOD - blitter destination modulo.
 	MOVE.W	D0,(BLTCON1_66,A5)	;056c0: 3b400042
-; COPJMP1 - copper jump strobes.
 	MOVE.W	#$6428,(BLTSIZE_88,A5)	;056c4: 3b7c64280058
 	BSR.W	_05378			;056ca: 6100fcac
 	RTS				;056ce: 4e75
 _056D0:
-	TST.B	flg1B69D		;056d0: 4a390001b69d
+	TST.B	flgScreenSwitch_1B69D	;056d0: 4a390001b69d
 	BEQ.S	_056F0			;056d6: 6718
-	SF	flg1B69D		;056d8: 51f90001b69d
+	SF	flgScreenSwitch_1B69D	;056d8: 51f90001b69d
 	MOVEA.L	ptr1B50A,A0		;056de: 20790001b50a
 	BSR.W	_053CA			;056e4: 6100fce4
 	MOVE.W	#$4200,chip31AA6	;056e8: 33fc420000031aa6
@@ -7500,7 +7513,7 @@ _0592C:
 	BSR.W	_0575C			;05968: 6100fdf2
 ret0596C:
 	RTS				;0596c: 4e75
-_0596E:
+_ScreenFlash_0596E:
 	MOVE.W	#$001f,D7		;0596e: 3e3c001f
 	LEA	ptr1B5CE,A4		;05972: 49f90001b5ce
 	LEA	ptr1B50E,A2		;05978: 45f90001b50e
@@ -7571,7 +7584,7 @@ loop059E8:
 	BSR.W	_053CA			;05a32: 6100f996
 	RTS				;05a36: 4e75
 _05A38:
-	SF	flg2E48B		;05a38: 51f90002e48b
+	SF	flgRedraw		;05a38: 51f90002e48b
 	CMPI.B	#$01,intScreen		;05a3e: 0c3900010002e486
 	BEQ.W	_05B6E			;05a46: 67000126
 	CMPI.B	#$02,intScreen		;05a4a: 0c3900020002e486
@@ -7584,26 +7597,26 @@ _05A38:
 	JSR	_0DFF2			;05a72: 4eb90000dff2
 	MOVEA.L	ptrBuff02,A0		;05a78: 207900000532
 	JSR	_056A6			;05a7e: 4eb9000056a6
-	JSR	_06840			;05a84: 4eb900006840
+	JSR	_RandomScreenCoordsThing_06840 ;05a84: 4eb900006840
 	MOVE.L	data2DEBC,D0		;05a8a: 20390002debc
 	BEQ.S	_05AAC			;05a90: 671a
-	MOVE.L	D0,data1AFB2		;05a92: 23c00001afb2
-	MOVE.L	data2DEBC,data1AFD2	;05a98: 23f90002debc0001afd2
-	MOVE.L	data2DEC0,data1B032	;05aa2: 23f90002dec00001b032
+	MOVE.L	D0,LAB_10C6		;05a92: 23c00001afb2
+	MOVE.L	data2DEBC,LAB_10C7	;05a98: 23f90002debc0001afd2
+	MOVE.L	data2DEC0,LAB_10CA	;05aa2: 23f90002dec00001b032
 _05AAC:
-	CLR.W	data2E484		;05aac: 42790002e484
+	CLR.W	intAsteroidFacing	;05aac: 42790002e484
 	MOVEA.L	ptrBuff02,A5		;05ab2: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;05ab8: 2c790000052a
 	JSR	_05540			;05abe: 4eb900005540
 _05AC4:
 	JSR	_056D0			;05ac4: 4eb9000056d0
-	LEA	ptr1AF96,A0		;05aca: 41f90001af96
+	LEA	palette,A0		;05aca: 41f90001af96
 	BSR.W	_053CA			;05ad0: 6100f8f8
 	RTS				;05ad4: 4e75
 _05AD6:
-	LEA	ptr1AF96,A0		;05ad6: 41f90001af96
-	LEA	ptr1AFD6,A2		;05adc: 45f90001afd6
-	LEA	ptr1B016,A1		;05ae2: 43f90001b016
+	LEA	palette,A0		;05ad6: 41f90001af96
+	LEA	palette_standard,A2	;05adc: 45f90001afd6
+	LEA	palette_dark,A1		;05ae2: 43f90001b016
 	MOVE.L	(28,A2),data2DEBC	;05ae8: 23ea001c0002debc
 	MOVE.W	(4,A2),(28,A0)		;05af0: 316a0004001c
 	MOVE.W	(2,A2),(30,A0)		;05af6: 316a0002001e
@@ -7625,7 +7638,7 @@ _05B42:
 	MOVEA.L	ptrBuff02,A5		;05b4a: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;05b50: 2c790000052a
 	BSR.W	_05540			;05b56: 6100f9e8
-	MOVEA.L	ptr2DEEC,A6		;05b5a: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;05b5a: 2c790002deec
 	JSR	_0E008			;05b60: 4eb90000e008
 	BSR.W	_07884			;05b66: 61001d1c
 	BRA.W	_05AC4			;05b6a: 6000ff58
@@ -7635,19 +7648,19 @@ _05B6E:
 	MOVEA.L	ptrBuff02,A5		;05b76: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;05b7c: 2c790000052a
 	BSR.W	_05540			;05b82: 6100f9bc
-	MOVEA.L	ptr2DEEC,A6		;05b86: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;05b86: 2c790002deec
 	BSR.W	_06088			;05b8c: 610004fa
 	BSR.W	_07884			;05b90: 61001cf2
 	BRA.W	_05AC4			;05b94: 6000ff2e
 _05B98:
 	MOVEA.L	ptrBuff02,A0		;05b98: 207900000532
 	BSR.W	_056A6			;05b9e: 6100fb06
-	BSR.W	_06840			;05ba2: 61000c9c
+	BSR.W	_RandomScreenCoordsThing_06840 ;05ba2: 61000c9c
 	CMPI.B	#$03,intScreen		;05ba6: 0c3900030002e486
 	BEQ.S	_05C08			;05bae: 6758
 	CMPI.B	#$05,intScreen		;05bb0: 0c3900050002e486
 	BEQ.S	_05C08			;05bb8: 674e
-	MOVEA.L	ptr2DEEC,A6		;05bba: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;05bba: 2c790002deec
 	LEA	ptr1B6BE,A4		;05bc0: 49f90001b6be
 	MOVE.L	#$00000820,D1		;05bc6: 223c00000820
 	MOVEQ	#0,D7			;05bcc: 7e00
@@ -7676,18 +7689,18 @@ _05C00:
 	CMPI.B	#$21,D7			;05c02: 0c070021
 	BNE.S	_05BCE			;05c06: 66c6
 _05C08:
-	TST.B	flg2E48A		;05c08: 4a390002e48a
+	TST.B	flgShowUI		;05c08: 4a390002e48a
 	BEQ.S	_05C24			;05c0e: 6714
 	JSR	_11694			;05c10: 4eb900011694
 	BSR.W	_06BAC			;05c16: 61000f94
 	MOVEA.L	ptrBuff02,A1		;05c1a: 227900000532
-	BSR.W	_08348			;05c20: 61002726
+	BSR.W	_MsgLineCoords08348	;05c20: 61002726
 _05C24:
 	MOVE.L	data2DEBC,D0		;05c24: 20390002debc
 	BEQ.S	ret05C46		;05c2a: 671a
-	MOVE.L	D0,data1AFB2		;05c2c: 23c00001afb2
-	MOVE.L	data2DEBC,data1AFD2	;05c32: 23f90002debc0001afd2
-	MOVE.L	data2DEC0,data1B032	;05c3c: 23f90002dec00001b032
+	MOVE.L	D0,LAB_10C6		;05c2c: 23c00001afb2
+	MOVE.L	data2DEBC,LAB_10C7	;05c32: 23f90002debc0001afd2
+	MOVE.L	data2DEC0,LAB_10CA	;05c3c: 23f90002dec00001b032
 ret05C46:
 	RTS				;05c46: 4e75
 	DC.W	$0009			;05c48
@@ -7701,21 +7714,21 @@ _05C4E:
 	BEQ.S	_05C68			;05c5e: 6708
 	MOVE.B	#$02,intScreen		;05c60: 13fc00020002e486
 _05C68:
-	SF	flg2E48B		;05c68: 51f90002e48b
+	SF	flgRedraw		;05c68: 51f90002e48b
 	BSR.W	_06440			;05c6e: 610007d0
 	JSR	_0DFF2			;05c72: 4eb90000dff2
 	BSR.W	_05B98			;05c78: 6100ff1e
-	LEA	ptr1AF96,A0		;05c7c: 41f90001af96
+	LEA	palette,A0		;05c7c: 41f90001af96
 	BSR.W	_053CA			;05c82: 6100f746
 	BRA.S	_05CB4			;05c86: 602c
 _05C88:
-	TST.B	flg2E48B		;05c88: 4a390002e48b
+	TST.B	flgRedraw		;05c88: 4a390002e48b
 	BNE.S	_05C68			;05c8e: 66d8
 	JSR	_13B3E			;05c90: 4eb900013b3e
-	TST.B	flg2E48B		;05c96: 4a390002e48b
+	TST.B	flgRedraw		;05c96: 4a390002e48b
 	BNE.S	_05C68			;05c9c: 66ca
 _05C9E:
-	MOVE.B	intScrn3,D0		;05c9e: 10390002e488
+	MOVE.B	intNewScreen,D0		;05c9e: 10390002e488
 	BEQ.S	_05CB4			;05ca4: 670e
 	MOVE.L	D0,-(A7)		;05ca6: 2f00
 	MOVEQ	#14,D0			;05ca8: 700e
@@ -7727,11 +7740,11 @@ _05CB4:
 	MOVEA.L	ptrBuff02,A5		;05cb4: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;05cba: 2c790000052a
 	BSR.W	_05540			;05cc0: 6100f87e
-	MOVEA.L	ptr2DEEC,A6		;05cc4: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;05cc4: 2c790002deec
 	BSR.W	_06088			;05cca: 610003bc
 	BSR.W	_07884			;05cce: 61001bb4
 	BSR.W	_056D0			;05cd2: 6100f9fc
-	BSR.W	_025DC			;05cd6: 6100c904
+	BSR.W	_Pause_025DC		;05cd6: 6100c904
 	CMPI.B	#$02,intScreen		;05cda: 0c3900020002e486
 	BNE.S	_05CE8			;05ce2: 6604
 	BSR.W	_0654A			;05ce4: 61000864
@@ -7755,32 +7768,32 @@ _05D0C:
 _05D22:
 	TST.B	flg1D7F3		;05d22: 4a390001d7f3
 	BEQ.S	_05D46			;05d28: 671c
-	TST.L	lUnknown54		;05d2a: 4ab90002de5c
+	TST.L	lUnknownSat54		;05d2a: 4ab90002de5c
 	BEQ.S	_05D46			;05d30: 6714
 	SF	flg1D7F3		;05d32: 51f90001d7f3
-	SF	intScrn2		;05d38: 51f90002e487
+	SF	intPrevScreen		;05d38: 51f90002e487
 	BSR.W	_08902			;05d3e: 61002bc2
 	BRA.W	_05C88			;05d42: 6000ff44
 _05D46:
 	TST.B	flg2E09C		;05d46: 4a390002e09c
 	BEQ.S	_05D6A			;05d4c: 671c
-	TST.L	lUnknown54		;05d4e: 4ab90002de5c
+	TST.L	lUnknownSat54		;05d4e: 4ab90002de5c
 	BEQ.S	_05D6A			;05d54: 6714
 	SF	flg2E09C		;05d56: 51f90002e09c
-	SF	intScrn2		;05d5c: 51f90002e487
+	SF	intPrevScreen		;05d5c: 51f90002e487
 	BSR.W	_BuildSattWin		;05d62: 610023b8
 	BRA.W	_05C88			;05d66: 6000ff20
 _05D6A:
-	TST.B	flg2E09F		;05d6a: 4a390002e09f
+	TST.B	flgScreen2E09F		;05d6a: 4a390002e09f
 	BEQ.S	_05DAA			;05d70: 6738
-	TST.L	lUnknown54		;05d72: 4ab90002de5c
+	TST.L	lUnknownSat54		;05d72: 4ab90002de5c
 	BEQ.S	_05DAA			;05d78: 6730
-	SF	flg2E09F		;05d7a: 51f90002e09f
-	SF	intScrn2		;05d80: 51f90002e487
-	MOVEA.L	lUnknown54,A0		;05d86: 20790002de5c
+	SF	flgScreen2E09F		;05d7a: 51f90002e09f
+	SF	intPrevScreen		;05d80: 51f90002e487
+	MOVEA.L	lUnknownSat54,A0	;05d86: 20790002de5c
 	TST.B	(96,A0)			;05d8c: 4a280060
 	BEQ.S	_05D9E			;05d90: 670c
-	MOVE.B	#$09,intScrn3		;05d92: 13fc00090002e488
+	MOVE.B	#$09,intNewScreen	;05d92: 13fc00090002e488
 	BRA.W	_05C88			;05d9a: 6000feec
 _05D9E:
 ; NO SPY SATELLITE ORBITING THAT ASTEROID!
@@ -7790,29 +7803,29 @@ _05D9E:
 _05DAA:
 	TST.B	flg2E09B		;05daa: 4a390002e09b
 	BEQ.S	_05DCE			;05db0: 671c
-	TST.L	lUnknown54		;05db2: 4ab90002de5c
+	TST.L	lUnknownSat54		;05db2: 4ab90002de5c
 	BEQ.S	_05DCE			;05db8: 6714
 	SF	flg2E09B		;05dba: 51f90002e09b
-	SF	intScrn2		;05dc0: 51f90002e487
+	SF	intPrevScreen		;05dc0: 51f90002e487
 	BSR.W	_MissileFireWin		;05dc6: 6100258e
 	BRA.W	_05C88			;05dca: 6000febc
 _05DCE:
 	TST.B	flg2E09D		;05dce: 4a390002e09d
 	BEQ.S	_05DF8			;05dd4: 6722
-	TST.L	lUnknown54		;05dd6: 4ab90002de5c
+	TST.L	lUnknownSat54		;05dd6: 4ab90002de5c
 	BEQ.S	_05DF8			;05ddc: 671a
 	SF	flg2E09D		;05dde: 51f90002e09d
-	SF	intScrn2		;05de4: 51f90002e487
+	SF	intPrevScreen		;05de4: 51f90002e487
 	MOVEA.L	ptr2DEB4,A6		;05dea: 2c790002deb4
 	BSR.W	_0ACD0			;05df0: 61004ede
 	BRA.W	_05C9E			;05df4: 6000fea8
 _05DF8:
 	TST.B	flg2E09E		;05df8: 4a390002e09e
 	BEQ.S	_05E1C			;05dfe: 671c
-	TST.L	lUnknown54		;05e00: 4ab90002de5c
+	TST.L	lUnknownSat54		;05e00: 4ab90002de5c
 	BEQ.S	_05E1C			;05e06: 6714
 	SF	flg2E09E		;05e08: 51f90002e09e
-	SF	intScrn2		;05e0e: 51f90002e487
+	SF	intPrevScreen		;05e0e: 51f90002e487
 	BSR.W	_FleetWin		;05e14: 61005e04
 	BRA.W	_05C9E			;05e18: 6000fe84
 _05E1C:
@@ -7833,32 +7846,32 @@ _05E40:
 	MOVEA.L	ptr2DEB8,A0		;05e4e: 20790002deb8
 	MOVE.B	#$02,flg2E47B		;05e54: 13fc00020002e47b
 	BSR.W	_HangarWin		;05e5c: 61003284
-	ST	flg2E48B		;05e60: 50f90002e48b
+	ST	flgRedraw		;05e60: 50f90002e48b
 	BRA.W	_05C88			;05e66: 6000fe20
 _05E6A:
 	BSR.W	_FleetWin		;05e6a: 61005dae
 	BRA.W	_05C88			;05e6e: 6000fe18
 _05E72:
 	MOVE.B	flg2E47C,D0		;05e72: 10390002e47c
-	BEQ.S	_05E9C			;05e78: 6722
+	BEQ.S	_Button_05E9C		;05e78: 6722
 	CMPI.B	#$01,D0			;05e7a: 0c000001
 	BNE.S	_05E6A			;05e7e: 66ea
 	MOVE.B	#$02,flg2E47C		;05e80: 13fc00020002e47c
 	MOVEA.L	ptr2DEB4,A6		;05e88: 2c790002deb4
 	BSR.W	_0B312			;05e8e: 61005482
-	ST	flg2E48B		;05e92: 50f90002e48b
+	ST	flgRedraw		;05e92: 50f90002e48b
 	BRA.W	_05C88			;05e98: 6000fdee
-_05E9C:
+_Button_05E9C:
 	TST.B	MouseBtn		;05e9c: 4a3900000766
 	BEQ.W	_05F3E			;05ea2: 6700009a
 	BTST	#0,MouseBtn		;05ea6: 0839000000000766
 	BEQ.S	_05F2E			;05eae: 677e
 	MOVE.B	#$01,flg1F0B4		;05eb0: 13fc00010001f0b4
-	LEA	arrBtns41,A2		;05eb8: 45f900020b90
+	LEA	arrButton0,A2		;05eb8: 45f900020b90
 	JSR	_1147A			;05ebe: 4eb90001147a
 	TST.W	D2			;05ec4: 4a42
 	BMI.S	_05ED8			;05ec6: 6b10
-	JSR	_10FE0			;05ec8: 4eb900010fe0
+	JSR	_ButtonEffect		;05ec8: 4eb900010fe0
 	SF	flg1F0B4		;05ece: 51f90001f0b4
 	BRA.W	_05C88			;05ed4: 6000fdb2
 _05ED8:
@@ -7870,7 +7883,7 @@ _05ED8:
 	CMPI.B	#$00,intPointer		;05eec: 0c3900000002e48c
 	BEQ.S	_05F26			;05ef4: 6730
 _05EF6:
-	BSR.W	_06C0E			;05ef6: 61000d16
+	BSR.W	_ClickBuilding		;05ef6: 61000d16
 	BRA.W	_05C88			;05efa: 6000fd8c
 _05EFE:
 	JSR	_102BC			;05efe: 4eb9000102bc
@@ -7888,7 +7901,7 @@ _05F26:
 	BRA.W	_05C88			;05f2a: 6000fd5c
 _05F2E:
 	LEA	ptr1F0B6,A0		;05f2e: 41f90001f0b6
-	JSR	_110E0			;05f34: 4eb9000110e0
+	JSR	_Button3_110E0		;05f34: 4eb9000110e0
 	BRA.W	_05C88			;05f3a: 6000fd4c
 _05F3E:
 	MOVE.B	InKey,D0		;05f3e: 103900000764
@@ -7903,10 +7916,10 @@ _05F3E:
 _05F5C:
 ; Left arrow
 	CMPI.B	#$4f,D0			;05f5c: 0c00004f
-	BNE.S	_05F6A			;05f60: 6608
+	BNE.S	_BlueButton_05F6A	;05f60: 6608
 	BSR.W	_RotateLeft		;05f62: 6100010c
 	BRA.W	_05C88			;05f66: 6000fd20
-_05F6A:
+_BlueButton_05F6A:
 ; 0
 	CMPI.B	#$0a,D0			;05f6a: 0c00000a
 	BNE.S	_05F74			;05f6e: 6604
@@ -7921,8 +7934,8 @@ _05F74:
 	SUBI.B	#$00,D0			;05f80: 04000000
 _05F84:
 	EXT.W	D0			;05f84: 4880
-	MOVE.W	D0,data2E088		;05f86: 33c00002e088
-	ST	flg2E48B		;05f8c: 50f90002e48b
+	MOVE.W	D0,currBlueBuild	;05f86: 33c00002e088
+	ST	flgRedraw		;05f8c: 50f90002e48b
 	SF	flg1F0B4		;05f92: 51f90001f0b4
 	BRA.W	_05C88			;05f98: 6000fcee
 _05F9C:
@@ -7953,21 +7966,21 @@ _05FD4:
 	MOVEQ	#16,D0			;05fe0: 7010
 	MOVEQ	#16,D1			;05fe2: 7210
 	MOVEA.L	ptrBuff01,A1		;05fe4: 22790000052e
-	BSR.W	_07310			;05fea: 61001324
-_05FEE:
+	BSR.W	_DisplayText		;05fea: 61001324
+_MouseWait_05FEE:
 ; mousewait
 	TST.B	MouseBtn		;05fee: 4a3900000766
-	BEQ.S	_05FEE			;05ff4: 67f8
+	BEQ.S	_MouseWait_05FEE	;05ff4: 67f8
 	BRA.W	_05C88			;05ff6: 6000fc90
 _05FFA:
 ; F1-F10
 	CMPI.B	#$50,D0			;05ffa: 0c000050
-	BMI.S	_06010			;05ffe: 6b10
+	BMI.S	_05C88			;05ffe: 6b10
 	CMPI.B	#$5a,D0			;06000: 0c00005a
-	BPL.S	_06010			;06004: 6a0a
-	JSR	_02590			;06006: 4eb900002590
+	BPL.S	_05C88			;06004: 6a0a
+	JSR	_Hotkeys_02590		;06006: 4eb900002590
 	BRA.W	_05C88			;0600c: 6000fc7a
-_06010:
+_05C88:
 	BRA.W	_05C88			;06010: 6000fc76
 	RTS				;06014: 4e75
 strVersion:
@@ -7982,16 +7995,16 @@ strVersion:
 	DC.B	"K240 - VERSION 2.000,  7-6-94 11:15",255,"CLICK MOUSE TO CONTINUE G"
 	DC.B	"AME...",0
 _RotateRight:
-	ADDQ.W	#1,data2E484		;0605a: 52790002e484
-	ANDI.W	#$0003,data2E484	;06060: 027900030002e484
-	ST	flg2E48B		;06068: 50f90002e48b
+	ADDQ.W	#1,intAsteroidFacing	;0605a: 52790002e484
+	ANDI.W	#$0003,intAsteroidFacing ;06060: 027900030002e484
+	ST	flgRedraw		;06068: 50f90002e48b
 	RTS				;0606e: 4e75
 _RotateLeft:
-	SUBQ.W	#1,data2E484		;06070: 53790002e484
+	SUBQ.W	#1,intAsteroidFacing	;06070: 53790002e484
 	BPL.S	_06080			;06076: 6a08
-	MOVE.W	#$0003,data2E484	;06078: 33fc00030002e484
+	MOVE.W	#$0003,intAsteroidFacing ;06078: 33fc00030002e484
 _06080:
-	ST	flg2E48B		;06080: 50f90002e48b
+	ST	flgRedraw		;06080: 50f90002e48b
 	RTS				;06086: 4e75
 _06088:
 	LEA	ptr1B6BE,A4		;06088: 49f90001b6be
@@ -8011,37 +8024,37 @@ _060AA:
 	BNE.W	_0615A			;060c2: 66000096
 	BCLR	#15,D5			;060c6: 0885000f
 	BEQ.S	_06108			;060ca: 673c
-	LEA	ptr32842,A3		;060cc: 47f900032842
+	LEA	sprTile5,A3		;060cc: 47f900032842
 	BCLR	#14,D5			;060d2: 0885000e
 	BCLR	#15,D5			;060d6: 0885000f
 	BCLR	#14,D5			;060da: 0885000e
 	MULU	#$000e,D5		;060de: cafc000e
-	MOVEA.L	ptr2DEF0,A2		;060e2: 24790002def0
+	MOVEA.L	ptrAstBldg_2DEF0,A2	;060e2: 24790002def0
 	ADDA.L	D5,A2			;060e8: d5c5
 	CMPI.B	#$1b,(0,A2)		;060ea: 0c2a001b0000
 	BEQ.S	_06138			;060f0: 6746
-	LEA	ptr3280A,A3		;060f2: 47f90003280a
+	LEA	sprTile4,A3		;060f2: 47f90003280a
 	BTST	#7,(1,A6,D2.W)		;060f8: 083600072001
 	BEQ.S	_06138			;060fe: 6738
-	LEA	ptr328EA,A3		;06100: 47f9000328ea
+	LEA	sprTile8,A3		;06100: 47f9000328ea
 	BRA.S	_06138			;06106: 6030
 _06108:
-	LEA	ptr3279A,A3		;06108: 47f90003279a
+	LEA	sprTile2,A3		;06108: 47f90003279a
 	CMPI.W	#$002d,D5		;0610e: 0c45002d
 	BMI.S	_06138			;06112: 6b24
 	CMPI.W	#$0030,D5		;06114: 0c450030
 	BMI.S	_06138			;06118: 6b1e
-	LEA	ptr327D2,A3		;0611a: 47f9000327d2
+	LEA	sprTile3,A3		;0611a: 47f9000327d2
 	CMPI.W	#$003d,D5		;06120: 0c45003d
 	BMI.S	_06138			;06124: 6b12
-	LEA	ptr3287A,A3		;06126: 47f90003287a
+	LEA	sprTile6,A3		;06126: 47f90003287a
 	CMPI.W	#$0040,D5		;0612c: 0c450040
 	BMI.S	_06138			;06130: 6b06
-	LEA	ptr328B2,A3		;06132: 47f9000328b2
+	LEA	sprTile7,A3		;06132: 47f9000328b2
 _06138:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;06138: 48e7fffe
 	MOVEQ	#14,D3			;0613c: 760e
-	MOVE.L	#chip3278C,D6		;0613e: 2c3c0003278c
+	MOVE.L	#sprTile,D6		;0613e: 2c3c0003278c
 	MOVE.W	#$01c1,D2		;06144: 343c01c1
 	MOVEA.L	ptrBuff00,A0		;06148: 20790000052a
 	BSR.W	_062EA			;0614e: 6100019a
@@ -8062,9 +8075,9 @@ _06176:
 	BCLR	#15,D5			;0617c: 0885000f
 	BCLR	#14,D5			;06180: 0885000e
 	MULU	#$000e,D5		;06184: cafc000e
-	MOVEA.L	ptr2DEF0,A2		;06188: 24790002def0
+	MOVEA.L	ptrAstBldg_2DEF0,A2	;06188: 24790002def0
 	ADDA.L	D5,A2			;0618e: d5c5
-	MOVEA.L	ptr2DEF0,A0		;06190: 20790002def0
+	MOVEA.L	ptrAstBldg_2DEF0,A0	;06190: 20790002def0
 	MOVE.L	A0,D5			;06196: 2a08
 	SUB.L	A2,D5			;06198: 9a8a
 	NEG.L	D5			;0619a: 4485
@@ -8089,19 +8102,19 @@ _061C6:
 _061DC:
 	MOVE.W	(A1)+,D2		;061dc: 3419
 	BEQ.S	_061E4			;061de: 6704
-	BSR.W	_0C5AA			;061e0: 610063c8
+	BSR.W	_Ships0C5AA		;061e0: 610063c8
 _061E4:
 	MOVE.W	(A1)+,D2		;061e4: 3419
 	BEQ.S	_061EC			;061e6: 6704
-	BSR.W	_0C5AA			;061e8: 610063c0
+	BSR.W	_Ships0C5AA		;061e8: 610063c0
 _061EC:
 	MOVE.W	(A1)+,D2		;061ec: 3419
 	BEQ.S	_061F4			;061ee: 6704
-	BSR.W	_0C5AA			;061f0: 610063b8
+	BSR.W	_Ships0C5AA		;061f0: 610063b8
 _061F4:
 	MOVE.W	(A1)+,D2		;061f4: 3419
 	BEQ.S	_061FC			;061f6: 6704
-	BSR.W	_0C5AA			;061f8: 610063b0
+	BSR.W	_Ships0C5AA		;061f8: 610063b0
 _061FC:
 	MOVE.W	unk06280,D2		;061fc: 343900006280
 	BTST	#6,(1,A6,D2.W)		;06202: 083600062001
@@ -8110,7 +8123,7 @@ _061FC:
 	BEQ.S	_06256			;06212: 6742
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;06214: 48e7fffe
 	MOVE.W	#$0320,D2		;06218: 343c0320
-	LEA	ptr1D8F6,A1		;0621c: 43f90001d8f6
+	LEA	arrShipSpriteList,A1	;0621c: 43f90001d8f6
 	ADDA.W	D2,A1			;06222: d2c2
 	MOVEM.L	(A1),A0/A2		;06224: 4cd10500
 	MOVE.W	(8,A1),D2		;06228: 34290008
@@ -8121,9 +8134,8 @@ _061FC:
 	SUB.W	data1C3E4,D1		;0623c: 92790001c3e4
 	ADDQ.W	#6,D1			;06242: 5c41
 	MOVEQ	#1,D6			;06244: 7c01
-	BSR.W	_0C916			;06246: 610066ce
+	BSR.W	_DrawGfx_0C916		;06246: 610066ce
 ; Sound S: Turret fire
-; 
 	MOVEQ	#19,D0			;0624a: 7013
 	JSR	_PlaySound		;0624c: 4eb90001a50e
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;06252: 4cdf7fff
@@ -8165,7 +8177,7 @@ _062A2:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;062b2: 4cdf7fff
 	RTS				;062b6: 4e75
 _062B8:
-	LEA	ptr33452,A5		;062b8: 4bf900033452
+	LEA	arrBuildingSpriteList,A5 ;062b8: 4bf900033452
 	ADD.W	D5,D5			;062be: da45
 	MOVE.W	D5,D3			;062c0: 3605
 	ASL.W	#2,D3			;062c2: e543
@@ -8202,7 +8214,7 @@ _06320:
 	SUBQ.L	#1,D7			;06326: 5387
 	MOVE.L	D7,(BLTAFWM_68,A5)	;06328: 2b470044
 	BTST	#0,D1			;0632c: 08010000
-	BEQ.S	_06370			;06330: 673e
+	BEQ.S	_Sprite_06370		;06330: 673e
 	SUBQ.W	#1,D1			;06332: 5341
 	MOVE.W	#$8000,(BLTCON1_66,A5)	;06334: 3b7c80000042
 	MOVE.W	#$ffd4,(BLTDMOD_102,A5)	;0633a: 3b7cffd40066
@@ -8217,9 +8229,11 @@ _0635A:
 	ADDQ.W	#1,D2			;06362: 5242
 	MOVE.W	#$0000,(BLTALWM_70,A5)	;06364: 3b7c00000046
 	MOVE.W	#$8fca,(64,A5)		;0636a: 3b7c8fca0040
-_06370:
+_Sprite_06370:
 	ADDA.W	D1,A0			;06370: d0c1
 	MOVE.W	D4,(98,A5)		;06372: 3b440062
+; sprite functions
+; Loops over four 8000-byte bitplanes for 16-color graphics
 	MOVEQ	#3,D7			;06376: 7e03
 loop06378:
 	MOVE.L	D6,(80,A5)		;06378: 2b460050
@@ -8248,7 +8262,7 @@ _063C6:
 	MOVE.L	D1,-(A7)		;063cc: 2f01
 	MOVE.L	D2,-(A7)		;063ce: 2f02
 	SUBI.W	#$00f0,D1		;063d0: 044100f0
-	LEA	ptr1C88E,A2		;063d4: 45f90001c88e
+	LEA	ptrWind_1C88E,A2	;063d4: 45f90001c88e
 	SUBQ.W	#1,D4			;063da: 5344
 	ASL.W	#2,D4			;063dc: e544
 	ADDA.W	D4,A2			;063de: d4c4
@@ -8309,7 +8323,7 @@ _0645C:
 	CMPI.B	#$21,D1			;06472: 0c010021
 	BNE.S	_0644E			;06476: 66d6
 	LEA	ptr1B6BE,A4		;06478: 49f90001b6be
-	MOVE.W	data2E484,D0		;0647e: 30390002e484
+	MOVE.W	intAsteroidFacing,D0	;0647e: 30390002e484
 	BEQ.W	_06528			;06484: 670000a2
 	CMPI.B	#$02,D0			;06488: 0c000002
 	BEQ.S	_064FE			;0648c: 6770
@@ -8407,7 +8421,7 @@ _0652C:
 _0654A:
 	BSR.W	_06796			;0654a: 6100024a
 	LEA	ptr1B6BE,A4		;0654e: 49f90001b6be
-	MOVEA.L	ptr2DEEC,A6		;06554: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;06554: 2c790002deec
 	MOVE.W	unk0683E,D0		;0655a: 30390000683e
 	BMI.S	ret065A4		;06560: 6b42
 	ADD.W	D0,D0			;06562: d040
@@ -8417,7 +8431,7 @@ _0654A:
 	BCLR	#15,D5			;0656e: 0885000f
 	BCLR	#14,D5			;06572: 0885000e
 	MULU	#$000e,D5		;06576: cafc000e
-	MOVEA.L	ptr2DEF0,A3		;0657a: 26790002def0
+	MOVEA.L	ptrAstBldg_2DEF0,A3	;0657a: 26790002def0
 	ADDA.L	D5,A3			;06580: d7c5
 	MOVEQ	#0,D5			;06582: 7a00
 	MOVE.B	(0,A3),D5		;06584: 1a2b0000
@@ -8428,11 +8442,11 @@ _0654A:
 	LEA	tblTerranBldtStats,A3	;06594: 47f90001c3e8
 	ADDA.L	D5,A3			;0659a: d7c5
 	MOVE.W	(0,A3),D0		;0659c: 302b0000
-	BSR.W	_07856			;065a0: 610012b4
+	BSR.W	_ErrorLine_07856	;065a0: 610012b4
 ret065A4:
 	RTS				;065a4: 4e75
 _065A6:
-	LEA	ptr33452,A5		;065a6: 4bf900033452
+	LEA	arrBuildingSpriteList,A5 ;065a6: 4bf900033452
 	CMPI.B	#$02,intScreen		;065ac: 0c3900020002e486
 	BEQ.W	_06664			;065b4: 670000ae
 ; a 1600 byte chip buffer
@@ -8445,7 +8459,7 @@ _065A6:
 	SUBQ.W	#1,D7			;065ce: 5347
 loop065D0:
 	SUBQ.L	#8,A4			;065d0: 518c
-	MOVEM.W	unk00760,D0-D1		;065d2: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;065d2: 4cb9000300000760
 	CMP.W	(2,A4),D0		;065da: b06c0002
 	BMI.W	_0665A			;065de: 6b00007a
 	MOVE.W	D0,D2			;065e2: 3400
@@ -8456,7 +8470,7 @@ loop065D0:
 	BMI.W	_0665A			;065f4: 6b000064
 	CMP.W	(4,A4),D1		;065f8: b26c0004
 	BGT.W	_0665A			;065fc: 6e00005c
-	MOVEA.L	ptr2DEF0,A3		;06600: 26790002def0
+	MOVEA.L	ptrAstBldg_2DEF0,A3	;06600: 26790002def0
 	ADDA.W	(A4),A3			;06606: d6d4
 	MOVEA.L	A3,A1			;06608: 224b
 	SUB.W	(4,A4),D1		;0660a: 926c0004
@@ -8499,7 +8513,7 @@ _0665E:
 	RTS				;06662: 4e75
 _06664:
 	LEA	ptr1B6BE,A4		;06664: 49f90001b6be
-	MOVEA.L	ptr2DEEC,A6		;0666a: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;0666a: 2c790002deec
 	MOVE.W	unk0683E,D0		;06670: 30390000683e
 	BMI.S	_0665E			;06676: 6be6
 	ADD.W	D0,D0			;06678: d040
@@ -8509,7 +8523,7 @@ _06664:
 	BCLR	#15,D5			;06684: 0885000f
 	BCLR	#14,D5			;06688: 0885000e
 	MULU	#$000e,D5		;0668c: cafc000e
-	MOVEA.L	ptr2DEF0,A3		;06690: 26790002def0
+	MOVEA.L	ptrAstBldg_2DEF0,A3	;06690: 26790002def0
 	ADDA.L	D5,A3			;06696: d7c5
 	MOVEQ	#0,D5			;06698: 7a00
 	MOVE.B	(0,A3),D5		;0669a: 1a2b0000
@@ -8524,7 +8538,7 @@ _0669E:
 	LEA	tblTerranBldtStats,A3	;066b2: 47f90001c3e8
 	ADDA.L	D1,A3			;066b8: d7c1
 	MOVE.W	(0,A3),D0		;066ba: 302b0000
-	BSR.W	_07856			;066be: 61001196
+	BSR.W	_ErrorLine_07856	;066be: 61001196
 	MOVEA.L	(A7)+,A3		;066c2: 265f
 	MOVE.L	(A7)+,D5		;066c4: 2a1f
 	MOVE.L	A3,-(A7)		;066c6: 2f0b
@@ -8550,7 +8564,7 @@ _066FA:
 	MOVEA.L	ptrBuff01,A1		;066fa: 22790000052e
 	MOVE.W	#$00fe,D0		;06700: 303c00fe
 	MOVE.W	#$00be,D1		;06704: 323c00be
-	BSR.W	_07310			;06708: 61000c06
+	BSR.W	_DisplayText		;06708: 61000c06
 	MOVE.W	(A7)+,D5		;0670c: 3a1f
 _0670E:
 	MOVE.W	#$00b4,D7		;0670e: 3e3c00b4
@@ -8587,7 +8601,7 @@ _06762:
 	LEA	tblTerranBldtStats,A3	;06770: 47f90001c3e8
 	ADDA.L	D5,A3			;06776: d7c5
 	MOVE.W	(0,A3),D0		;06778: 302b0000
-	BSR.W	_07856			;0677c: 610010d8
+	BSR.W	_ErrorLine_07856	;0677c: 610010d8
 	MOVEA.L	(A7)+,A3		;06780: 265f
 _06782:
 	BTST	#0,MouseBtn		;06782: 0839000000000766
@@ -8596,7 +8610,7 @@ _06782:
 	MOVEQ	#0,D0			;06792: 7000
 	RTS				;06794: 4e75
 _06796:
-	MOVEM.W	unk00760,D0-D1		;06796: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;06796: 4cb9000300000760
 	CMPI.W	#$002b,D1		;0679e: 0c41002b
 	BMI.W	_06826			;067a2: 6b000082
 	CMPI.W	#$00b3,D1		;067a6: 0c4100b3
@@ -8655,9 +8669,9 @@ unk0683D:
 	DS.B	1			;0683d
 unk0683E:
 	DS.W	1			;0683e
-_06840:
+_RandomScreenCoordsThing_06840:
 	MOVE.L	intRNG2,intRNG0		;06840: 23f900000c5c00000c58
-	MOVE.W	data2E484,D0		;0684a: 30390002e484
+	MOVE.W	intAsteroidFacing,D0	;0684a: 30390002e484
 	LEA	ptr1B69E,A0		;06850: 41f90001b69e
 	ASL.W	#2,D0			;06856: e540
 	MOVE.L	(0,A0,D0.W),D0		;06858: 20300000
@@ -8671,6 +8685,7 @@ _06840:
 	ADDA.L	#$00001f40,A3		;0687a: d7fc00001f40
 	MOVE.W	#$00c8,D7		;06880: 3e3c00c8
 loop06884:
+; random screen coords
 	MOVE.L	#$000000c8,D0		;06884: 203c000000c8
 	JSR	_RandInt		;0688a: 4eb900000c0c
 	MOVE.W	D0,D1			;06890: 3200
@@ -8698,6 +8713,7 @@ _068CE:
 	MOVEQ	#2,D2			;068d2: 7402
 	MOVEQ	#15,D7			;068d4: 7e0f
 loop068D6:
+; Random screen coords
 	MOVE.L	#$000000c8,D0		;068d6: 203c000000c8
 	JSR	_RandInt		;068dc: 4eb900000c0c
 	MOVE.W	D0,D1			;068e2: 3200
@@ -8792,16 +8808,16 @@ _PlaceBuilding:
 	RTS				;069ec: 4e75
 _069EE:
 	LEA	ptr1B6BE,A4		;069ee: 49f90001b6be
-	MOVEA.L	ptr2DEEC,A6		;069f4: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;069f4: 2c790002deec
 	MOVE.W	(unk0683E,PC),D2	;069fa: 343afe42
 	BMI.W	ret06B8C		;069fe: 6b00018c
 	ADD.W	D2,D2			;06a02: d442
 	BSR.S	_06994			;06a04: 618e
 	BNE.W	_06B8E			;06a06: 66000186
 	MOVE.W	D1,D3			;06a0a: 3601
-	MOVE.W	data2E088,D0		;06a0c: 30390002e088
+	MOVE.W	currBlueBuild,D0	;06a0c: 30390002e088
 	ADD.W	D0,D0			;06a12: d040
-	LEA	arrUnknown40,A0		;06a14: 41f900020b7c
+	LEA	arrBlueButtonBldgs,A0	;06a14: 41f900020b7c
 	MOVE.W	(0,A0,D0.W),D0		;06a1a: 30300000
 	CMPI.W	#$0015,D0		;06a1e: 0c400015
 	BMI.S	_06A64			;06a22: 6b40
@@ -8827,7 +8843,7 @@ _06A5C:
 	BSR.W	_06994			;06a5c: 6100ff36
 	BNE.W	_06B8E			;06a60: 6600012c
 _06A64:
-	MOVEA.L	ptr2DEF0,A0		;06a64: 20790002def0
+	MOVEA.L	ptrAstBldg_2DEF0,A0	;06a64: 20790002def0
 	MOVEQ	#0,D7			;06a6a: 7e00
 _06A6C:
 	TST.B	(0,A0)			;06a6c: 4a280000
@@ -8949,9 +8965,9 @@ _06BAC:
 	MOVEQ	#68,D3			;06bb8: 7644
 	MOVEQ	#4,D2			;06bba: 7404
 	BSR.W	_054BA			;06bbc: 6100e8fc
-	MOVE.W	data2E088,D0		;06bc0: 30390002e088
+	MOVE.W	currBlueBuild,D0	;06bc0: 30390002e088
 	MOVE.W	D0,D6			;06bc6: 3c00
-	LEA	arrUnknown40,A0		;06bc8: 41f900020b7c
+	LEA	arrBlueButtonBldgs,A0	;06bc8: 41f900020b7c
 	ADD.W	D0,D0			;06bce: d040
 	MOVE.W	(0,A0,D0.W),D5		;06bd0: 3a300000
 	MOVEA.L	ptrBuff02,A0		;06bd4: 207900000532
@@ -8966,9 +8982,9 @@ _06BAC:
 	LEA	ptr1C8F4,A0		;06bfc: 41f90001c8f4
 	MOVE.B	D6,(A0)			;06c02: 1086
 	SF	(1,A0)			;06c04: 51e80001
-	BSR.W	_07310			;06c08: 61000706
+	BSR.W	_DisplayText		;06c08: 61000706
 	RTS				;06c0c: 4e75
-_06C0E:
+_ClickBuilding:
 ; the result of clicking on an asteroid square
 	TST.W	unk059D0		;06c0e: 4a79000059d0
 	BNE.S	ret06C5E		;06c14: 6648
@@ -8997,7 +9013,7 @@ _06C0E:
 ret06C5E:
 	RTS				;06c5e: 4e75
 _DetonateBldg_06C60:
-	BSR.W	_0C428			;06c60: 610057c6
+	BSR.W	_ConfirmDetonate_0C428	;06c60: 610057c6
 	BMI.S	ret06CA6		;06c64: 6b40
 	MOVE.W	(4,A3),D0		;06c66: 302b0004
 	EXT.L	D0			;06c6a: 48c0
@@ -9005,13 +9021,13 @@ _DetonateBldg_06C60:
 	MOVE.W	D0,D1			;06c70: 3200
 	SWAP	D0			;06c72: 4840
 	ASR.W	#2,D0			;06c74: e440
-	MOVE.L	ptr2DEEC,ptrThisAstMap	;06c76: 23f90002deec0002decc
-	MOVE.L	ptr2DEF0,ptrThisAstBldg	;06c80: 23f90002def00002ded0
-	MOVE.L	ptr2DEF4,ptrThisAstBldgCount ;06c8a: 23f90002def40002ded4
+	MOVE.L	ptrAstMap_2DEEC,ptrThisAstMap ;06c76: 23f90002deec0002decc
+	MOVE.L	ptrAstBldg_2DEF0,ptrThisAstBldg ;06c80: 23f90002def00002ded0
+	MOVE.L	ptrBldCount_2DEF4,ptrThisAstBldgCount ;06c8a: 23f90002def40002ded4
 	MOVE.L	ptrCurrentAst,ptrThisAstStats ;06c94: 23f90002de580002ded8
 ; Deals 120 damage, enough to destroy any building
 	MOVEQ	#120,D7			;06c9e: 7e78
-	JSR	_DetonateBldg_0F5E4	;06ca0: 4eb90000f5e4
+	JSR	_DestroyBldg		;06ca0: 4eb90000f5e4
 ret06CA6:
 	RTS				;06ca6: 4e75
 arrBuildWins:
@@ -9056,6 +9072,7 @@ arrBuildWins:
 	DC.L	_ColonySummaryWin	;06d40: 0000b438
 	DC.L	_ColonySummaryWin	;06d44: 0000b438
 _NormalBldg:
+; Most buildings don't do anything special when destroyed
 	RTS				;06d48: 4e75
 _DamageBldg:
 	MOVEQ	#0,D1			;06d4a: 7200
@@ -9064,7 +9081,7 @@ _DamageBldg:
 	MOVE.W	(4,A0),D2		;06d54: 34280004
 	BCLR	#6,(1,A6,D2.W)		;06d58: 08b600062001
 	BTST	#7,(1,A6,D2.W)		;06d5e: 083600072001
-; Shield Generator, probably
+; If this building is affected by a shield generator:
 ; Half damage, minimum 1
 	BEQ.S	_06D6C			;06d64: 6706
 	ASR.W	#1,D7			;06d66: e247
@@ -9073,15 +9090,17 @@ _DamageBldg:
 _06D6C:
 	TST.B	flg1EBD8		;06d6c: 4a390001ebd8
 	BNE.S	_06D7E			;06d72: 660a
-; If looping over a ship's hardpoints
+; If looping over a ship's hardpoints (?)
 	MOVEA.L	ptrThisAstStats,A2	;06d74: 24790002ded8
 	ADD.W	D7,(82,A2)		;06d7a: df6a0052
 _06D7E:
 	SUB.B	D7,(1,A0)		;06d7e: 9f280001
 	BGT.W	_06E70			;06d82: 6e0000ec
+; Destroy building if HP = 0
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;06d86: 48e7fffe
 	CMPI.B	#$29,D1			;06d8a: 0c010029
 	BPL.S	_06DA0			;06d8e: 6a10
+; Special rules for destroying certain Terran buildings
 	SUBQ.B	#1,D1			;06d90: 5301
 	LSL.W	#2,D1			;06d92: e549
 	LEA	_DestroyTriggers,A1	;06d94: 43f900006eb2
@@ -9186,6 +9205,8 @@ _06EA0:
 	OR.W	D1,D2			;06eae: 8441
 	RTS				;06eb0: 4e75
 _DestroyTriggers:
+; Most buildings do nothing special when destroyed
+; Some have obvious special effects.
 	DC.L	_NormalBldg		;06eb2: 00006d48
 	DC.L	_NormalBldg		;06eb6: 00006d48
 	DC.L	_DestroyStorageFacil	;06eba: 00006f68
@@ -9366,9 +9387,10 @@ ptr070BE:
 	DS.L	1			;070be
 unk070C2:
 	DS.W	1			;070c2
-_PlaceCPU:
-; Places building D4 but in practice this is only ever called to place
-; a CPU, when establishing the initial colony or starting a new colony
+_RandomlyPlaceBldg:
+; Places building D4, but in practice this is only ever called
+; to place a CPU, when establishing the initial colony or
+; starting a new colony
 	MOVEA.L	ptrThisAstStats,A0	;070c4: 20790002ded8
 ; If asteroid byte 89 bits 6 or 7 are set to 1, you can't build.
 ; bit 7 = stasis.
@@ -9376,8 +9398,8 @@ _PlaceCPU:
 	BMI.W	ret071EC		;070ce: 6b00011c
 	BTST	#6,D0			;070d2: 08000006
 	BNE.W	ret071EC		;070d6: 66000114
-; D0 here acquires the value 4 if the building is one of the 4-square
-; buildings, otherwise 1.
+; D0 here acquires the value 4 if the building is one of the
+; 4-square buildings, otherwise 1.
 	MOVEQ	#1,D0			;070da: 7001
 	CMPI.W	#$0015,D4		;070dc: 0c440015
 	BMI.S	_070EA			;070e0: 6b08
@@ -9484,7 +9506,7 @@ _0720A:
 _0722C:
 	SUBQ.W	#5,D4			;0722c: 5b44
 	MOVEM.L	D0-D1/A5,-(A7)		;0722e: 48e7c004
-	MOVEA.L	ptr1C8E2,A5		;07232: 2a790001c8e2
+	MOVEA.L	textField07,A5		;07232: 2a790001c8e2
 	LEA	ptr1C8F4,A2		;07238: 45f90001c8f4
 	MOVEQ	#0,D7			;0723e: 7e00
 	MOVEQ	#1,D6			;07240: 7c01
@@ -9577,7 +9599,7 @@ _0730A:
 	BSR.S	_072CE			;0730a: 61c2
 	BSR.S	_072AE			;0730c: 61a0
 	BRA.S	_07324			;0730e: 6014
-_07310:
+_DisplayText:
 ; Tetracorp load screen typer
 	BSR.S	_072CE			;07310: 61bc
 	MOVE.W	D0,D5			;07312: 3a00
@@ -9593,10 +9615,10 @@ _07324:
 	ANDI.L	#$00000007,D0		;07324: 028000000007
 	MOVE.L	D0,D2			;0732a: 2400
 	ADDA.L	D1,A1			;0732c: d3c1
-	MOVEA.L	ptr1C8E2,A4		;0732e: 28790001c8e2
+	MOVEA.L	textField07,A4		;0732e: 28790001c8e2
 _07334:
 	MOVEA.L	D2,A2			;07334: 2442
-	MOVE.W	data1C8EE,data1C8F2	;07336: 33f90001c8ee0001c8f2
+	MOVE.W	txtBuffer_1C8EE,data1C8F2 ;07336: 33f90001c8ee0001c8f2
 	MOVEA.L	A1,A3			;07340: 2649
 _07342:
 	MOVE.B	intTypeSpeed,D0		;07342: 10390001cb03
@@ -9619,7 +9641,7 @@ _0735E:
 	BNE.S	_073AE			;0736a: 6642
 	MOVEQ	#0,D0			;0736c: 7000
 _0736E:
-	JSR	_00BB8			;0736e: 4eb900000bb8
+	JSR	_Wait			;0736e: 4eb900000bb8
 	BCLR	#0,data1CB07		;07374: 08b900000001cb07
 	BNE.S	_073AE			;0737c: 6630
 	MOVE.B	(A0),D0			;0737e: 1010
@@ -9655,7 +9677,7 @@ _073AE:
 	MOVEQ	#0,D5			;073c8: 7a00
 	MOVE.B	D2,D4			;073ca: 1802
 	MOVEQ	#8,D3			;073cc: 7608
-	MOVEA.L	ptr1C8E6,A5		;073ce: 2a790001c8e6
+	MOVEA.L	textField08,A5		;073ce: 2a790001c8e6
 	MOVE.W	D0,D1			;073d4: 3200
 	LSL.W	#3,D0			;073d6: e748
 	ADD.W	D1,D0			;073d8: d041
@@ -9672,7 +9694,7 @@ loop073DE:
 	AND.B	D0,(8000,A1)		;073f0: c1291f40
 	AND.B	D0,(A1)+		;073f4: c119
 	NOT.B	D0			;073f6: 4600
-	MOVE.B	data2E476,D6		;073f8: 1c390002e476
+	MOVE.B	textcolor,D6		;073f8: 1c390002e476
 	LSR.B	#1,D6			;073fe: e20e
 	BCC.S	_07406			;07400: 6404
 	OR.B	D0,(-1,A1)		;07402: 8129ffff
@@ -9691,7 +9713,7 @@ _07416:
 _0741E:
 	OR.B	D0,(31999,A1)		;0741e: 81297cff
 	ADD.B	D7,D2			;07422: d407
-	ADD.B	D7,data1C8EE		;07424: df390001c8ee
+	ADD.B	D7,txtBuffer_1C8EE	;07424: df390001c8ee
 	CMPI.B	#$08,D2			;0742a: 0c020008
 	BMI.S	_07476			;0742e: 6b46
 	MOVEQ	#1,D5			;07430: 7a01
@@ -9706,7 +9728,7 @@ _0741E:
 	AND.B	D1,(16000,A1)		;07444: c3293e80
 	AND.B	D1,(24000,A1)		;07448: c3295dc0
 	NOT.B	D1			;0744c: 4601
-	MOVE.B	data2E476,D6		;0744e: 1c390002e476
+	MOVE.B	textcolor,D6		;0744e: 1c390002e476
 	LSR.B	#1,D6			;07454: e20e
 	BCC.S	_0745A			;07456: 6402
 	OR.B	D1,(A1)			;07458: 8311
@@ -9732,7 +9754,7 @@ _07476:
 	BRA.W	_07342			;07482: 6000febe
 _07486:
 	MOVE.L	A2,D2			;07486: 240a
-	MOVE.W	data1C8F2,data1C8EE	;07488: 33f90001c8f20001c8ee
+	MOVE.W	data1C8F2,txtBuffer_1C8EE ;07488: 33f90001c8f20001c8ee
 	MOVEA.L	A3,A1			;07492: 224b
 	ADDI.W	#$000a,data1C8F0	;07494: 0679000a0001c8f0
 ; 400
@@ -9799,7 +9821,7 @@ _0751A:
 	MOVE.L	(A7)+,D3		;0751c: 261f
 	RTS				;0751e: 4e75
 _GetStringA0:
-; Not sure if this just loads text or gets the address of the string.
+; Gets the address of the string.
 	MOVEA.L	ptrBuff11_Text,A0	;07520: 207900000556
 	SUBQ.W	#1,D0			;07526: 5340
 	ADD.W	D0,D0			;07528: d040
@@ -9807,13 +9829,14 @@ _GetStringA0:
 	ADDA.W	D0,A0			;0752e: d0c0
 	RTS				;07530: 4e75
 _GetStringA1:
+; Same as previous but loads into register A1
 	MOVEA.L	ptrBuff11_Text,A1	;07532: 227900000556
 	SUBQ.W	#1,D0			;07538: 5340
 	ADD.W	D0,D0			;0753a: d040
 	MOVE.W	(0,A1,D0.W),D0		;0753c: 30310000
 	ADDA.W	D0,A1			;07540: d2c0
 	RTS				;07542: 4e75
-_DiskReq:
+_DiskReqMakeString:
 ; "Please insert disk" blocks game. You can't cancel it.
 	MOVE.L	D0,-(A7)		;07544: 2f00
 ; 356: PLEASE INSERT K240 GAME DISK x IN ANY DRIVE...
@@ -9831,33 +9854,41 @@ _07566:
 	ADDA.L	D0,A0			;07566: d1c0
 	MOVE.L	(A7)+,D0		;07568: 201f
 	RTS				;0756a: 4e75
-_0756C:
+_GetNoneStr:
+; Interesting quirk here. ENGLISH.MGL consists of a list of
+; byte offsets followed by a list of null-byte terminated
+; strings which are referenced by the string. String 102 is
+; "AREA EXP.", followed by a null byte, followed by the string
+; "--- NONE ---", but the latter string has no entry in the
+; byte offset list. The only way to access it is to point to
+; the "AREA EXP." string and advance the pointer 10 bytes.
+; I suspect this was done to add AREA EXP. to the string list
+; without adding a new string to the string list.
 	MOVE.L	D0,-(A7)		;0756c: 2f00
-; 102: AREA EXP.
-; ???
+; 102: AREA EXP./--- NONE ---
 	MOVEQ	#102,D0			;0756e: 7066
 	BSR.S	_GetStringA0		;07570: 61ae
 	ADDQ.W	#8,A0			;07572: 5048
 	ADDQ.W	#2,A0			;07574: 5448
 	MOVE.L	(A7)+,D0		;07576: 201f
 	RTS				;07578: 4e75
-_0757A:
-	MOVE.B	#$0c,data2E476		;0757a: 13fc000c0002e476
+_Window_0757A:
+	MOVE.B	#$0c,textcolor		;0757a: 13fc000c0002e476
 	SF	flg1CB00		;07582: 51f90001cb00
 	SF	flg1CB01		;07588: 51f90001cb01
 	MOVEA.L	A6,A5			;0758e: 2a4e
 	ADDQ.L	#8,A6			;07590: 508e
 	MOVEM.W	(A5),D0-D1		;07592: 4c950003
-	MOVEM.W	D0-D1,data1C8EA		;07596: 48b900030001c8ea
-	MOVEM.W	D0-D1,data1C8EE		;0759e: 48b900030001c8ee
+	MOVEM.W	D0-D1,textField09	;07596: 48b900030001c8ea
+	MOVEM.W	D0-D1,txtBuffer_1C8EE	;0759e: 48b900030001c8ee
 _075A6:
 	TST.B	(A6)			;075a6: 4a16
 	BMI.S	_075C4			;075a8: 6b1a
 	MOVEA.L	A6,A0			;075aa: 204e
-	MOVEM.W	data1C8EE,D0-D1		;075ac: 4cb900030001c8ee
+	MOVEM.W	txtBuffer_1C8EE,D0-D1	;075ac: 4cb900030001c8ee
 	MOVE.L	A1,-(A7)		;075b4: 2f09
 	MOVE.L	A5,-(A7)		;075b6: 2f0d
-	JSR	(_07310,PC)		;075b8: 4ebafd56
+	JSR	(_DisplayText,PC)	;075b8: 4ebafd56
 	MOVEA.L	(A7)+,A5		;075bc: 2a5f
 	MOVEA.L	(A7)+,A1		;075be: 225f
 	MOVEA.L	A0,A6			;075c0: 2c48
@@ -9874,7 +9905,7 @@ _075D0:
 	SF	flg1CB06		;075e2: 51f90001cb06
 	CLR.W	data1CAF4		;075e8: 42790001caf4
 	CLR.W	data1CAF6		;075ee: 42790001caf6
-	MOVE.B	#$0c,data2E476		;075f4: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;075f4: 13fc000c0002e476
 	RTS				;075fc: 4e75
 _075FE:
 	CMPI.W	#$f300,D0		;075fe: 0c40f300
@@ -9886,7 +9917,7 @@ _0760E:
 	CMPI.W	#$fa00,D0		;0760e: 0c40fa00
 	BNE.S	_0761E			;07612: 660a
 	MOVE.W	(A6)+,D0		;07614: 301e
-	MOVE.B	D0,data2E476		;07616: 13c00002e476
+	MOVE.B	D0,textcolor		;07616: 13c00002e476
 	BRA.S	_075A6			;0761c: 6088
 _0761E:
 	CMPI.W	#$fb00,D0		;0761e: 0c40fb00
@@ -9923,7 +9954,7 @@ _07676:
 	BSR.W	_GetStringA0		;07676: 6100fea8
 	BSR.W	_077D4			;0767a: 61000158
 	MOVEM.L	A1/A5-A6,-(A7)		;0767e: 48e70046
-	JSR	(_07310,PC)		;07682: 4ebafc8c
+	JSR	(_DisplayText,PC)	;07682: 4ebafc8c
 	MOVEM.L	(A7)+,A1/A5-A6		;07686: 4cdf6200
 	TST.L	D0			;0768a: 4a80
 	BMI.W	_075D0			;0768c: 6b00ff42
@@ -9936,7 +9967,7 @@ _07694:
 	MOVEA.L	(A6)+,A0		;0769e: 205e
 	BSR.W	_077D4			;076a0: 61000132
 	MOVEM.L	A1/A5-A6,-(A7)		;076a4: 48e70046
-	JSR	(_07310,PC)		;076a8: 4ebafc66
+	JSR	(_DisplayText,PC)	;076a8: 4ebafc66
 	MOVEM.L	(A7)+,A1/A5-A6		;076ac: 4cdf6200
 	TST.L	D0			;076b0: 4a80
 	BMI.W	_075D0			;076b2: 6b00ff1c
@@ -9952,7 +9983,7 @@ _076BA:
 	MOVEA.L	D0,A0			;076cc: 2040
 	BSR.W	_077D4			;076ce: 61000104
 	MOVEM.L	A1/A5-A6,-(A7)		;076d2: 48e70046
-	JSR	(_07310,PC)		;076d6: 4ebafc38
+	JSR	(_DisplayText,PC)	;076d6: 4ebafc38
 	MOVEM.L	(A7)+,A1/A5-A6		;076da: 4cdf6200
 	TST.L	D0			;076de: 4a80
 	BMI.W	_075D0			;076e0: 6b00feee
@@ -10008,7 +10039,7 @@ _0776E:
 	BSR.S	_077D4			;0776e: 6164
 	LEA	ptr1C8F4,A0		;07770: 41f90001c8f4
 	MOVEM.L	A1/A5-A6,-(A7)		;07776: 48e70046
-	JSR	(_07310,PC)		;0777a: 4ebafb94
+	JSR	(_DisplayText,PC)	;0777a: 4ebafb94
 	MOVEM.L	(A7)+,A1/A5-A6		;0777e: 4cdf6200
 	BRA.W	_075A6			;07782: 6000fe22
 _07786:
@@ -10059,12 +10090,12 @@ _077D4:
 	ADD.B	(-1,A4),D0		;077f0: d02cffff
 	ADD.W	(A5),D0			;077f4: d055
 	ADD.W	(2,A5),D1		;077f6: d26d0002
-	MOVEM.W	D0-D1,data1C8EE		;077fa: 48b900030001c8ee
+	MOVEM.W	D0-D1,txtBuffer_1C8EE	;077fa: 48b900030001c8ee
 ret07802:
 	RTS				;07802: 4e75
 _07804:
 	MOVE.L	A1,-(A7)		;07804: 2f09
-	MOVEA.L	ptr1C8E2,A1		;07806: 22790001c8e2
+	MOVEA.L	textField07,A1		;07806: 22790001c8e2
 	MOVEA.L	A0,A2			;0780c: 2448
 	MOVEQ	#0,D2			;0780e: 7400
 _07810:
@@ -10078,30 +10109,30 @@ _0781E:
 	MOVEA.L	(A7)+,A1		;0781e: 225f
 	RTS				;07820: 4e75
 _ErrMsgLine:
-	BSR.S	_07856			;07822: 6132
+	BSR.S	_ErrorLine_07856	;07822: 6132
 ; Sound Q: Error boop
 ; Error noise
 	MOVEQ	#17,D0			;07824: 7011
 	JSR	_PlaySound		;07826: 4eb90001a50e
 	ST	flgPaused		;0782c: 50f90002e458
 	MOVEQ	#50,D0			;07832: 7032
-	JSR	_00BB8			;07834: 4eb900000bb8
+	JSR	_Wait			;07834: 4eb900000bb8
 	SF	flgPaused		;0783a: 51f90002e458
 	RTS				;07840: 4e75
 _07842:
-	BSR.S	_07856			;07842: 6112
+	BSR.S	_ErrorLine_07856	;07842: 6112
 ; Sound Q: Error boop
 ; Error noise
 	MOVEQ	#17,D0			;07844: 7011
 	JSR	_PlaySound		;07846: 4eb90001a50e
 	MOVE.B	#$32,flg1CCC2		;0784c: 13fc00320001ccc2
 	RTS				;07854: 4e75
-_07856:
-	TST.B	flg2E48A		;07856: 4a390002e48a
+_ErrorLine_07856:
+	TST.B	flgShowUI		;07856: 4a390002e48a
 	BNE.S	_0786C			;0785c: 660e
 	MOVE.W	D0,-(A7)		;0785e: 3f00
 	MOVEA.L	ptrBuff01,A1		;07860: 22790000052e
-	BSR.W	_08348			;07866: 61000ae0
+	BSR.W	_MsgLineCoords08348	;07866: 61000ae0
 	MOVE.W	(A7)+,D0		;0786a: 301f
 _0786C:
 	BSR.W	_GetStringA0		;0786c: 6100fcb2
@@ -10113,7 +10144,7 @@ _0786C:
 	BSR.W	_0730A			;0787e: 6100fa8a
 	RTS				;07882: 4e75
 _07884:
-	TST.B	flg2E48A		;07884: 4a390002e48a
+	TST.B	flgShowUI		;07884: 4a390002e48a
 	BEQ.W	ret07962		;0788a: 670000d6
 	TST.B	flg2E478		;0788e: 4a390002e478
 	BEQ.S	_078E0			;07894: 674a
@@ -10145,10 +10176,10 @@ _078E0:
 _078EA:
 	MOVEA.L	ptrBuff00,A1		;078ea: 22790000052a
 	MOVE.W	#$00be,D1		;078f0: 323c00be
-	MOVE.B	data2E476,data2E477	;078f4: 13f90002e4760002e477
-	MOVE.B	#$0c,data2E476		;078fe: 13fc000c0002e476
-	BSR.W	_07310			;07906: 6100fa08
-	MOVE.B	data2E477,data2E476	;0790a: 13f90002e4770002e476
+	MOVE.B	textcolor,tmpTextcolor	;078f4: 13f90002e4760002e477
+	MOVE.B	#$0c,textcolor		;078fe: 13fc000c0002e476
+	BSR.W	_DisplayText		;07906: 6100fa08
+	MOVE.B	tmpTextcolor,textcolor	;0790a: 13f90002e4770002e476
 	CMPI.B	#$19,data1CB04		;07914: 0c3900190001cb04
 	BMI.S	_0795C			;0791c: 6b3e
 	MOVEA.L	ptrCurrentAst,A0	;0791e: 20790002de58
@@ -10157,13 +10188,13 @@ _078EA:
 ; 106: -- IN STASIS --
 	MOVEQ	#106,D0			;0792a: 706a
 	BSR.W	_GetStringA0		;0792c: 6100fbf2
-	MOVE.B	data2E476,data2E477	;07930: 13f90002e4760002e477
-	MOVE.B	#$0b,data2E476		;0793a: 13fc000b0002e476
+	MOVE.B	textcolor,tmpTextcolor	;07930: 13f90002e4760002e477
+	MOVE.B	#$0b,textcolor		;0793a: 13fc000b0002e476
 	MOVEA.L	ptrBuff00,A1		;07942: 22790000052a
 	MOVE.W	#$00c8,D0		;07948: 303c00c8
 	MOVEQ	#4,D1			;0794c: 7204
-	BSR.W	_07310			;0794e: 6100f9c0
-	MOVE.B	data2E477,data2E476	;07952: 13f90002e4770002e476
+	BSR.W	_DisplayText		;0794e: 6100f9c0
+	MOVE.B	tmpTextcolor,textcolor	;07952: 13f90002e4770002e476
 _0795C:
 	JSR	_10F00			;0795c: 4eb900010f00
 ret07962:
@@ -10171,7 +10202,7 @@ ret07962:
 _07964:
 	TST.L	ptr2DEB0		;07964: 4ab90002deb0
 	BEQ.S	_07992			;0796a: 6726
-	ST	flg2E48B		;0796c: 50f90002e48b
+	ST	flgRedraw		;0796c: 50f90002e48b
 	ST	flg1B69C		;07972: 50f90001b69c
 	CLR.L	ptr2DEB0		;07978: 42b90002deb0
 	TST.B	flg315CD		;0797e: 4a39000315cd
@@ -10203,13 +10234,13 @@ _079B0:
 	BSR.W	_054A4			;079e6: 6100dabc
 	MOVE.L	ptrBuff01,D0		;079ea: 20390000052e
 	BSR.W	_05448			;079f0: 6100da56
-	SF	flg00BB2		;079f4: 51f900000bb2
+	SF	flgWait			;079f4: 51f900000bb2
 _079FA:
-	TST.B	flg00BB2		;079fa: 4a3900000bb2
+	TST.B	flgWait			;079fa: 4a3900000bb2
 	BEQ.S	_079FA			;07a00: 67f8
-	SF	flg00BB2		;07a02: 51f900000bb2
+	SF	flgWait			;07a02: 51f900000bb2
 	RTS				;07a08: 4e75
-_07A0A:
+_DialogBox:
 	MOVE.L	A0,-(A7)		;07a0a: 2f08
 	BSR.S	_079B0			;07a0c: 61a2
 	MOVEA.L	(A7)+,A0		;07a0e: 205f
@@ -10232,8 +10263,8 @@ _07A0A:
 	BSR.W	_07A64			;07a48: 6100001a
 	MOVEA.L	ptrBuff01,A5		;07a4c: 2a790000052e
 	MOVEA.L	ptrBuff02,A6		;07a52: 2c7900000532
-	BSR.W	_05584			;07a58: 6100db2a
-	ST	flg2E48B		;07a5c: 50f90002e48b
+	BSR.W	_DiskReq_05584		;07a58: 6100db2a
+	ST	flgRedraw		;07a5c: 50f90002e48b
 	RTS				;07a62: 4e75
 _07A64:
 	TST.W	(24,A0)			;07a64: 4a680018
@@ -10281,12 +10312,12 @@ _07AAE:
 	MOVEM.L	(A7)+,D0/A0-A1		;07aec: 4cdf0301
 	BSR.W	_GetStringA0		;07af0: 6100fa2e
 	ST	flg1CB00		;07af4: 50f90001cb00
-	MOVE.B	#$0b,data2E476		;07afa: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;07afa: 13fc000b0002e476
 	LEA	ptr1D4D4,A5		;07b02: 4bf90001d4d4
 	MOVE.W	(2,A5),D1		;07b08: 322d0002
 	ADDQ.W	#7,D1			;07b0c: 5e41
-	BSR.W	_07310			;07b0e: 6100f800
-	MOVE.B	#$0c,data2E476		;07b12: 13fc000c0002e476
+	BSR.W	_DisplayText		;07b0e: 6100f800
+	MOVE.B	#$0c,textcolor		;07b12: 13fc000c0002e476
 	SF	flg1CB00		;07b1a: 51f90001cb00
 	MOVEA.L	(A7)+,A1		;07b20: 225f
 	MOVEA.L	(A7)+,A0		;07b22: 205f
@@ -10297,7 +10328,7 @@ _07B26:
 	MULU	#$0140,D1		;07b2a: c2fc0140
 	ADD.W	D0,D1			;07b2e: d240
 	MOVE.L	D1,D6			;07b30: 2c01
-	LEA	ptr32922,A0		;07b32: 41f900032922
+	LEA	sprFrames,A0		;07b32: 41f900032922
 	LEA	HARDBASE,A5		;07b38: 4bf900dff000
 	BSR.W	_05378			;07b3e: 6100d838
 	MOVEQ	#-1,D4			;07b42: 78ff
@@ -10380,30 +10411,30 @@ loop07BCA:
 _07C1E:
 	MOVEA.L	(A7)+,A2		;07c1e: 245f
 	RTS				;07c20: 4e75
-_07C22:
+_DiskReq_07C22:
 	ST	flgPaused		;07c22: 50f90002e458
 	ST	flg2E483		;07c28: 50f90002e483
-	SF	flg1B69D		;07c2e: 51f90001b69d
-	LEA	ptr2E9EA,A0		;07c34: 41f90002e9ea
+	SF	flgScreenSwitch_1B69D	;07c2e: 51f90001b69d
+	LEA	winDiskOperation,A0	;07c34: 41f90002e9ea
 	MOVEA.L	ptrBuff01,A1		;07c3a: 22790000052e
-	BSR.W	_07A0A			;07c40: 6100fdc8
+	BSR.W	_DialogBox		;07c40: 6100fdc8
 	MOVEA.L	ptrBuff02,A5		;07c44: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;07c4a: 2c790000052a
-	BSR.W	_05584			;07c50: 6100d932
+	BSR.W	_DiskReq_05584		;07c50: 6100d932
 	LEA	ptr30BBE,A6		;07c54: 4df900030bbe
 	MOVEA.L	ptrBuff00,A1		;07c5a: 22790000052a
-	BSR.W	_0757A			;07c60: 6100f918
+	BSR.W	_Window_0757A		;07c60: 6100f918
 	MOVEA.L	ptrBuff00,A5		;07c64: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;07c6a: 2c790000052e
-	BSR.W	_05584			;07c70: 6100d912
+	BSR.W	_DiskReq_05584		;07c70: 6100d912
 	SF	flgPaused		;07c74: 51f90002e458
 	RTS				;07c7a: 4e75
-_SpaceView:
+_BuildButton:
 	ST	flgPaused		;07c7c: 50f90002e458
 	MOVE.B	#$00,intPointer		;07c82: 13fc00000002e48c
-	LEA	ptr2E6CC,A0		;07c8a: 41f90002e6cc
+	LEA	winEngineering,A0	;07c8a: 41f90002e6cc
 	MOVEA.L	ptrBuff01,A1		;07c90: 22790000052e
-	BSR.W	_07A0A			;07c96: 6100fd72
+	BSR.W	_DialogBox		;07c96: 6100fd72
 	MOVE.W	data2E08A,D7		;07c9a: 3e390002e08a
 _07CA0:
 	MOVE.W	D7,-(A7)		;07ca0: 3f07
@@ -10411,7 +10442,7 @@ _07CA0:
 	MULU	#$0004,D7		;07ca8: cefc0004
 	ADDA.L	D7,A0			;07cac: d1c7
 	MOVE.W	(A0),D0			;07cae: 3010
-	MOVE.W	D0,arrUnknown40		;07cb0: 33c000020b7c
+	MOVE.W	D0,arrBlueButtonBldgs	;07cb0: 33c000020b7c
 	MOVE.W	D0,D5			;07cb6: 3a00
 	SUBQ.W	#1,D0			;07cb8: 5340
 	MULU	#$000a,D0		;07cba: c0fc000a
@@ -10422,7 +10453,7 @@ _07CA0:
 	MOVE.W	(4,A1),textField03	;07cd6: 33e900040001c8d2
 	LEA	ptr2E05C,A1		;07cde: 43f90002e05c
 	MOVE.B	#$28,(A1)+		;07ce4: 12fc0028
-	LEA	arrUnknown40,A0		;07ce8: 41f900020b7c
+	LEA	arrBlueButtonBldgs,A0	;07ce8: 41f900020b7c
 	MOVE.W	(A0)+,D1		;07cee: 3218
 	MOVEQ	#0,D0			;07cf0: 7000
 _07CF2:
@@ -10446,7 +10477,7 @@ _07D18:
 _07D1A:
 	MOVEA.L	ptrBuff02,A5		;07d1a: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;07d20: 2c790000052a
-	BSR.W	_05584			;07d26: 6100d85c
+	BSR.W	_DiskReq_05584		;07d26: 6100d85c
 	MOVEA.L	ptrBuff00,A0		;07d2a: 20790000052a
 	MOVEM.W	ptr1D4DC,D0-D1		;07d30: 4cb900030001d4dc
 	ADDI.W	#$0048,D1		;07d38: 06410048
@@ -10470,10 +10501,10 @@ _07D4E:
 	MOVEA.L	ptrBuff00,A1		;07d66: 22790000052a
 	MOVE.W	#$0010,data1CAF4	;07d6c: 33fc00100001caf4
 	MOVE.W	#$0024,data1CAF6	;07d74: 33fc00240001caf6
-	BSR.W	_0757A			;07d7c: 6100f7fc
+	BSR.W	_Window_0757A		;07d7c: 6100f7fc
 	MOVEA.L	ptrBuff00,A5		;07d80: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;07d86: 2c790000052e
-	BSR.W	_05584			;07d8c: 6100d7f6
+	BSR.W	_DiskReq_05584		;07d8c: 6100d7f6
 	MOVE.W	(A7)+,D7		;07d90: 3e1f
 _07D92:
 	MOVEQ	#0,D0			;07d92: 7000
@@ -10483,7 +10514,7 @@ _07D92:
 	BEQ.S	_07D92			;07da6: 67ea
 	MOVE.W	D7,-(A7)		;07da8: 3f07
 	SF	flg07E8C		;07daa: 51f900007e8c
-	LEA	ptr2E6CC,A0		;07db0: 41f90002e6cc
+	LEA	winEngineering,A0	;07db0: 41f90002e6cc
 	MOVEA.L	(34,A0),A2		;07db6: 24680022
 	JSR	_1147A			;07dba: 4eb90001147a
 	MOVE.W	(A7)+,D7		;07dc0: 3e1f
@@ -10536,7 +10567,7 @@ _07E2E:
 	CMPI.B	#$0a,D0			;07e4c: 0c00000a
 	BPL.S	_07E2E			;07e50: 6adc
 	ADD.W	D0,D0			;07e52: d040
-	LEA	arrUnknown40,A0		;07e54: 41f900020b7c
+	LEA	arrBlueButtonBldgs,A0	;07e54: 41f900020b7c
 	MOVE.W	(A0),D1			;07e5a: 3210
 	MOVE.W	D1,(0,A0,D0.W)		;07e5c: 31810000
 	MOVEQ	#35,D2			;07e60: 7423
@@ -10544,9 +10575,9 @@ _07E2E:
 	BRA.W	_07DC6			;07e64: 6000ff60
 _07E68:
 	MOVE.W	D7,data2E08A		;07e68: 33c70002e08a
-	CLR.W	data2E088		;07e6e: 42790002e088
+	CLR.W	currBlueBuild		;07e6e: 42790002e088
 	BSR.W	_07964			;07e74: 6100faee
-	TST.B	flg2E48A		;07e78: 4a390002e48a
+	TST.B	flgShowUI		;07e78: 4a390002e48a
 	BEQ.S	_07E84			;07e7e: 6704
 	BSR.W	_05B98			;07e80: 6100dd16
 _07E84:
@@ -10556,9 +10587,9 @@ flg07E8C:
 	DC.W	$0000			;07e8c
 _BuildMissileWin:
 	ST	flgPaused		;07e8e: 50f90002e458
-	LEA	ptr2E718,A0		;07e94: 41f90002e718
+	LEA	winWeaponeering,A0	;07e94: 41f90002e718
 	MOVEA.L	ptrBuff01,A1		;07e9a: 22790000052e
-	BSR.W	_07A0A			;07ea0: 6100fb68
+	BSR.W	_DialogBox		;07ea0: 6100fb68
 	MOVEA.L	ptrBuff02,A1		;07ea4: 227900000532
 	LEA	ptr30418,A2		;07eaa: 45f900030418
 	MOVEQ	#0,D0			;07eb0: 7000
@@ -10568,7 +10599,7 @@ _BuildMissileWin:
 _07EBA:
 	MOVEA.L	ptrBuff02,A5		;07eba: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;07ec0: 2c790000052a
-	BSR.W	_05584			;07ec6: 6100d6bc
+	BSR.W	_DiskReq_05584		;07ec6: 6100d6bc
 	MOVE.W	D7,-(A7)		;07eca: 3f07
 	MOVE.W	D7,D6			;07ecc: 3c07
 	LEA	tblMissileStats,A0	;07ece: 41f90001d662
@@ -10589,7 +10620,7 @@ _07EBA:
 	MOVE.W	D6,D1			;07f0a: 3206
 	ASL.W	#2,D6			;07f0c: e546
 	ADD.W	D1,D6			;07f0e: dc41
-	LEA	ptr1D8F6,A1		;07f10: 43f90001d8f6
+	LEA	arrShipSpriteList,A1	;07f10: 43f90001d8f6
 	ADDA.W	D6,A1			;07f16: d2c6
 	MOVEM.L	(A1),A0/A2		;07f18: 4cd10500
 	MOVE.W	(8,A1),D2		;07f1c: 34290008
@@ -10599,12 +10630,12 @@ _07EBA:
 	SUB.W	D2,D1			;07f32: 9242
 	ADDI.W	#$00b0,D0		;07f34: 064000b0
 	MOVEQ	#1,D6			;07f38: 7c01
-	BSR.W	_0C916			;07f3a: 610049da
+	BSR.W	_DrawGfx_0C916		;07f3a: 610049da
 	LEA	ptr30488,A6		;07f3e: 4df900030488
 	MOVEA.L	ptrBuff00,A1		;07f44: 22790000052a
 	MOVE.W	#$0010,data1CAF4	;07f4a: 33fc00100001caf4
 	MOVE.W	#$0024,data1CAF6	;07f52: 33fc00240001caf6
-	BSR.W	_0757A			;07f5a: 6100f61e
+	BSR.W	_Window_0757A		;07f5a: 6100f61e
 	MOVE.W	(A7),D7			;07f5e: 3e17
 	MOVEA.L	ptrCurrentAst,A2	;07f60: 24790002de58
 	LEA	(144,A2),A0		;07f66: 41ea0090
@@ -10612,9 +10643,9 @@ _07EBA:
 	ADD.W	D6,D6			;07f6c: dc46
 	TST.W	(0,A0,D6.W)		;07f6e: 4a706000
 	BEQ.W	_0801E			;07f72: 670000aa
-	MOVE.B	#$07,data2E476		;07f76: 13fc00070002e476
+	MOVE.B	#$07,textcolor		;07f76: 13fc00070002e476
 	MOVE.W	#$009b,D0		;07f7e: 303c009b
-	MOVEA.L	ptr2DEF4,A3		;07f82: 26790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A3	;07f82: 26790002def4
 	TST.W	(14,A3)			;07f88: 4a6b000e
 	BEQ.W	_08002			;07f8c: 67000074
 	LEA	tblMissileStats,A0	;07f90: 41f90001d662
@@ -10631,22 +10662,22 @@ _07EBA:
 	CMP.W	(0,A2,D2.W),D1		;07fb2: b2722000
 	BPL.S	_07FE0			;07fb6: 6a28
 	MOVE.W	#$00aa,D0		;07fb8: 303c00aa
-	MOVE.B	#$0b,data2E476		;07fbc: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;07fbc: 13fc000b0002e476
 	MOVEQ	#0,D1			;07fc4: 7200
 	MOVE.W	(4,A0),D1		;07fc6: 32280004
 	CMP.L	intCashMissiles,D1	;07fca: b2b90002de78
 	BMI.S	_08002			;07fd0: 6b30
-	MOVE.B	#$07,data2E476		;07fd2: 13fc00070002e476
+	MOVE.B	#$07,textcolor		;07fd2: 13fc00070002e476
 ; 104: MISSILE CONSTRUCTION FUND RUNNING LOW!
 	MOVE.W	#$0068,D0		;07fda: 303c0068
 	BRA.S	_08002			;07fde: 6022
 _07FE0:
 	BSR.W	_GetStringA0		;07fe0: 6100f53e
-	MOVE.B	#$07,data2E476		;07fe4: 13fc00070002e476
+	MOVE.B	#$07,textcolor		;07fe4: 13fc00070002e476
 	MOVE.W	#$008c,D0		;07fec: 303c008c
 	MOVE.W	#$00af,D1		;07ff0: 323c00af
 	MOVEA.L	ptrBuff00,A1		;07ff4: 22790000052a
-	BSR.W	_07310			;07ffa: 6100f314
+	BSR.W	_DisplayText		;07ffa: 6100f314
 ; 157: MISSILE PODS NEED MORE
 	MOVE.W	#$009d,D0		;07ffe: 303c009d
 _08002:
@@ -10654,18 +10685,18 @@ _08002:
 	MOVEQ	#8,D0			;08006: 7008
 	MOVE.W	#$00af,D1		;08008: 323c00af
 	MOVEA.L	ptrBuff00,A1		;0800c: 22790000052a
-	BSR.W	_07310			;08012: 6100f2fc
-	MOVE.B	#$0c,data2E476		;08016: 13fc000c0002e476
+	BSR.W	_DisplayText		;08012: 6100f2fc
+	MOVE.B	#$0c,textcolor		;08016: 13fc000c0002e476
 _0801E:
 	MOVEA.L	ptrBuff00,A5		;0801e: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;08024: 2c790000052e
-	BSR.W	_05584			;0802a: 6100d558
+	BSR.W	_DiskReq_05584		;0802a: 6100d558
 	MOVE.W	(A7)+,D7		;0802e: 3e1f
 _08030:
 	BTST	#0,MouseBtn		;08030: 0839000000000766
 	BEQ.S	_08030			;08038: 67f6
 	MOVE.W	D7,-(A7)		;0803a: 3f07
-	LEA	ptr2E718,A0		;0803c: 41f90002e718
+	LEA	winWeaponeering,A0	;0803c: 41f90002e718
 	MOVEA.L	(34,A0),A2		;08042: 24680022
 	JSR	_1147A			;08046: 4eb90001147a
 	MOVE.W	(A7)+,D7		;0804c: 3e1f
@@ -10741,26 +10772,26 @@ _08110:
 	RTS				;0811a: 4e75
 _BuildSattWin:
 	ST	flgPaused		;0811c: 50f90002e458
-	LEA	ptr2E6F2,A0		;08122: 41f90002e6f2
+	LEA	winSatConstruction,A0	;08122: 41f90002e6f2
 	MOVEA.L	ptrBuff01,A1		;08128: 22790000052e
-	BSR.W	_07A0A			;0812e: 6100f8da
+	BSR.W	_DialogBox		;0812e: 6100f8da
 	MOVEA.L	ptrBuff02,A1		;08132: 227900000532
 	LEA	ptr30418,A2		;08138: 45f900030418
 	MOVEQ	#0,D0			;0813e: 7000
 	MOVEQ	#15,D1			;08140: 720f
 	BSR.W	_07B26			;08142: 6100f9e2
 	MOVEQ	#0,D7			;08146: 7e00
-	MOVE.L	lUnknown54,D0		;08148: 20390002de5c
+	MOVE.L	lUnknownSat54,D0	;08148: 20390002de5c
 	BEQ.S	_08168			;0814e: 6718
 	MOVEA.L	ptrCurrentAst,A0	;08150: 20790002de58
 	MOVE.L	D0,(174,A0)		;08156: 214000ae
 	MOVEA.L	D0,A1			;0815a: 2240
 	MOVE.B	(25,A1),(94,A0)		;0815c: 11690019005e
-	CLR.L	lUnknown54		;08162: 42b90002de5c
+	CLR.L	lUnknownSat54		;08162: 42b90002de5c
 _08168:
 	MOVEA.L	ptrBuff02,A5		;08168: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0816e: 2c790000052a
-	BSR.W	_05584			;08174: 6100d40e
+	BSR.W	_DiskReq_05584		;08174: 6100d40e
 	MOVEA.L	ptrCurrentAst,A0	;08178: 20790002de58
 	MOVEQ	#0,D0			;0817e: 7000
 	MOVE.B	(170,A0),D0		;08180: 102800aa
@@ -10768,7 +10799,7 @@ _08168:
 	MOVE.B	(171,A0),D0		;0818a: 102800ab
 	MOVE.W	D0,textField03		;0818e: 33c00001c8d2
 	MOVE.L	A0,-(A7)		;08194: 2f08
-	BSR.W	_0756C			;08196: 6100f3d4
+	BSR.W	_GetNoneStr		;08196: 6100f3d4
 	MOVE.L	A0,textField01		;0819a: 23c80001c8ca
 	MOVEA.L	(A7)+,A0		;081a0: 205f
 	MOVE.L	(174,A0),D0		;081a2: 202800ae
@@ -10787,13 +10818,13 @@ _081C0:
 _081CA:
 	LEA	ptr312C0,A6		;081ca: 4df9000312c0
 	MOVEA.L	ptrBuff00,A1		;081d0: 22790000052a
-	BSR.W	_0757A			;081d6: 6100f3a2
+	BSR.W	_Window_0757A		;081d6: 6100f3a2
 	MOVEA.L	ptrCurrentAst,A2	;081da: 24790002de58
 	TST.B	(170,A2)		;081e0: 4a2a00aa
 	BEQ.W	_08244			;081e4: 6700005e
-	MOVE.B	#$07,data2E476		;081e8: 13fc00070002e476
+	MOVE.B	#$07,textcolor		;081e8: 13fc00070002e476
 	MOVE.W	#$009b,D0		;081f0: 303c009b
-	MOVEA.L	ptr2DEF4,A3		;081f4: 26790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A3	;081f4: 26790002def4
 	TST.W	(14,A3)			;081fa: 4a6b000e
 	BEQ.S	_08228			;081fe: 6728
 	MOVE.W	#$01dd,D0		;08200: 303c01dd
@@ -10804,22 +10835,22 @@ _081CA:
 	BMI.S	_08228			;0821a: 6b0c
 ; 170: CONSTRUCTION PROCEEDING NORMALLY.
 	MOVE.W	#$00aa,D0		;0821c: 303c00aa
-	MOVE.B	#$0b,data2E476		;08220: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;08220: 13fc000b0002e476
 _08228:
 	BSR.W	_GetStringA0		;08228: 6100f2f6
 	MOVEQ	#8,D0			;0822c: 7008
 	MOVE.W	#$007f,D1		;0822e: 323c007f
 	MOVEA.L	ptrBuff00,A1		;08232: 22790000052a
-	BSR.W	_07310			;08238: 6100f0d6
-	MOVE.B	#$0c,data2E476		;0823c: 13fc000c0002e476
+	BSR.W	_DisplayText		;08238: 6100f0d6
+	MOVE.B	#$0c,textcolor		;0823c: 13fc000c0002e476
 _08244:
 	MOVEA.L	ptrBuff00,A5		;08244: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0824a: 2c790000052e
-	BSR.W	_05584			;08250: 6100d332
+	BSR.W	_DiskReq_05584		;08250: 6100d332
 _08254:
 	BTST	#0,MouseBtn		;08254: 0839000000000766
 	BEQ.S	_08254			;0825c: 67f6
-	LEA	ptr2E6F2,A0		;0825e: 41f90002e6f2
+	LEA	winSatConstruction,A0	;0825e: 41f90002e6f2
 	MOVEA.L	(34,A0),A2		;08264: 24680022
 	JSR	_1147A			;08268: 4eb90001147a
 	TST.W	D2			;0826e: 4a42
@@ -10860,7 +10891,7 @@ _082A4:
 	MOVEQ	#76,D0			;082e8: 704c
 	MOVE.B	#$98,D1			;082ea: 123c0098
 	MOVEQ	#0,D5			;082ee: 7a00
-	BSR.W	_0E1FA			;082f0: 61005f08
+	BSR.W	_ExplodeSprite_0E1FA	;082f0: 61005f08
 	MOVE.W	#$000b,(38,A0)		;082f4: 317c000b0026
 	SF	(19,A0)			;082fa: 51e80013
 	MOVE.W	#$0400,(24,A0)		;082fe: 317c04000018
@@ -10870,15 +10901,15 @@ _0830E:
 	CMPI.B	#$04,D2			;0830e: 0c020004
 	BNE.S	_0833C			;08312: 6628
 	ST	flg2E09C		;08314: 50f90002e09c
-	BSET	#2,alien_2E00F		;0831a: 08f900020002e00f
-	BCLR	#3,alien_2E00F		;08322: 08b900030002e00f
-	MOVE.B	#$04,intScrn3		;0832a: 13fc00040002e488
-	MOVE.B	intScreen,intScrn2	;08332: 13f90002e4860002e487
+	BSET	#2,info_display		;0831a: 08f900020002e00f
+	BCLR	#3,info_display		;08322: 08b900030002e00f
+	MOVE.B	#$04,intNewScreen	;0832a: 13fc00040002e488
+	MOVE.B	intScreen,intPrevScreen	;08332: 13f90002e4860002e487
 _0833C:
 	BSR.W	_07964			;0833c: 6100f626
 	SF	flgPaused		;08340: 51f90002e458
 	RTS				;08346: 4e75
-_08348:
+_MsgLineCoords08348:
 	MOVEQ	#0,D0			;08348: 7000
 	MOVE.W	#$00be,D1		;0834a: 323c00be
 	MOVEQ	#40,D2			;0834e: 7428
@@ -10897,7 +10928,7 @@ _MissileFireWin:
 	BSR.W	_ErrMsgLine		;08372: 6100f4ae
 	RTS				;08376: 4e75
 _08378:
-	MOVEA.L	ptr2DEF4,A0		;08378: 20790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A0	;08378: 20790002def4
 	TST.W	(28,A0)			;0837e: 4a68001c
 	BNE.S	_0838E			;08382: 660a
 ; 160: NO MISSILE SILOS ON ASTEROID
@@ -10906,15 +10937,15 @@ _08378:
 	RTS				;0838c: 4e75
 _0838E:
 	ST	flgPaused		;0838e: 50f90002e458
-	LEA	ptr2E73E,A0		;08394: 41f90002e73e
+	LEA	winMissileControl,A0	;08394: 41f90002e73e
 	MOVEA.L	ptrBuff01,A1		;0839a: 22790000052e
-	BSR.W	_07A0A			;083a0: 6100f668
-	TST.L	lUnknown54		;083a4: 4ab90002de5c
+	BSR.W	_DialogBox		;083a0: 6100f668
+	TST.L	lUnknownSat54		;083a4: 4ab90002de5c
 	BNE.S	_083E8			;083aa: 663c
 	MOVEA.L	ptrCurrentAst,A0	;083ac: 20790002de58
 	LEA	(122,A0),A2		;083b2: 45e8007a
 	LEA	(100,A0),A1		;083b6: 43e80064
-	LEA	ptr1D54E,A4		;083ba: 49f90001d54e
+	LEA	flgIntelHonest,A4	;083ba: 49f90001d54e
 	LEA	ptr1D538,A3		;083c0: 47f90001d538
 	MOVEQ	#10,D0			;083c6: 700a
 loop083C8:
@@ -10925,20 +10956,20 @@ loop083C8:
 _083D2:
 	MOVE.W	D1,(A4)+		;083d2: 38c1
 	MOVE.W	(A1)+,D2		;083d4: 3419
-	BPL.S	_083DE			;083d6: 6a06
+	BPL.S	LAB_0535		;083d6: 6a06
 	MOVEQ	#0,D2			;083d8: 7400
 	MOVE.W	D2,(-2,A1)		;083da: 3342fffe
-_083DE:
+LAB_0535:
 	ADD.W	D1,D2			;083de: d441
 	MOVE.W	D2,(A3)+		;083e0: 36c2
 	DBF	D0,loop083C8		;083e2: 51c8ffe4
 	BRA.S	_08454			;083e6: 606c
 _083E8:
 	MOVEA.L	ptrCurrentAst,A0	;083e8: 20790002de58
-	MOVEA.L	lUnknown54,A1		;083ee: 22790002de5c
+	MOVEA.L	lUnknownSat54,A1	;083ee: 22790002de5c
 	MOVE.L	A1,(178,A0)		;083f4: 214900b2
 	MOVE.B	(25,A1),(93,A0)		;083f8: 11690019005d
-	CLR.L	lUnknown54		;083fe: 42b90002de5c
+	CLR.L	lUnknownSat54		;083fe: 42b90002de5c
 	MOVE.L	A1,D2			;08404: 2409
 	MOVEM.W	(26,A0),D0-D1		;08406: 4ca80003001a
 	CMPI.L	#$ffffffff,D2		;0840c: 0c82ffffffff
@@ -10966,7 +10997,7 @@ _08442:
 	EXT.L	D0			;0844c: 48c0
 	MOVE.W	D0,data2E08E		;0844e: 33c00002e08e
 _08454:
-	BSR.W	_0756C			;08454: 6100f116
+	BSR.W	_GetNoneStr		;08454: 6100f116
 	MOVE.L	A0,textField01		;08458: 23c80001c8ca
 	MOVEA.L	ptrCurrentAst,A0	;0845e: 20790002de58
 	MOVE.L	(178,A0),D0		;08464: 202800b2
@@ -10996,16 +11027,16 @@ _0849E:
 _084AC:
 	MOVEA.L	ptrBuff02,A5		;084ac: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;084b2: 2c790000052a
-	BSR.W	_05584			;084b8: 6100d0ca
+	BSR.W	_DiskReq_05584		;084b8: 6100d0ca
 	LEA	tblMisslUnk1,A6		;084bc: 4df9000304d0
 	TST.B	flgBPMislGuidance	;084c2: 4a390002e43d
 	BNE.S	_084D0			;084c8: 6606
 	LEA	tblMisslUnk2Guided,A6	;084ca: 4df900030542
 _084D0:
 	MOVEA.L	ptrBuff00,A1		;084d0: 22790000052a
-	BSR.W	_0757A			;084d6: 6100f0a2
+	BSR.W	_Window_0757A		;084d6: 6100f0a2
 	LEA	ptr1D538,A0		;084da: 41f90001d538
-	LEA	ptr1D54E,A2		;084e0: 45f90001d54e
+	LEA	flgIntelHonest,A2	;084e0: 45f90001d54e
 	MOVEQ	#10,D3			;084e6: 760a
 	MOVEQ	#98,D0			;084e8: 7062
 	MOVEQ	#54,D1			;084ea: 7236
@@ -11022,10 +11053,10 @@ loop084EC:
 	ADDQ.W	#8,D1			;08516: 5041
 	ADDQ.W	#2,D1			;08518: 5441
 	DBF	D3,loop084EC		;0851a: 51cbffd0
-	MOVE.B	#$0b,data2E476		;0851e: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;0851e: 13fc000b0002e476
 	MOVEQ	#10,D3			;08526: 760a
 	LEA	ptr1D538,A3		;08528: 47f90001d538
-	LEA	ptr1D54E,A4		;0852e: 49f90001d54e
+	LEA	flgIntelHonest,A4	;0852e: 49f90001d54e
 	MOVEQ	#52,D1			;08534: 7234
 loop08536:
 	MOVE.W	(A4)+,D0		;08536: 301c
@@ -11043,24 +11074,24 @@ loop08536:
 	MOVEA.L	ptrBuff00,A1		;0855c: 22790000052a
 	MOVE.W	#$00b2,D0		;08562: 303c00b2
 	MOVEM.L	D1/D3/A3-A4,-(A7)	;08566: 48e75018
-	BSR.W	_07310			;0856a: 6100eda4
+	BSR.W	_DisplayText		;0856a: 6100eda4
 	MOVEM.L	(A7)+,D1/D3/A3-A4	;0856e: 4cdf180a
 	ADDQ.W	#8,D1			;08572: 5041
 	ADDQ.W	#2,D1			;08574: 5441
 	DBF	D3,loop08536		;08576: 51cbffbe
-	MOVE.B	#$0c,data2E476		;0857a: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;0857a: 13fc000c0002e476
 	MOVEA.L	ptrBuff00,A5		;08582: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;08588: 2c790000052e
-	BSR.W	_05584			;0858e: 6100cff4
+	BSR.W	_DiskReq_05584		;0858e: 6100cff4
 _08592:
 	TST.B	MouseBtn		;08592: 4a3900000766
 	BEQ.S	_08592			;08598: 67f8
-	LEA	ptr2E73E,A0		;0859a: 41f90002e73e
+	LEA	winMissileControl,A0	;0859a: 41f90002e73e
 	MOVEA.L	(34,A0),A2		;085a0: 24680022
 	JSR	_1147A			;085a4: 4eb90001147a
 	TST.W	D2			;085aa: 4a42
 	BPL.W	_08618			;085ac: 6a00006a
-	MOVEM.W	unk00760,D0-D1		;085b0: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;085b0: 4cb9000300000760
 	CMPI.W	#$0036,D1		;085b8: 0c410036
 	BMI.S	_08592			;085bc: 6bd4
 	CMPI.W	#$00a4,D1		;085be: 0c4100a4
@@ -11069,7 +11100,7 @@ _08592:
 	DIVU	#$000a,D1		;085c8: 82fc000a
 	ADD.W	D1,D1			;085cc: d241
 	LEA	ptr1D538,A0		;085ce: 41f90001d538
-	LEA	ptr1D54E,A1		;085d4: 43f90001d54e
+	LEA	flgIntelHonest,A1	;085d4: 43f90001d54e
 	BTST	#1,MouseBtn		;085da: 0839000100000766
 	BEQ.S	_08600			;085e2: 671c
 	MOVE.W	(0,A1,D1.W),D0		;085e4: 30311000
@@ -11097,10 +11128,10 @@ _08618:
 	CMPI.B	#$2d,D2			;08626: 0c02002d
 	BNE.W	_08658			;0862a: 6600002c
 	ST	flg2E09B		;0862e: 50f90002e09b
-	BSET	#2,alien_2E00F		;08634: 08f900020002e00f
-	BSET	#3,alien_2E00F		;0863c: 08f900030002e00f
-	MOVE.B	#$04,intScrn3		;08644: 13fc00040002e488
-	MOVE.B	intScreen,intScrn2	;0864c: 13f90002e4860002e487
+	BSET	#2,info_display		;08634: 08f900020002e00f
+	BSET	#3,info_display		;0863c: 08f900030002e00f
+	MOVE.B	#$04,intNewScreen	;08644: 13fc00040002e488
+	MOVE.B	intScreen,intPrevScreen	;0864c: 13f90002e4860002e487
 	BRA.S	_08694			;08656: 603c
 _08658:
 	MOVEA.L	ptrCurrentAst,A0	;08658: 20790002de58
@@ -11110,7 +11141,7 @@ _08658:
 	LEA	(100,A0),A1		;0866c: 43e80064
 	LEA	(122,A0),A2		;08670: 45e8007a
 	LEA	ptr1D538,A4		;08674: 49f90001d538
-	LEA	ptr1D54E,A3		;0867a: 47f90001d54e
+	LEA	flgIntelHonest,A3	;0867a: 47f90001d54e
 	MOVEQ	#0,D2			;08680: 7400
 	MOVEQ	#10,D0			;08682: 700a
 loop08684:
@@ -11125,7 +11156,7 @@ _08694:
 	SF	flgPaused		;08698: 51f90002e458
 	RTS				;0869e: 4e75
 _086A0:
-	LEA	ptr1D54E,A1		;086a0: 43f90001d54e
+	LEA	flgIntelHonest,A1	;086a0: 43f90001d54e
 	MOVEQ	#10,D0			;086a6: 700a
 loop086A8:
 	CLR.W	(A1)+			;086a8: 4259
@@ -11232,34 +11263,34 @@ _OreSurveyWin:
 	MOVEA.L	ptrCurrentAst,A0	;087cc: 20790002de58
 	MOVEQ	#0,D7			;087d2: 7e00
 	TST.B	(25,A0)			;087d4: 4a280019
-	BMI.W	_08838			;087d8: 6b00005e
-	BRA.S	_087F0			;087dc: 6012
+	BMI.W	_OreSurv_08838		;087d8: 6b00005e
+	BRA.S	_OreSurv_087F0		;087dc: 6012
 _OreSurv_087DE:
 	MOVEQ	#5,D0			;087de: 7005
 	MOVEQ	#1,D1			;087e0: 7201
 	JSR	_1A2CE			;087e2: 4eb90001a2ce
 	TST.B	(25,A0)			;087e8: 4a280019
-	BPL.S	_087F0			;087ec: 6a02
+	BPL.S	_OreSurv_087F0		;087ec: 6a02
 	MOVEQ	#-1,D7			;087ee: 7eff
-_087F0:
+_OreSurv_087F0:
 ; Ore survey of an asteroid that doesn't exist
 	MOVE.L	A0,ptr088FE		;087f0: 23c8000088fe
 	ST	flgPaused		;087f6: 50f90002e458
 	ST	flg2E483		;087fc: 50f90002e483
 	MOVE.W	D7,-(A7)		;08802: 3f07
-	LEA	ptr2E764,A0		;08804: 41f90002e764
+	LEA	winGeoSurvey,A0		;08804: 41f90002e764
 	MOVEA.L	ptrBuff01,A1		;0880a: 22790000052e
-	BSR.W	_07A0A			;08810: 6100f1f8
+	BSR.W	_DialogBox		;08810: 6100f1f8
 	MOVEA.L	ptr088FE,A0		;08814: 2079000088fe
 ; Asteroid name
 	LEA	(40,A0),A1		;0881a: 43e80028
 	MOVE.L	A1,textField01		;0881e: 23c90001c8ca
 	MOVEA.L	ptrBuff02,A5		;08824: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0882a: 2c790000052a
-	BSR.W	_05584			;08830: 6100cd52
+	BSR.W	_DiskReq_05584		;08830: 6100cd52
 	MOVE.W	(A7)+,D7		;08834: 3e1f
 	BEQ.S	_08840			;08836: 6708
-_08838:
+_OreSurv_08838:
 ; Ore survey of an asteroid that does exist
 	LEA	ptr3069C,A6		;08838: 4df90003069c
 	BRA.S	_088B8			;0883e: 6078
@@ -11305,14 +11336,14 @@ _088AA:
 	LEA	ptr305B0,A6		;088b2: 4df9000305b0
 _088B8:
 	MOVEA.L	ptrBuff00,A1		;088b8: 22790000052a
-	BSR.W	_0757A			;088be: 6100ecba
+	BSR.W	_Window_0757A		;088be: 6100ecba
 	MOVEA.L	ptrBuff00,A5		;088c2: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;088c8: 2c790000052e
-	BSR.W	_05584			;088ce: 6100ccb4
+	BSR.W	_DiskReq_05584		;088ce: 6100ccb4
 _088D2:
 	BTST	#0,MouseBtn		;088d2: 0839000000000766
 	BEQ.S	_088D2			;088da: 67f6
-	LEA	ptr2E764,A0		;088dc: 41f90002e764
+	LEA	winGeoSurvey,A0		;088dc: 41f90002e764
 	MOVEA.L	(34,A0),A2		;088e2: 24680022
 	JSR	_1147A			;088e6: 4eb90001147a
 	CMPI.B	#$0a,D2			;088ec: 0c02000a
@@ -11325,8 +11356,8 @@ ptr088FE:
 _08902:
 	CLR.L	ptr08C3C		;08902: 42b900008c3c
 	ST	flg08C48		;08908: 50f900008c48
-	MOVEA.L	lUnknown54,A0		;0890e: 20790002de5c
-	CLR.L	lUnknown54		;08914: 42b90002de5c
+	MOVEA.L	lUnknownSat54,A0	;0890e: 20790002de5c
+	CLR.L	lUnknownSat54		;08914: 42b90002de5c
 	JSR	_138E6			;0891a: 4eb9000138e6
 	MOVE.L	A4,ptr08C40		;08920: 23cc00008c40
 	TST.W	(22,A4)			;08926: 4a6c0016
@@ -11364,7 +11395,7 @@ _0898C:
 	MOVE.B	(A0)+,(A1)+		;0898c: 12d8
 	BNE.S	_0898C			;0898e: 66fc
 	SUBQ.L	#1,A1			;08990: 5389
-	BSR.W	_0756C			;08992: 6100ebd8
+	BSR.W	_GetNoneStr		;08992: 6100ebd8
 	MOVE.L	ptr08C3C,D0		;08996: 203900008c3c
 	BEQ.S	_089A4			;0899c: 6706
 	MOVEA.L	D0,A0			;0899e: 2040
@@ -11374,7 +11405,7 @@ _089A4:
 	BNE.S	_089A4			;089a6: 66fc
 	SUBQ.L	#1,A1			;089a8: 5389
 	SF	(A1)			;089aa: 51d1
-	MOVEA.L	ptr2DEF4,A4		;089ac: 28790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A4	;089ac: 28790002def4
 	MOVE.W	(4,A4),D0		;089b2: 302c0004
 	MOVE.W	(60,A4),D1		;089b6: 322c003c
 	ADD.W	(66,A4),D1		;089ba: d26c0042
@@ -11393,13 +11424,13 @@ _089A4:
 	MULU	#$012c,D0		;089ea: c0fc012c
 	MOVE.W	D0,unk08C46		;089ee: 33c000008c46
 _089F4:
-	LEA	ptr2EA82,A0		;089f4: 41f90002ea82
+	LEA	winOreTeleporter,A0	;089f4: 41f90002ea82
 	MOVEA.L	ptrBuff01,A1		;089fa: 22790000052e
-	BSR.W	_07A0A			;08a00: 6100f008
+	BSR.W	_DialogBox		;08a00: 6100f008
 _08A04:
 	MOVEA.L	ptrBuff02,A5		;08a04: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;08a0a: 2c790000052a
-	BSR.W	_05584			;08a10: 6100cb72
+	BSR.W	_DiskReq_05584		;08a10: 6100cb72
 	MOVEA.L	ptrCurrentAst,A0	;08a14: 20790002de58
 	LEA	(182,A0),A0		;08a1a: 41e800b6
 	MOVEQ	#9,D3			;08a1e: 7609
@@ -11432,7 +11463,7 @@ _08A6A:
 	ADDQ.W	#8,D1			;08a6a: 5041
 	ADDQ.W	#2,D1			;08a6c: 5441
 	DBF	D3,loop08A30		;08a6e: 51cbffc0
-	LEA	ptr1D54E,A1		;08a72: 43f90001d54e
+	LEA	flgIntelHonest,A1	;08a72: 43f90001d54e
 	MOVEQ	#0,D0			;08a78: 7000
 	MOVE.L	D0,(A1)			;08a7a: 2280
 	MOVE.L	D0,(4,A1)		;08a7c: 23400004
@@ -11450,21 +11481,21 @@ loop08A9C:
 _08AA2:
 	LEA	ptr30F3A,A6		;08aa2: 4df900030f3a
 	MOVEA.L	ptrBuff00,A1		;08aa8: 22790000052a
-	BSR.W	_0757A			;08aae: 6100eaca
+	BSR.W	_Window_0757A		;08aae: 6100eaca
 	MOVEA.L	ptrBuff00,A5		;08ab2: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;08ab8: 2c790000052e
-	BSR.W	_05584			;08abe: 6100cac4
+	BSR.W	_DiskReq_05584		;08abe: 6100cac4
 	TST.B	flg08C48		;08ac2: 4a3900008c48
 	BNE.W	_08BE8			;08ac8: 6600011e
 _08ACC:
 	TST.B	MouseBtn		;08acc: 4a3900000766
 	BEQ.S	_08ACC			;08ad2: 67f8
-	LEA	ptr2EA82,A0		;08ad4: 41f90002ea82
+	LEA	winOreTeleporter,A0	;08ad4: 41f90002ea82
 	MOVEA.L	(34,A0),A2		;08ada: 24680022
 	JSR	_1147A			;08ade: 4eb90001147a
 	TST.W	D2			;08ae4: 4a42
 	BPL.W	_08BFA			;08ae6: 6a000112
-	MOVE.W	unk00762,D1		;08aea: 323900000762
+	MOVE.W	intMouseY,D1		;08aea: 323900000762
 	CMPI.W	#$0042,D1		;08af0: 0c410042
 	BMI.S	_08ACC			;08af4: 6bd6
 	CMPI.W	#$00a6,D1		;08af6: 0c4100a6
@@ -11475,7 +11506,7 @@ _08ACC:
 	TST.L	ptr08C3C		;08b06: 4ab900008c3c
 	BEQ.W	_08BDC			;08b0c: 670000ce
 	LEA	ptr1D4F4,A0		;08b10: 41f90001d4f4
-	LEA	ptr1D54E,A1		;08b16: 43f90001d54e
+	LEA	flgIntelHonest,A1	;08b16: 43f90001d54e
 	LEA	ptr1D730,A2		;08b1c: 45f90001d730
 	MOVEA.L	ptrCurrentAst,A5	;08b22: 2a790002de58
 	LEA	(182,A5),A3		;08b28: 47ed00b6
@@ -11550,10 +11581,10 @@ _08BFA:
 	CMPI.B	#$04,D2			;08c00: 0c020004
 	BNE.W	_08ACC			;08c04: 6600fec6
 	ST	flg1D7F3		;08c08: 50f90001d7f3
-	BSET	#2,alien_2E00F		;08c0e: 08f900020002e00f
-	BCLR	#3,alien_2E00F		;08c16: 08b900030002e00f
-	MOVE.B	#$04,intScrn3		;08c1e: 13fc00040002e488
-	MOVE.B	intScreen,intScrn2	;08c26: 13f90002e4860002e487
+	BSET	#2,info_display		;08c0e: 08f900020002e00f
+	BCLR	#3,info_display		;08c16: 08b900030002e00f
+	MOVE.B	#$04,intNewScreen	;08c1e: 13fc00040002e488
+	MOVE.B	intScreen,intPrevScreen	;08c26: 13f90002e4860002e487
 _08C30:
 	BSR.W	_07964			;08c30: 6100ed32
 	SF	flgPaused		;08c34: 51f90002e458
@@ -11569,13 +11600,13 @@ unk08C46:
 flg08C48:
 	DS.W	1			;08c48
 _08C4A:
-	LEA	ptr2EA5C,A0		;08c4a: 41f90002ea5c
+	LEA	winOreTransp,A0		;08c4a: 41f90002ea5c
 	MOVE.L	#data301B8,(20,A0)	;08c50: 217c000301b80014
 	MOVE.W	#$0028,(16,A0)		;08c58: 317c00280010
 	ST	flg08EE0		;08c5e: 50f900008ee0
 	BRA.S	_08C80			;08c64: 601a
 _08C66:
-	LEA	ptr2EA5C,A0		;08c66: 41f90002ea5c
+	LEA	winOreTransp,A0		;08c66: 41f90002ea5c
 	MOVE.L	#data2FDB4,(20,A0)	;08c6c: 217c0002fdb40014
 	MOVE.W	#$001e,(16,A0)		;08c74: 317c001e0010
 	SF	flg08EE0		;08c7a: 51f900008ee0
@@ -11603,7 +11634,7 @@ _08CC6:
 	MOVEA.L	(4,A0),A0		;08cc6: 20680004
 _08CCA:
 	MOVE.L	A0,ptr08ED8		;08cca: 23c800008ed8
-	LEA	ptr1D54E,A1		;08cd0: 43f90001d54e
+	LEA	flgIntelHonest,A1	;08cd0: 43f90001d54e
 	MOVEQ	#9,D0			;08cd6: 7009
 	MOVEQ	#0,D2			;08cd8: 7400
 loop08CDA:
@@ -11612,7 +11643,7 @@ loop08CDA:
 	ADD.W	D1,D2			;08cde: d441
 	DBF	D0,loop08CDA		;08ce0: 51c8fff8
 	MOVE.W	D2,unk08EDC		;08ce4: 33c200008edc
-	MOVEA.L	ptr2DEF4,A4		;08cea: 28790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A4	;08cea: 28790002def4
 	MOVE.W	(4,A4),D0		;08cf0: 302c0004
 	MOVE.W	(60,A4),D1		;08cf4: 322c003c
 	ADD.W	(66,A4),D1		;08cf8: d26c0042
@@ -11620,13 +11651,13 @@ loop08CDA:
 	ADD.W	D1,D0			;08cfe: d041
 	MULU	#$012c,D0		;08d00: c0fc012c
 	MOVE.W	D0,unk08EDE		;08d04: 33c000008ede
-	LEA	ptr2EA5C,A0		;08d0a: 41f90002ea5c
+	LEA	winOreTransp,A0		;08d0a: 41f90002ea5c
 	MOVEA.L	ptrBuff01,A1		;08d10: 22790000052e
-	BSR.W	_07A0A			;08d16: 6100ecf2
+	BSR.W	_DialogBox		;08d16: 6100ecf2
 _08D1A:
 	MOVEA.L	ptrBuff02,A5		;08d1a: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;08d20: 2c790000052a
-	BSR.W	_05584			;08d26: 6100c85c
+	BSR.W	_DiskReq_05584		;08d26: 6100c85c
 	SF	flg1CB05		;08d2a: 51f90001cb05
 	TST.B	flg08EE0		;08d30: 4a3900008ee0
 	BNE.S	_08D3E			;08d36: 6606
@@ -11666,19 +11697,19 @@ _08D94:
 	DBF	D3,loop08D5A		;08d98: 51cbffc0
 	LEA	ptr30DA6,A6		;08d9c: 4df900030da6
 	MOVEA.L	ptrBuff00,A1		;08da2: 22790000052a
-	BSR.W	_0757A			;08da8: 6100e7d0
+	BSR.W	_Window_0757A		;08da8: 6100e7d0
 	MOVEA.L	ptrBuff00,A5		;08dac: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;08db2: 2c790000052e
-	BSR.W	_05584			;08db8: 6100c7ca
+	BSR.W	_DiskReq_05584		;08db8: 6100c7ca
 _08DBC:
 	TST.B	MouseBtn		;08dbc: 4a3900000766
 	BEQ.S	_08DBC			;08dc2: 67f8
-	LEA	ptr2EA5C,A0		;08dc4: 41f90002ea5c
+	LEA	winOreTransp,A0		;08dc4: 41f90002ea5c
 	MOVEA.L	(34,A0),A2		;08dca: 24680022
 	JSR	_1147A			;08dce: 4eb90001147a
 	TST.W	D2			;08dd4: 4a42
 	BPL.W	_08EC0			;08dd6: 6a0000e8
-	MOVE.W	unk00762,D1		;08dda: 323900000762
+	MOVE.W	intMouseY,D1		;08dda: 323900000762
 	CMPI.W	#$0038,D1		;08de0: 0c410038
 	BMI.S	_08DBC			;08de4: 6bd6
 	CMPI.W	#$009c,D1		;08de6: 0c41009c
@@ -11687,7 +11718,7 @@ _08DBC:
 	DIVU	#$000a,D1		;08df0: 82fc000a
 	ADD.W	D1,D1			;08df4: d241
 	LEA	ptr1D4F4,A0		;08df6: 41f90001d4f4
-	LEA	ptr1D54E,A1		;08dfc: 43f90001d54e
+	LEA	flgIntelHonest,A1	;08dfc: 43f90001d54e
 	LEA	ptr1D730,A2		;08e02: 45f90001d730
 	MOVEA.L	ptr08ED4,A5		;08e08: 2a7900008ed4
 	LEA	(182,A5),A3		;08e0e: 47ed00b6
@@ -11768,22 +11799,22 @@ _08EE2:
 	LEA	(40,A5),A5		;08f06: 4bed0028
 	MOVE.L	A5,textField01		;08f0a: 23cd0001c8ca
 	MOVE.L	A0,-(A7)		;08f10: 2f08
-	LEA	ptr2EA10,A0		;08f12: 41f90002ea10
+	LEA	winSecurityReport,A0	;08f12: 41f90002ea10
 	MOVEA.L	ptrBuff01,A1		;08f18: 22790000052e
-	BSR.W	_07A0A			;08f1e: 6100eaea
+	BSR.W	_DialogBox		;08f1e: 6100eaea
 	MOVEA.L	ptrBuff02,A5		;08f22: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;08f28: 2c790000052a
-	BSR.W	_05584			;08f2e: 6100c654
+	BSR.W	_DiskReq_05584		;08f2e: 6100c654
 	MOVEA.L	(A7)+,A6		;08f32: 2c5f
 	MOVEA.L	ptrBuff00,A1		;08f34: 22790000052a
-	BSR.W	_0757A			;08f3a: 6100e63e
+	BSR.W	_Window_0757A		;08f3a: 6100e63e
 	MOVEA.L	ptrBuff00,A5		;08f3e: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;08f44: 2c790000052e
-	BSR.W	_05584			;08f4a: 6100c638
+	BSR.W	_DiskReq_05584		;08f4a: 6100c638
 _08F4E:
 	BTST	#0,MouseBtn		;08f4e: 0839000000000766
 	BEQ.S	_08F4E			;08f56: 67f6
-	LEA	ptr2EA10,A0		;08f58: 41f90002ea10
+	LEA	winSecurityReport,A0	;08f58: 41f90002ea10
 	MOVEA.L	(34,A0),A2		;08f5e: 24680022
 	JSR	_1147A			;08f62: 4eb90001147a
 	CMPI.B	#$0a,D2			;08f68: 0c02000a
@@ -11795,13 +11826,13 @@ _08F72:
 	RTS				;08f7c: 4e75
 _Message_08F7E:
 	LEA	ptr1F986,A0		;08f7e: 41f90001f986
-_08F84:
+_Colony08F84:
 	TST.W	(2,A0)			;08f84: 4a680002
 	BMI.S	ret08FA0		;08f88: 6b16
 	BEQ.S	_08F92			;08f8a: 6706
 	ADDQ.L	#8,A0			;08f8c: 5088
 	ADDQ.L	#8,A0			;08f8e: 5088
-	BRA.S	_08F84			;08f90: 60f2
+	BRA.S	_Colony08F84		;08f90: 60f2
 _08F92:
 	MOVE.W	D0,(A0)+		;08f92: 30c0
 	MOVE.W	#$0046,(A0)+		;08f94: 30fc0046
@@ -11811,7 +11842,7 @@ _08F92:
 	MOVE.L	D2,(A0)			;08f9e: 2082
 ret08FA0:
 	RTS				;08fa0: 4e75
-_Daily07:
+_Daily07Sound:
 	LEA	ptr1F986,A0		;08fa2: 41f90001f986
 _08FA8:
 	MOVE.W	(2,A0),D0		;08fa8: 30280002
@@ -11878,22 +11909,22 @@ _09036:
 	SF	flg1CB05		;09046: 51f90001cb05
 	ADD.L	D2,intCashGeneral	;0904c: d5b90002de68
 _09052:
-	LEA	ptr2E9C4,A0		;09052: 41f90002e9c4
+	LEA	winInformation,A0	;09052: 41f90002e9c4
 	MOVEA.L	ptrBuff01,A1		;09058: 22790000052e
-	BSR.W	_07A0A			;0905e: 6100e9aa
+	BSR.W	_DialogBox		;0905e: 6100e9aa
 	MOVEA.L	ptrBuff02,A5		;09062: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;09068: 2c790000052a
-	BSR.W	_05584			;0906e: 6100c514
+	BSR.W	_DiskReq_05584		;0906e: 6100c514
 	LEA	ptr30B86,A6		;09072: 4df900030b86
 	MOVEA.L	ptrBuff00,A1		;09078: 22790000052a
-	BSR.W	_0757A			;0907e: 6100e4fa
+	BSR.W	_Window_0757A		;0907e: 6100e4fa
 	MOVEA.L	ptrBuff00,A5		;09082: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;09088: 2c790000052e
-	BSR.W	_05584			;0908e: 6100c4f4
+	BSR.W	_DiskReq_05584		;0908e: 6100c4f4
 _09092:
 	BTST	#0,MouseBtn		;09092: 0839000000000766
 	BEQ.S	_09092			;0909a: 67f6
-	LEA	ptr2E9C4,A0		;0909c: 41f90002e9c4
+	LEA	winInformation,A0	;0909c: 41f90002e9c4
 	MOVEA.L	(34,A0),A2		;090a2: 24680022
 	JSR	_1147A			;090a6: 4eb90001147a
 	CMPI.B	#$0a,D2			;090ac: 0c02000a
@@ -11918,7 +11949,7 @@ _HangarWin:
 	MOVEA.L	ptrCurrentAst,A0	;090ee: 20790002de58
 	LEA	(40,A0),A0		;090f4: 41e80028
 	MOVE.L	A0,textField01		;090f8: 23c80001c8ca
-	LEA	ptr2EA36,A0		;090fe: 41f90002ea36
+	LEA	winShipInvent,A0	;090fe: 41f90002ea36
 	MOVE.L	#data2FF61,(30,A0)	;09104: 217c0002ff61001e
 	MOVE.L	#data2E4FE,(34,A0)	;0910c: 217c0002e4fe0022
 	CMPI.B	#$02,flg2E47B		;09114: 0c3900020002e47b
@@ -11927,9 +11958,9 @@ _HangarWin:
 	MOVE.L	#data2E512,(34,A0)	;09126: 217c0002e5120022
 _0912E:
 	MOVEA.L	ptrBuff01,A1		;0912e: 22790000052e
-	BSR.W	_07A0A			;09134: 6100e8d4
+	BSR.W	_DialogBox		;09134: 6100e8d4
 	LEA	ptr1D538,A0		;09138: 41f90001d538
-	LEA	ptr1D54E,A1		;0913e: 43f90001d54e
+	LEA	flgIntelHonest,A1	;0913e: 43f90001d54e
 	MOVEQ	#9,D0			;09144: 7009
 loop09146:
 	CLR.W	(A0)+			;09146: 4258
@@ -12009,12 +12040,12 @@ _091F8:
 _091FE:
 	MOVEA.L	ptrBuff02,A5		;091fe: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;09204: 2c790000052a
-	BSR.W	_05584			;0920a: 6100c378
+	BSR.W	_DiskReq_05584		;0920a: 6100c378
 	LEA	ptr30ABC,A6		;0920e: 4df900030abc
 	MOVEA.L	ptrBuff00,A1		;09214: 22790000052a
-	BSR.W	_0757A			;0921a: 6100e35e
+	BSR.W	_Window_0757A		;0921a: 6100e35e
 	LEA	ptr1D538,A0		;0921e: 41f90001d538
-	LEA	ptr1D54E,A2		;09224: 45f90001d54e
+	LEA	flgIntelHonest,A2	;09224: 45f90001d54e
 	MOVEQ	#9,D3			;0922a: 7609
 	MOVEQ	#106,D0			;0922c: 706a
 	MOVEQ	#64,D1			;0922e: 7240
@@ -12031,10 +12062,10 @@ loop09230:
 	ADDQ.W	#8,D1			;0925a: 5041
 	ADDQ.W	#2,D1			;0925c: 5441
 	DBF	D3,loop09230		;0925e: 51cbffd0
-	MOVE.B	#$0b,data2E476		;09262: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;09262: 13fc000b0002e476
 	MOVEQ	#9,D3			;0926a: 7609
 	LEA	ptr1D538,A3		;0926c: 47f90001d538
-	LEA	ptr1D54E,A4		;09272: 49f90001d54e
+	LEA	flgIntelHonest,A4	;09272: 49f90001d54e
 	MOVEQ	#62,D1			;09278: 723e
 loop0927A:
 	MOVE.W	(A4)+,D0		;0927a: 301c
@@ -12052,24 +12083,24 @@ loop0927A:
 	MOVEA.L	ptrBuff00,A1		;092a0: 22790000052a
 	MOVE.W	#$00ba,D0		;092a6: 303c00ba
 	MOVEM.L	D1/D3/A3-A4,-(A7)	;092aa: 48e75018
-	BSR.W	_07310			;092ae: 6100e060
+	BSR.W	_DisplayText		;092ae: 6100e060
 	MOVEM.L	(A7)+,D1/D3/A3-A4	;092b2: 4cdf180a
 	ADDQ.W	#8,D1			;092b6: 5041
 	ADDQ.W	#2,D1			;092b8: 5441
 	DBF	D3,loop0927A		;092ba: 51cbffbe
-	MOVE.B	#$0c,data2E476		;092be: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;092be: 13fc000c0002e476
 	MOVEA.L	ptrBuff00,A5		;092c6: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;092cc: 2c790000052e
-	BSR.W	_05584			;092d2: 6100c2b0
+	BSR.W	_DiskReq_05584		;092d2: 6100c2b0
 _092D6:
 	TST.B	MouseBtn		;092d6: 4a3900000766
 	BEQ.S	_092D6			;092dc: 67f8
-	LEA	ptr2EA36,A0		;092de: 41f90002ea36
+	LEA	winShipInvent,A0	;092de: 41f90002ea36
 	MOVEA.L	(34,A0),A2		;092e4: 24680022
 	JSR	_1147A			;092e8: 4eb90001147a
 	TST.W	D2			;092ee: 4a42
 	BPL.W	_0935C			;092f0: 6a00006a
-	MOVEM.W	unk00760,D0-D1		;092f4: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;092f4: 4cb9000300000760
 	CMPI.W	#$0040,D1		;092fc: 0c410040
 	BMI.S	_092D6			;09300: 6bd4
 	CMPI.W	#$00a4,D1		;09302: 0c4100a4
@@ -12078,7 +12109,7 @@ _092D6:
 	DIVU	#$000a,D1		;0930c: 82fc000a
 	ADD.W	D1,D1			;09310: d241
 	LEA	ptr1D538,A0		;09312: 41f90001d538
-	LEA	ptr1D54E,A1		;09318: 43f90001d54e
+	LEA	flgIntelHonest,A1	;09318: 43f90001d54e
 	BTST	#1,MouseBtn		;0931e: 0839000100000766
 	BEQ.S	_09344			;09326: 671c
 	MOVE.W	(0,A1,D1.W),D0		;09328: 30311000
@@ -12104,7 +12135,7 @@ _0935C:
 	BEQ.S	_09382			;09366: 671a
 	CMPI.B	#$29,D2			;09368: 0c020029
 	BNE.W	_091FE			;0936c: 6600fe90
-	LEA	ptr1D54E,A1		;09370: 43f90001d54e
+	LEA	flgIntelHonest,A1	;09370: 43f90001d54e
 	MOVEQ	#9,D0			;09376: 7009
 loop09378:
 	CLR.W	(A1)+			;09378: 4259
@@ -12113,7 +12144,7 @@ loop09378:
 _09382:
 	TST.B	flg2E47B		;09382: 4a390002e47b
 	BNE.W	_091FE			;09388: 6600fe74
-	LEA	ptr1D54E,A1		;0938c: 43f90001d54e
+	LEA	flgIntelHonest,A1	;0938c: 43f90001d54e
 	MOVEQ	#9,D0			;09392: 7009
 loop09394:
 	TST.W	(A1)+			;09394: 4a59
@@ -12132,14 +12163,14 @@ _093B2:
 	RTS				;093c2: 4e75
 _OreStorageWin:
 	ST	flgPaused		;093c4: 50f90002e458
-	LEA	ptr2E7B0,A0		;093ca: 41f90002e7b0
+	LEA	winStorageFacil,A0	;093ca: 41f90002e7b0
 	MOVEA.L	ptrBuff01,A1		;093d0: 22790000052e
-	BSR.W	_07A0A			;093d6: 6100e632
+	BSR.W	_DialogBox		;093d6: 6100e632
 	MOVEA.L	ptrCurrentAst,A0	;093da: 20790002de58
 	LEA	(40,A0),A1		;093e0: 43e80028
 	MOVE.L	A1,textField01		;093e4: 23c90001c8ca
 	MOVE.W	(202,A0),textField02	;093ea: 33e800ca0001c8ce
-	MOVEA.L	ptr2DEF4,A4		;093f2: 28790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A4	;093f2: 28790002def4
 	MOVE.W	(4,A4),D0		;093f8: 302c0004
 	MOVE.W	(60,A4),D1		;093fc: 322c003c
 	ADD.W	(66,A4),D1		;09400: d26c0042
@@ -12149,7 +12180,7 @@ _OreStorageWin:
 	MOVE.W	D0,textField03		;0940c: 33c00001c8d2
 	MOVEA.L	ptrBuff02,A5		;09412: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;09418: 2c790000052a
-	BSR.W	_05584			;0941e: 6100c164
+	BSR.W	_DiskReq_05584		;0941e: 6100c164
 	MOVEA.L	ptrCurrentAst,A0	;09422: 20790002de58
 	LEA	(182,A0),A0		;09428: 41e800b6
 	MOVEQ	#9,D3			;0942c: 7609
@@ -12159,14 +12190,14 @@ loop09434:
 	DBF	D3,loop09434		;09436: 51cbfffc
 	LEA	ptr306BE,A6		;0943a: 4df9000306be
 	MOVEA.L	ptrBuff00,A1		;09440: 22790000052a
-	BSR.W	_0757A			;09446: 6100e132
+	BSR.W	_Window_0757A		;09446: 6100e132
 	MOVEA.L	ptrBuff00,A5		;0944a: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;09450: 2c790000052e
-	BSR.W	_05584			;09456: 6100c12c
+	BSR.W	_DiskReq_05584		;09456: 6100c12c
 _0945A:
 	BTST	#0,MouseBtn		;0945a: 0839000000000766
 	BEQ.S	_0945A			;09462: 67f6
-	LEA	ptr2E7B0,A0		;09464: 41f90002e7b0
+	LEA	winStorageFacil,A0	;09464: 41f90002e7b0
 	MOVEA.L	(34,A0),A2		;0946a: 24680022
 	JSR	_1147A			;0946e: 4eb90001147a
 	CMPI.B	#$0a,D2			;09474: 0c02000a
@@ -12177,7 +12208,7 @@ _0945A:
 _CommandCentWin:
 	ST	flgPaused		;09486: 50f90002e458
 	SF	flg1D7F2		;0948c: 51f90001d7f2
-	LEA	ptr2E7D6,A0		;09492: 41f90002e7d6
+	LEA	winCommandCentre,A0	;09492: 41f90002e7d6
 	MOVE.L	#data2FEDB,(30,A0)	;09498: 217c0002fedb001e
 	MOVE.L	#data2E554,(34,A0)	;094a0: 217c0002e5540022
 	MOVEA.L	ptrCurrentAst,A1	;094a8: 22790002de58
@@ -12189,12 +12220,12 @@ _CommandCentWin:
 	MOVE.L	#data2E562,(34,A0)	;094c6: 217c0002e5620022
 _094CE:
 	MOVEA.L	ptrBuff01,A1		;094ce: 22790000052e
-	BSR.W	_07A0A			;094d4: 6100e534
+	BSR.W	_DialogBox		;094d4: 6100e534
 _094D8:
 	MOVEA.L	ptrBuff02,A5		;094d8: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;094de: 2c790000052a
-	BSR.W	_05584			;094e4: 6100c09e
-	MOVE.B	#$07,data2E476		;094e8: 13fc00070002e476
+	BSR.W	_DiskReq_05584		;094e4: 6100c09e
+	MOVE.B	#$07,textcolor		;094e8: 13fc00070002e476
 	LEA	tblOrePrice0Sel,A2	;094f0: 45f900020adc
 	MOVEQ	#9,D3			;094f6: 7609
 	MOVEQ	#52,D1			;094f8: 7234
@@ -12211,24 +12242,24 @@ loop09500:
 	MOVE.W	#$00bc,D0		;0951e: 303c00bc
 	MOVEA.L	ptrBuff00,A1		;09522: 22790000052a
 	MOVEM.L	D1/D3/A2/A5,-(A7)	;09528: 48e75024
-	BSR.W	_07310			;0952c: 6100dde2
+	BSR.W	_DisplayText		;0952c: 6100dde2
 	MOVEM.L	(A7)+,D1/D3/A2/A5	;09530: 4cdf240a
 _09534:
 	LEA	(12,A2),A2		;09534: 45ea000c
 	ADDQ.W	#8,D1			;09538: 5041
 	ADDQ.W	#2,D1			;0953a: 5441
 	DBF	D3,loop09500		;0953c: 51cbffc2
-	MOVE.B	#$0c,data2E476		;09540: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;09540: 13fc000c0002e476
 	LEA	ptr30796,A6		;09548: 4df900030796
 	MOVEA.L	ptrBuff00,A1		;0954e: 22790000052a
-	BSR.W	_0757A			;09554: 6100e024
+	BSR.W	_Window_0757A		;09554: 6100e024
 	MOVEA.L	ptrBuff00,A5		;09558: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0955e: 2c790000052e
-	BSR.W	_05584			;09564: 6100c01e
+	BSR.W	_DiskReq_05584		;09564: 6100c01e
 _09568:
 	BTST	#0,MouseBtn		;09568: 0839000000000766
 	BEQ.S	_09568			;09570: 67f6
-	LEA	ptr2E7D6,A0		;09572: 41f90002e7d6
+	LEA	winCommandCentre,A0	;09572: 41f90002e7d6
 	MOVEA.L	(34,A0),A2		;09578: 24680022
 	JSR	_1147A			;0957c: 4eb90001147a
 	CMPI.B	#$0a,D2			;09582: 0c02000a
@@ -12237,16 +12268,16 @@ _09568:
 	BNE.W	_0966A			;0958e: 660000da
 	MOVEA.L	ptrBuff02,A5		;09592: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;09598: 2c790000052a
-	BSR.W	_05584			;0959e: 6100bfe4
-	MOVE.B	#$07,data2E476		;095a2: 13fc00070002e476
+	BSR.W	_DiskReq_05584		;0959e: 6100bfe4
+	MOVE.B	#$07,textcolor		;095a2: 13fc00070002e476
 ; 590: TRANSPORT LOCATIONS:
 	MOVE.W	#$024e,D0		;095aa: 303c024e
 	BSR.W	_GetStringA0		;095ae: 6100df70
 	MOVEA.L	ptrBuff00,A1		;095b2: 22790000052a
 	MOVEQ	#78,D0			;095b8: 704e
 	MOVEQ	#44,D1			;095ba: 722c
-	BSR.W	_07310			;095bc: 6100dd52
-	MOVE.B	#$0c,data2E476		;095c0: 13fc000c0002e476
+	BSR.W	_DisplayText		;095bc: 6100dd52
+	MOVE.B	#$0c,textcolor		;095c0: 13fc000c0002e476
 	MOVEQ	#64,D1			;095c8: 7240
 	MOVEQ	#0,D6			;095ca: 7c00
 	MOVEA.L	ptrBuff12_Asteroids,A0	;095cc: 20790000055a
@@ -12259,10 +12290,11 @@ _095DA:
 	CMPI.B	#$37,(8,A1)		;095dc: 0c2900370008
 	BNE.S	_09608			;095e2: 6624
 	MOVEM.L	D0-D1/D6/A0-A1,-(A7)	;095e4: 48e7c2c0
+; Asteroid name
 	LEA	(40,A0),A0		;095e8: 41e80028
 	MOVEA.L	ptrBuff00,A1		;095ec: 22790000052a
 	MOVEQ	#78,D0			;095f2: 704e
-	BSR.W	_07310			;095f4: 6100dd1a
+	BSR.W	_DisplayText		;095f4: 6100dd1a
 	MOVEM.L	(A7)+,D0-D1/D6/A0-A1	;095f8: 4cdf0343
 	ADDQ.W	#8,D1			;095fc: 5041
 	ADDQ.W	#2,D1			;095fe: 5441
@@ -12288,7 +12320,7 @@ _0961E:
 	BSR.W	_GetStringA0		;09630: 6100deee
 	MOVEA.L	ptrBuff00,A1		;09634: 22790000052a
 	MOVEQ	#78,D0			;0963a: 704e
-	BSR.W	_07310			;0963c: 6100dcd2
+	BSR.W	_DisplayText		;0963c: 6100dcd2
 	MOVEM.L	(A7)+,D1/D6/A0-A1	;09640: 4cdf0342
 	ADDQ.W	#8,D1			;09644: 5041
 	ADDQ.W	#2,D1			;09646: 5441
@@ -12301,7 +12333,7 @@ _09650:
 _09656:
 	MOVEA.L	ptrBuff00,A5		;09656: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0965c: 2c790000052e
-	BSR.W	_05584			;09662: 6100bf20
+	BSR.W	_DiskReq_05584		;09662: 6100bf20
 	BRA.W	_09568			;09666: 6000ff00
 _0966A:
 	CMPI.B	#$30,D2			;0966a: 0c020030
@@ -12320,13 +12352,13 @@ _GravityNullWin:
 	BRA.W	_ErrMsgLine		;09696: 6000e18a
 _0969A:
 	ST	flgPaused		;0969a: 50f90002e458
-	LEA	ptr2E822,A0		;096a0: 41f90002e822
+	LEA	winGravityNull,A0	;096a0: 41f90002e822
 	MOVEA.L	ptrBuff01,A1		;096a6: 22790000052e
-	BSR.W	_07A0A			;096ac: 6100e35c
+	BSR.W	_DialogBox		;096ac: 6100e35c
 _096B0:
 	MOVEA.L	ptrBuff02,A5		;096b0: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;096b6: 2c790000052a
-	BSR.W	_05584			;096bc: 6100bec6
+	BSR.W	_DiskReq_05584		;096bc: 6100bec6
 	MOVE.W	#$0079,textField01	;096c0: 33fc00790001c8ca
 	MOVE.W	#$007b,textField02	;096c8: 33fc007b0001c8ce
 	MOVEA.L	ptrCurrentAst,A0	;096d0: 20790002de58
@@ -12338,14 +12370,14 @@ _096EE:
 	LEA	ptr30868,A6		;096ee: 4df900030868
 	MOVEA.L	ptrBuff00,A1		;096f4: 22790000052a
 	MOVE.W	#$0024,data1CAF6	;096fa: 33fc00240001caf6
-	BSR.W	_0757A			;09702: 6100de76
+	BSR.W	_Window_0757A		;09702: 6100de76
 	MOVEA.L	ptrBuff00,A5		;09706: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0970c: 2c790000052e
-	BSR.W	_05584			;09712: 6100be70
+	BSR.W	_DiskReq_05584		;09712: 6100be70
 _09716:
 	BTST	#0,MouseBtn		;09716: 0839000000000766
 	BEQ.S	_09716			;0971e: 67f6
-	LEA	ptr2E822,A0		;09720: 41f90002e822
+	LEA	winGravityNull,A0	;09720: 41f90002e822
 	MOVEA.L	(34,A0),A2		;09726: 24680022
 	JSR	_1147A			;0972a: 4eb90001147a
 	TST.W	D2			;09730: 4a42
@@ -12360,7 +12392,7 @@ _0974A:
 	SF	flgPaused		;0974e: 51f90002e458
 	RTS				;09754: 4e75
 _AstEngineWin:
-	MOVEA.L	ptr2DEF4,A0		;09756: 20790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A0	;09756: 20790002def4
 	TST.W	(44,A0)			;0975c: 4a68002c
 	BNE.S	_09768			;09760: 6606
 _09762:
@@ -12380,15 +12412,15 @@ _09768:
 _0978C:
 	ST	flgPaused		;0978c: 50f90002e458
 	ST	flg2E483		;09792: 50f90002e483
-	LEA	ptr2E848,A0		;09798: 41f90002e848
+	LEA	winAstEngine,A0		;09798: 41f90002e848
 	MOVEA.L	ptrBuff01,A1		;0979e: 22790000052e
-	BSR.W	_07A0A			;097a4: 6100e264
+	BSR.W	_DialogBox		;097a4: 6100e264
 	MOVEA.L	ptrCurrentAst,A0	;097a8: 20790002de58
 	MOVE.B	(35,A0),unk09974	;097ae: 13e8002300009974
 _097B6:
 	MOVEA.L	ptrBuff02,A5		;097b6: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;097bc: 2c790000052a
-	BSR.W	_05584			;097c2: 6100bdc0
+	BSR.W	_DiskReq_05584		;097c2: 6100bdc0
 	MOVEA.L	ptrCurrentAst,A0	;097c6: 20790002de58
 	MOVEQ	#0,D0			;097cc: 7000
 	MOVE.B	(24,A0),D0		;097ce: 10280018
@@ -12442,17 +12474,17 @@ loop097E8:
 	MOVE.W	#$0096,D0		;09880: 303c0096
 	MOVEQ	#80,D1			;09884: 7250
 	MOVEA.L	ptrBuff00,A1		;09886: 22790000052a
-	BSR.W	_0C916			;0988c: 61003088
+	BSR.W	_DrawGfx_0C916		;0988c: 61003088
 	LEA	ptr30892,A6		;09890: 4df900030892
 	MOVEA.L	ptrBuff00,A1		;09896: 22790000052a
-	BSR.W	_0757A			;0989c: 6100dcdc
+	BSR.W	_Window_0757A		;0989c: 6100dcdc
 	MOVEA.L	ptrBuff00,A5		;098a0: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;098a6: 2c790000052e
-	BSR.W	_05584			;098ac: 6100bcd6
+	BSR.W	_DiskReq_05584		;098ac: 6100bcd6
 _098B0:
 	BTST	#0,MouseBtn		;098b0: 0839000000000766
 	BEQ.S	_098B0			;098b8: 67f6
-	LEA	ptr2E848,A0		;098ba: 41f90002e848
+	LEA	winAstEngine,A0		;098ba: 41f90002e848
 	MOVEA.L	(34,A0),A2		;098c0: 24680022
 	JSR	_1147A			;098c4: 4eb90001147a
 	TST.W	D2			;098ca: 4a42
@@ -12476,7 +12508,7 @@ _09906:
 	MOVEA.L	ptrCurrentAst,A0	;09906: 20790002de58
 	MOVE.B	unk09974,D1		;0990c: 123900009974
 	MOVE.B	D1,(35,A0)		;09912: 11410023
-	LEA	arrAstMove1F6C6,A2	;09916: 45f90001f6c6
+	LEA	arrAstDirection,A2	;09916: 45f90001f6c6
 	ASL.W	#2,D1			;0991c: e541
 	MOVE.L	(0,A2,D1.W),(56,A0)	;0991e: 217210000038
 	CLR.L	(30,A0)			;09924: 42a8001e
@@ -12491,7 +12523,7 @@ _09942:
 	MOVEM.W	(A2)+,D2-D3		;09942: 4c9a000c
 	ADDI.W	#$00a6,D2		;09946: 064200a6
 	ADDI.W	#$0057,D3		;0994a: 06430057
-	MOVEM.W	unk00760,D0-D1		;0994e: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;0994e: 4cb9000300000760
 	JSR	_11B36			;09956: 4eb900011b36
 	CMP.W	D0,D6			;0995c: bc40
 	BMI.S	_09968			;0995e: 6b08
@@ -12523,10 +12555,10 @@ _0998C:
 	MOVE.L	A3,-(A7)		;099a8: 2f0b
 	ST	flgPaused		;099aa: 50f90002e458
 	BSR.W	_0A874			;099b0: 61000ec2
-	LEA	ptr2E86E,A0		;099b4: 41f90002e86e
+	LEA	winGeoSurvey2,A0	;099b4: 41f90002e86e
 	MOVE.L	#data2E5A0,(34,A0)	;099ba: 217c0002e5a00022
 	MOVEA.L	ptrBuff01,A1		;099c2: 22790000052e
-	BSR.W	_07A0A			;099c8: 6100e040
+	BSR.W	_DialogBox		;099c8: 6100e040
 	MOVEA.L	ptrBuff02,A1		;099cc: 227900000532
 	LEA	ptr30395,A2		;099d2: 45f900030395
 	MOVEQ	#0,D0			;099d8: 7000
@@ -12551,7 +12583,7 @@ _09A04:
 _09A26:
 	MOVEA.L	ptrBuff02,A5		;09a26: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;09a2c: 2c790000052a
-	BSR.W	_05584			;09a32: 6100bb50
+	BSR.W	_DiskReq_05584		;09a32: 6100bb50
 	LEA	ptr1D7E2,A0		;09a36: 41f90001d7e2
 	MOVEQ	#-1,D0			;09a3c: 70ff
 	MOVE.L	D0,(A0)			;09a3e: 2080
@@ -12562,7 +12594,7 @@ _09A26:
 	BNE.S	_09A58			;09a52: 6604
 	SF	(9,A0)			;09a54: 51e80009
 _09A58:
-	TST.B	flgBPStasis		;09a58: 4a390002e44a
+	TST.B	flgBPStaticInducer	;09a58: 4a390002e44a
 	BNE.S	_09A64			;09a5e: 6604
 	SF	(8,A0)			;09a60: 51e80008
 _09A64:
@@ -12592,7 +12624,7 @@ _09A96:
 	TST.B	(0,A4,D4.W)		;09aaa: 4a344000
 	BEQ.S	_09AE0			;09aae: 6730
 	MULU	#$000a,D3		;09ab0: c6fc000a
-	LEA	ptr1D8F6,A0		;09ab4: 41f90001d8f6
+	LEA	arrShipSpriteList,A0	;09ab4: 41f90001d8f6
 	MOVE.W	(8,A0,D3.W),D2		;09aba: 34303008
 	MOVEM.L	(0,A0,D3.W),A0/A2	;09abe: 4cf005003000
 	MOVEQ	#2,D6			;09ac4: 7c02
@@ -12602,7 +12634,7 @@ _09A96:
 	MOVE.L	A3,-(A7)		;09ace: 2f0b
 	MOVE.L	A4,-(A7)		;09ad0: 2f0c
 	MOVEA.L	ptrBuff00,A1		;09ad2: 22790000052a
-	BSR.W	_0C916			;09ad8: 61002e3c
+	BSR.W	_DrawGfx_0C916		;09ad8: 61002e3c
 	MOVEA.L	(A7)+,A4		;09adc: 285f
 	MOVEA.L	(A7)+,A3		;09ade: 265f
 _09AE0:
@@ -12621,7 +12653,7 @@ _09AE0:
 	MOVE.W	#$00b6,D0		;09afe: 303c00b6
 	MOVE.W	#$00b7,D1		;09b02: 323c00b7
 	MOVEA.L	ptrBuff00,A1		;09b06: 22790000052a
-	BSR.W	_07310			;09b0c: 6100d802
+	BSR.W	_DisplayText		;09b0c: 6100d802
 	MOVE.W	unk09D9A,D0		;09b10: 303900009d9a
 	ADD.W	D0,D0			;09b16: d040
 	LEA	arrHPCosts,A1		;09b18: 43f90001d816
@@ -12635,26 +12667,26 @@ _09AE0:
 	MOVE.W	#$011a,D0		;09b3c: 303c011a
 	MOVE.W	#$00b7,D1		;09b40: 323c00b7
 	MOVEA.L	ptrBuff00,A1		;09b44: 22790000052a
-	MOVE.B	#$0b,data2E476		;09b4a: 13fc000b0002e476
-	BSR.W	_07310			;09b52: 6100d7bc
-	MOVE.B	#$0c,data2E476		;09b56: 13fc000c0002e476
+	MOVE.B	#$0b,textcolor		;09b4a: 13fc000b0002e476
+	BSR.W	_DisplayText		;09b52: 6100d7bc
+	MOVE.B	#$0c,textcolor		;09b56: 13fc000c0002e476
 _09B5E:
 	BSR.W	_0A17A			;09b5e: 6100061a
 	LEA	ptr308BC,A6		;09b62: 4df9000308bc
 	MOVEA.L	ptrBuff00,A1		;09b68: 22790000052a
-	BSR.W	_0757A			;09b6e: 6100da0a
+	BSR.W	_Window_0757A		;09b6e: 6100da0a
 	MOVEA.L	ptrBuff00,A5		;09b72: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;09b78: 2c790000052e
-	SF	flg00BB2		;09b7e: 51f900000bb2
+	SF	flgWait			;09b7e: 51f900000bb2
 _09B84:
-	TST.B	flg00BB2		;09b84: 4a3900000bb2
+	TST.B	flgWait			;09b84: 4a3900000bb2
 	BEQ.S	_09B84			;09b8a: 67f8
-	SF	flg00BB2		;09b8c: 51f900000bb2
-	BSR.W	_05584			;09b92: 6100b9f0
+	SF	flgWait			;09b8c: 51f900000bb2
+	BSR.W	_DiskReq_05584		;09b92: 6100b9f0
 _09B96:
 	BTST	#0,MouseBtn		;09b96: 0839000000000766
 	BEQ.S	_09B96			;09b9e: 67f6
-	LEA	ptr2E86E,A0		;09ba0: 41f90002e86e
+	LEA	winGeoSurvey2,A0	;09ba0: 41f90002e86e
 	MOVEA.L	(34,A0),A2		;09ba6: 24680022
 	JSR	_1147A			;09baa: 4eb90001147a
 	TST.W	D2			;09bb0: 4a42
@@ -12733,7 +12765,7 @@ _09CA6:
 	RTS				;09cac: 4e75
 _09CAE:
 	LEA	arrHPCosts,A0		;09cae: 41f90001d816
-	MOVEM.W	unk00760,D0-D1		;09cb4: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;09cb4: 4cb9000300000760
 	MOVEQ	#7,D4			;09cbc: 7807
 loop09CBE:
 	MOVE.W	-(A0),D3		;09cbe: 3620
@@ -12775,7 +12807,7 @@ _09D16:
 	SUBQ.W	#1,D0			;09d22: 5340
 	MULU	#$0018,D0		;09d24: c0fc0018
 	ADDA.W	D0,A1			;09d28: d2c0
-	MOVEM.W	unk00760,D0-D1		;09d2a: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;09d2a: 4cb9000300000760
 	MOVEQ	#0,D4			;09d32: 7800
 _09D34:
 	CMP.W	data1D7C6,D4		;09d34: b8790001d7c6
@@ -12823,10 +12855,10 @@ unk09D9C:
 _09D9E:
 	ST	flgPaused		;09d9e: 50f90002e458
 	BSR.W	_0A874			;09da4: 61000ace
-	LEA	ptr2E86E,A0		;09da8: 41f90002e86e
+	LEA	winGeoSurvey2,A0	;09da8: 41f90002e86e
 	MOVE.L	#data2E5AC,(34,A0)	;09dae: 217c0002e5ac0022
 	MOVEA.L	ptrBuff01,A1		;09db6: 22790000052e
-	BSR.W	_07A0A			;09dbc: 6100dc4c
+	BSR.W	_DialogBox		;09dbc: 6100dc4c
 	MOVEA.L	ptrBuff02,A1		;09dc0: 227900000532
 	LEA	ptr30395,A2		;09dc6: 45f900030395
 	MOVEQ	#0,D0			;09dcc: 7000
@@ -12851,7 +12883,7 @@ _09DF8:
 _09E1A:
 	MOVEA.L	ptrBuff02,A5		;09e1a: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;09e20: 2c790000052a
-	BSR.W	_05584			;09e26: 6100b75c
+	BSR.W	_DiskReq_05584		;09e26: 6100b75c
 	LEA	ptr1D7E2,A0		;09e2a: 41f90001d7e2
 	MOVEQ	#-1,D0			;09e30: 70ff
 	MOVE.L	D0,(A0)			;09e32: 2080
@@ -12865,7 +12897,7 @@ _09E1A:
 	BNE.S	_09E56			;09e50: 6604
 	SF	(9,A0)			;09e52: 51e80009
 _09E56:
-	TST.B	flgBPStasis		;09e56: 4a390002e44a
+	TST.B	flgBPStaticInducer	;09e56: 4a390002e44a
 	BNE.S	_09E62			;09e5c: 6604
 	SF	(8,A0)			;09e5e: 51e80008
 _09E62:
@@ -12894,7 +12926,7 @@ _09E94:
 	TST.B	(0,A4,D4.W)		;09ea8: 4a344000
 	BEQ.S	_09EDE			;09eac: 6730
 	MULU	#$000a,D3		;09eae: c6fc000a
-	LEA	ptr1D8F6,A0		;09eb2: 41f90001d8f6
+	LEA	arrShipSpriteList,A0	;09eb2: 41f90001d8f6
 	MOVE.W	(8,A0,D3.W),D2		;09eb8: 34303008
 	MOVEM.L	(0,A0,D3.W),A0/A2	;09ebc: 4cf005003000
 	MOVEQ	#2,D6			;09ec2: 7c02
@@ -12904,7 +12936,7 @@ _09E94:
 	MOVE.L	A3,-(A7)		;09ecc: 2f0b
 	MOVE.L	A4,-(A7)		;09ece: 2f0c
 	MOVEA.L	ptrBuff00,A1		;09ed0: 22790000052a
-	BSR.W	_0C916			;09ed6: 61002a3e
+	BSR.W	_DrawGfx_0C916		;09ed6: 61002a3e
 	MOVEA.L	(A7)+,A4		;09eda: 285f
 	MOVEA.L	(A7)+,A3		;09edc: 265f
 _09EDE:
@@ -12922,7 +12954,7 @@ _09EDE:
 	MOVE.W	#$00b6,D0		;09efc: 303c00b6
 	MOVE.W	#$00b7,D1		;09f00: 323c00b7
 	MOVEA.L	ptrBuff00,A1		;09f04: 22790000052a
-	BSR.W	_07310			;09f0a: 6100d404
+	BSR.W	_DisplayText		;09f0a: 6100d404
 	MOVE.W	unk0A176,D0		;09f0e: 30390000a176
 	ADD.W	D0,D0			;09f14: d040
 	LEA	arrHPCosts,A1		;09f16: 43f90001d816
@@ -12936,26 +12968,26 @@ _09EDE:
 	MOVE.W	#$011a,D0		;09f3a: 303c011a
 	MOVE.W	#$00b7,D1		;09f3e: 323c00b7
 	MOVEA.L	ptrBuff00,A1		;09f42: 22790000052a
-	MOVE.B	#$0b,data2E476		;09f48: 13fc000b0002e476
-	BSR.W	_07310			;09f50: 6100d3be
-	MOVE.B	#$0c,data2E476		;09f54: 13fc000c0002e476
+	MOVE.B	#$0b,textcolor		;09f48: 13fc000b0002e476
+	BSR.W	_DisplayText		;09f50: 6100d3be
+	MOVE.B	#$0c,textcolor		;09f54: 13fc000c0002e476
 _09F5C:
 	BSR.W	_0A17A			;09f5c: 6100021c
 	LEA	ptr308BC,A6		;09f60: 4df9000308bc
 	MOVEA.L	ptrBuff00,A1		;09f66: 22790000052a
-	BSR.W	_0757A			;09f6c: 6100d60c
+	BSR.W	_Window_0757A		;09f6c: 6100d60c
 	MOVEA.L	ptrBuff00,A5		;09f70: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;09f76: 2c790000052e
-	SF	flg00BB2		;09f7c: 51f900000bb2
+	SF	flgWait			;09f7c: 51f900000bb2
 _09F82:
-	TST.B	flg00BB2		;09f82: 4a3900000bb2
+	TST.B	flgWait			;09f82: 4a3900000bb2
 	BEQ.S	_09F82			;09f88: 67f8
-	SF	flg00BB2		;09f8a: 51f900000bb2
-	BSR.W	_05584			;09f90: 6100b5f2
+	SF	flgWait			;09f8a: 51f900000bb2
+	BSR.W	_DiskReq_05584		;09f90: 6100b5f2
 _09F94:
 	BTST	#0,MouseBtn		;09f94: 0839000000000766
 	BEQ.S	_09F94			;09f9c: 67f6
-	LEA	ptr2E86E,A0		;09f9e: 41f90002e86e
+	LEA	winGeoSurvey2,A0	;09f9e: 41f90002e86e
 	MOVEA.L	(34,A0),A2		;09fa4: 24680022
 	JSR	_1147A			;09fa8: 4eb90001147a
 	TST.W	D2			;09fae: 4a42
@@ -13020,7 +13052,7 @@ _0A082:
 	RTS				;0a088: 4e75
 _0A08A:
 	LEA	arrHPCosts,A0		;0a08a: 41f90001d816
-	MOVEM.W	unk00760,D0-D1		;0a090: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;0a090: 4cb9000300000760
 	MOVEQ	#7,D4			;0a098: 7807
 loop0A09A:
 	MOVE.W	-(A0),D3		;0a09a: 3620
@@ -13062,7 +13094,7 @@ _0A0F2:
 	SUBQ.W	#1,D0			;0a0fe: 5340
 	MULU	#$0018,D0		;0a100: c0fc0018
 	ADDA.W	D0,A1			;0a104: d2c0
-	MOVEM.W	unk00760,D0-D1		;0a106: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;0a106: 4cb9000300000760
 	MOVEQ	#0,D4			;0a10e: 7800
 _0A110:
 	CMP.W	data1D7C6,D4		;0a110: b8790001d7c6
@@ -13168,7 +13200,7 @@ loop0A240:
 	BMI.S	_0A27E			;0a242: 6b3a
 	ADDI.W	#$00a8,D3		;0a244: 064300a8
 	MULU	#$000a,D3		;0a248: c6fc000a
-	LEA	ptr1D8F6,A0		;0a24c: 41f90001d8f6
+	LEA	arrShipSpriteList,A0	;0a24c: 41f90001d8f6
 	MOVE.W	(8,A0,D3.W),D2		;0a252: 34303008
 	MOVEM.L	(0,A0,D3.W),A0/A2	;0a256: 4cf005003000
 	MOVEQ	#2,D6			;0a25c: 7c02
@@ -13179,7 +13211,7 @@ loop0A240:
 	SUB.W	D2,D1			;0a26a: 9242
 	MOVEA.L	ptrBuff00,A1		;0a26c: 22790000052a
 	MOVEM.L	D4/A3-A4,-(A7)		;0a272: 48e70818
-	BSR.W	_0C916			;0a276: 6100269e
+	BSR.W	_DrawGfx_0C916		;0a276: 6100269e
 	MOVEM.L	(A7)+,D4/A3-A4		;0a27a: 4cdf1810
 _0A27E:
 	ADDQ.L	#4,A3			;0a27e: 588b
@@ -13255,7 +13287,7 @@ _0A37A:
 	MOVE.W	(0,A1,D3.W),D3		;0a394: 36313000
 	ADDQ.W	#4,D3			;0a398: 5843
 	MULU	#$000a,D3		;0a39a: c6fc000a
-	LEA	ptr1D8F6,A0		;0a39e: 41f90001d8f6
+	LEA	arrShipSpriteList,A0	;0a39e: 41f90001d8f6
 	MOVE.W	(8,A0,D3.W),D2		;0a3a4: 34303008
 	MOVEM.L	(0,A0,D3.W),A0/A2	;0a3a8: 4cf005003000
 	LEA	ptr1E4AA,A1		;0a3ae: 43f90001e4aa
@@ -13272,7 +13304,7 @@ _0A37A:
 _0A3D4:
 	SUB.W	D2,D1			;0a3d4: 9242
 	MOVEA.L	ptrBuff00,A1		;0a3d6: 22790000052a
-	BSR.W	_0C916			;0a3dc: 61002538
+	BSR.W	_DrawGfx_0C916		;0a3dc: 61002538
 ret0A3E0:
 	RTS				;0a3e0: 4e75
 _0A3E2:
@@ -13283,10 +13315,10 @@ _0A3E2:
 	BNE.W	_0A8BE			;0a3ee: 660004ce
 	ST	flgPaused		;0a3f2: 50f90002e458
 	BSR.W	_0A874			;0a3f8: 6100047a
-	LEA	ptr2E86E,A0		;0a3fc: 41f90002e86e
+	LEA	winGeoSurvey2,A0	;0a3fc: 41f90002e86e
 	MOVE.L	#data2E5A0,(34,A0)	;0a402: 217c0002e5a00022
 	MOVEA.L	ptrBuff01,A1		;0a40a: 22790000052e
-	BSR.W	_07A0A			;0a410: 6100d5f8
+	BSR.W	_DialogBox		;0a410: 6100d5f8
 	MOVEA.L	ptrBuff02,A1		;0a414: 227900000532
 	LEA	ptr30395,A2		;0a41a: 45f900030395
 	MOVEQ	#0,D0			;0a420: 7000
@@ -13311,7 +13343,7 @@ _0A44C:
 _0A46E:
 	MOVEA.L	ptrBuff02,A5		;0a46e: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0a474: 2c790000052a
-	BSR.W	_05584			;0a47a: 6100b108
+	BSR.W	_DiskReq_05584		;0a47a: 6100b108
 	LEA	ptr1D7E2,A0		;0a47e: 41f90001d7e2
 	MOVEQ	#-1,D0			;0a484: 70ff
 	MOVE.L	D0,(A0)			;0a486: 2080
@@ -13326,7 +13358,7 @@ _0A4A2:
 	BNE.S	_0A4AE			;0a4a8: 6604
 	SF	(9,A0)			;0a4aa: 51e80009
 _0A4AE:
-	TST.B	flgBPStasis		;0a4ae: 4a390002e44a
+	TST.B	flgBPStaticInducer	;0a4ae: 4a390002e44a
 	BNE.S	_0A4BA			;0a4b4: 6604
 	SF	(8,A0)			;0a4b6: 51e80008
 _0A4BA:
@@ -13355,7 +13387,7 @@ _0A4EC:
 	TST.B	(0,A4,D4.W)		;0a500: 4a344000
 	BEQ.S	_0A536			;0a504: 6730
 	MULU	#$000a,D3		;0a506: c6fc000a
-	LEA	ptr1D8F6,A0		;0a50a: 41f90001d8f6
+	LEA	arrShipSpriteList,A0	;0a50a: 41f90001d8f6
 	MOVE.W	(8,A0,D3.W),D2		;0a510: 34303008
 	MOVEM.L	(0,A0,D3.W),A0/A2	;0a514: 4cf005003000
 	MOVEQ	#2,D6			;0a51a: 7c02
@@ -13365,7 +13397,7 @@ _0A4EC:
 	MOVE.L	A3,-(A7)		;0a524: 2f0b
 	MOVE.L	A4,-(A7)		;0a526: 2f0c
 	MOVEA.L	ptrBuff00,A1		;0a528: 22790000052a
-	BSR.W	_0C916			;0a52e: 610023e6
+	BSR.W	_DrawGfx_0C916		;0a52e: 610023e6
 	MOVEA.L	(A7)+,A4		;0a532: 285f
 	MOVEA.L	(A7)+,A3		;0a534: 265f
 _0A536:
@@ -13383,7 +13415,7 @@ _0A536:
 	MOVE.W	#$00b6,D0		;0a554: 303c00b6
 	MOVE.W	#$00b7,D1		;0a558: 323c00b7
 	MOVEA.L	ptrBuff00,A1		;0a55c: 22790000052a
-	BSR.W	_07310			;0a562: 6100cdac
+	BSR.W	_DisplayText		;0a562: 6100cdac
 	MOVE.W	unk0A870,D0		;0a566: 30390000a870
 	ADD.W	D0,D0			;0a56c: d040
 	LEA	arrHPCosts,A1		;0a56e: 43f90001d816
@@ -13397,26 +13429,26 @@ _0A536:
 	MOVE.W	#$011a,D0		;0a592: 303c011a
 	MOVE.W	#$00b7,D1		;0a596: 323c00b7
 	MOVEA.L	ptrBuff00,A1		;0a59a: 22790000052a
-	MOVE.B	#$0b,data2E476		;0a5a0: 13fc000b0002e476
-	BSR.W	_07310			;0a5a8: 6100cd66
-	MOVE.B	#$0c,data2E476		;0a5ac: 13fc000c0002e476
+	MOVE.B	#$0b,textcolor		;0a5a0: 13fc000b0002e476
+	BSR.W	_DisplayText		;0a5a8: 6100cd66
+	MOVE.B	#$0c,textcolor		;0a5ac: 13fc000c0002e476
 _0A5B4:
 	BSR.W	_0A17A			;0a5b4: 6100fbc4
 	LEA	ptr308BC,A6		;0a5b8: 4df9000308bc
 	MOVEA.L	ptrBuff00,A1		;0a5be: 22790000052a
-	BSR.W	_0757A			;0a5c4: 6100cfb4
+	BSR.W	_Window_0757A		;0a5c4: 6100cfb4
 	MOVEA.L	ptrBuff00,A5		;0a5c8: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0a5ce: 2c790000052e
-	SF	flg00BB2		;0a5d4: 51f900000bb2
+	SF	flgWait			;0a5d4: 51f900000bb2
 _0A5DA:
-	TST.B	flg00BB2		;0a5da: 4a3900000bb2
+	TST.B	flgWait			;0a5da: 4a3900000bb2
 	BEQ.S	_0A5DA			;0a5e0: 67f8
-	SF	flg00BB2		;0a5e2: 51f900000bb2
-	BSR.W	_05584			;0a5e8: 6100af9a
+	SF	flgWait			;0a5e2: 51f900000bb2
+	BSR.W	_DiskReq_05584		;0a5e8: 6100af9a
 _0A5EC:
 	BTST	#0,MouseBtn		;0a5ec: 0839000000000766
 	BEQ.S	_0A5EC			;0a5f4: 67f6
-	LEA	ptr2E86E,A0		;0a5f6: 41f90002e86e
+	LEA	winGeoSurvey2,A0	;0a5f6: 41f90002e86e
 	MOVEA.L	(34,A0),A2		;0a5fc: 24680022
 	JSR	_1147A			;0a600: 4eb90001147a
 	TST.W	D2			;0a606: 4a42
@@ -13526,7 +13558,7 @@ _0A77C:
 	RTS				;0a782: 4e75
 _0A784:
 	LEA	arrHPCosts,A0		;0a784: 41f90001d816
-	MOVEM.W	unk00760,D0-D1		;0a78a: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;0a78a: 4cb9000300000760
 	MOVEQ	#7,D4			;0a792: 7807
 loop0A794:
 	MOVE.W	-(A0),D3		;0a794: 3620
@@ -13567,7 +13599,7 @@ _0A7EC:
 	SUBQ.W	#1,D0			;0a7f8: 5340
 	MULU	#$0018,D0		;0a7fa: c0fc0018
 	ADDA.W	D0,A1			;0a7fe: d2c0
-	MOVEM.W	unk00760,D0-D1		;0a800: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;0a800: 4cb9000300000760
 	MOVEQ	#0,D4			;0a808: 7800
 _0A80A:
 	CMP.W	data1D7C6,D4		;0a80a: b8790001d7c6
@@ -13653,9 +13685,9 @@ loop0A8DE:
 	DBF	D3,loop0A8DE		;0a8e4: 51cbfff8
 	ST	flgPaused		;0a8e8: 50f90002e458
 	BSR.S	_0A874			;0a8ee: 6184
-	LEA	ptr2E894,A0		;0a8f0: 41f90002e894
+	LEA	winGeoSurvey3,A0	;0a8f0: 41f90002e894
 	MOVEA.L	ptrBuff01,A1		;0a8f6: 22790000052e
-	BSR.W	_07A0A			;0a8fc: 6100d10c
+	BSR.W	_DialogBox		;0a8fc: 6100d10c
 	MOVEA.L	ptrBuff02,A1		;0a900: 227900000532
 	LEA	ptr30418,A2		;0a906: 45f900030418
 	MOVEQ	#0,D0			;0a90c: 7000
@@ -13663,7 +13695,7 @@ loop0A8DE:
 	BSR.W	_07B26			;0a910: 6100d214
 	MOVEA.L	ptrBuff02,A5		;0a914: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0a91a: 2c790000052a
-	BSR.W	_05584			;0a920: 6100ac62
+	BSR.W	_DiskReq_05584		;0a920: 6100ac62
 	BSR.W	_0A17A			;0a924: 6100f854
 	MOVEA.L	ptr0AAA8,A1		;0a928: 22790000aaa8
 	MOVEQ	#0,D0			;0a92e: 7000
@@ -13692,10 +13724,10 @@ loop0A984:
 	MOVE.L	D2,data1D7C2		;0a98a: 23c20001d7c2
 	LEA	ptr309A2,A6		;0a990: 4df9000309a2
 	MOVEA.L	ptrBuff00,A1		;0a996: 22790000052a
-	BSR.W	_0757A			;0a99c: 6100cbdc
-	MOVE.B	#$07,data2E476		;0a9a0: 13fc00070002e476
+	BSR.W	_Window_0757A		;0a99c: 6100cbdc
+	MOVE.B	#$07,textcolor		;0a9a0: 13fc00070002e476
 	MOVE.W	#$009b,D0		;0a9a8: 303c009b
-	MOVEA.L	ptr2DEF4,A2		;0a9ac: 24790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A2	;0a9ac: 24790002def4
 	TST.W	(14,A2)			;0a9b2: 4a6a000e
 	BEQ.W	_0AA40			;0a9b6: 67000088
 	MOVEA.L	ptrCurrentAst,A2	;0a9ba: 24790002de58
@@ -13722,21 +13754,21 @@ loop0A984:
 	CMP.W	(0,A2,D2.W),D1		;0a9f2: b2722000
 	BPL.S	_YardsNeedMore		;0a9f6: 6a28
 	MOVE.W	#$00aa,D0		;0a9f8: 303c00aa
-	MOVE.B	#$0b,data2E476		;0a9fc: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;0a9fc: 13fc000b0002e476
 	MOVE.L	data1D7C2,D1		;0aa04: 22390001d7c2
 	CMP.L	intCashVehicles,D1	;0aa0a: b2b90002de70
 	BMI.S	_0AA40			;0aa10: 6b2e
-	MOVE.B	#$07,data2E476		;0aa12: 13fc00070002e476
+	MOVE.B	#$07,textcolor		;0aa12: 13fc00070002e476
 ; 169: VEHICLE CONSTRUCTION FUND RUNNING LOW!
 	MOVE.W	#$00a9,D0		;0aa1a: 303c00a9
 	BRA.S	_0AA40			;0aa1e: 6020
 _YardsNeedMore:
 	BSR.W	_GetStringA0		;0aa20: 6100cafe
-	MOVE.B	#$07,data2E476		;0aa24: 13fc00070002e476
+	MOVE.B	#$07,textcolor		;0aa24: 13fc00070002e476
 	MOVEQ	#109,D0			;0aa2c: 706d
 	MOVE.W	#$008f,D1		;0aa2e: 323c008f
 	MOVEA.L	ptrBuff00,A1		;0aa32: 22790000052a
-	BSR.W	_07310			;0aa38: 6100c8d6
+	BSR.W	_DisplayText		;0aa38: 6100c8d6
 ; 168: YARDS NEED MORE
 	MOVE.W	#$00a8,D0		;0aa3c: 303c00a8
 _0AA40:
@@ -13744,20 +13776,20 @@ _0AA40:
 	MOVEQ	#8,D0			;0aa44: 7008
 	MOVE.W	#$008f,D1		;0aa46: 323c008f
 	MOVEA.L	ptrBuff00,A1		;0aa4a: 22790000052a
-	BSR.W	_07310			;0aa50: 6100c8be
-	MOVE.B	#$0c,data2E476		;0aa54: 13fc000c0002e476
+	BSR.W	_DisplayText		;0aa50: 6100c8be
+	MOVE.B	#$0c,textcolor		;0aa54: 13fc000c0002e476
 	MOVEA.L	ptrBuff00,A5		;0aa5c: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0aa62: 2c790000052e
-	SF	flg00BB2		;0aa68: 51f900000bb2
+	SF	flgWait			;0aa68: 51f900000bb2
 _0AA6E:
-	TST.B	flg00BB2		;0aa6e: 4a3900000bb2
+	TST.B	flgWait			;0aa6e: 4a3900000bb2
 	BEQ.S	_0AA6E			;0aa74: 67f8
-	SF	flg00BB2		;0aa76: 51f900000bb2
-	BSR.W	_05584			;0aa7c: 6100ab06
+	SF	flgWait			;0aa76: 51f900000bb2
+	BSR.W	_DiskReq_05584		;0aa7c: 6100ab06
 _0AA80:
 	BTST	#0,MouseBtn		;0aa80: 0839000000000766
 	BEQ.S	_0AA80			;0aa88: 67f6
-	LEA	ptr2E894,A0		;0aa8a: 41f90002e894
+	LEA	winGeoSurvey3,A0	;0aa8a: 41f90002e894
 	MOVEA.L	(34,A0),A2		;0aa90: 24680022
 	BSR.W	_1147A			;0aa94: 610069e4
 	TST.W	D2			;0aa98: 4a42
@@ -13769,13 +13801,13 @@ ptr0AAA8:
 	DS.L	1			;0aaa8
 _FinanceWin:
 	ST	flgPaused		;0aaac: 50f90002e458
-	LEA	ptr2E8BA,A0		;0aab2: 41f90002e8ba
+	LEA	winColonyAnalysis,A0	;0aab2: 41f90002e8ba
 	MOVEA.L	ptrBuff01,A1		;0aab8: 22790000052e
-	BSR.W	_07A0A			;0aabe: 6100cf4a
+	BSR.W	_DialogBox		;0aabe: 6100cf4a
 _0AAC2:
 	MOVEA.L	ptrBuff02,A5		;0aac2: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0aac8: 2c790000052a
-	BSR.W	_05584			;0aace: 6100aab4
+	BSR.W	_DiskReq_05584		;0aace: 6100aab4
 	MOVEQ	#4,D3			;0aad2: 7604
 	LEA	intCashGeneral,A2	;0aad4: 45f90002de68
 	LEA	ptr1D508,A4		;0aada: 49f90001d508
@@ -13838,22 +13870,22 @@ _0AB34:
 	DBF	D3,loop0AAE2		;0ab82: 51cbff5e
 	LEA	ptr30A5C,A6		;0ab86: 4df900030a5c
 	MOVEA.L	ptrBuff00,A1		;0ab8c: 22790000052a
-	BSR.W	_0757A			;0ab92: 6100c9e6
+	BSR.W	_Window_0757A		;0ab92: 6100c9e6
 	MOVEA.L	ptrBuff00,A5		;0ab96: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0ab9c: 2c790000052e
-	BSR.W	_05584			;0aba2: 6100a9e0
+	BSR.W	_DiskReq_05584		;0aba2: 6100a9e0
 _0ABA6:
 	BTST	#0,MouseBtn		;0aba6: 0839000000000766
 	BEQ.S	_0ABA6			;0abae: 67f6
-	LEA	ptr2E8BA,A0		;0abb0: 41f90002e8ba
+	LEA	winColonyAnalysis,A0	;0abb0: 41f90002e8ba
 	MOVEA.L	(34,A0),A2		;0abb6: 24680022
 	BSR.W	_1147A			;0abba: 610068be
 	TST.W	D2			;0abbe: 4a42
 	BPL.W	_0ACBC			;0abc0: 6a0000fa
-	MOVE.L	unk00760,D0		;0abc4: 203900000760
+	MOVE.L	intMouseX,D0		;0abc4: 203900000760
 	CMP.L	unk0ACC8,D0		;0abca: b0b90000acc8
 	BEQ.S	_0ABA6			;0abd0: 67d4
-	MOVEM.W	unk00760,D0-D1		;0abd2: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;0abd2: 4cb9000300000760
 	MOVEM.W	D0-D1,unk0ACC8		;0abda: 48b900030000acc8
 	SUBI.W	#$0048,D1		;0abe2: 04410048
 	BMI.S	_0ABA6			;0abe6: 6bbe
@@ -13951,19 +13983,19 @@ _0ACD0:
 	MOVE.L	D0,unk0B304		;0ace4: 23c00000b304
 	MOVE.L	D0,unk0B300		;0acea: 23c00000b300
 	SF	flg2E47D		;0acf0: 51f90002e47d
-	TST.L	lUnknown54		;0acf6: 4ab90002de5c
+	TST.L	lUnknownSat54		;0acf6: 4ab90002de5c
 	BEQ.S	_0AD3C			;0acfc: 673e
-	CMPI.L	#$00000032,lUnknown54	;0acfe: 0cb9000000320002de5c
+	CMPI.L	#$00000032,lUnknownSat54 ;0acfe: 0cb9000000320002de5c
 	BMI.S	_0AD2E			;0ad08: 6b24
-	MOVEA.L	lUnknown54,A1		;0ad0a: 22790002de5c
+	MOVEA.L	lUnknownSat54,A1	;0ad0a: 22790002de5c
 	MOVE.L	A1,unk0B304		;0ad10: 23c90000b304
 _0AD16:
 	MOVE.L	ptrCurrentAst,unk0B300	;0ad16: 23f90002de580000b300
-	CLR.L	lUnknown54		;0ad20: 42b90002de5c
+	CLR.L	lUnknownSat54		;0ad20: 42b90002de5c
 	ST	unk0B30F		;0ad26: 50f90000b30f
 	BRA.S	_0AD80			;0ad2c: 6052
 _0AD2E:
-	MOVE.L	lUnknown54,D0		;0ad2e: 20390002de5c
+	MOVE.L	lUnknownSat54,D0	;0ad2e: 20390002de5c
 	MOVE.B	D0,flg0B310		;0ad34: 13c00000b310
 	BRA.S	_0AD16			;0ad3a: 60da
 _0AD3C:
@@ -13991,9 +14023,9 @@ _0AD80:
 	EXT.W	D7			;0ad94: 4887
 	MOVE.W	D7,D6			;0ad96: 3c07
 	CMPI.B	#$32,D6			;0ad98: 0c060032
-	BMI.S	_0ADA2			;0ad9c: 6b04
+	BMI.S	_Shipbuild_0ADA2	;0ad9c: 6b04
 	SUBI.W	#$0030,D6		;0ad9e: 04460030
-_0ADA2:
+_Shipbuild_0ADA2:
 	MULU	#$0018,D6		;0ada2: ccfc0018
 	LEA	arrTerranShipStats00,A1	;0ada6: 43f90001e548
 	ADDA.L	D6,A1			;0adac: d3c6
@@ -14005,16 +14037,16 @@ _0ADA2:
 	MOVE.B	(48,A6),D0		;0adc4: 102e0030
 	MOVE.W	D0,textField04		;0adc8: 33c00001c8d6
 	MOVE.L	(28,A6),D0		;0adce: 202e001c
-	LEA	ptr1E8C0,A3		;0add2: 47f90001e8c0
+	LEA	arrSprHardpoints,A3	;0add2: 47f90001e8c0
 	LEA	ptr1EBDE,A2		;0add8: 45f90001ebde
 	MOVEQ	#0,D1			;0adde: 7200
-_0ADE0:
+_loop_0ADE0:
 	CMP.L	(A3)+,D0		;0ade0: b09b
 	BEQ.S	_0ADFA			;0ade2: 6716
 	ADDQ.L	#4,A2			;0ade4: 588a
 	ADDQ.B	#1,D1			;0ade6: 5201
 	CMPI.B	#$12,D1			;0ade8: 0c010012
-	BNE.S	_0ADE0			;0adec: 66f2
+	BNE.S	_loop_0ADE0		;0adec: 66f2
 	LEA	ptr1EBDA,A2		;0adee: 45f90001ebda
 	CLR.L	unk0B304		;0adf4: 42b90000b304
 _0ADFA:
@@ -14049,7 +14081,7 @@ _0AE72:
 	BNE.S	_0AE8C			;0ae76: 6614
 	MOVE.W	#$000f,(-4,A0)		;0ae78: 317c000ffffc
 	MOVE.L	#data2FF1C,(A0)		;0ae7e: 20bc0002ff1c
-	MOVE.L	#data2E66E,(4,A0)	;0ae84: 217c0002e66e0004
+	MOVE.L	#winHotkeys,(4,A0)	;0ae84: 217c0002e66e0004
 _0AE8C:
 	LEA	ptr1D7D6,A3		;0ae8c: 47f90001d7d6
 	MOVE.W	#$009e,D0		;0ae92: 303c009e
@@ -14087,7 +14119,7 @@ _0AEF8:
 	ADDI.W	#$007e,D7		;0aef8: 0647007e
 	MOVE.W	D7,(4,A0)		;0aefc: 31470004
 	MOVEA.L	ptrBuff01,A1		;0af00: 22790000052e
-	BSR.W	_07A0A			;0af06: 6100cb02
+	BSR.W	_DialogBox		;0af06: 6100cb02
 	MOVEA.L	ptrBuff02,A1		;0af0a: 227900000532
 	LEA	ptr30324,A2		;0af10: 45f900030324
 	MOVEQ	#18,D0			;0af16: 7012
@@ -14096,10 +14128,10 @@ _0AEF8:
 _0AF1E:
 	MOVEA.L	ptrBuff02,A5		;0af1e: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0af24: 2c790000052a
-	BSR.W	_05584			;0af2a: 6100a658
+	BSR.W	_DiskReq_05584		;0af2a: 6100a658
 	LEA	ptr30B12,A6		;0af2e: 4df900030b12
 	MOVEA.L	ptrBuff00,A1		;0af34: 22790000052a
-	BSR.W	_0757A			;0af3a: 6100c63e
+	BSR.W	_Window_0757A		;0af3a: 6100c63e
 	LEA	ptr1EBDA,A2		;0af3e: 45f90001ebda
 	MOVE.L	unk0B30A,D0		;0af44: 20390000b30a
 	MOVEQ	#0,D1			;0af4a: 7200
@@ -14117,7 +14149,7 @@ _0AF5A:
 loop0AF6A:
 	MOVEQ	#0,D0			;0af6a: 7000
 	MOVE.B	(A2)+,D0		;0af6c: 101a
-	BEQ.S	_0AFA6			;0af6e: 6736
+	BEQ.S	LAB_0699		;0af6e: 6736
 	CMPI.B	#$08,D0			;0af70: 0c000008
 	BNE.S	_0AF88			;0af74: 6612
 	MOVEA.L	ptr2DEB4,A6		;0af76: 2c790002deb4
@@ -14128,13 +14160,12 @@ _0AF88:
 ; 173: ORBITAL SPACE DOCK
 	ADDI.W	#$00ad,D0		;0af88: 064000ad
 	BSR.W	_GetStringA0		;0af8c: 6100c592
-; 411: MONEY =
 	MOVE.W	#$009b,D0		;0af90: 303c009b
 	MOVEA.L	ptrBuff00,A1		;0af94: 22790000052a
 	MOVEM.L	D1-D2/A2,-(A7)		;0af9a: 48e76020
-	BSR.W	_07310			;0af9e: 6100c370
+	BSR.W	_DisplayText		;0af9e: 6100c370
 	MOVEM.L	(A7)+,D1-D2/A2		;0afa2: 4cdf0406
-_0AFA6:
+LAB_0699:
 	ADDQ.W	#8,D1			;0afa6: 5041
 	ADDQ.W	#2,D1			;0afa8: 5441
 	DBF	D2,loop0AF6A		;0afaa: 51caffbe
@@ -14148,11 +14179,12 @@ _0AFCC:
 	MOVE.L	unk0B304,D0		;0afcc: 20390000b304
 	BEQ.S	_0AFEA			;0afd2: 6716
 	MOVEA.L	D0,A0			;0afd4: 2040
+; asteroid name
 	LEA	(40,A0),A0		;0afd6: 41e80028
 	MOVE.W	#$00c6,D0		;0afda: 303c00c6
 	MOVEQ	#50,D1			;0afde: 7232
 	MOVEA.L	ptrBuff00,A1		;0afe0: 22790000052a
-	BSR.W	_07310			;0afe6: 6100c328
+	BSR.W	_DisplayText		;0afe6: 6100c328
 _0AFEA:
 	CMPI.B	#$0a,unk0B30C		;0afea: 0c39000a0000b30c
 	BNE.S	_0B012			;0aff2: 661e
@@ -14163,7 +14195,7 @@ _0AFEA:
 	MOVE.W	#$00da,D0		;0b002: 303c00da
 	MOVEQ	#70,D1			;0b006: 7246
 	MOVEA.L	ptrBuff00,A1		;0b008: 22790000052a
-	BSR.W	_07310			;0b00e: 6100c300
+	BSR.W	_DisplayText		;0b00e: 6100c300
 _0B012:
 	MOVEQ	#0,D0			;0b012: 7000
 	MOVE.B	flg0B310,D0		;0b014: 10390000b310
@@ -14176,7 +14208,7 @@ _0B012:
 	MOVE.W	#$00f8,D0		;0b030: 303c00f8
 	MOVEQ	#50,D1			;0b034: 7232
 	MOVEA.L	ptrBuff00,A1		;0b036: 22790000052a
-	BSR.W	_07310			;0b03c: 6100c2d2
+	BSR.W	_DisplayText		;0b03c: 6100c2d2
 _0B040:
 	MOVEQ	#0,D0			;0b040: 7000
 	MOVE.B	unk0B311,D0		;0b042: 10390000b311
@@ -14189,16 +14221,16 @@ _0B040:
 	MOVE.W	#$0104,D0		;0b05e: 303c0104
 	MOVEQ	#50,D1			;0b062: 7232
 	MOVEA.L	ptrBuff00,A1		;0b064: 22790000052a
-	BSR.W	_07310			;0b06a: 6100c2a4
+	BSR.W	_DisplayText		;0b06a: 6100c2a4
 _0B06E:
 	MOVEA.L	ptrBuff00,A5		;0b06e: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0b074: 2c790000052e
-	SF	flg00BB2		;0b07a: 51f900000bb2
+	SF	flgWait			;0b07a: 51f900000bb2
 _0B080:
-	TST.B	flg00BB2		;0b080: 4a3900000bb2
+	TST.B	flgWait			;0b080: 4a3900000bb2
 	BEQ.S	_0B080			;0b086: 67f8
-	SF	flg00BB2		;0b088: 51f900000bb2
-	BSR.W	_05584			;0b08e: 6100a4f4
+	SF	flgWait			;0b088: 51f900000bb2
+	BSR.W	_DiskReq_05584		;0b08e: 6100a4f4
 _0B092:
 	BTST	#0,MouseBtn		;0b092: 0839000000000766
 	BEQ.S	_0B092			;0b09a: 67f6
@@ -14221,7 +14253,7 @@ _0B0D6:
 	CMPI.B	#$21,D2			;0b0de: 0c020021
 	BNE.S	_0B0F6			;0b0e2: 6612
 	ST	flg2E47D		;0b0e4: 50f90002e47d
-	MOVE.B	#$01,intScrn3		;0b0ea: 13fc00010002e488
+	MOVE.B	#$01,intNewScreen	;0b0ea: 13fc00010002e488
 	BRA.W	_0B24C			;0b0f2: 60000158
 _0B0F6:
 	MOVEQ	#1,D0			;0b0f6: 7001
@@ -14319,13 +14351,13 @@ _0B1FC:
 	BMI.S	_0B224			;0b212: 6b10
 	CMPI.B	#$0b,D0			;0b214: 0c00000b
 	BNE.W	_0AF1E			;0b218: 6600fd04
-	BSET	#4,alien_2E00F		;0b21c: 08f900040002e00f
+	BSET	#4,info_display		;0b21c: 08f900040002e00f
 _0B224:
 	ST	flg2E09D		;0b224: 50f90002e09d
-	BSET	#2,alien_2E00F		;0b22a: 08f900020002e00f
-	BCLR	#3,alien_2E00F		;0b232: 08b900030002e00f
-	MOVE.B	#$04,intScrn3		;0b23a: 13fc00040002e488
-	MOVE.B	intScreen,intScrn2	;0b242: 13f90002e4860002e487
+	BSET	#2,info_display		;0b22a: 08f900020002e00f
+	BCLR	#3,info_display		;0b232: 08b900030002e00f
+	MOVE.B	#$04,intNewScreen	;0b23a: 13fc00040002e488
+	MOVE.B	intScreen,intPrevScreen	;0b242: 13f90002e4860002e487
 _0B24C:
 	BSR.W	_07964			;0b24c: 6100c716
 ; Ship pointer
@@ -14345,7 +14377,7 @@ _0B24C:
 	MOVE.W	unk0B308,D0		;0b292: 30390000b308
 	SUBQ.B	#1,D0			;0b298: 5300
 	ASL.W	#2,D0			;0b29a: e540
-	LEA	ptr1E8C0,A0		;0b29c: 41f90001e8c0
+	LEA	arrSprHardpoints,A0	;0b29c: 41f90001e8c0
 	MOVE.L	(0,A0,D0.W),(28,A6)	;0b2a2: 2d700000001c
 	MOVE.L	#$04000000,(24,A6)	;0b2a8: 2d7c040000000018
 	MOVE.L	unk0B304,D0		;0b2b0: 20390000b304
@@ -14447,16 +14479,16 @@ _0B3CE:
 	ADDI.W	#$007e,D7		;0b3ce: 0647007e
 	MOVE.W	D7,(4,A0)		;0b3d2: 31470004
 	MOVEA.L	ptrBuff01,A1		;0b3d6: 22790000052e
-	BSR.W	_07A0A			;0b3dc: 6100c62c
+	BSR.W	_DialogBox		;0b3dc: 6100c62c
 	MOVEA.L	ptrBuff02,A5		;0b3e0: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0b3e6: 2c790000052a
-	BSR.W	_05584			;0b3ec: 6100a196
+	BSR.W	_DiskReq_05584		;0b3ec: 6100a196
 	LEA	ptr30B12,A6		;0b3f0: 4df900030b12
 	MOVEA.L	ptrBuff00,A1		;0b3f6: 22790000052a
-	BSR.W	_0757A			;0b3fc: 6100c17c
+	BSR.W	_Window_0757A		;0b3fc: 6100c17c
 	MOVEA.L	ptrBuff00,A5		;0b400: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0b406: 2c790000052e
-	BSR.W	_05584			;0b40c: 6100a176
+	BSR.W	_DiskReq_05584		;0b40c: 6100a176
 _0B410:
 	BTST	#0,MouseBtn		;0b410: 0839000000000766
 	BEQ.S	_0B410			;0b418: 67f6
@@ -14493,7 +14525,7 @@ _0B45C:
 	MULU	#$000a,D0		;0b482: c0fc000a
 ; radiation
 	MOVE.W	D0,textField03		;0b486: 33c00001c8d2
-	MOVEA.L	ptr2DEF4,A4		;0b48c: 28790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A4	;0b48c: 28790002def4
 	JSR	_CalcHousing		;0b492: 4eb90001489a
 ; population maximum
 	MOVE.W	D0,textField04		;0b498: 33c00001c8d6
@@ -14598,27 +14630,27 @@ _0B59C:
 	MOVE.B	#$29,(A1)+		;0b5b0: 12fc0029
 _0B5B4:
 	SF	(A1)			;0b5b4: 51d1
-	LEA	ptr2EAA8,A0		;0b5b6: 41f90002eaa8
+	LEA	winColonySummary,A0	;0b5b6: 41f90002eaa8
 	MOVEA.L	ptrBuff01,A1		;0b5bc: 22790000052e
-	BSR.W	_07A0A			;0b5c2: 6100c446
+	BSR.W	_DialogBox		;0b5c2: 6100c446
 _0B5C6:
 	MOVEA.L	ptrBuff02,A5		;0b5c6: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0b5cc: 2c790000052a
-	BSR.W	_05584			;0b5d2: 61009fb0
+	BSR.W	_DiskReq_05584		;0b5d2: 61009fb0
 	TST.B	flg0B730		;0b5d6: 4a390000b730
 	BEQ.S	_0B5F0			;0b5dc: 6712
 	LEA	ptr30CFE,A6		;0b5de: 4df900030cfe
 	MOVEA.L	ptrBuff00,A1		;0b5e4: 22790000052a
-	BSR.W	_0757A			;0b5ea: 6100bf8e
+	BSR.W	_Window_0757A		;0b5ea: 6100bf8e
 	BRA.S	_0B600			;0b5ee: 6010
 _0B5F0:
 	LEA	ptr30BF6,A6		;0b5f0: 4df900030bf6
 	MOVEA.L	ptrBuff00,A1		;0b5f6: 22790000052a
-	BSR.W	_0757A			;0b5fc: 6100bf7c
+	BSR.W	_Window_0757A		;0b5fc: 6100bf7c
 _0B600:
 	MOVEA.L	ptrBuff00,A5		;0b600: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0b606: 2c790000052e
-	BSR.W	_05584			;0b60c: 61009f76
+	BSR.W	_DiskReq_05584		;0b60c: 61009f76
 _0B610:
 	MOVE.B	InKey,D0		;0b610: 103900000764
 	BEQ.S	_0B674			;0b616: 675c
@@ -14654,7 +14686,7 @@ _0B664:
 _0B674:
 	BTST	#0,MouseBtn		;0b674: 0839000000000766
 	BEQ.S	_0B610			;0b67c: 6792
-	LEA	ptr2EAA8,A0		;0b67e: 41f90002eaa8
+	LEA	winColonySummary,A0	;0b67e: 41f90002eaa8
 	MOVEA.L	(34,A0),A2		;0b684: 24680022
 	BSR.W	_1147A			;0b688: 61005df0
 	CMPI.B	#$0a,D2			;0b68c: 0c02000a
@@ -14721,19 +14753,19 @@ unk0B731:
 _PowerStatusWin:
 	ST	flgPaused		;0b732: 50f90002e458
 	SF	flg0B82E		;0b738: 51f90000b82e
-	LEA	ptr2E8E0,A0		;0b73e: 41f90002e8e0
+	LEA	winPowerFail,A0		;0b73e: 41f90002e8e0
 	MOVEA.L	ptrBuff01,A1		;0b744: 22790000052e
-	BSR.W	_07A0A			;0b74a: 6100c2be
+	BSR.W	_DialogBox		;0b74a: 6100c2be
 	MOVEA.L	ptrBuff02,A5		;0b74e: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0b754: 2c790000052a
-	BSR.W	_05584			;0b75a: 61009e28
+	BSR.W	_DiskReq_05584		;0b75a: 61009e28
 	MOVEA.L	ptrCurrentAst,A0	;0b75e: 20790002de58
-	MOVEA.L	ptr2DEF4,A3		;0b764: 26790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A3	;0b764: 26790002def4
 	MOVE.W	(718,A0),D4		;0b76a: 382802ce
 	BNE.S	_0B782			;0b76e: 6612
 	LEA	ptr30D30,A6		;0b770: 4df900030d30
 	MOVEA.L	ptrBuff00,A1		;0b776: 22790000052a
-	BSR.W	_0757A			;0b77c: 6100bdfc
+	BSR.W	_Window_0757A		;0b77c: 6100bdfc
 	BRA.S	_0B7DE			;0b780: 605c
 _0B782:
 	ST	flg0B82E		;0b782: 50f90000b82e
@@ -14756,7 +14788,7 @@ _0B7A8:
 	MOVE.W	D3,D0			;0b7ac: 3003
 	MOVEA.L	ptrBuff00,A1		;0b7ae: 22790000052a
 	MOVEM.L	D1-D4/A2-A3,-(A7)	;0b7b4: 48e77830
-	BSR.W	_07310			;0b7b8: 6100bb56
+	BSR.W	_DisplayText		;0b7b8: 6100bb56
 	MOVEM.L	(A7)+,D1-D4/A2-A3	;0b7bc: 4cdf0c1e
 	SUBQ.W	#1,D4			;0b7c0: 5344
 	BEQ.S	_0B7DE			;0b7c2: 671a
@@ -14773,17 +14805,17 @@ _0B7A8:
 _0B7DE:
 	MOVEA.L	ptrBuff00,A5		;0b7de: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0b7e4: 2c790000052e
-	BSR.W	_05584			;0b7ea: 61009d98
+	BSR.W	_DiskReq_05584		;0b7ea: 61009d98
 _0B7EE:
 	TST.B	flg0B82E		;0b7ee: 4a390000b82e
 	BEQ.S	_0B7FE			;0b7f4: 6708
 ; Sound E: Warning klaxon
 	MOVEQ	#5,D0			;0b7f6: 7005
-	JSR	_PlaySound_Daily	;0b7f8: 4eb90001a36c
+	JSR	_PlaySoundLoop		;0b7f8: 4eb90001a36c
 _0B7FE:
 	BTST	#0,MouseBtn		;0b7fe: 0839000000000766
 	BEQ.S	_0B7EE			;0b806: 67e6
-	LEA	ptr2E8E0,A0		;0b808: 41f90002e8e0
+	LEA	winPowerFail,A0		;0b808: 41f90002e8e0
 	MOVEA.L	(34,A0),A2		;0b80e: 24680022
 	BSR.W	_1147A			;0b812: 61005c66
 	TST.W	D2			;0b816: 4a42
@@ -14824,13 +14856,13 @@ _0B870:
 	CLR.W	unk0B996		;0b880: 42790000b996
 	CLR.W	(A1)+			;0b886: 4259
 	ST	flgPaused		;0b888: 50f90002e458
-	LEA	ptr2E906,A0		;0b88e: 41f90002e906
+	LEA	winBlueprints,A0	;0b88e: 41f90002e906
 	MOVEA.L	ptrBuff01,A1		;0b894: 22790000052e
-	BSR.W	_07A0A			;0b89a: 6100c16e
+	BSR.W	_DialogBox		;0b89a: 6100c16e
 _0B89E:
 	MOVEA.L	ptrBuff02,A5		;0b89e: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0b8a4: 2c790000052a
-	BSR.W	_05584			;0b8aa: 61009cd8
+	BSR.W	_DiskReq_05584		;0b8aa: 61009cd8
 	MOVE.W	unk0B996,D0		;0b8ae: 30390000b996
 	ADDQ.W	#1,D0			;0b8b4: 5240
 	MOVE.W	D0,textField02		;0b8b6: 33c00001c8ce
@@ -14839,7 +14871,7 @@ _0B89E:
 	MOVE.W	D0,textField03		;0b8c4: 33c00001c8d2
 	LEA	ptr31182,A6		;0b8ca: 4df900031182
 	MOVEA.L	ptrBuff00,A1		;0b8d0: 22790000052a
-	BSR.W	_0757A			;0b8d6: 6100bca2
+	BSR.W	_Window_0757A		;0b8d6: 6100bca2
 	MOVEQ	#70,D1			;0b8da: 7246
 	MOVE.W	unk0B996,D7		;0b8dc: 3e390000b996
 	MULU	#$0012,D7		;0b8e2: cefc0012
@@ -14853,7 +14885,7 @@ _0B8F0:
 	MOVEQ	#16,D0			;0b8f8: 7010
 	MOVEA.L	ptrBuff00,A1		;0b8fa: 22790000052a
 	MOVEM.L	D1/D7/A2,-(A7)		;0b900: 48e74120
-	BSR.W	_07310			;0b904: 6100ba0a
+	BSR.W	_DisplayText		;0b904: 6100ba0a
 	MOVEM.L	(A7)+,D1/D7/A2		;0b908: 4cdf0482
 	ADDQ.W	#8,D1			;0b90c: 5041
 	ADDQ.W	#2,D1			;0b90e: 5441
@@ -14863,11 +14895,11 @@ _0B8F0:
 _0B918:
 	MOVEA.L	ptrBuff00,A5		;0b918: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0b91e: 2c790000052e
-	BSR.W	_05584			;0b924: 61009c5e
+	BSR.W	_DiskReq_05584		;0b924: 61009c5e
 _0B928:
 	TST.B	MouseBtn		;0b928: 4a3900000766
 	BEQ.S	_0B928			;0b92e: 67f8
-	LEA	ptr2E906,A0		;0b930: 41f90002e906
+	LEA	winBlueprints,A0	;0b930: 41f90002e906
 	MOVEA.L	(34,A0),A2		;0b936: 24680022
 	BSR.W	_1147A			;0b93a: 61005b3e
 	CMPI.W	#$0024,D2		;0b93e: 0c420024
@@ -14891,7 +14923,6 @@ _0B982:
 	BSR.W	_07964			;0b988: 6100bfda
 	SF	flgPaused		;0b98c: 51f90002e458
 	RTS				;0b992: 4e75
-unk0B994:
 	DS.W	1			;0b994
 unk0B996:
 	DS.W	1			;0b996
@@ -14901,9 +14932,9 @@ _0B99A:
 	ST	flgPaused		;0b99a: 50f90002e458
 	ST	flg2E483		;0b9a0: 50f90002e483
 	SF	flg1D7F4		;0b9a6: 51f90001d7f4
-	LEA	ptr2E92C,A0		;0b9ac: 41f90002e92c
+	LEA	winBldgCounts,A0	;0b9ac: 41f90002e92c
 	MOVEA.L	ptrBuff01,A1		;0b9b2: 22790000052e
-	BSR.W	_07A0A			;0b9b8: 6100c050
+	BSR.W	_DialogBox		;0b9b8: 6100c050
 	MOVE.W	#$0001,unk0BC12		;0b9bc: 33fc00010000bc12
 _0B9C4:
 	MOVEA.L	ptrCurrentAst,A0	;0b9c4: 20790002de58
@@ -14912,11 +14943,11 @@ _0B9C4:
 	MOVE.W	#$0004,textField03	;0b9d4: 33fc00040001c8d2
 	MOVEA.L	ptrBuff02,A5		;0b9dc: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0b9e2: 2c790000052a
-	BSR.W	_05584			;0b9e8: 61009b9a
+	BSR.W	_DiskReq_05584		;0b9e8: 61009b9a
 	MOVE.W	unk0BC12,textField02	;0b9ec: 33f90000bc120001c8ce
 	LEA	ptr311DE,A6		;0b9f6: 4df9000311de
 	MOVEA.L	ptrBuff00,A1		;0b9fc: 22790000052a
-	BSR.W	_0757A			;0ba02: 6100bb76
+	BSR.W	_Window_0757A		;0ba02: 6100bb76
 	MOVEQ	#62,D1			;0ba06: 723e
 	MOVE.W	unk0BC12,D7		;0ba08: 3e390000bc12
 	SUBQ.W	#1,D7			;0ba0e: 5347
@@ -14929,7 +14960,7 @@ loop0BA1E:
 	MOVE.W	(A2)+,D0		;0ba20: 301a
 	MOVE.W	D0,unk0BC16		;0ba22: 33c00000bc16
 	MOVEM.L	D1/D7/A2,-(A7)		;0ba28: 48e74120
-	MOVEA.L	ptr2DEF4,A0		;0ba2c: 20790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A0	;0ba2c: 20790002def4
 	SUBQ.W	#1,D0			;0ba32: 5340
 	ADD.W	D0,D0			;0ba34: d040
 	MOVE.W	(0,A0,D0.W),D0		;0ba36: 30300000
@@ -14941,8 +14972,8 @@ loop0BA1E:
 	MOVEQ	#16,D0			;0ba4e: 7010
 	LEA	ptr1C8F4,A0		;0ba50: 41f90001c8f4
 	MOVEA.L	ptrBuff00,A1		;0ba56: 22790000052a
-	MOVE.B	#$0b,data2E476		;0ba5c: 13fc000b0002e476
-	BSR.W	_07310			;0ba64: 6100b8aa
+	MOVE.B	#$0b,textcolor		;0ba5c: 13fc000b0002e476
+	BSR.W	_DisplayText		;0ba64: 6100b8aa
 	MOVEM.L	(A7)+,D1/D7/A2		;0ba68: 4cdf0482
 	MOVE.W	unk0BC16,D0		;0ba6c: 30390000bc16
 	SUBQ.W	#1,D0			;0ba72: 5340
@@ -14953,9 +14984,9 @@ loop0BA1E:
 	BSR.W	_GetStringA0		;0ba82: 6100ba9c
 	MOVEQ	#56,D0			;0ba86: 7038
 	MOVEA.L	ptrBuff00,A1		;0ba88: 22790000052a
-	MOVE.B	#$0c,data2E476		;0ba8e: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;0ba8e: 13fc000c0002e476
 	MOVEM.L	D1/D7/A2,-(A7)		;0ba96: 48e74120
-	BSR.W	_07310			;0ba9a: 6100b874
+	BSR.W	_DisplayText		;0ba9a: 6100b874
 	MOVEM.L	(A7)+,D1/D7/A2		;0ba9e: 4cdf0482
 	TST.W	unk0BC18		;0baa2: 4a790000bc18
 	BEQ.W	_0BB92			;0baa8: 670000e8
@@ -14975,7 +15006,7 @@ _0BAE4:
 	LEA	ptr31222,A6		;0bae4: 4df900031222
 	MOVEA.L	ptrBuff00,A1		;0baea: 22790000052a
 	MOVEM.L	D1/D7/A2,-(A7)		;0baf0: 48e74120
-	BSR.W	_0757A			;0baf4: 6100ba84
+	BSR.W	_Window_0757A		;0baf4: 6100ba84
 	MOVEM.L	(A7)+,D1/D7/A2		;0baf8: 4cdf0482
 	BRA.W	_0BB92			;0bafc: 60000094
 _0BB00:
@@ -14993,7 +15024,7 @@ _0BB16:
 	MOVE.W	#$00e8,D0		;0bb1a: 303c00e8
 	MOVE.W	#$0098,D1		;0bb1e: 323c0098
 	MOVEA.L	ptrBuff00,A1		;0bb22: 22790000052a
-	BSR.W	_07310			;0bb28: 6100b7e6
+	BSR.W	_DisplayText		;0bb28: 6100b7e6
 	MOVEM.L	(A7)+,D1/D7/A2		;0bb2c: 4cdf0482
 	BRA.S	_0BB92			;0bb30: 6060
 _0BB32:
@@ -15025,11 +15056,11 @@ _0BB92:
 	DBF	D7,loop0BA1E		;0bb96: 51cffe86
 	MOVEA.L	ptrBuff00,A5		;0bb9a: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0bba0: 2c790000052e
-	BSR.W	_05584			;0bba6: 610099dc
+	BSR.W	_DiskReq_05584		;0bba6: 610099dc
 _0BBAA:
 	TST.B	MouseBtn		;0bbaa: 4a3900000766
 	BEQ.S	_0BBAA			;0bbb0: 67f8
-	LEA	ptr2E92C,A0		;0bbb2: 41f90002e92c
+	LEA	winBldgCounts,A0	;0bbb2: 41f90002e92c
 	MOVEA.L	(34,A0),A2		;0bbb8: 24680022
 	BSR.W	_1147A			;0bbbc: 610058bc
 	CMPI.W	#$0024,D2		;0bbc0: 0c420024
@@ -15073,9 +15104,9 @@ _0BC2C:
 	MOVEQ	#1,D0			;0bc44: 7001
 	MOVE.W	D0,unk0C2E4		;0bc46: 33c00000c2e4
 	MOVE.W	D0,unk0C2E6		;0bc4c: 33c00000c2e6
-	LEA	ptr2EACE,A0		;0bc52: 41f90002eace
+	LEA	win2EACE,A0		;0bc52: 41f90002eace
 	MOVEA.L	ptrBuff01,A1		;0bc58: 22790000052e
-	BSR.W	_07A0A			;0bc5e: 6100bdaa
+	BSR.W	_DialogBox		;0bc5e: 6100bdaa
 	MOVEA.L	ptrBuff02,A1		;0bc62: 227900000532
 	LEA	ptr30270,A2		;0bc68: 45f900030270
 	MOVEQ	#22,D0			;0bc6e: 7016
@@ -15089,7 +15120,7 @@ _0BC2C:
 	TST.B	flg2E47B		;0bc8a: 4a390002e47b
 	BEQ.W	_0BD82			;0bc90: 670000f0
 	SF	flg2E47B		;0bc94: 51f90002e47b
-	LEA	ptr1D54E,A0		;0bc9a: 41f90001d54e
+	LEA	flgIntelHonest,A0	;0bc9a: 41f90001d54e
 	CLR.W	(2,A0)			;0bca0: 42680002
 	CLR.W	(6,A0)			;0bca4: 42680006
 	CLR.W	(10,A0)			;0bca8: 4268000a
@@ -15172,7 +15203,7 @@ _0BD76:
 	MOVEA.L	D2,A5			;0bd7c: 2a42
 	BRA.W	_0BCD2			;0bd7e: 6000ff52
 _0BD82:
-	MOVE.L	lUnknown54,D1		;0bd82: 22390002de5c
+	MOVE.L	lUnknownSat54,D1	;0bd82: 22390002de5c
 	BEQ.S	_0BDCC			;0bd88: 6742
 	CLR.L	(10,A2)			;0bd8a: 42aa000a
 	CLR.L	(18,A2)			;0bd8e: 42aa0012
@@ -15191,13 +15222,13 @@ _0BDAE:
 	BMI.S	_0BDBC			;0bdb4: 6b06
 	MOVE.B	(25,A5),(1,A2)		;0bdb6: 156d00190001
 _0BDBC:
-	CLR.L	lUnknown54		;0bdbc: 42b90002de5c
+	CLR.L	lUnknownSat54		;0bdbc: 42b90002de5c
 	ST	unk0C2E8		;0bdc2: 50f90000c2e8
 	SF	(30,A2)			;0bdc8: 51ea001e
 _0BDCC:
 	MOVEA.L	ptrBuff02,A5		;0bdcc: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0bdd2: 2c790000052a
-	BSR.W	_05584			;0bdd8: 610097aa
+	BSR.W	_DiskReq_05584		;0bdd8: 610097aa
 	MOVEA.L	ptrBuff14_Fleet,A2	;0bddc: 247900000562
 	MOVE.W	unk0C2E2,D0		;0bde2: 30390000c2e2
 	MOVE.W	D0,textField01		;0bde8: 33c00001c8ca
@@ -15247,7 +15278,7 @@ _0BE6E:
 	MOVE.L	(10,A2),D0		;0be7c: 202a000a
 	BMI.S	_0BE94			;0be80: 6b12
 	MOVE.L	A0,-(A7)		;0be82: 2f08
-	BSR.W	_0756C			;0be84: 6100b6e6
+	BSR.W	_GetNoneStr		;0be84: 6100b6e6
 	MOVEA.L	A0,A1			;0be88: 2248
 	MOVEA.L	(A7)+,A0		;0be8a: 205f
 	BEQ.S	_0BE94			;0be8c: 6706
@@ -15285,12 +15316,12 @@ _0BEC8:
 	MOVE.W	#$00b8,D3		;0bee2: 363c00b8
 	MOVEQ	#12,D7			;0bee6: 7e0c
 loop0BEE8:
-	MOVE.B	#$0c,data2E476		;0bee8: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;0bee8: 13fc000c0002e476
 	MOVE.L	(A1)+,D4		;0bef0: 2819
 	BEQ.W	_0BF6E			;0bef2: 6700007a
 	BPL.S	_0BF04			;0bef6: 6a0c
 	BCLR	#31,D4			;0bef8: 0884001f
-	MOVE.B	#$06,data2E476		;0befc: 13fc00060002e476
+	MOVE.B	#$06,textcolor		;0befc: 13fc00060002e476
 _0BF04:
 	MOVEA.L	D4,A6			;0bf04: 2c44
 	MOVEQ	#0,D0			;0bf06: 7000
@@ -15307,7 +15338,7 @@ _0BF18:
 	MOVEM.L	D1/D3/D7/A1/A6,-(A7)	;0bf20: 48e75142
 	MOVEA.L	ptrBuff00,A1		;0bf24: 22790000052a
 	MOVE.W	D3,D0			;0bf2a: 3003
-	BSR.W	_07310			;0bf2c: 6100b3e2
+	BSR.W	_DisplayText		;0bf2c: 6100b3e2
 	MOVEM.L	(A7),D1/D3/D7/A1/A6	;0bf30: 4cd7428a
 	MOVEQ	#0,D0			;0bf34: 7000
 	MOVE.W	(50,A6),D0		;0bf36: 302e0032
@@ -15319,8 +15350,8 @@ _0BF18:
 	ADDI.W	#$0064,D0		;0bf4a: 06400064
 	MOVEA.L	ptrBuff00,A1		;0bf4e: 22790000052a
 	LEA	ptr1C8F4,A0		;0bf54: 41f90001c8f4
-	BSR.W	_07310			;0bf5a: 6100b3b4
-	MOVE.B	#$0c,data2E476		;0bf5e: 13fc000c0002e476
+	BSR.W	_DisplayText		;0bf5a: 6100b3b4
+	MOVE.B	#$0c,textcolor		;0bf5e: 13fc000c0002e476
 	MOVEM.L	(A7)+,D1/D3/D7/A1/A6	;0bf66: 4cdf428a
 	ADDQ.W	#8,D1			;0bf6a: 5041
 	ADDQ.W	#2,D1			;0bf6c: 5441
@@ -15336,22 +15367,22 @@ _0BF8C:
 	MOVE.W	unk0C2E4,ptr1D4F4	;0bf8c: 33f90000c2e40001d4f4
 	LEA	ptr30D48,A6		;0bf96: 4df900030d48
 	MOVEA.L	ptrBuff00,A1		;0bf9c: 22790000052a
-	BSR.W	_0757A			;0bfa2: 6100b5d6
+	BSR.W	_Window_0757A		;0bfa2: 6100b5d6
 	MOVEA.L	ptrBuff00,A5		;0bfa6: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0bfac: 2c790000052e
-	BSR.W	_05584			;0bfb2: 610095d0
+	BSR.W	_DiskReq_05584		;0bfb2: 610095d0
 _0BFB6:
 	TST.B	MouseBtn		;0bfb6: 4a3900000766
 	BEQ.S	_0BFB6			;0bfbc: 67f8
-	LEA	ptr2EACE,A0		;0bfbe: 41f90002eace
+	LEA	win2EACE,A0		;0bfbe: 41f90002eace
 	MOVEA.L	(34,A0),A2		;0bfc4: 24680022
 	BSR.W	_1147A			;0bfc8: 610054b0
 	MOVEA.L	ptr0C2DE,A0		;0bfcc: 20790000c2de
 	TST.W	D2			;0bfd2: 4a42
 	BPL.W	_0C094			;0bfd4: 6a0000be
-	CMPI.W	#$0020,unk00762		;0bfd8: 0c79002000000762
+	CMPI.W	#$0020,intMouseY	;0bfd8: 0c79002000000762
 	BPL.S	_0C020			;0bfe0: 6a3e
-	CMPI.W	#$00f0,unk00760		;0bfe2: 0c7900f000000760
+	CMPI.W	#$00f0,intMouseX	;0bfe2: 0c7900f000000760
 	BMI.S	_0C020			;0bfea: 6b34
 	CMPI.B	#$04,(0,A0)		;0bfec: 0c2800040000
 	BEQ.S	_0C008			;0bff2: 6714
@@ -15375,13 +15406,13 @@ _0C012:
 	BRA.S	_0C00A			;0c01e: 60ea
 _0C020:
 	MOVEQ	#0,D1			;0c020: 7200
-	MOVE.W	unk00762,D1		;0c022: 323900000762
+	MOVE.W	intMouseY,D1		;0c022: 323900000762
 	SUBI.W	#$003e,D1		;0c028: 0441003e
 	BMI.S	_0BFB6			;0c02c: 6b88
 	DIVU	#$000a,D1		;0c02e: 82fc000a
 	CMPI.W	#$000d,D1		;0c032: 0c41000d
 	BPL.W	_0BFB6			;0c036: 6a00ff7e
-	MOVE.W	unk00760,D0		;0c03a: 303900000760
+	MOVE.W	intMouseX,D0		;0c03a: 303900000760
 	CMPI.W	#$00b8,D0		;0c040: 0c4000b8
 	BMI.W	_0BFB6			;0c044: 6b00ff70
 	MOVE.W	unk0C2E4,D0		;0c048: 30390000c2e4
@@ -15423,11 +15454,10 @@ _0C0A6:
 	BNE.W	_0C226			;0c0d4: 66000150
 	TST.L	(6,A0)			;0c0d8: 4aa80006
 	BMI.S	_0C0EE			;0c0dc: 6b10
-_FleetBugFix:
 ; Fleet bug fix applied in v2.000. This single BNE.W fixes a bug
-; present in v1.886 which causes the game to crash on a fleet move
-; after fleet incorrectly makes a sudden jump to a different asteroid.
-; This is the only fix in v2.000.
+; present in v1.886 which causes the game to crash on a fleet
+; move after fleet incorrectly makes a sudden jump to a
+; different asteroid. This is the only change to v2.000.
 	BNE.W	_0BDCC			;0c0de: 6600fcec
 	MOVE.L	ptrCurrentAst,(6,A0)	;0c0e2: 21790002de580006
 	BRA.W	_0BDCC			;0c0ea: 6000fce0
@@ -15487,10 +15517,10 @@ _0C1A4:
 	BNE.W	_0C1D0			;0c1a8: 66000026
 	MOVE.W	unk0C2E4,D0		;0c1ac: 30390000c2e4
 	CMP.W	unk0C2E6,D0		;0c1b2: b0790000c2e6
-	BNE.S	_0C1C6			;0c1b8: 660c
+	BNE.S	_0BDCC			;0c1b8: 660c
 	MOVE.W	#$0001,unk0C2E4		;0c1ba: 33fc00010000c2e4
 	BRA.W	_0BDCC			;0c1c2: 6000fc08
-_0C1C6:
+_0BDCC:
 	ADDQ.W	#1,unk0C2E4		;0c1c6: 52790000c2e4
 	BRA.W	_0BDCC			;0c1cc: 6000fbfe
 _0C1D0:
@@ -15520,13 +15550,13 @@ _0C226:
 	CMPI.B	#$04,(0,A0)		;0c226: 0c2800040000
 	BEQ.W	_0BFB6			;0c22c: 6700fd88
 	ST	flg2E09E		;0c230: 50f90002e09e
-	BSET	#2,alien_2E00F		;0c236: 08f900020002e00f
-	BCLR	#3,alien_2E00F		;0c23e: 08b900030002e00f
-	MOVE.B	#$04,intScrn3		;0c246: 13fc00040002e488
-	MOVE.B	intScreen,intScrn2	;0c24e: 13f90002e4860002e487
+	BSET	#2,info_display		;0c236: 08f900020002e00f
+	BCLR	#3,info_display		;0c23e: 08b900030002e00f
+	MOVE.B	#$04,intNewScreen	;0c246: 13fc00040002e488
+	MOVE.B	intScreen,intPrevScreen	;0c24e: 13f90002e4860002e487
 	CMPI.B	#$03,(0,A0)		;0c258: 0c2800030000
 	BNE.S	_0C268			;0c25e: 6608
-	BSET	#6,alien_2E00F		;0c260: 08f900060002e00f
+	BSET	#6,info_display		;0c260: 08f900060002e00f
 _0C268:
 	BSR.W	_07964			;0c268: 6100b6fa
 	BSR.S	_0C2EA			;0c26c: 617c
@@ -15598,23 +15628,23 @@ _HotkeysWin:
 	SUBQ.B	#1,D0			;0c32c: 5300
 	EXT.W	D0			;0c32e: 4880
 	ASL.W	#2,D0			;0c330: e540
-	MOVE.L	lUnknown54,(0,A0,D0.W)	;0c332: 21b90002de5c0000
-	CLR.L	lUnknown54		;0c33a: 42b90002de5c
+	MOVE.L	lUnknownSat54,(0,A0,D0.W) ;0c332: 21b90002de5c0000
+	CLR.L	lUnknownSat54		;0c33a: 42b90002de5c
 _0C340:
-	LEA	ptr2E99E,A0		;0c340: 41f90002e99e
+	LEA	winQuickSel,A0		;0c340: 41f90002e99e
 	MOVEA.L	ptrBuff01,A1		;0c346: 22790000052e
-	BSR.W	_07A0A			;0c34c: 6100b6bc
+	BSR.W	_DialogBox		;0c34c: 6100b6bc
 	MOVEA.L	ptrBuff02,A5		;0c350: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0c356: 2c790000052a
-	BSR.W	_05584			;0c35c: 61009226
+	BSR.W	_DiskReq_05584		;0c35c: 61009226
 	LEA	ptr30BD4,A6		;0c360: 4df900030bd4
 	MOVEA.L	ptrBuff00,A1		;0c366: 22790000052a
-	BSR.W	_0757A			;0c36c: 6100b20c
+	BSR.W	_Window_0757A		;0c36c: 6100b20c
 	LEA	arrHotkeys,A2		;0c370: 45f90002de88
 	MOVEQ	#9,D6			;0c376: 7c09
 	MOVEQ	#70,D1			;0c378: 7246
 loop0C37A:
-	BSR.W	_0756C			;0c37a: 6100b1f0
+	BSR.W	_GetNoneStr		;0c37a: 6100b1f0
 	MOVEQ	#12,D7			;0c37e: 7e0c
 	MOVE.L	(A2)+,D0		;0c380: 201a
 	BEQ.S	_0C3A0			;0c382: 671c
@@ -15630,26 +15660,26 @@ loop0C37A:
 	MOVEQ	#9,D7			;0c39e: 7e09
 _0C3A0:
 	MOVEA.L	ptrBuff00,A1		;0c3a0: 22790000052a
-	MOVE.B	D7,data2E476		;0c3a6: 13c70002e476
+	MOVE.B	D7,textcolor		;0c3a6: 13c70002e476
 	MOVEQ	#96,D0			;0c3ac: 7060
 	MOVEM.L	D1/D6-D7/A2,-(A7)	;0c3ae: 48e74320
-	BSR.W	_07310			;0c3b2: 6100af5c
+	BSR.W	_DisplayText		;0c3b2: 6100af5c
 	MOVEM.L	(A7)+,D1/D6-D7/A2	;0c3b6: 4cdf04c2
 	ADDQ.W	#8,D1			;0c3ba: 5041
 	ADDQ.W	#2,D1			;0c3bc: 5441
 	DBF	D6,loop0C37A		;0c3be: 51ceffba
-	MOVE.B	#$0b,data2E476		;0c3c2: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;0c3c2: 13fc000b0002e476
 	MOVEA.L	ptrBuff00,A5		;0c3ca: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0c3d0: 2c790000052e
-	BSR.W	_05584			;0c3d6: 610091ac
+	BSR.W	_DiskReq_05584		;0c3d6: 610091ac
 _0C3DA:
 	BTST	#0,MouseBtn		;0c3da: 0839000000000766
 	BEQ.S	_0C3DA			;0c3e2: 67f6
-	LEA	ptr2E99E,A0		;0c3e4: 41f90002e99e
+	LEA	winQuickSel,A0		;0c3e4: 41f90002e99e
 	MOVEA.L	(34,A0),A2		;0c3ea: 24680022
 	BSR.W	_1147A			;0c3ee: 6100508a
 	BPL.S	_0C41C			;0c3f2: 6a28
-	MOVE.W	unk00762,D1		;0c3f4: 323900000762
+	MOVE.W	intMouseY,D1		;0c3f4: 323900000762
 	SUBI.W	#$0046,D1		;0c3fa: 04410046
 	BMI.S	_0C3DA			;0c3fe: 6bda
 	EXT.L	D1			;0c400: 48c1
@@ -15658,12 +15688,12 @@ _0C3DA:
 	BPL.S	_0C3DA			;0c40a: 6ace
 	ADDQ.B	#1,D1			;0c40c: 5201
 	MOVE.B	D1,flg2E47E		;0c40e: 13c10002e47e
-	BSET	#2,alien_2E00F		;0c414: 08f900020002e00f
+	BSET	#2,info_display		;0c414: 08f900020002e00f
 _0C41C:
 	BSR.W	_07964			;0c41c: 6100b546
 	SF	flgPaused		;0c420: 51f90002e458
 	RTS				;0c426: 4e75
-_0C428:
+_ConfirmDetonate_0C428:
 	ST	flgPaused		;0c428: 50f90002e458
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;0c42e: 48e7fffe
 	MOVEQ	#0,D0			;0c432: 7000
@@ -15673,22 +15703,22 @@ _0C428:
 	LEA	tblTerranBldtStats,A3	;0c43e: 47f90001c3e8
 	ADDA.L	D0,A3			;0c444: d7c0
 	MOVE.W	(0,A3),textField01	;0c446: 33eb00000001c8ca
-	LEA	ptr2E7FC,A0		;0c44e: 41f90002e7fc
+	LEA	winDemolish,A0		;0c44e: 41f90002e7fc
 	MOVEA.L	ptrBuff01,A1		;0c454: 22790000052e
-	BSR.W	_07A0A			;0c45a: 6100b5ae
+	BSR.W	_DialogBox		;0c45a: 6100b5ae
 	MOVEA.L	ptrBuff02,A5		;0c45e: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0c464: 2c790000052a
-	BSR.W	_05584			;0c46a: 61009118
+	BSR.W	_DiskReq_05584		;0c46a: 61009118
 	LEA	ptr311BA,A6		;0c46e: 4df9000311ba
 	MOVEA.L	ptrBuff00,A1		;0c474: 22790000052a
-	BSR.W	_0757A			;0c47a: 6100b0fe
+	BSR.W	_Window_0757A		;0c47a: 6100b0fe
 	MOVEA.L	ptrBuff00,A5		;0c47e: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0c484: 2c790000052e
-	BSR.W	_05584			;0c48a: 610090f8
+	BSR.W	_DiskReq_05584		;0c48a: 610090f8
 _0C48E:
 	BTST	#0,MouseBtn		;0c48e: 0839000000000766
 	BEQ.S	_0C48E			;0c496: 67f6
-	LEA	ptr2E7FC,A0		;0c498: 41f90002e7fc
+	LEA	winDemolish,A0		;0c498: 41f90002e7fc
 	MOVEA.L	(34,A0),A2		;0c49e: 24680022
 	JSR	_1147A			;0c4a2: 4eb90001147a
 	BMI.S	_0C48E			;0c4a8: 6be4
@@ -15705,7 +15735,8 @@ _0C4C4:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;0c4ce: 4cdf7fff
 	MOVEQ	#0,D0			;0c4d2: 7000
 	RTS				;0c4d4: 4e75
-_ShipAct2a:
+_ShipAct2a_ScoutSpy:
+; Presumably handles scoutship spying orders
 	MOVE.B	(33,A6),D0		;0c4d6: 102e0021
 	EXT.W	D0			;0c4da: 4880
 	MULU	#$02ee,D0		;0c4dc: c0fc02ee
@@ -15729,25 +15760,26 @@ _ShipAct2a:
 	JSR	_PlaySound		;0c51c: 4eb90001a50e
 	ST	flgPaused		;0c522: 50f90002e458
 	ST	flg2E483		;0c528: 50f90002e483
-	LEA	ptr2E78A,A0		;0c52e: 41f90002e78a
+	LEA	winScoutSpy,A0		;0c52e: 41f90002e78a
 	MOVEA.L	ptrBuff01,A1		;0c534: 22790000052e
-	BSR.W	_07A0A			;0c53a: 6100b4ce
+	BSR.W	_DialogBox		;0c53a: 6100b4ce
 	MOVEA.L	(A7)+,A0		;0c53e: 205f
+; Asteroid name
 	LEA	(40,A0),A1		;0c540: 43e80028
 	MOVE.L	A1,textField01		;0c544: 23c90001c8ca
 	MOVEA.L	ptrBuff02,A5		;0c54a: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;0c550: 2c790000052a
-	BSR.W	_05584			;0c556: 6100902c
+	BSR.W	_DiskReq_05584		;0c556: 6100902c
 	LEA	ptr3126E,A6		;0c55a: 4df90003126e
 	MOVEA.L	ptrBuff00,A1		;0c560: 22790000052a
-	BSR.W	_0757A			;0c566: 6100b012
+	BSR.W	_Window_0757A		;0c566: 6100b012
 	MOVEA.L	ptrBuff00,A5		;0c56a: 2a790000052a
 	MOVEA.L	ptrBuff01,A6		;0c570: 2c790000052e
-	BSR.W	_05584			;0c576: 6100900c
+	BSR.W	_DiskReq_05584		;0c576: 6100900c
 _0C57A:
 	BTST	#0,MouseBtn		;0c57a: 0839000000000766
 	BEQ.S	_0C57A			;0c582: 67f6
-	LEA	ptr2E78A,A0		;0c584: 41f90002e78a
+	LEA	winScoutSpy,A0		;0c584: 41f90002e78a
 	MOVEA.L	(34,A0),A2		;0c58a: 24680022
 	JSR	_1147A			;0c58e: 4eb90001147a
 	CMPI.B	#$0a,D2			;0c594: 0c02000a
@@ -15757,7 +15789,7 @@ _0C57A:
 	MOVEA.L	(A7)+,A6		;0c5a4: 2c5f
 	MOVEQ	#-1,D0			;0c5a6: 70ff
 	RTS				;0c5a8: 4e75
-_0C5AA:
+_Ships0C5AA:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;0c5aa: 48e7fffe
 	SUBQ.W	#1,D2			;0c5ae: 5342
 	MOVEA.L	ptrBuff09_Ships,A6	;0c5b0: 2c790000054e
@@ -15771,7 +15803,7 @@ _0C5AA:
 	MOVE.W	(0,A0,D2.W),D2		;0c5d0: 34302000
 	MOVE.B	(19,A6),D3		;0c5d4: 162e0013
 	CMPI.B	#$fb,D3			;0c5d8: 0c0300fb
-	BEQ.W	_0C85A			;0c5dc: 6700027c
+	BEQ.W	caseD_3a		;0c5dc: 6700027c
 	TST.B	D3			;0c5e0: 4a03
 	BMI.S	_0C5E6			;0c5e2: 6b02
 	ADD.B	D3,D2			;0c5e4: d403
@@ -15779,7 +15811,7 @@ _0C5E6:
 	MOVE.B	(9,A6),D3		;0c5e6: 162e0009
 	EXT.W	D3			;0c5ea: 4883
 	LEA	ptr1E818,A5		;0c5ec: 4bf90001e818
-	MOVE.W	data2E484,D7		;0c5f2: 3e390002e484
+	MOVE.W	intAsteroidFacing,D7	;0c5f2: 3e390002e484
 	ASL.W	#3,D7			;0c5f8: e747
 	ADDA.W	D7,A5			;0c5fa: dac7
 	MOVE.B	(0,A5,D3.W),D3		;0c5fc: 16353000
@@ -15792,7 +15824,7 @@ _0C610:
 	MOVE.W	D2,D1			;0c612: 3202
 	ASL.W	#2,D2			;0c614: e542
 	ADD.W	D1,D2			;0c616: d441
-	LEA	ptr1D8F6,A1		;0c618: 43f90001d8f6
+	LEA	arrShipSpriteList,A1	;0c618: 43f90001d8f6
 	ADDA.W	D2,A1			;0c61e: d2c2
 	MOVEM.L	(A1),A0/A2		;0c620: 4cd10500
 	MOVE.W	(8,A1),D2		;0c624: 34290008
@@ -15836,7 +15868,7 @@ _0C698:
 	BTST	#4,(20,A6)		;0c698: 082e00040014
 	BNE.S	_0C6EE			;0c69e: 664e
 _0C6A0:
-	MOVE.W	data2E484,D7		;0c6a0: 3e390002e484
+	MOVE.W	intAsteroidFacing,D7	;0c6a0: 3e390002e484
 	BEQ.S	_0C6EE			;0c6a6: 6746
 	CMPI.B	#$02,D7			;0c6a8: 0c070002
 	BEQ.S	_0C6DC			;0c6ac: 672e
@@ -15899,17 +15931,17 @@ _0C718:
 	BEQ.S	_0C740			;0c738: 6706
 	ST	flgStatic2E474		;0c73a: 50f90002e474
 _0C740:
-	BSR.W	_0C916			;0c740: 610001d4
+	BSR.W	_DrawGfx_0C916		;0c740: 610001d4
 	MOVEA.L	(A7)+,A6		;0c744: 2c5f
 	MOVE.W	(A7)+,D1		;0c746: 321f
 	MOVE.W	(A7)+,D0		;0c748: 301f
 ; Check if ship firing
 	BTST	#6,(21,A6)		;0c74a: 082e00060015
-	BEQ.W	_0C85A			;0c750: 67000108
+	BEQ.W	caseD_3a		;0c750: 67000108
 	BTST	#0,(22,A6)		;0c754: 082e00000016
-	BNE.W	_0C85A			;0c75a: 660000fe
+	BNE.W	caseD_3a		;0c75a: 660000fe
 	TST.B	(20,A6)			;0c75e: 4a2e0014
-	BMI.W	_0C85A			;0c762: 6b0000f6
+	BMI.W	caseD_3a		;0c762: 6b0000f6
 	MOVEA.L	ptrBuff00,A1		;0c766: 22790000052a
 	MOVEQ	#0,D2			;0c76c: 7400
 ; Ship ID
@@ -15920,7 +15952,7 @@ _0C740:
 	CMPI.B	#$05,D2			;0c772: 0c020005
 	BMI.W	_0C830			;0c776: 6b0000b8
 	CMPI.B	#$44,D2			;0c77a: 0c020044
-	BPL.W	_0C85A			;0c77e: 6a0000da
+	BPL.W	caseD_3a		;0c77e: 6a0000da
 ; 0   35: Destructor
 ; 1   36: Terminator
 ; 2   37: Transporter
@@ -15928,7 +15960,7 @@ _0C740:
 ; 4   39: Orbital Spacedock
 ; 5+  3c-43: Alien ships
 	SUBI.B	#$35,D2			;0c782: 04020035
-	BMI.W	_0C85A			;0c786: 6b0000d2
+	BMI.W	caseD_3a		;0c786: 6b0000d2
 	EXT.W	D2			;0c78a: 4882
 	ASL.W	#3,D2			;0c78c: e742
 	LEA	ptr0C79E,A3		;0c78e: 47f90000c79e
@@ -15938,38 +15970,38 @@ _0C740:
 ptr0C79E:
 ; 30 entries = 15 pairs: 5 large terran ships and 8 alien ships
 ; Destructor
-	DC.L	data1ED9E		;0c79e: 0001ed9e
+	DC.L	firemask1ED9E		;0c79e: 0001ed9e
 	DC.L	unk0C860		;0c7a2: 0000c860
 ; Terminator
-	DC.L	data1EE9E		;0c7a6: 0001ee9e
+	DC.L	firemask1EE9E		;0c7a6: 0001ee9e
 	DC.L	unk0C860		;0c7aa: 0000c860
 ; Transporter
-	DC.L	data1EF9E		;0c7ae: 0001ef9e
-	DC.L	unk0C890		;0c7b2: 0000c890
+	DC.L	firemask1EF9E		;0c7ae: 0001ef9e
+	DC.L	caseD_39		;0c7b2: 0000c890
 ; Fleet Battleship
-	DC.L	data1EFC0		;0c7b6: 0001efc0
-	DC.L	unk0C890		;0c7ba: 0000c890
+	DC.L	firemask1EFC0		;0c7b6: 0001efc0
+	DC.L	caseD_39		;0c7ba: 0000c890
 ; Orbital Spacedock
-	DC.L	data1F012		;0c7be: 0001f012
-	DC.L	unk0C890		;0c7c2: 0000c890
+	DC.L	firemask1F012		;0c7be: 0001f012
+	DC.L	caseD_39		;0c7c2: 0000c890
 ; Small alien ship 3c
 	DS.L	1			;0c7c6
-	DC.L	_0C85A			;0c7ca: 0000c85a
+	DC.L	caseD_3a		;0c7ca: 0000c85a
 ; Small alien ship 3d
 	DS.L	1			;0c7ce
-	DC.L	_0C85A			;0c7d2: 0000c85a
+	DC.L	caseD_3a		;0c7d2: 0000c85a
 ; Alien ship 3e
 	DC.L	tblAlienShip26		;0c7d6: 000205f4
-	DC.L	unk0C816		;0c7da: 0000c816
+	DC.L	caseD_3f		;0c7da: 0000c816
 ; Alien ship 3f
 	DC.L	tblAlienShip26		;0c7de: 000205f4
-	DC.L	unk0C816		;0c7e2: 0000c816
+	DC.L	caseD_3f		;0c7e2: 0000c816
 ; Alien ship 40
 	DC.L	tblAlienShip26		;0c7e6: 000205f4
-	DC.L	unk0C816		;0c7ea: 0000c816
+	DC.L	caseD_3f		;0c7ea: 0000c816
 ; Alien ship 41
 	DC.L	tblAlienShip26		;0c7ee: 000205f4
-	DC.L	unk0C816		;0c7f2: 0000c816
+	DC.L	caseD_3f		;0c7f2: 0000c816
 ; Alien ship 42
 	DC.L	tblAlienUnk27		;0c7f6: 000207f4
 	DC.L	unk0C860		;0c7fa: 0000c860
@@ -15978,11 +16010,11 @@ ptr0C79E:
 	DC.L	unk0C860		;0c802: 0000c860
 ; Alien ship 44?
 	DC.L	tblAlienUnk29		;0c806: 000209f4
-	DC.L	unk0C890		;0c80a: 0000c890
+	DC.L	caseD_39		;0c80a: 0000c890
 ; Alien ship ??
 	DC.L	tblAlienUnk30		;0c80e: 00020a16
-	DC.L	unk0C890		;0c812: 0000c890
-unk0C816:
+	DC.L	caseD_39		;0c812: 0000c890
+caseD_3f:
 	MOVEQ	#0,D2			;0c816: 7400
 	MOVE.B	(8,A6),D2		;0c818: 142e0008
 	SUBI.B	#$3c,D2			;0c81c: 0402003c
@@ -15994,10 +16026,10 @@ unk0C816:
 	BRA.S	_0C84A			;0c82e: 601a
 _0C830:
 	SUBQ.B	#2,D2			;0c830: 5502
-	BMI.S	_0C85A			;0c832: 6b26
+	BMI.S	caseD_3a		;0c832: 6b26
 	EXT.W	D2			;0c834: 4882
 	ASL.W	#7,D2			;0c836: ef42
-	LEA	ptr1EC1E,A3		;0c838: 47f90001ec1e
+	LEA	arrGunfireSprites,A3	;0c838: 47f90001ec1e
 	ADDA.W	D2,A3			;0c83e: d6c2
 	MOVE.W	unk0C914,D2		;0c840: 34390000c914
 	ASL.W	#4,D2			;0c846: e942
@@ -16009,8 +16041,8 @@ _0C84A:
 	MOVEQ	#1,D6			;0c850: 7c01
 	ADD.W	(A3)+,D0		;0c852: d05b
 	ADD.W	(A3),D1			;0c854: d253
-	BSR.W	_0C916			;0c856: 610000be
-_0C85A:
+	BSR.W	_DrawGfx_0C916		;0c856: 610000be
+caseD_3a:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;0c85a: 4cdf7fff
 	RTS				;0c85e: 4e75
 unk0C860:
@@ -16026,14 +16058,14 @@ unk0C860:
 	ADD.W	(A3)+,D0		;0c876: d05b
 	ADD.W	(A3)+,D1		;0c878: d25b
 	MOVE.L	A3,-(A7)		;0c87a: 2f0b
-	BSR.W	_0C916			;0c87c: 61000098
+	BSR.W	_DrawGfx_0C916		;0c87c: 61000098
 	MOVEA.L	(A7)+,A3		;0c880: 265f
 	MOVE.W	(A7)+,D1		;0c882: 321f
 	MOVE.W	(A7)+,D0		;0c884: 301f
 	ADDQ.L	#2,A3			;0c886: 548b
 	MOVEA.L	ptrBuff00,A1		;0c888: 22790000052a
 	BRA.S	_0C84A			;0c88e: 60ba
-unk0C890:
+caseD_39:
 	MOVE.W	(A3)+,D3		;0c890: 361b
 loop0C892:
 	MOVEA.L	(A3)+,A0		;0c892: 205b
@@ -16047,7 +16079,7 @@ loop0C892:
 	MOVE.W	D3,-(A7)		;0c8a2: 3f03
 	MOVE.L	A3,-(A7)		;0c8a4: 2f0b
 	MOVEA.L	ptrBuff00,A1		;0c8a6: 22790000052a
-	BSR.W	_0C916			;0c8ac: 61000068
+	BSR.W	_DrawGfx_0C916		;0c8ac: 61000068
 	MOVEA.L	(A7)+,A3		;0c8b0: 265f
 	MOVE.W	(A7)+,D3		;0c8b2: 361f
 	MOVE.W	(A7)+,D1		;0c8b4: 321f
@@ -16073,12 +16105,12 @@ _0C8E0:
 	MOVE.W	D2,D4			;0c8e4: 3802
 	ASL.W	#2,D2			;0c8e6: e542
 	ADD.W	D4,D2			;0c8e8: d444
-	LEA	ptr1D8F6,A6		;0c8ea: 4df90001d8f6
+	LEA	arrShipSpriteList,A6	;0c8ea: 4df90001d8f6
 	ADDA.W	D2,A6			;0c8f0: dcc2
 	MOVEM.L	(A6),A0/A2		;0c8f2: 4cd60500
 	MOVE.W	(8,A6),D2		;0c8f6: 342e0008
 	SUB.W	D2,D1			;0c8fa: 9242
-	BSR.W	_0C916			;0c8fc: 61000018
+	BSR.W	_DrawGfx_0C916		;0c8fc: 61000018
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;0c900: 4cdf7fff
 	RTS				;0c904: 4e75
 _0C906:
@@ -16089,7 +16121,7 @@ unk0C914:
 	DS.B	1			;0c914
 unk0C915:
 	DS.B	1			;0c915
-_0C916:
+_DrawGfx_0C916:
 	LEA	HARDBASE,A5		;0c916: 4bf900dff000
 	BSR.W	_05378			;0c91c: 61008a5a
 	MOVE.W	#$ffff,(BLTAFWM_68,A5)	;0c920: 3b7cffff0044
@@ -16278,10 +16310,10 @@ unk0CB26:
 unk0CB28:
 	DS.W	1			;0cb28
 _0CB2A:
-	ST	flg2E468		;0cb2a: 50f90002e468
+	ST	flgShowGfx		;0cb2a: 50f90002e468
 	MOVE.L	A6,D2			;0cb30: 240e
 	BEQ.S	_0CB70			;0cb32: 673c
-_0CB34:
+_ShipAct_0CB34:
 	MOVE.L	(0,A6),D0		;0cb34: 202e0000
 	MOVE.L	D0,-(A7)		;0cb38: 2f00
 	MOVE.L	A6,-(A7)		;0cb3a: 2f0e
@@ -16305,12 +16337,12 @@ _0CB66:
 	MOVE.L	(A7)+,D0		;0cb68: 201f
 	BEQ.S	_0CB70			;0cb6a: 6704
 	MOVEA.L	D0,A6			;0cb6c: 2c40
-	BRA.S	_0CB34			;0cb6e: 60c4
+	BRA.S	_ShipAct_0CB34		;0cb6e: 60c4
 _0CB70:
-	SF	flg2E468		;0cb70: 51f90002e468
+	SF	flgShowGfx		;0cb70: 51f90002e468
 	RTS				;0cb76: 4e75
-_Daily04:
-	ST	flg2E468		;0cb78: 50f90002e468
+_Daily04Ast:
+	ST	flgShowGfx		;0cb78: 50f90002e468
 	MOVEA.L	ptrBuff12_Asteroids,A0	;0cb7e: 20790000055a
 	MOVE.W	unk0CD52,D0		;0cb84: 30390000cd52
 	MULU	#$02ee,D0		;0cb8a: c0fc02ee
@@ -16333,7 +16365,7 @@ loop0CB92:
 	MOVE.L	(0,A0),D2		;0cbce: 24280000
 	BEQ.W	_0CC3E			;0cbd2: 6700006a
 	MOVEA.L	D2,A6			;0cbd6: 2c42
-_0CBD8:
+_ShipAct_0CBD8:
 	MOVE.L	(0,A6),D0		;0cbd8: 202e0000
 	MOVE.L	D0,-(A7)		;0cbdc: 2f00
 	MOVEQ	#0,D0			;0cbde: 7000
@@ -16350,24 +16382,25 @@ _0CBD8:
 	ASL.L	#8,D0			;0cbfe: e180
 	MOVE.L	D0,(24,A6)		;0cc00: 2d400018
 _0CC04:
-	TST.B	flg2E46D		;0cc04: 4a390002e46d
+	TST.B	flgShipActive_2E46D	;0cc04: 4a390002e46d
 	BNE.W	_0CD40			;0cc0a: 66000134
 ; Reduce 1 from ship's firing cooldown
 	SUBQ.B	#1,(22,A6)		;0cc0e: 532e0016
-	BGT.S	_0CC30			;0cc12: 6e1c
-	BEQ.S	_0CC2C			;0cc14: 6716
+	BGT.S	_DontShoot0CC30		;0cc12: 6e1c
+	BEQ.S	_Atk_0CC2C		;0cc14: 6716
 	CMPI.B	#$f9,(22,A6)		;0cc16: 0c2e00f90016
-	BNE.S	_0CC30			;0cc1c: 6612
+	BNE.S	_DontShoot0CC30		;0cc1c: 6612
 	MOVE.B	#$10,(22,A6)		;0cc1e: 1d7c00100016
+; clear firing weapon
 	BCLR	#6,(21,A6)		;0cc24: 08ae00060015
-	BRA.S	_0CC30			;0cc2a: 6004
-_0CC2C:
-	BSR.W	_107DC			;0cc2c: 61003bae
-_0CC30:
+	BRA.S	_DontShoot0CC30		;0cc2a: 6004
+_Atk_0CC2C:
+	BSR.W	_ShipAtk_107DC		;0cc2c: 61003bae
+_DontShoot0CC30:
 	MOVE.L	(A7)+,D0		;0cc30: 201f
 	BEQ.S	_0CC3E			;0cc32: 670a
 	MOVEA.L	D0,A6			;0cc34: 2c40
-	BRA.S	_0CBD8			;0cc36: 60a0
+	BRA.S	_ShipAct_0CBD8		;0cc36: 60a0
 _0CC38:
 	CLR.W	(24,A6)			;0cc38: 426e0018
 	BRA.S	_0CC04			;0cc3c: 60c6
@@ -16387,10 +16420,10 @@ _0CC50:
 	BEQ.S	_0CC8A			;0cc5c: 672c
 	BMI.S	_0CCC4			;0cc5e: 6b64
 	CMPI.B	#$0d,D0			;0cc60: 0c00000d
-	BEQ.S	_0CC6E			;0cc64: 6708
+	BEQ.S	_ShipAct_0CC6E		;0cc64: 6708
 	BTST	#2,(21,A6)		;0cc66: 082e00020015
 	BNE.S	_0CC8A			;0cc6c: 661c
-_0CC6E:
+_ShipAct_0CC6E:
 	SUBQ.B	#1,D0			;0cc6e: 5300
 	LSL.W	#2,D0			;0cc70: e548
 	LEA	arrShipActions,A0	;0cc72: 41f90000d1f8
@@ -16401,7 +16434,7 @@ _0CC6E:
 	ASL.L	#8,D0			;0cc84: e180
 	MOVE.L	D0,(24,A6)		;0cc86: 2d400018
 _0CC8A:
-	TST.B	flg2E46D		;0cc8a: 4a390002e46d
+	TST.B	flgShipActive_2E46D	;0cc8a: 4a390002e46d
 	BNE.W	_0CD40			;0cc90: 660000ae
 	SUBQ.B	#1,(22,A6)		;0cc94: 532e0016
 	BGT.S	_0CCBC			;0cc98: 6e22
@@ -16412,7 +16445,7 @@ _0CC8A:
 	BCLR	#6,(21,A6)		;0ccaa: 08ae00060015
 	BRA.S	_0CCBC			;0ccb0: 600a
 _0CCB2:
-	BSR.W	_107DC			;0ccb2: 61003b28
+	BSR.W	_ShipAtk_107DC		;0ccb2: 61003b28
 	BCLR	#2,(21,A6)		;0ccb6: 08ae00020015
 _0CCBC:
 	MOVE.L	(A7)+,D0		;0ccbc: 201f
@@ -16430,7 +16463,7 @@ _0CCCA:
 	MOVE.L	(16,A0),D2		;0ccd2: 24280010
 	BEQ.W	_0CD1E			;0ccd6: 67000046
 	MOVEA.L	D2,A6			;0ccda: 2c42
-_0CCDC:
+_ShipAct_0CCDC:
 	MOVE.L	(0,A6),D0		;0ccdc: 202e0000
 	MOVE.L	D0,-(A7)		;0cce0: 2f00
 	MOVEQ	#0,D0			;0cce2: 7000
@@ -16447,12 +16480,12 @@ _0CCDC:
 	ASL.L	#8,D0			;0cd02: e180
 	MOVE.L	D0,(24,A6)		;0cd04: 2d400018
 _0CD08:
-	TST.B	flg2E46D		;0cd08: 4a390002e46d
+	TST.B	flgShipActive_2E46D	;0cd08: 4a390002e46d
 	BNE.S	_0CD40			;0cd0e: 6630
 	MOVE.L	(A7)+,D0		;0cd10: 201f
 	BEQ.S	_0CD1E			;0cd12: 670a
 	MOVEA.L	D0,A6			;0cd14: 2c40
-	BRA.S	_0CCDC			;0cd16: 60c4
+	BRA.S	_ShipAct_0CCDC		;0cd16: 60c4
 _0CD18:
 	CLR.W	(24,A6)			;0cd18: 426e0018
 	BRA.S	_0CD08			;0cd1c: 60ea
@@ -16462,20 +16495,20 @@ _0CD1E:
 _0CD22:
 	LEA	(3000,A0),A0		;0cd22: 41e80bb8
 	DBF	D0,loop0CB92		;0cd26: 51c8fe6a
-	SF	flg2E468		;0cd2a: 51f90002e468
+	SF	flgShowGfx		;0cd2a: 51f90002e468
 	ADDQ.W	#1,unk0CD52		;0cd30: 52790000cd52
 	ANDI.W	#$0003,unk0CD52		;0cd36: 027900030000cd52
 	RTS				;0cd3e: 4e75
 _0CD40:
 	ADDQ.L	#8,A7			;0cd40: 508f
 	ADDQ.L	#4,A7			;0cd42: 588f
-	SF	flg2E46D		;0cd44: 51f90002e46d
-	SF	flg2E468		;0cd4a: 51f90002e468
+	SF	flgShipActive_2E46D	;0cd44: 51f90002e46d
+	SF	flgShowGfx		;0cd4a: 51f90002e468
 	RTS				;0cd50: 4e75
 unk0CD52:
 	DC.W	$0000			;0cd52
-_Daily05:
-	ST	flg2E468		;0cd54: 50f90002e468
+_Daily05Ship:
+	ST	flgShowGfx		;0cd54: 50f90002e468
 	ST	flg2E475		;0cd5a: 50f90002e475
 	MOVEA.L	ptrBuff16,A6		;0cd60: 2c790000056a
 	MOVE.L	A6,ptrThisAstMap	;0cd66: 23ce0002decc
@@ -16494,7 +16527,7 @@ _0CD98:
 	MOVE.L	(0,A6),D0		;0cd98: 202e0000
 	MOVE.L	D0,-(A7)		;0cd9c: 2f00
 	MOVE.L	A6,-(A7)		;0cd9e: 2f0e
-_0CDA0:
+_ShipAct_0CDA0:
 	MOVEQ	#0,D0			;0cda0: 7000
 	MOVE.B	(24,A6),D0		;0cda2: 102e0018
 	BEQ.S	_0CDC6			;0cda6: 671e
@@ -16509,7 +16542,7 @@ _0CDA0:
 	ASL.L	#8,D0			;0cdc0: e180
 	MOVE.L	D0,(24,A6)		;0cdc2: 2d400018
 _0CDC6:
-	TST.B	flg2E46D		;0cdc6: 4a390002e46d
+	TST.B	flgShipActive_2E46D	;0cdc6: 4a390002e46d
 	BNE.W	_0CF06			;0cdcc: 66000138
 	SUBQ.B	#1,(22,A6)		;0cdd0: 532e0016
 	BGT.S	_0CDF2			;0cdd4: 6e1c
@@ -16520,7 +16553,7 @@ _0CDC6:
 	BCLR	#6,(21,A6)		;0cde6: 08ae00060015
 	BRA.S	_0CDF2			;0cdec: 6004
 _0CDEE:
-	BSR.W	_107DC			;0cdee: 610039ec
+	BSR.W	_ShipAtk_107DC		;0cdee: 610039ec
 _0CDF2:
 	MOVEA.L	(A7)+,A6		;0cdf2: 2c5f
 	MOVE.L	(A7)+,D0		;0cdf4: 201f
@@ -16530,7 +16563,7 @@ _0CDF2:
 _0CDFC:
 ; ship destroyed flag?
 	MOVE.W	#$0d00,(24,A6)		;0cdfc: 3d7c0d000018
-	BRA.S	_0CDA0			;0ce02: 609c
+	BRA.S	_ShipAct_0CDA0		;0ce02: 609c
 _0CE04:
 	MOVEA.L	(A7),A0			;0ce04: 2057
 	MOVE.L	(8,A0),D2		;0ce06: 24280008
@@ -16546,10 +16579,10 @@ _0CE18:
 	BEQ.S	_0CE4C			;0ce1e: 672c
 	BMI.S	_0CE88			;0ce20: 6b66
 	CMPI.B	#$0d,D0			;0ce22: 0c00000d
-	BEQ.S	_0CE30			;0ce26: 6708
+	BEQ.S	_ShipAct_0CE30		;0ce26: 6708
 	BTST	#2,(21,A6)		;0ce28: 082e00020015
 	BNE.S	_0CE4C			;0ce2e: 661c
-_0CE30:
+_ShipAct_0CE30:
 	SUBQ.B	#1,D0			;0ce30: 5300
 	LSL.W	#2,D0			;0ce32: e548
 	LEA	arrShipActions,A0	;0ce34: 41f90000d1f8
@@ -16560,7 +16593,7 @@ _0CE30:
 	ASL.L	#8,D0			;0ce46: e180
 	MOVE.L	D0,(24,A6)		;0ce48: 2d400018
 _0CE4C:
-	TST.B	flg2E46D		;0ce4c: 4a390002e46d
+	TST.B	flgShipActive_2E46D	;0ce4c: 4a390002e46d
 	BNE.W	_0CF06			;0ce52: 660000b2
 	SUBQ.B	#1,(22,A6)		;0ce56: 532e0016
 	BGT.S	_0CE7E			;0ce5a: 6e22
@@ -16573,7 +16606,7 @@ _0CE4C:
 	BCLR	#6,(21,A6)		;0ce6c: 08ae00060015
 	BRA.S	_0CE7E			;0ce72: 600a
 _0CE74:
-	BSR.W	_107DC			;0ce74: 61003966
+	BSR.W	_ShipAtk_107DC		;0ce74: 61003966
 ; static inducer effect
 	BCLR	#2,(21,A6)		;0ce78: 08ae00020015
 _0CE7E:
@@ -16590,7 +16623,7 @@ _0CE90:
 	MOVE.L	(16,A0),D2		;0ce92: 24280010
 	BEQ.S	_0CEE0			;0ce96: 6748
 	MOVEA.L	D2,A6			;0ce98: 2c42
-_0CE9A:
+_ShipAct_0CE9A:
 	MOVE.L	(0,A6),D0		;0ce9a: 202e0000
 	MOVE.L	D0,-(A7)		;0ce9e: 2f00
 	MOVE.L	A6,-(A7)		;0cea0: 2f0e
@@ -16608,13 +16641,13 @@ _0CE9A:
 	ASL.L	#8,D0			;0cec2: e180
 	MOVE.L	D0,(24,A6)		;0cec4: 2d400018
 _0CEC8:
-	TST.B	flg2E46D		;0cec8: 4a390002e46d
+	TST.B	flgShipActive_2E46D	;0cec8: 4a390002e46d
 	BNE.S	_0CF06			;0cece: 6636
 	MOVEA.L	(A7)+,A6		;0ced0: 2c5f
 	MOVE.L	(A7)+,D0		;0ced2: 201f
 	BEQ.S	_0CEE0			;0ced4: 670a
 	MOVEA.L	D0,A6			;0ced6: 2c40
-	BRA.S	_0CE9A			;0ced8: 60c0
+	BRA.S	_ShipAct_0CE9A		;0ced8: 60c0
 _0CEDA:
 	CLR.W	(24,A6)			;0ceda: 426e0018
 	BRA.S	_0CEC8			;0cede: 60e8
@@ -16623,29 +16656,29 @@ _0CEE0:
 	ADDA.L	#$00000020,A0		;0cee2: d1fc00000020
 	CMPA.L	#ptr2E006,A0		;0cee8: b1fc0002e006
 	BNE.W	_0CD7E			;0ceee: 6600fe8e
-	SF	flg2E46D		;0cef2: 51f90002e46d
+	SF	flgShipActive_2E46D	;0cef2: 51f90002e46d
 	SF	flg2E475		;0cef8: 51f90002e475
-	SF	flg2E468		;0cefe: 51f90002e468
+	SF	flgShowGfx		;0cefe: 51f90002e468
 	RTS				;0cf04: 4e75
 _0CF06:
 	ADDQ.L	#8,A7			;0cf06: 508f
 	ADDQ.L	#4,A7			;0cf08: 588f
-	SF	flg2E46D		;0cf0a: 51f90002e46d
+	SF	flgShipActive_2E46D	;0cf0a: 51f90002e46d
 	SF	flg2E475		;0cf10: 51f90002e475
-	SF	flg2E468		;0cf16: 51f90002e468
+	SF	flgShowGfx		;0cf16: 51f90002e468
 	RTS				;0cf1c: 4e75
 _0CF1E:
 ; appears to involve moving screens
-	MOVE.L	ptr2DEEC,-(A7)		;0cf1e: 2f390002deec
-	MOVE.L	ptr2DEF0,-(A7)		;0cf24: 2f390002def0
-	MOVE.L	ptr2DEF4,-(A7)		;0cf2a: 2f390002def4
+	MOVE.L	ptrAstMap_2DEEC,-(A7)	;0cf1e: 2f390002deec
+	MOVE.L	ptrAstBldg_2DEF0,-(A7)	;0cf24: 2f390002def0
+	MOVE.L	ptrBldCount_2DEF4,-(A7)	;0cf2a: 2f390002def4
 	MOVE.L	ptrCurrentAst,-(A7)	;0cf30: 2f390002de58
 	MOVE.L	A6,ptrCurrentAst	;0cf36: 23ce0002de58
 	MOVE.L	A6,ptrThisAstStats	;0cf3c: 23ce0002ded8
 	MOVEA.L	ptrBuff16,A0		;0cf42: 20790000056a
-	MOVE.L	A0,ptr2DEEC		;0cf48: 23c80002deec
-	MOVE.L	A0,ptr2DEF0		;0cf4e: 23c80002def0
-	MOVE.L	A0,ptr2DEF4		;0cf54: 23c80002def4
+	MOVE.L	A0,ptrAstMap_2DEEC	;0cf48: 23c80002deec
+	MOVE.L	A0,ptrAstBldg_2DEF0	;0cf4e: 23c80002def0
+	MOVE.L	A0,ptrBldCount_2DEF4	;0cf54: 23c80002def4
 	ST	flg2E475		;0cf5a: 50f90002e475
 	MOVE.B	#$01,intScreen		;0cf60: 13fc00010002e486
 	BSR.W	_0DFF2			;0cf68: 61001088
@@ -16668,9 +16701,9 @@ _0CF90:
 	BSR.W	_0D00E			;0cf9e: 6100006e
 _0CFA2:
 	MOVE.L	(A7)+,ptrCurrentAst	;0cfa2: 23df0002de58
-	MOVE.L	(A7)+,ptr2DEF4		;0cfa8: 23df0002def4
-	MOVE.L	(A7)+,ptr2DEF0		;0cfae: 23df0002def0
-	MOVE.L	(A7)+,ptr2DEEC		;0cfb4: 23df0002deec
+	MOVE.L	(A7)+,ptrBldCount_2DEF4	;0cfa8: 23df0002def4
+	MOVE.L	(A7)+,ptrAstBldg_2DEF0	;0cfae: 23df0002def0
+	MOVE.L	(A7)+,ptrAstMap_2DEEC	;0cfb4: 23df0002deec
 	SF	flg2E475		;0cfba: 51f90002e475
 	MOVE.B	#$05,intScreen		;0cfc0: 13fc00050002e486
 	RTS				;0cfc8: 4e75
@@ -16680,13 +16713,13 @@ _Daily03:
 	BEQ.W	ret0D1EA		;0cfd4: 67000214
 	MOVEA.L	D0,A6			;0cfd8: 2c40
 	BRA.S	_0D00E			;0cfda: 6032
-_Daily02:
+_Daily02Ship:
 	MOVEA.L	ptrCurrentAst,A6	;0cfdc: 2c790002de58
 	MOVE.L	(8,A6),D0		;0cfe2: 202e0008
 	BEQ.W	ret0D1EA		;0cfe6: 67000202
 	MOVEA.L	D0,A6			;0cfea: 2c40
 	BRA.S	_0D00E			;0cfec: 6020
-_Daily01:
+_Daily01Ship:
 	BSR.W	_0DFF2			;0cfee: 61001002
 	CLR.W	data2E0A4		;0cff2: 42790002e0a4
 	MOVEA.L	ptrCurrentAst,A6	;0cff8: 2c790002de58
@@ -16696,10 +16729,10 @@ _Daily01:
 	MOVEA.L	D0,A6			;0d00c: 2c40
 _0D00E:
 	MOVEA.L	ptrBuff13,A0		;0d00e: 20790000055e
-	SF	flg2E468		;0d014: 51f90002e468
-	MOVE.L	ptr2DEEC,ptrThisAstMap	;0d01a: 23f90002deec0002decc
-	MOVE.L	ptr2DEF0,ptrThisAstBldg	;0d024: 23f90002def00002ded0
-	MOVE.L	ptr2DEF4,ptrThisAstBldgCount ;0d02e: 23f90002def40002ded4
+	SF	flgShowGfx		;0d014: 51f90002e468
+	MOVE.L	ptrAstMap_2DEEC,ptrThisAstMap ;0d01a: 23f90002deec0002decc
+	MOVE.L	ptrAstBldg_2DEF0,ptrThisAstBldg ;0d024: 23f90002def00002ded0
+	MOVE.L	ptrBldCount_2DEF4,ptrThisAstBldgCount ;0d02e: 23f90002def40002ded4
 _0D038:
 	MOVE.L	(0,A6),D0		;0d038: 202e0000
 	MOVE.L	D0,-(A7)		;0d03c: 2f00
@@ -16711,12 +16744,13 @@ _0D038:
 	BEQ.W	_0D08A			;0d04e: 6700003a
 	BMI.W	_0D0CE			;0d052: 6b00007a
 	CMPI.B	#$0d,D0			;0d056: 0c00000d
-	BEQ.S	_0D06E			;0d05a: 6712
+	BEQ.S	_ShipAct_0D06E		;0d05a: 6712
 	TST.B	(89,A1)			;0d05c: 4a290059
 	BMI.W	_0D08A			;0d060: 6b000028
+; not in stasis
 	BTST	#2,(21,A6)		;0d064: 082e00020015
 	BNE.W	_0D08A			;0d06a: 6600001e
-_0D06E:
+_ShipAct_0D06E:
 	SUBQ.B	#1,D0			;0d06e: 5300
 	LSL.W	#2,D0			;0d070: e548
 	LEA	arrShipActions,A0	;0d072: 41f90000d1f8
@@ -16727,8 +16761,8 @@ _0D06E:
 	ASL.L	#8,D0			;0d084: e180
 	MOVE.L	D0,(24,A6)		;0d086: 2d400018
 _0D08A:
-	TST.B	flg2E46D		;0d08a: 4a390002e46d
-	BNE.W	_0D1EC			;0d090: 6600015a
+	TST.B	flgShipActive_2E46D	;0d08a: 4a390002e46d
+	BNE.W	_AddrPlus12		;0d090: 6600015a
 	MOVEA.L	(A7)+,A6		;0d094: 2c5f
 	MOVEA.L	(A7)+,A0		;0d096: 205f
 	TST.B	(8,A6)			;0d098: 4a2e0008
@@ -16754,7 +16788,7 @@ _0D0D4:
 	TST.B	(89,A1)			;0d0da: 4a290059
 	BMI.S	_0D0EA			;0d0de: 6b0a
 ; If not in stasis, do _107da and clear static inducer
-	BSR.W	_107DC			;0d0e0: 610036fa
+	BSR.W	_ShipAtk_107DC		;0d0e0: 610036fa
 	BCLR	#2,(21,A6)		;0d0e4: 08ae00020015
 _0D0EA:
 	MOVE.B	intScreen,D0		;0d0ea: 10390002e486
@@ -16768,7 +16802,7 @@ _0D0F8:
 	MOVEQ	#0,D1			;0d102: 7200
 	MOVE.B	(10,A6),D0		;0d104: 102e000a
 	MOVE.B	(11,A6),D1		;0d108: 122e000b
-	MOVE.W	data2E484,D2		;0d10c: 34390002e484
+	MOVE.W	intAsteroidFacing,D2	;0d10c: 34390002e484
 	BEQ.S	_0D184			;0d112: 6770
 	CMPI.B	#$01,D2			;0d114: 0c020001
 	BEQ.S	_0D160			;0d118: 6746
@@ -16860,14 +16894,14 @@ _0D1E0:
 	BRA.W	_0D038			;0d1e6: 6000fe50
 ret0D1EA:
 	RTS				;0d1ea: 4e75
-_0D1EC:
+_AddrPlus12:
 	ADDQ.L	#8,A7			;0d1ec: 508f
 	ADDQ.L	#4,A7			;0d1ee: 588f
-	SF	flg2E46D		;0d1f0: 51f90002e46d
+	SF	flgShipActive_2E46D	;0d1f0: 51f90002e46d
 	RTS				;0d1f6: 4e75
 arrShipActions:
 ; A list of 45 possible things ships can be made to do.
-; Ships includes missiles and vortex storms.
+; "Ships" also includes missiles, fire, vortex storms.
 ; List starts from 1. Listed here in hex
 	DC.L	_ShipAct01		;0d1f8: 0000d66c
 	DC.L	_ShipAct02		;0d1fc: 0000da76
@@ -16877,26 +16911,26 @@ arrShipActions:
 	DC.L	_ShipAct06		;0d20c: 0000d72c
 	DC.L	_ShipAct07_LandSurf	;0d210: 0000d794
 	DC.L	_ShipAct08		;0d214: 0000d816
-	DC.L	_ShipAct09		;0d218: 0000d922
+	DC.L	_ShipAct09_Large	;0d218: 0000d922
 	DC.L	_ShipAct0a		;0d21c: 0000e2ac
-	DC.L	_ShipAct0b		;0d220: 0000e2d4
+	DC.L	_ShipAct0b_Burn		;0d220: 0000e2d4
 	DC.L	_ShipAct0c_Misl		;0d224: 0000e8fc
 	DC.L	_ShipAct0d_Expl		;0d228: 0000e57e
 	DC.L	_ShipAct0e_Misl		;0d22c: 0000f02e
 	DC.L	_ShipAct0f_Vortex	;0d230: 0000f744
 	DC.L	_ShipAct10		;0d234: 0000ebc4
-	DC.L	_ShipAct11		;0d238: 0000d994
+	DC.L	_ShipAct11_Large	;0d238: 0000d994
 	DC.L	_ShipAct12		;0d23c: 0000eab8
 	DC.L	_ShipAct13_Scout	;0d240: 0000d5f4
 	DC.L	_ShipAct14_Survey	;0d244: 0000d634
 	DC.L	_ShipAct15_NewAst	;0d248: 000128bc
 	DC.L	_ShipAct16_LandPad	;0d24c: 0000da06
-	DC.L	_ShipAct17		;0d250: 0000d428
+	DC.L	_ShipAct17_Explore	;0d250: 0000d428
 	DC.L	_ShipAct18_ScoutRep	;0d254: 0000d582
 	DC.L	_ShipAct19		;0d258: 0000dc4e
 	DC.L	_ShipAct1a_Ret0		;0d25c: 0000d2ac
 	DC.L	_ShipAct1b		;0d260: 0000d834
-	DC.L	_ShipAct1c_Colony	;0d264: 0000d8a6
+	DC.L	_ShipAct1c_Colonize	;0d264: 0000d8a6
 	DC.L	_ShipAct1d		;0d268: 0001061c
 	DC.L	_ShipAct1e		;0d26c: 00010696
 	DC.L	_ShipAct1f		;0d270: 0000e28a
@@ -16909,16 +16943,16 @@ arrShipActions:
 	DC.L	_ShipAct26		;0d28c: 0000d406
 	DC.L	_ShipAct27		;0d290: 0000d5d6
 	DC.L	_ShipAct28		;0d294: 0000d3a2
-	DC.L	_ShipAct29_Vortex	;0d298: 0000f880
-	DC.L	_ShipAct2a		;0d29c: 0000c4d6
-	DC.L	_ShipAct2b_Spy		;0d2a0: 0000d2b0
+	DC.L	_ShipAct29_GoldVortex	;0d298: 0000f880
+	DC.L	_ShipAct2a_ScoutSpy	;0d29c: 0000c4d6
+	DC.L	_ShipAct2b_SpySat	;0d2a0: 0000d2b0
 	DC.L	_ShipAct2c_Remove	;0d2a4: 0000e8d0
 	DC.L	_ShipAct2d		;0d2a8: 0000eb28
 _ShipAct1a_Ret0:
 	MOVEQ	#0,D0			;0d2ac: 7000
 	RTS				;0d2ae: 4e75
-_ShipAct2b_Spy:
-	TST.B	flg2E468		;0d2b0: 4a390002e468
+_ShipAct2b_SpySat:
+	TST.B	flgShowGfx		;0d2b0: 4a390002e468
 	BNE.S	_0D2FC			;0d2b6: 6644
 	CMPI.W	#$000d,(38,A6)		;0d2b8: 0c6e000d0026
 	BPL.S	_0D2C8			;0d2be: 6a08
@@ -17006,7 +17040,6 @@ _ShipAct28:
 	BEQ.S	_0D3BA			;0d3a8: 6710
 _0D3AA:
 	MOVEA.L	D1,A5			;0d3aa: 2a41
-; battleship?
 	CMPI.B	#$2b,(8,A5)		;0d3ac: 0c2d002b0008
 	BEQ.S	_0D3C2			;0d3b2: 670e
 	MOVE.L	(0,A5),D1		;0d3b4: 222d0000
@@ -17046,7 +17079,7 @@ _ShipAct26:
 	MOVE.W	#$0400,(24,A6)		;0d406: 3d7c04000018
 	MOVEQ	#0,D0			;0d40c: 7000
 	MOVE.L	D0,(32,A6)		;0d40e: 2d400020
-	MOVE.L	#data1E914,(28,A6)	;0d412: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;0d412: 2d7c0001e914001c
 	MOVEQ	#0,D0			;0d41a: 7000
 	RTS				;0d41c: 4e75
 _ShipAct21_Shield150:
@@ -17054,9 +17087,9 @@ _ShipAct21_Shield150:
 	MOVE.W	#$0096,(50,A6)		;0d41e: 3d7c00960032
 	MOVEQ	#0,D0			;0d424: 7000
 	RTS				;0d426: 4e75
-_ShipAct17:
+_ShipAct17_Explore:
 	SF	(34,A6)			;0d428: 51ee0022
-	BTST	#3,data2E45A		;0d42c: 083900030002e45a
+	BTST	#3,bFrameRule		;0d42c: 083900030002e45a
 	BNE.S	_0D43A			;0d434: 6604
 	MOVEQ	#0,D0			;0d436: 7000
 	RTS				;0d438: 4e75
@@ -17127,9 +17160,10 @@ loop0D4C6:
 	BPL.S	_0D512			;0d4ea: 6a26
 	CMPI.W	#$0006,intCurrentAlienID ;0d4ec: 0c7900060002df02
 	BNE.S	_0D508			;0d4f4: 6612
+; Swixaran cloaked asteroid detection
 	CMPA.L	ptrEnemyHome,A0		;0d4f6: b1f90002de60
 	BNE.S	_0D508			;0d4fc: 660a
-	BTST	#2,bAlienSpec		;0d4fe: 083900020002e48d
+	BTST	#2,bAlienSpecial	;0d4fe: 083900020002e48d
 	BNE.S	_0D512			;0d506: 660a
 _0D508:
 	ADDQ.B	#1,(34,A6)		;0d508: 522e0022
@@ -17171,7 +17205,7 @@ _0D56E:
 	MOVEQ	#32,D4			;0d56e: 7820
 	MOVE.W	(10,A6),D2		;0d570: 342e000a
 	MOVE.W	(12,A6),D3		;0d574: 362e000c
-	JSR	_15EEE			;0d578: 4eb900015eee
+	JSR	_MoveAsts_15EEE		;0d578: 4eb900015eee
 	MOVEQ	#0,D0			;0d57e: 7000
 	RTS				;0d580: 4e75
 _ShipAct18_ScoutRep:
@@ -17182,24 +17216,24 @@ _ShipAct18_ScoutRep:
 	MOVEQ	#0,D2			;0d586: 7400
 	MOVE.B	(34,A6),D2		;0d588: 142e0022
 	CMPI.B	#$01,D2			;0d58c: 0c020001
-	BEQ.S	_0D5BE			;0d590: 672c
+	BEQ.S	_ScoutRep0D5BE		;0d590: 672c
 ; 74: A SCOUT REPORTS FINDING x ASTEROIDS.
 	MOVEQ	#74,D0			;0d592: 704a
 	BSR.W	_GetStringA0		;0d594: 61009f8a
 	MOVEQ	#24,D0			;0d598: 7018
 	CMPI.B	#$00,intLanguage	;0d59a: 0c3900000001af13
-	BEQ.S	_0D5B2			;0d5a2: 670e
+	BEQ.S	_ScoutRep0D5B2		;0d5a2: 670e
 	MOVEQ	#18,D0			;0d5a4: 7012
 	CMPI.B	#$01,intLanguage	;0d5a6: 0c3900010001af13
-	BEQ.S	_0D5B2			;0d5ae: 6702
+	BEQ.S	_ScoutRep0D5B2		;0d5ae: 6702
 	MOVEQ	#15,D0			;0d5b0: 700f
-_0D5B2:
+_ScoutRep0D5B2:
 	ADDA.L	D0,A0			;0d5b2: d1c0
 	MOVE.B	D2,D3			;0d5b4: 1602
 	ADDI.B	#$30,D3			;0d5b6: 06030030
 	MOVE.B	D3,(A0)			;0d5ba: 1083
 	MOVEQ	#74,D0			;0d5bc: 704a
-_0D5BE:
+_ScoutRep0D5BE:
 	MOVE.L	ptrThisAstStats,D1	;0d5be: 22390002ded8
 ; 5,000 per asteroid found
 	MULU	#$1388,D2		;0d5c4: c4fc1388
@@ -17216,7 +17250,7 @@ _ShipAct27:
 	ADD.L	ptrBuff12_Asteroids,D0	;0d5e0: d0b90000055a
 	MOVEA.L	D0,A0			;0d5e6: 2040
 	BTST	#6,(89,A0)		;0d5e8: 082800060059
-	BNE.S	_0D612			;0d5ee: 6622
+	BNE.S	_ScoutReturn		;0d5ee: 6622
 	MOVEQ	#-1,D0			;0d5f0: 70ff
 	RTS				;0d5f2: 4e75
 _ShipAct13_Scout:
@@ -17229,7 +17263,7 @@ _ShipAct13_Scout:
 	MULU	#$02ee,D0		;0d606: c0fc02ee
 	ADD.L	ptrBuff12_Asteroids,D0	;0d60a: d0b90000055a
 	MOVEA.L	D0,A0			;0d610: 2040
-_0D612:
+_ScoutReturn:
 	MOVE.B	(25,A0),(34,A6)		;0d612: 1d6800190022
 ; Return home
 	MOVE.B	(33,A6),D0		;0d618: 102e0021
@@ -17466,7 +17500,7 @@ _0D89A:
 	MOVE.B	D1,(13,A6)		;0d89e: 1d41000d
 	MOVEQ	#-1,D0			;0d8a2: 70ff
 	RTS				;0d8a4: 4e75
-_ShipAct1c_Colony:
+_ShipAct1c_Colonize:
 	TST.B	(21,A6)			;0d8a6: 4a2e0015
 	BPL.S	_StartTerranColony	;0d8aa: 6a06
 	JMP	_StartAlienColony	;0d8ac: 4ef9000179ca
@@ -17476,7 +17510,7 @@ _StartTerranColony:
 	MOVEQ	#99,D0			;0d8ba: 7063
 loop0D8BC:
 	TST.B	(0,A0)			;0d8bc: 4a280000
-	BNE.S	next0D91C		;0d8c0: 665a
+	BNE.S	done0D91C		;0d8c0: 665a
 	LEA	(14,A0),A0		;0d8c2: 41e8000e
 	DBF	D0,loop0D8BC		;0d8c6: 51c8fff4
 ; You need 30,000 in general cash.
@@ -17489,7 +17523,7 @@ loop0D8BC:
 	MOVEQ	#1,D3			;0d8e2: 7601
 	MOVEQ	#4,D4			;0d8e4: 7804
 	BSR.W	_MessageWin		;0d8e6: 6100b6e8
-	BRA.S	next0D91C		;0d8ea: 6030
+	BRA.S	done0D91C		;0d8ea: 6030
 _0D8EC:
 	SUBI.L	#$00007530,intCashGeneral ;0d8ec: 04b9000075300002de68
 ; 285: COLONY ESTABLISHED ON THIS ASTEROID.
@@ -17501,15 +17535,15 @@ _0D8EC:
 	BSR.W	_Message_08F7E		;0d906: 6100b676
 ; Building ID 21: CPU
 	MOVEQ	#21,D4			;0d90a: 7815
-	BSR.W	_PlaceCPU		;0d90c: 610097b6
+	BSR.W	_RandomlyPlaceBldg	;0d90c: 610097b6
 	MOVEA.L	ptrThisAstStats,A0	;0d910: 20790002ded8
 ; Start CPU output at 500
 	MOVE.W	#$01f4,(692,A0)		;0d916: 317c01f402b4
-next0D91C:
+done0D91C:
 	MOVEA.L	(A7)+,A6		;0d91c: 2c5f
 	MOVEQ	#-1,D0			;0d91e: 70ff
 	RTS				;0d920: 4e75
-_ShipAct09:
+_ShipAct09_Large:
 	CMPI.B	#$01,(23,A6)		;0d922: 0c2e00010017
 	BEQ.S	_0D984			;0d928: 675a
 	MOVE.B	(8,A6),D0		;0d92a: 102e0008
@@ -17552,7 +17586,7 @@ _0D984:
 _0D98E:
 	SF	(10,A6)			;0d98e: 51ee000a
 	BRA.S	_0D984			;0d992: 60f0
-_ShipAct11:
+_ShipAct11_Large:
 	CMPI.B	#$03,(23,A6)		;0d994: 0c2e00030017
 	BEQ.S	_0D9F6			;0d99a: 675a
 	MOVE.B	(8,A6),D0		;0d99c: 102e0008
@@ -17636,7 +17670,7 @@ _ShipAct02:
 	BTST	#6,(89,A0)		;0da82: 082800060059
 	BNE.W	_0DB74			;0da88: 660000ea
 _0DA8C:
-	TST.B	flg2E468		;0da8c: 4a390002e468
+	TST.B	flgShowGfx		;0da8c: 4a390002e468
 	BNE.W	_0DAD2			;0da92: 6600003e
 	TST.W	(38,A6)			;0da96: 4a6e0026
 	BEQ.W	_0DAD2			;0da9a: 67000036
@@ -17709,13 +17743,13 @@ _0DB70:
 _0DB74:
 	MOVE.W	#$0400,(24,A6)		;0db74: 3d7c04000018
 	CLR.L	(32,A6)			;0db7a: 42ae0020
-	MOVE.L	#data1E914,(28,A6)	;0db7e: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;0db7e: 2d7c0001e914001c
 	MOVEQ	#0,D0			;0db86: 7000
 	RTS				;0db88: 4e75
 _ShipAct03:
 	TST.W	(38,A6)			;0db8a: 4a6e0026
 	BNE.S	_0DBAE			;0db8e: 661e
-	TST.B	flg2E468		;0db90: 4a390002e468
+	TST.B	flgShowGfx		;0db90: 4a390002e468
 	BNE.S	_0DBEE			;0db96: 6656
 	LEA	ptr1E9F8,A2		;0db98: 45f90001e9f8
 	MOVEQ	#34,D0			;0db9e: 7022
@@ -17813,13 +17847,13 @@ _AddShip:
 ; Missiles and vortex storms also appear to be ships.
 ; d2 = ship type
 	BSR.S	_FindShipSlot		;0dc9a: 61c8
-	BMI.S	_0DCAC			;0dc9c: 6b0e
+	BMI.S	_ret_0DCAC		;0dc9c: 6b0e
 	MOVEA.L	A0,A1			;0dc9e: 2248
 	ADDA.L	D6,A0			;0dca0: d1c6
 	JSR	_024FA			;0dca2: 4eb9000024fa
 	MOVEA.L	A1,A0			;0dca8: 2049
 	BRA.S	_0DCB6			;0dcaa: 600a
-_0DCAC:
+_ret_0DCAC:
 	LEA	ptr1F044,A6		;0dcac: 4df90001f044
 	MOVEQ	#-1,D0			;0dcb2: 70ff
 	RTS				;0dcb4: 4e75
@@ -17856,18 +17890,19 @@ _0DCDA:
 	MOVE.B	#$01,(23,A6)		;0dd1a: 1d7c00010017
 	MOVE.W	#$ffff,(36,A6)		;0dd20: 3d7cffff0024
 	MOVEQ	#8,D0			;0dd26: 7008
+; random facing
 	JSR	_RandInt		;0dd28: 4eb900000c0c
 	MOVE.B	D0,(9,A6)		;0dd2e: 1d400009
 	CMPI.B	#$37,(8,A6)		;0dd32: 0c2e00370008
-	BMI.S	_0DD50			;0dd38: 6b16
-	BNE.S	_0DD40			;0dd3a: 6604
+	BMI.S	_ret0_0DD50		;0dd38: 6b16
+	BNE.S	_largeships_0DD40	;0dd3a: 6604
 	BSR.W	_InitTranspCargo	;0dd3c: 61003174
-_0DD40:
-; large ships
+_largeships_0DD40:
+; large ships, transporter size and up
 	BSET	#4,(20,A6)		;0dd40: 08ee00040014
 	MOVE.B	(11,A6),(13,A6)		;0dd46: 1d6e000b000d
 	SF	(9,A6)			;0dd4c: 51ee0009
-_0DD50:
+_ret0_0DD50:
 	MOVEQ	#0,D0			;0dd50: 7000
 	RTS				;0dd52: 4e75
 _0DD54:
@@ -18120,7 +18155,7 @@ _0DFA6:
 	MOVEQ	#0,D7			;0dfbe: 7e00
 	MOVE.B	(0,A3),D7		;0dfc0: 1e2b0000
 	SUBQ.W	#1,D7			;0dfc4: 5347
-	LEA	ptr33452,A3		;0dfc6: 47f900033452
+	LEA	arrBuildingSpriteList,A3 ;0dfc6: 47f900033452
 	ADD.W	D7,D7			;0dfcc: de47
 	MOVE.W	D7,D2			;0dfce: 3407
 	ASL.W	#2,D2			;0dfd0: e542
@@ -18159,19 +18194,19 @@ _0E016:
 _0E018:
 	MOVE.W	(A1)+,D2		;0e018: 3419
 	BEQ.S	_0E020			;0e01a: 6704
-	BSR.W	_0C5AA			;0e01c: 6100e58c
+	BSR.W	_Ships0C5AA		;0e01c: 6100e58c
 _0E020:
 	MOVE.W	(A1)+,D2		;0e020: 3419
 	BEQ.S	_0E028			;0e022: 6704
-	BSR.W	_0C5AA			;0e024: 6100e584
+	BSR.W	_Ships0C5AA		;0e024: 6100e584
 _0E028:
 	MOVE.W	(A1)+,D2		;0e028: 3419
 	BEQ.S	_0E030			;0e02a: 6704
-	BSR.W	_0C5AA			;0e02c: 6100e57c
+	BSR.W	_Ships0C5AA		;0e02c: 6100e57c
 _0E030:
 	MOVE.W	(A1)+,D2		;0e030: 3419
 	BEQ.S	_0E038			;0e032: 6704
-	BSR.W	_0C5AA			;0e034: 6100e574
+	BSR.W	_Ships0C5AA		;0e034: 6100e574
 _0E038:
 	ADDQ.L	#2,A4			;0e038: 548c
 	ADDQ.W	#2,D1			;0e03a: 5441
@@ -18218,7 +18253,7 @@ _0E0AA:
 	MOVE.W	D0,D1			;0e0b8: 3200
 	ASL.W	#2,D0			;0e0ba: e540
 	ADD.W	D1,D0			;0e0bc: d041
-	LEA	ptr1D8F6,A1		;0e0be: 43f90001d8f6
+	LEA	arrShipSpriteList,A1	;0e0be: 43f90001d8f6
 	MOVEA.L	(0,A1,D0.W),A0		;0e0c4: 20710000
 	MOVEA.L	(4,A1,D0.W),A2		;0e0c8: 24710004
 	MOVE.W	(8,A1,D0.W),D2		;0e0cc: 34310008
@@ -18233,7 +18268,7 @@ _0E0AA:
 	ADD.W	D5,D1			;0e0e6: d245
 	MOVEQ	#1,D6			;0e0e8: 7c01
 	MOVEM.L	D3-D5/D7/A3,-(A7)	;0e0ea: 48e71d10
-	BSR.W	_0C916			;0e0ee: 6100e826
+	BSR.W	_DrawGfx_0C916		;0e0ee: 6100e826
 	MOVEM.L	(A7)+,D3-D5/D7/A3	;0e0f2: 4cdf08b8
 	ADDQ.B	#1,D3			;0e0f6: 5203
 	CMP.B	D3,D7			;0e0f8: be03
@@ -18251,19 +18286,19 @@ _0E116:
 _0E118:
 	MOVE.W	(A1)+,D2		;0e118: 3419
 	BEQ.S	_0E120			;0e11a: 6704
-	BSR.W	_0C5AA			;0e11c: 6100e48c
+	BSR.W	_Ships0C5AA		;0e11c: 6100e48c
 _0E120:
 	MOVE.W	(A1)+,D2		;0e120: 3419
 	BEQ.S	_0E128			;0e122: 6704
-	BSR.W	_0C5AA			;0e124: 6100e484
+	BSR.W	_Ships0C5AA		;0e124: 6100e484
 _0E128:
 	MOVE.W	(A1)+,D2		;0e128: 3419
 	BEQ.S	_0E130			;0e12a: 6704
-	BSR.W	_0C5AA			;0e12c: 6100e47c
+	BSR.W	_Ships0C5AA		;0e12c: 6100e47c
 _0E130:
 	MOVE.W	(A1)+,D2		;0e130: 3419
 	BEQ.S	_0E138			;0e132: 6704
-	BSR.W	_0C5AA			;0e134: 6100e474
+	BSR.W	_Ships0C5AA		;0e134: 6100e474
 _0E138:
 	ADDQ.L	#2,A4			;0e138: 548c
 	ADDQ.W	#2,D1			;0e13a: 5441
@@ -18322,7 +18357,7 @@ _0E1EE:
 	LEA	ptr1F044,A0		;0e1f0: 41f90001f044
 	MOVEQ	#-1,D0			;0e1f6: 70ff
 	RTS				;0e1f8: 4e75
-_0E1FA:
+_ExplodeSprite_0E1FA:
 ; missile? is fire also a ship?
 ; Tyl Energiser: d0=50, d1=$88, d5=0
 	BSR.W	_FindShipSlot		;0e1fa: 6100fa68
@@ -18389,7 +18424,7 @@ _ShipAct0a:
 	MOVE.L	(14,A0),(14,A6)		;0e2c2: 2d68000e000e
 	MOVE.W	(38,A0),(38,A6)		;0e2c8: 3d6800260026
 	MOVE.B	(23,A0),(23,A6)		;0e2ce: 1d6800170017
-_ShipAct0b:
+_ShipAct0b_Burn:
 	MOVEA.L	(28,A6),A2		;0e2d4: 246e001c
 	MOVEQ	#0,D0			;0e2d8: 7000
 	MOVE.B	(18,A6),D0		;0e2da: 102e0012
@@ -18412,7 +18447,7 @@ _0E306:
 	MOVEQ	#0,D0			;0e310: 7000
 	RTS				;0e312: 4e75
 _0E314:
-	TST.B	flg2E468		;0e314: 4a390002e468
+	TST.B	flgShowGfx		;0e314: 4a390002e468
 	BNE.S	_0E32C			;0e31a: 6610
 	MOVE.B	(1,A2,D0.W),D0		;0e31c: 10320001
 	EXT.W	D0			;0e320: 4880
@@ -18424,7 +18459,7 @@ _0E326:
 	JSR	_PlaySound		;0e326: 4eb90001a50e
 _0E32C:
 	ADDQ.B	#2,(18,A6)		;0e32c: 542e0012
-	BRA.S	_ShipAct0b		;0e330: 60a2
+	BRA.S	_ShipAct0b_Burn		;0e330: 60a2
 _0E332:
 	MOVE.B	(8,A6),D1		;0e332: 122e0008
 	CMPI.B	#$27,D1			;0e336: 0c010027
@@ -18455,13 +18490,14 @@ _0E342:
 	MOVEA.L	ptrThisAstMap,A6	;0e382: 2c790002decc
 	MOVEA.L	ptrThisAstBldgCount,A1	;0e388: 22790002ded4
 ; Fire deals double damage to Swixaran
+; 2 instead of 1
 	MOVEQ	#1,D7			;0e38e: 7e01
 	CMPI.W	#$0006,intCurrentAlienID ;0e390: 0c7900060002df02
 	BNE.S	_0E39C			;0e398: 6602
 	MOVEQ	#2,D7			;0e39a: 7e02
 _0E39C:
 	JSR	_DamageBldg		;0e39c: 4eb900006d4a
-	TST.B	flg2E468		;0e3a2: 4a390002e468
+	TST.B	flgShowGfx		;0e3a2: 4a390002e468
 	BNE.S	_0E3B0			;0e3a8: 6606
 	JSR	_PlayExplosion		;0e3aa: 4eb90001a4fa
 _0E3B0:
@@ -18509,7 +18545,7 @@ _0E3E0:
 _0E42E:
 	MOVEA.L	(A7)+,A6		;0e42e: 2c5f
 	ADDQ.B	#1,(18,A6)		;0e430: 522e0012
-	BRA.W	_ShipAct0b		;0e434: 6000fe9e
+	BRA.W	_ShipAct0b_Burn		;0e434: 6000fe9e
 _0E438:
 	CMPI.B	#$23,D1			;0e438: 0c010023
 	BNE.W	_0E49A			;0e43c: 6600005c
@@ -18518,10 +18554,10 @@ _0E438:
 	SUBQ.W	#1,(38,A0)		;0e44a: 53680026
 	ADDQ.B	#1,(18,A6)		;0e44e: 522e0012
 	CMPI.B	#$fc,(1,A2,D0.W)	;0e452: 0c3200fc0001
-	BNE.W	_ShipAct0b		;0e458: 6600fe7a
+	BNE.W	_ShipAct0b_Burn		;0e458: 6600fe7a
 	ADDQ.B	#1,(18,A6)		;0e45c: 522e0012
 	BSET	#6,(20,A0)		;0e460: 08e800060014
-	BEQ.W	_ShipAct0b		;0e466: 6700fe6c
+	BEQ.W	_ShipAct0b_Burn		;0e466: 6700fe6c
 	MOVE.L	A0,-(A7)		;0e46a: 2f08
 	MOVE.B	(8,A0),D0		;0e46c: 10280008
 	BEQ.S	_0E490			;0e470: 671e
@@ -18535,7 +18571,7 @@ _0E438:
 _0E490:
 	MOVEA.L	(A7)+,A0		;0e490: 205f
 	BSR.W	_0E6DA			;0e492: 61000246
-	BRA.W	_ShipAct0b		;0e496: 6000fe3c
+	BRA.W	_ShipAct0b_Burn		;0e496: 6000fe3c
 _0E49A:
 	CMPI.B	#$24,D1			;0e49a: 0c010024
 	BNE.S	_0E4CA			;0e49e: 662a
@@ -18544,10 +18580,10 @@ _0E49A:
 	ADDQ.W	#1,(38,A0)		;0e4aa: 52680026
 	ADDQ.B	#1,(18,A6)		;0e4ae: 522e0012
 	CMPI.B	#$fc,(1,A2,D0.W)	;0e4b2: 0c3200fc0001
-	BNE.W	_ShipAct0b		;0e4b8: 6600fe1a
+	BNE.W	_ShipAct0b_Burn		;0e4b8: 6600fe1a
 	ADDQ.B	#1,(18,A6)		;0e4bc: 522e0012
 	MOVE.W	#$0400,(24,A0)		;0e4c0: 317c04000018
-	BRA.W	_ShipAct0b		;0e4c6: 6000fe0c
+	BRA.W	_ShipAct0b_Burn		;0e4c6: 6000fe0c
 _0E4CA:
 	CMPI.B	#$32,D1			;0e4ca: 0c010032
 	BNE.S	_0E504			;0e4ce: 6634
@@ -18573,7 +18609,7 @@ _0E4F6:
 	BNE.S	_0E4DC			;0e4fa: 66e0
 _0E4FC:
 	ADDQ.B	#1,(18,A6)		;0e4fc: 522e0012
-	BRA.W	_ShipAct0b		;0e500: 6000fdd2
+	BRA.W	_ShipAct0b_Burn		;0e500: 6000fdd2
 _0E504:
 	CMPI.B	#$2f,D1			;0e504: 0c01002f
 	BEQ.S	_0E512			;0e508: 6708
@@ -18585,7 +18621,7 @@ _0E512:
 	CMPI.B	#$04,D0			;0e51a: 0c000004
 	BMI.S	_0E528			;0e51e: 6b08
 	ADDQ.B	#1,(18,A6)		;0e520: 522e0012
-	BRA.W	_ShipAct0b		;0e524: 6000fdae
+	BRA.W	_ShipAct0b_Burn		;0e524: 6000fdae
 _0E528:
 	ST	flg2E46A		;0e528: 50f90002e46a
 	MOVE.W	(10,A6),-(A7)		;0e52e: 3f2e000a
@@ -18601,22 +18637,22 @@ _0E528:
 	MOVE.W	D2,-(A7)		;0e54c: 3f02
 	MOVE.W	D3,-(A7)		;0e54e: 3f03
 	MOVE.L	A6,-(A7)		;0e550: 2f0e
-	BSR.W	_GrounBurn		;0e552: 61001b08
+	BSR.W	_GroundBurn		;0e552: 61001b08
 	MOVEA.L	(A7)+,A6		;0e556: 2c5f
 	MOVE.W	(A7)+,D3		;0e558: 361f
 	MOVE.W	(A7)+,D2		;0e55a: 341f
 	ADD.B	D2,(10,A6)		;0e55c: d52e000a
 	ADD.B	D3,(11,A6)		;0e560: d72e000b
 	MOVE.L	A6,-(A7)		;0e564: 2f0e
-	BSR.W	_GrounBurn		;0e566: 61001af4
+	BSR.W	_GroundBurn		;0e566: 61001af4
 	MOVEA.L	(A7)+,A6		;0e56a: 2c5f
 	SF	flg2E46A		;0e56c: 51f90002e46a
 	MOVE.W	(A7)+,(10,A6)		;0e572: 3d5f000a
 	ADDQ.B	#1,(18,A6)		;0e576: 522e0012
-	BRA.W	_ShipAct0b		;0e57a: 6000fd58
+	BRA.W	_ShipAct0b_Burn		;0e57a: 6000fd58
 _ShipAct0d_Expl:
 	MOVE.L	A6,-(A7)		;0e57e: 2f0e
-	TST.B	flg2E468		;0e580: 4a390002e468
+	TST.B	flgShowGfx		;0e580: 4a390002e468
 	BNE.S	_0E5DC			;0e586: 6654
 	MOVE.B	(8,A6),D0		;0e588: 102e0008
 	CMPI.B	#$42,D0			;0e58c: 0c000042
@@ -18635,7 +18671,7 @@ _0E5B0:
 	MOVE.B	#$98,D1			;0e5b8: 123c0098
 	MOVEA.L	ptrThisAstStats,A0	;0e5bc: 20790002ded8
 	MOVEQ	#0,D5			;0e5c2: 7a00
-	BSR.W	_0E1FA			;0e5c4: 6100fc34
+	BSR.W	_ExplodeSprite_0E1FA	;0e5c4: 6100fc34
 	MOVEA.L	(A7),A6			;0e5c8: 2c57
 	JSR	_PlayExplosion		;0e5ca: 4eb90001a4fa
 	MOVE.W	(38,A6),(38,A0)		;0e5d0: 316e00260026
@@ -18656,7 +18692,7 @@ _0E5E6:
 	MOVEQ	#5,D0			;0e600: 7005
 	JSR	_RandInt		;0e602: 4eb900000c0c
 	EXG	D0,D5			;0e608: c145
-	BSR.W	_0E1FA			;0e60a: 6100fbee
+	BSR.W	_ExplodeSprite_0E1FA	;0e60a: 6100fbee
 	MOVEA.L	(A7),A6			;0e60e: 2c57
 	MOVE.W	(38,A6),(38,A0)		;0e610: 316e00260026
 	MOVE.B	(23,A6),(23,A0)		;0e616: 116e00170017
@@ -18669,7 +18705,7 @@ _0E5E6:
 	MOVEQ	#5,D0			;0e636: 7005
 	JSR	_RandInt		;0e638: 4eb900000c0c
 	EXG	D0,D5			;0e63e: c145
-	BSR.W	_0E1FA			;0e640: 6100fbb8
+	BSR.W	_ExplodeSprite_0E1FA	;0e640: 6100fbb8
 	MOVEA.L	(A7),A6			;0e644: 2c57
 	MOVE.W	(38,A6),(38,A0)		;0e646: 316e00260026
 	MOVE.B	(23,A6),(23,A0)		;0e64c: 116e00170017
@@ -18682,7 +18718,7 @@ _0E5E6:
 	MOVEQ	#5,D0			;0e66c: 7005
 	JSR	_RandInt		;0e66e: 4eb900000c0c
 	EXG	D0,D5			;0e674: c145
-	BSR.W	_0E1FA			;0e676: 6100fb82
+	BSR.W	_ExplodeSprite_0E1FA	;0e676: 6100fb82
 	MOVEA.L	(A7),A6			;0e67a: 2c57
 	MOVE.W	(38,A6),(38,A0)		;0e67c: 316e00260026
 	MOVE.B	(23,A6),(23,A0)		;0e682: 116e00170017
@@ -18695,7 +18731,7 @@ _0E5E6:
 	MOVEQ	#5,D0			;0e6a2: 7005
 	JSR	_RandInt		;0e6a4: 4eb900000c0c
 	EXG	D0,D5			;0e6aa: c145
-	BSR.W	_0E1FA			;0e6ac: 6100fb4c
+	BSR.W	_ExplodeSprite_0E1FA	;0e6ac: 6100fb4c
 	MOVEA.L	(A7),A6			;0e6b0: 2c57
 	MOVE.W	(38,A6),(38,A0)		;0e6b2: 316e00260026
 	MOVE.B	(23,A6),(23,A0)		;0e6b8: 116e00170017
@@ -18901,7 +18937,7 @@ _ShipAct0c_Misl:
 	BEQ.W	_0EA0A			;0e912: 670000f6
 _0E916:
 ; Otherwise:
-	TST.B	flg2E468		;0e916: 4a390002e468
+	TST.B	flgShowGfx		;0e916: 4a390002e468
 	BNE.S	_0E950			;0e91c: 6632
 	ADDQ.B	#1,(19,A6)		;0e91e: 522e0013
 	ANDI.B	#$01,(19,A6)		;0e922: 022e00010013
@@ -18977,7 +19013,7 @@ _0EA06:
 	RTS				;0ea08: 4e75
 _0EA0A:
 ; Ax-Zilanth specific Explosive missile effects:
-	TST.B	flg2E468		;0ea0a: 4a390002e468
+	TST.B	flgShowGfx		;0ea0a: 4a390002e468
 	BNE.S	_0EA48			;0ea10: 6636
 	CMPI.W	#$003c,(38,A6)		;0ea12: 0c6e003c0026
 	BMI.W	_0E916			;0ea18: 6b00fefc
@@ -18988,7 +19024,7 @@ _0EA0A:
 	MOVEA.L	ptrThisAstStats,A0	;0ea2c: 20790002ded8
 	MOVEQ	#51,D0			;0ea32: 7033
 	MOVEQ	#0,D5			;0ea34: 7a00
-	BSR.W	_0E1FA			;0ea36: 6100f7c2
+	BSR.W	_ExplodeSprite_0E1FA	;0ea36: 6100f7c2
 	MOVE.W	#$0046,(38,A0)		;0ea3a: 317c00460026
 	JSR	_PlayExplosion		;0ea40: 4eb90001a4fa
 	MOVEA.L	(A7)+,A6		;0ea46: 2c5f
@@ -18996,7 +19032,7 @@ _0EA48:
 ; Static Inducer warhead
 	MOVE.B	#$0c,(27,A6)		;0ea48: 1d7c000c001b
 	BSR.W	_ShipAct2c_Remove	;0ea4e: 6100fe80
-	BSR.W	_Warheads_0F222		;0ea52: 610007ce
+	BSR.W	_WarheadEffect		;0ea52: 610007ce
 	MOVEQ	#0,D0			;0ea56: 7000
 	RTS				;0ea58: 4e75
 _FitRandomHP:
@@ -19038,6 +19074,7 @@ _0EAB2:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;0eab2: 4cdf7fff
 	RTS				;0eab6: 4e75
 _ShipAct12:
+; appears to be coords
 	CMPI.B	#$05,(23,A6)		;0eab8: 0c2e00050017
 	BEQ.S	_0EB1A			;0eabe: 675a
 ; ships
@@ -19151,7 +19188,7 @@ _ShipAct10:
 	BMI.W	_Done_0EE5E		;0ebf0: 6b00026c
 	CMPI.B	#$2b,(8,A6)		;0ebf4: 0c2e002b0008
 	BEQ.S	_0EC0A			;0ebfa: 670e
-	BTST	#3,data2E45A		;0ebfc: 083900030002e45a
+	BTST	#3,bFrameRule		;0ebfc: 083900030002e45a
 	BNE.S	_0EC2C			;0ec04: 6626
 	MOVEQ	#0,D0			;0ec06: 7000
 	RTS				;0ec08: 4e75
@@ -19169,12 +19206,7 @@ _0EC0A:
 ; Terran missile, non-Tylaran alien, not known to player
 	BEQ.W	_Done_0EE5E		;0ec28: 67000234
 _0EC2C:
-; Fired by alien, or vs Tylaran, or known to player
-; In other words, the player cannot fire missiles against an enemy asteroid
-; that he has not formally discovered (usually happens when you can see
-; an asteroid with Telescope cheat, but haven't officially sent a scout
-; ship to find it yet). HOWEVER, Tylaran are exempt, and you can fire
-; missiles at undiscovered Tylaran asteroids all you like.
+; Fired by alien, or vs Tylaran, or known to player. In other words, the player cannot fire missiles against an enemy asteroid that he has not formally discovered (usually happens when you can see an asteroid with Telescope cheat, but haven't officially sent a scout ship to find it yet). HOWEVER, Tylaran are exempt, and you can fire missiles at undiscovered Tylaran asteroids all you like.
 	MOVE.W	(26,A0),D2		;0ec2c: 3428001a
 	MOVE.W	(28,A0),D3		;0ec30: 3628001c
 	BSR.W	_101E0			;0ec34: 610015aa
@@ -19208,10 +19240,10 @@ _0EC7E:
 	BNE.S	_0ECAC			;0ec84: 6626
 ; missiles launching
 	BSET	#3,(21,A6)		;0ec86: 08ee00030015
-	ST	flg2E46E		;0ec8c: 50f90002e46e
-	TST.B	flg2E471		;0ec92: 4a390002e471
+	ST	flgDSound1		;0ec8c: 50f90002e46e
+	TST.B	int2E471		;0ec92: 4a390002e471
 	BNE.S	_0ECB2			;0ec98: 6618
-	MOVE.B	#$08,flg2E471		;0ec9a: 13fc00080002e471
+	MOVE.B	#$08,int2E471		;0ec9a: 13fc00080002e471
 	MOVEQ	#7,D0			;0eca2: 7007
 	JSR	_PlayVoice		;0eca4: 4eb90001a2dc
 	BRA.S	_0ECB2			;0ecaa: 6006
@@ -19243,12 +19275,12 @@ _0ECCE:
 	LEA	(16,A0),A0		;0ecee: 41e80010
 	JSR	_024FA			;0ecf2: 4eb9000024fa
 	MOVEA.L	ptr0EF88,A0		;0ecf8: 20790000ef88
-	BRA.S	_0ED5E			;0ecfe: 605e
+	BRA.S	_Missiles_0ED5E		;0ecfe: 605e
 _0ED00:
 	LEA	(8,A0),A0		;0ed00: 41e80008
 	JSR	_024FA			;0ed04: 4eb9000024fa
 	MOVEA.L	ptr0EF88,A0		;0ed0a: 20790000ef88
-	BRA.S	_0ED5E			;0ed10: 604c
+	BRA.S	_Missiles_0ED5E		;0ed10: 604c
 _0ED12:
 ; Terran missiles
 	CMPI.L	#data1E96A,(28,A6)	;0ed12: 0cae0001e96a001c
@@ -19269,7 +19301,7 @@ _0ED2A:
 _0ED52:
 	JSR	_024FA			;0ed52: 4eb9000024fa
 	MOVEA.L	ptr0EF88,A0		;0ed58: 20790000ef88
-_0ED5E:
+_Missiles_0ED5E:
 	MOVE.L	A0,ptrThisAstStats	;0ed5e: 23c80002ded8
 	MOVE.B	#$01,(23,A6)		;0ed64: 1d7c00010017
 	CMPI.B	#$2b,(8,A6)		;0ed6a: 0c2e002b0008
@@ -19291,9 +19323,9 @@ _0ED88:
 	CMPA.L	ptrCurrentAst,A0	;0eda2: b1f90002de58
 	BNE.S	_0EDB2			;0eda8: 6608
 	MOVEQ	#6,D0			;0edaa: 7006
-	JSR	_Daily08		;0edac: 4eb90001a346
+	JSR	_Daily08Sound		;0edac: 4eb90001a346
 _0EDB2:
-	BSR.W	_0F0E4			;0edb2: 61000330
+	BSR.W	_Missiles_0F0E4		;0edb2: 61000330
 	MOVEQ	#0,D0			;0edb6: 7000
 	RTS				;0edb8: 4e75
 _0EDBA:
@@ -19428,7 +19460,7 @@ _0EF1E:
 	JSR	_RandInt		;0ef50: 4eb900000c0c
 	CMPI.B	#$32,D0			;0ef56: 0c000032
 	BPL.S	_0EF80			;0ef5a: 6a24
-; 32% chance
+; 50% chance
 	BSR.W	_NewAst_128E4		;0ef5c: 61003986
 	MOVE.B	(25,A0),(34,A6)		;0ef60: 1d6800190022
 	MOVE.L	A0,D0			;0ef66: 2008
@@ -19446,7 +19478,7 @@ _0EF80:
 ptr0EF88:
 	DS.L	1			;0ef88
 _ShipAct24_MeteorHit:
-	TST.B	flg2E468		;0ef8c: 4a390002e468
+	TST.B	flgShowGfx		;0ef8c: 4a390002e468
 	BNE.S	_0EFB6			;0ef92: 6622
 	ADDQ.B	#1,(19,A6)		;0ef94: 522e0013
 	CMPI.B	#$04,(19,A6)		;0ef98: 0c2e00040013
@@ -19465,8 +19497,8 @@ _0EFB6:
 	MOVEQ	#0,D0			;0efbe: 7000
 	RTS				;0efc0: 4e75
 _ShipAct20:
-	TST.B	flg2E468		;0efc2: 4a390002e468
-	BNE.S	_0F01A			;0efc8: 6650
+	TST.B	flgShowGfx		;0efc2: 4a390002e468
+	BNE.S	_Hit_0F01A		;0efc8: 6650
 	SUBQ.B	#1,(22,A6)		;0efca: 532e0016
 	BGT.S	_0F02A			;0efce: 6e5a
 	SF	(22,A6)			;0efd0: 51ee0016
@@ -19487,21 +19519,21 @@ _0EFFE:
 	TST.B	(26,A6)			;0f002: 4a2e001a
 	BEQ.S	_0F012			;0f006: 670a
 	CMPI.W	#$0032,(16,A6)		;0f008: 0c6e00320010
-	BMI.W	_0F0A2			;0f00e: 6b000092
+	BMI.W	_ret0_0F0A2		;0f00e: 6b000092
 _0F012:
 	CMPI.W	#$0008,(16,A6)		;0f012: 0c6e00080010
 	BPL.S	_0F02A			;0f018: 6a10
-_0F01A:
+_Hit_0F01A:
 	TST.B	(26,A6)			;0f01a: 4a2e001a
-	BNE.W	_0F0A2			;0f01e: 66000082
+	BNE.W	_ret0_0F0A2		;0f01e: 66000082
 	BSR.W	_ShipAct2c_Remove	;0f022: 6100f8ac
-	BSR.W	_Warheads_0F222		;0f026: 610001fa
+	BSR.W	_WarheadEffect		;0f026: 610001fa
 _0F02A:
 	MOVEQ	#0,D0			;0f02a: 7000
 	RTS				;0f02c: 4e75
 _ShipAct0e_Misl:
 ; missile strike
-	TST.B	flg2E468		;0f02e: 4a390002e468
+	TST.B	flgShowGfx		;0f02e: 4a390002e468
 	BNE.S	_0F06E			;0f034: 6638
 	ADDQ.B	#1,(19,A6)		;0f036: 522e0013
 	ANDI.B	#$01,(19,A6)		;0f03a: 022e00010013
@@ -19515,13 +19547,13 @@ _0F054:
 	TST.B	(26,A6)			;0f058: 4a2e001a
 	BEQ.S	_0F066			;0f05c: 6708
 	CMPI.W	#$0032,(16,A6)		;0f05e: 0c6e00320010
-	BMI.S	_0F0A2			;0f064: 6b3c
+	BMI.S	_ret0_0F0A2		;0f064: 6b3c
 _0F066:
 	CMPI.W	#$0008,(16,A6)		;0f066: 0c6e00080010
 	BPL.S	_0F09E			;0f06c: 6a30
 _0F06E:
 	TST.B	(26,A6)			;0f06e: 4a2e001a
-	BNE.S	_0F0A2			;0f072: 662e
+	BNE.S	_ret0_0F0A2		;0f072: 662e
 	CMPI.W	#$0003,intCurrentAlienID ;0f074: 0c7900030002df02
 	BNE.S	_0F096			;0f07c: 6618
 ; Ax-Zilanth:
@@ -19533,12 +19565,12 @@ _0F06E:
 	BSET	#3,(90,A1)		;0f090: 08e90003005a
 _0F096:
 	BSR.W	_ShipAct2c_Remove	;0f096: 6100f838
-	BSR.W	_Warheads_0F222		;0f09a: 61000186
+	BSR.W	_WarheadEffect		;0f09a: 61000186
 _0F09E:
 	MOVEQ	#0,D0			;0f09e: 7000
 	RTS				;0f0a0: 4e75
-_0F0A2:
-	TST.B	flg2E468		;0f0a2: 4a390002e468
+_ret0_0F0A2:
+	TST.B	flgShowGfx		;0f0a2: 4a390002e468
 	BNE.S	_0F0DC			;0f0a8: 6632
 	MOVE.L	A6,-(A7)		;0f0aa: 2f0e
 	MOVE.W	(10,A6),D2		;0f0ac: 342e000a
@@ -19547,7 +19579,7 @@ _0F0A2:
 	MOVEA.L	ptrThisAstStats,A0	;0f0ba: 20790002ded8
 	MOVEQ	#51,D0			;0f0c0: 7033
 	MOVEQ	#0,D5			;0f0c2: 7a00
-	BSR.W	_0E1FA			;0f0c4: 6100f134
+	BSR.W	_ExplodeSprite_0E1FA	;0f0c4: 6100f134
 	JSR	_PlayExplosion		;0f0c8: 4eb90001a4fa
 	MOVEA.L	(A7)+,A6		;0f0ce: 2c5f
 	MOVE.W	(14,A6),(14,A0)		;0f0d0: 316e000e000e
@@ -19556,10 +19588,15 @@ _0F0DC:
 	BSR.W	_ShipAct2c_Remove	;0f0dc: 6100f7f2
 	MOVEQ	#0,D0			;0f0e0: 7000
 	RTS				;0f0e2: 4e75
-_0F0E4:
+_Missiles_0F0E4:
+; Incoming missiles
+; A0 = asteroid
+; A4 = building count
+; A5 = buildings
+; A6 = missile
 	SF	(26,A6)			;0f0e4: 51ee001a
 	TST.B	(21,A6)			;0f0e8: 4a2e0015
-	BMI.S	_0F116			;0f0ec: 6b28
+	BMI.S	_AlienMissile_0F116	;0f0ec: 6b28
 ; Terran missile:
 ; Anti-Missile pods ignore Terran Antivirus
 	CMPI.B	#$0a,(27,A6)		;0f0ee: 0c2e000a001b
@@ -19572,7 +19609,7 @@ _0F0E4:
 	MOVE.B	D1,D0			;0f102: 1001
 	ADD.B	D0,D0			;0f104: d000
 	MOVE.B	D0,(88,A0)		;0f106: 11400058
-; d0 = ast[88] = 2p
+; d0 = ast[88] = pods x 2
 	MOVEQ	#20,D2			;0f10a: 7414
 	SUBQ.B	#1,D1			;0f10c: 5301
 ; d2 = 20
@@ -19584,7 +19621,7 @@ _0F0E4:
 ; d1 = (p-1)*4
 ; d2 = ((p-1)*4)+20
 	BRA.S	_CapPods_0F142		;0f114: 602c
-_0F116:
+_AlienMissile_0F116:
 ; Alien missiles:
 	MOVEA.L	ptrThisAstStats,A0	;0f116: 20790002ded8
 ; missile pod's powerfail - seems to be alien missiles only
@@ -19656,10 +19693,10 @@ _0F14A:
 _SkipPods_0F15A:
 	MOVE.B	(27,A6),D0		;0f15a: 102e001b
 	CMPI.B	#$05,D0			;0f15e: 0c000005
-	BEQ.S	_0F16A			;0f162: 6706
+	BEQ.S	_Sctr_Antv		;0f162: 6706
 	CMPI.B	#$0a,D0			;0f164: 0c00000a
 	BNE.S	_0F172			;0f168: 6608
-_0F16A:
+_Sctr_Antv:
 ; missile scatter or antivirus
 	MOVEQ	#8,D2			;0f16a: 7408
 	MOVEQ	#16,D3			;0f16c: 7610
@@ -19682,7 +19719,7 @@ _0F174:
 	MOVE.B	#$2d,(8,A6)		;0f1a0: 1d7c002d0008
 	MOVE.W	#$00c8,D2		;0f1a6: 343c00c8
 	MOVE.W	D2,D3			;0f1aa: 3602
-; 50% chance, probably sprite direction
+; 50% chance missile sprite direction
 	MOVEQ	#2,D0			;0f1ac: 7002
 	JSR	_RandInt		;0f1ae: 4eb900000c0c
 	BEQ.S	_0F1BE			;0f1b4: 6708
@@ -19714,7 +19751,7 @@ _0F1C6:
 	MOVEQ	#0,D5			;0f204: 7a00
 	MOVE.B	(0,A1),D5		;0f206: 1a290000
 	SUBQ.W	#1,D5			;0f20a: 5345
-	LEA	ptr33452,A5		;0f20c: 4bf900033452
+	LEA	arrBuildingSpriteList,A5 ;0f20c: 4bf900033452
 	ADD.W	D5,D5			;0f212: da45
 	MOVE.W	D5,D6			;0f214: 3c05
 	ASL.W	#2,D6			;0f216: e546
@@ -19723,7 +19760,7 @@ _0F1C6:
 _0F21E:
 	MOVEA.L	(A7)+,A6		;0f21e: 2c5f
 	RTS				;0f220: 4e75
-_Warheads_0F222:
+_WarheadEffect:
 ; Effect of a missile on successful hit
 ; missile (a6): 27 = missile ID
 	MOVEQ	#0,D0			;0f222: 7000
@@ -19772,7 +19809,7 @@ _0F298:
 	JSR	_PlaySound		;0f29a: 4eb90001a50e
 	RTS				;0f2a0: 4e75
 _WarheadScatter:
-	TST.B	flg2E468		;0f2a2: 4a390002e468
+	TST.B	flgShowGfx		;0f2a2: 4a390002e468
 	BNE.S	_0F2D2			;0f2a8: 6628
 	MOVE.W	(10,A6),D2		;0f2aa: 342e000a
 	LEA	ptr1EA46,A2		;0f2ae: 45f90001ea46
@@ -19780,13 +19817,13 @@ _WarheadScatter:
 	MOVEA.L	ptrCurrentAst,A0	;0f2b8: 20790002de58
 	MOVEQ	#51,D0			;0f2be: 7033
 	MOVEQ	#0,D5			;0f2c0: 7a00
-	BSR.W	_0E1FA			;0f2c2: 6100ef36
+	BSR.W	_ExplodeSprite_0E1FA	;0f2c2: 6100ef36
 	MOVE.W	#$001e,(38,A0)		;0f2c6: 317c001e0026
 	JSR	_PlayExplosion		;0f2cc: 4eb90001a4fa
 _0F2D2:
 	MOVEQ	#24,D0			;0f2d2: 7018
 loop0F2D4:
-	LEA	ptr1F07A,A6		;0f2d4: 4df90001f07a
+	LEA	unkMislHit,A6		;0f2d4: 4df90001f07a
 	MOVE.W	D0,-(A7)		;0f2da: 3f00
 	BSR.W	_0D760			;0f2dc: 6100e482
 	MOVE.W	(12,A6),(10,A6)		;0f2e0: 3d6e000c000a
@@ -19798,10 +19835,11 @@ loop0F2D4:
 	DBF	D0,loop0F2D4		;0f2f2: 51c8ffe0
 	RTS				;0f2f6: 4e75
 _WarheadAntivirus:
-; Ax-Zilanth seems to have Antivirus. All other uses replace it with
-; a custom missile. Ore-Eaters' missile is rated medium yield.
-; Swixaran's is rated high yield. Ax-Zilanth and Rigellian's is rated
-; "other".
+; Ax-Zilanth seems to have Antivirus. All other uses replace
+; it with a custom missile.
+; Ore-Eaters' missile is rated medium yield.
+; Swixaran's is rated high yield.
+; Ax-Zilanth and Rigellian's is rated "other".
 	TST.B	(21,A6)			;0f2f8: 4a2e0015
 	BPL.S	_0F32E			;0f2fc: 6a30
 	CMPI.W	#$0002,intCurrentAlienID ;0f2fe: 0c7900020002df02
@@ -19817,7 +19855,7 @@ _0F31E:
 	JMP	_WarheadRigel10		;0f328: 4ef9000171cc
 _0F32E:
 ; terran, axz
-	TST.B	flg2E468		;0f32e: 4a390002e468
+	TST.B	flgShowGfx		;0f32e: 4a390002e468
 	BNE.S	_0F35E			;0f334: 6628
 	MOVE.W	(10,A6),D2		;0f336: 342e000a
 	LEA	ptr1EA46,A2		;0f33a: 45f90001ea46
@@ -19825,7 +19863,7 @@ _0F32E:
 	MOVEA.L	ptrCurrentAst,A0	;0f344: 20790002de58
 	MOVEQ	#51,D0			;0f34a: 7033
 	MOVEQ	#0,D5			;0f34c: 7a00
-	BSR.W	_0E1FA			;0f34e: 6100eeaa
+	BSR.W	_ExplodeSprite_0E1FA	;0f34e: 6100eeaa
 	MOVE.W	#$001e,(38,A0)		;0f352: 317c001e0026
 	JSR	_PlayExplosion		;0f358: 4eb90001a4fa
 _0F35E:
@@ -19869,21 +19907,22 @@ _0F3BC:
 	TST.B	(21,A6)			;0f3c6: 4a2e0015
 	BMI.S	_VirusMain		;0f3ca: 6b2e
 ; Virus fired at Axz:
-	BSET	#0,bAlienSpec		;0f3cc: 08f900000002e48d
+	BSET	#0,bAlienSpecial	;0f3cc: 08f900000002e48d
 	BEQ.S	_VirusMain		;0f3d4: 6724
 ; Special case when Axz hit by a Virus after the first:
-; Essentially, it appears that the Axz adapt after the first Virus.
-; In practice, it means all Virus you fire after the first hit,
-; even at yourself, have no effect with Axz alien selected.
-; Coupled with their lore description of ignoring the player until
-; attacked first, this race appears to resemble the Borg.
+; Essentially, it appears that the Axz adapt after the
+; first Virus. In practice, it means all Virus you fire after
+; the first hit, even at yourself, have no effect with Axz alien
+; selected. Coupled with their lore description of ignoring the
+; player until attacked first, this race appears to resemble
+; the Borg.
 	MOVE.W	(10,A6),D2		;0f3d6: 342e000a
 	LEA	ptr1EA10,A2		;0f3da: 45f90001ea10
 	MOVE.B	#$98,D1			;0f3e0: 123c0098
 	MOVEA.L	ptrCurrentAst,A0	;0f3e4: 20790002de58
 	MOVEQ	#38,D0			;0f3ea: 7026
 	MOVEQ	#0,D5			;0f3ec: 7a00
-	BSR.W	_0E1FA			;0f3ee: 6100ee0a
+	BSR.W	_ExplodeSprite_0E1FA	;0f3ee: 6100ee0a
 	JSR	_PlayExplosion		;0f3f2: 4eb90001a4fa
 	RTS				;0f3f8: 4e75
 _VirusMain:
@@ -19891,7 +19930,7 @@ _VirusMain:
 ; except all hits after the first, if playing against Axz
 	MOVE.W	(10,A6),D2		;0f3fa: 342e000a
 ; Axz nerf version doesn't make this test:
-	TST.B	flg2E468		;0f3fe: 4a390002e468
+	TST.B	flgShowGfx		;0f3fe: 4a390002e468
 	BNE.S	_0F428			;0f404: 6622
 ; Missile hits
 	MOVE.W	D2,-(A7)		;0f406: 3f02
@@ -19900,7 +19939,7 @@ _VirusMain:
 	MOVEA.L	ptrCurrentAst,A0	;0f412: 20790002de58
 	MOVEQ	#38,D0			;0f418: 7026
 	MOVEQ	#0,D5			;0f41a: 7a00
-	BSR.W	_0E1FA			;0f41c: 6100eddc
+	BSR.W	_ExplodeSprite_0E1FA	;0f41c: 6100eddc
 	MOVE.W	(A7)+,D2		;0f420: 341f
 	JSR	_PlayExplosion		;0f422: 4eb90001a4fa
 _0F428:
@@ -19920,9 +19959,9 @@ loop0F440:
 ; Virus instantly destroys the building it hits
 ; Enough damage to destroy building with detonation
 	MOVEQ	#120,D7			;0f448: 7e78
-	BSR.W	_DetonateBldg_0F5E4	;0f44a: 61000198
+	BSR.W	_DestroyBldg		;0f44a: 61000198
 	MOVE.W	(2,A6),D0		;0f44e: 302e0002
-; probably only make flat tiles green
+; make flat tiles (2d, 2e, 2f) green
 	CMPI.W	#$002d,D0		;0f452: 0c40002d
 	BMI.S	next0F466		;0f456: 6b0e
 	CMPI.W	#$0030,D0		;0f458: 0c400030
@@ -20040,7 +20079,7 @@ ptr0F5D2:
 	DS.L	4			;0f5d2
 flg0F5E2:
 	DS.W	1			;0f5e2
-_DetonateBldg_0F5E4:
+_DestroyBldg:
 	MOVEA.L	ptrThisAstMap,A6	;0f5e4: 2c790002decc
 	ASL.W	#2,D0			;0f5ea: e540
 	MULU	#$0044,D1		;0f5ec: c2fc0044
@@ -20050,7 +20089,7 @@ _0F5F4:
 	MOVE.L	A6,-(A7)		;0f5f4: 2f0e
 	MOVE.W	(2,A6),D0		;0f5f6: 302e0002
 	BMI.S	_0F600			;0f5fa: 6b04
-_0F5FC:
+_next_0F5FC:
 	MOVEA.L	(A7)+,A6		;0f5fc: 2c5f
 	RTS				;0f5fe: 4e75
 _0F600:
@@ -20061,20 +20100,20 @@ _0F600:
 	ADDA.L	D0,A0			;0f612: d1c0
 	MOVEQ	#0,D1			;0f614: 7200
 	MOVE.B	(0,A0),D1		;0f616: 12280000
-	BEQ.S	_0F5FC			;0f61a: 67e0
+	BEQ.S	_next_0F5FC		;0f61a: 67e0
 	MOVE.W	D1,-(A7)		;0f61c: 3f01
 	MOVEA.L	ptrThisAstMap,A6	;0f61e: 2c790002decc
 	MOVEA.L	ptrThisAstBldgCount,A1	;0f624: 22790002ded4
 ; deals 120 damage to building
 	JSR	_DamageBldg		;0f62a: 4eb900006d4a
 	MOVE.W	(A7)+,D1		;0f630: 321f
-	TST.B	flg2E468		;0f632: 4a390002e468
-	BNE.S	_0F5FC			;0f638: 66c2
+	TST.B	flgShowGfx		;0f632: 4a390002e468
+	BNE.S	_next_0F5FC		;0f638: 66c2
 	JSR	_PlayExplosion		;0f63a: 4eb90001a4fa
 	CMPI.W	#$0004,D0		;0f640: 0c400004
 	BEQ.S	_0F66A			;0f644: 6724
 	SUBQ.W	#1,D1			;0f646: 5341
-	LEA	ptr33452,A5		;0f648: 4bf900033452
+	LEA	arrBuildingSpriteList,A5 ;0f648: 4bf900033452
 	ADD.W	D1,D1			;0f64e: d241
 	MOVE.W	D1,D0			;0f650: 3001
 	ASL.W	#2,D0			;0f652: e540
@@ -20100,13 +20139,13 @@ _0F682:
 	MOVEQ	#6,D0			;0f68c: 7006
 	JSR	_RandInt		;0f68e: 4eb900000c0c
 	EXG	D0,D5			;0f694: c145
-	BSR.W	_0E1FA			;0f696: 6100eb62
+	BSR.W	_ExplodeSprite_0E1FA	;0f696: 6100eb62
 	MOVEA.L	(A7)+,A6		;0f69a: 2c5f
 	RTS				;0f69c: 4e75
 _WarheadVortex:
 ; Unique variants for aliens 1,2,5,6. Standard 3.
 	TST.B	(21,A6)			;0f69e: 4a2e0015
-	BPL.S	_0F6E4			;0f6a2: 6a40
+	BPL.S	_TerranVortex		;0f6a2: 6a40
 	CMPI.W	#$0001,intCurrentAlienID ;0f6a4: 0c7900010002df02
 	BNE.S	_0F6B4			;0f6ac: 6606
 	JMP	_WarheadKll09		;0f6ae: 4ef900017118
@@ -20120,12 +20159,12 @@ _0F6C4:
 	JMP	_WarheadRigel09		;0f6ce: 4ef9000171a6
 _0F6D4:
 	CMPI.W	#$0002,intCurrentAlienID ;0f6d4: 0c7900020002df02
-	BNE.S	_0F6E4			;0f6dc: 6606
+	BNE.S	_TerranVortex		;0f6dc: 6606
 	JMP	_WarheadOreEtr09	;0f6de: 4ef9000174e2
-_0F6E4:
+_TerranVortex:
 ; Terran, Axz
 	MOVE.W	(10,A6),D2		;0f6e4: 342e000a
-	TST.B	flg2E468		;0f6e8: 4a390002e468
+	TST.B	flgShowGfx		;0f6e8: 4a390002e468
 	BNE.S	_0F714			;0f6ee: 6624
 	MOVE.W	D2,-(A7)		;0f6f0: 3f02
 	LEA	ptr1EA22,A2		;0f6f2: 45f90001ea22
@@ -20133,7 +20172,7 @@ _0F6E4:
 	MOVEA.L	ptrCurrentAst,A0	;0f6fc: 20790002de58
 	MOVEQ	#46,D0			;0f702: 702e
 	MOVEQ	#0,D5			;0f704: 7a00
-	BSR.W	_0E1FA			;0f706: 6100eaf2
+	BSR.W	_ExplodeSprite_0E1FA	;0f706: 6100eaf2
 	BMI.S	ret0F742		;0f70a: 6b36
 	JSR	_PlayExplosion		;0f70c: 4eb90001a4fa
 	MOVE.W	(A7)+,D2		;0f712: 341f
@@ -20171,11 +20210,11 @@ _ShipAct0f_Vortex:
 ; Sound N: Vortex walk
 ; and watching this asteroid, then make Vortex noises:
 	MOVEQ	#14,D0			;0f75e: 700e
-	JSR	_PlaySound_Daily	;0f760: 4eb90001a36c
+	JSR	_PlaySoundLoop		;0f760: 4eb90001a36c
 _0F766:
 ; 50 weapon cooldown?
 	MOVE.B	#$32,(22,A6)		;0f766: 1d7c00320016
-; 19 cycles 0-5, every six turns
+; animation frame. 19 cycles 0-5, every six turns
 	SUBQ.B	#1,(19,A6)		;0f76c: 532e0013
 	BPL.S	_0F778			;0f770: 6a06
 	MOVEQ	#5,D0			;0f772: 7005
@@ -20284,7 +20323,7 @@ _0F878:
 ; can affect vortex
 	BSR.W	_0DD54			;0f878: 6100e4da
 	BRA.W	done_0F7BC		;0f87c: 6000ff3e
-_ShipAct29_Vortex:
+_ShipAct29_GoldVortex:
 	MOVE.L	A6,-(A7)		;0f880: 2f0e
 	CMPI.B	#$01,intScreen		;0f882: 0c3900010002e486
 	BNE.S	_0F8A2			;0f88a: 6616
@@ -20294,7 +20333,7 @@ _ShipAct29_Vortex:
 ; Sound N: Vortex walk
 ; vortex sound
 	MOVEQ	#14,D0			;0f89a: 700e
-	JSR	_PlaySound_Daily	;0f89c: 4eb90001a36c
+	JSR	_PlaySoundLoop		;0f89c: 4eb90001a36c
 _0F8A2:
 	MOVE.B	#$32,(22,A6)		;0f8a2: 1d7c00320016
 	SUBQ.B	#1,(19,A6)		;0f8a8: 532e0013
@@ -20309,6 +20348,7 @@ _0F8C0:
 	JSR	_RandInt		;0f8c2: 4eb900000c0c
 	CMPI.B	#$61,D0			;0f8c8: 0c000061
 	BMI.S	_0F8FE			;0f8cc: 6b30
+; 3% chance to split
 	MOVE.B	(10,A6),D0		;0f8ce: 102e000a
 	MOVE.B	(11,A6),D1		;0f8d2: 122e000b
 	MOVEA.L	ptrThisAstStats,A0	;0f8d6: 20790002ded8
@@ -20316,17 +20356,18 @@ _0F8C0:
 	MOVEQ	#0,D7			;0f8de: 7e00
 	MOVEQ	#16,D6			;0f8e0: 7c10
 	BSR.W	_AddShip		;0f8e2: 6100e3b6
-	BMI.S	_0F8F8			;0f8e6: 6b10
+	BMI.S	_ret0_0F8F8		;0f8e6: 6b10
 	MOVE.B	#$11,(20,A6)		;0f8e8: 1d7c00110014
 	MOVE.B	#$29,(24,A6)		;0f8ee: 1d7c00290018
 	CLR.W	(38,A6)			;0f8f4: 426e0026
-_0F8F8:
+_ret0_0F8F8:
 	MOVEA.L	(A7)+,A6		;0f8f8: 2c5f
 	MOVEQ	#0,D0			;0f8fa: 7000
 	RTS				;0f8fc: 4e75
 _0F8FE:
 	CMPI.B	#$35,D0			;0f8fe: 0c000035
-	BMI.S	_0F932			;0f902: 6b2e
+	BMI.S	_Remove_0F932		;0f902: 6b2e
+; 44% chance to deal damage
 	ST	(12,A6)			;0f904: 50ee000c
 	MOVEQ	#0,D0			;0f908: 7000
 	MOVEQ	#0,D1			;0f90a: 7200
@@ -20342,15 +20383,17 @@ _0F8FE:
 ; 4 damage
 	MOVEQ	#4,D7			;0f92a: 7e04
 	BSR.W	_GroundHit		;0f92c: 61000546
-	BRA.S	_0F8F8			;0f930: 60c6
-_0F932:
+	BRA.S	_ret0_0F8F8		;0f930: 60c6
+_Remove_0F932:
 	CMPI.B	#$30,D0			;0f932: 0c000030
-	BMI.S	_0F946			;0f936: 6b0e
+	BMI.S	_Move_0F946		;0f936: 6b0e
+; 5% chance to remove
 	BSR.W	_ShipAct2c_Remove	;0f938: 6100ef96
 	MOVEQ	#14,D0			;0f93c: 700e
 	JSR	_1A3BA			;0f93e: 4eb90001a3ba
-	BRA.S	_0F8F8			;0f944: 60b2
-_0F946:
+	BRA.S	_ret0_0F8F8		;0f944: 60b2
+_Move_0F946:
+; 48% chance to move
 	EXT.L	D0			;0f946: 48c0
 	DIVU	#$0006,D0		;0f948: 80fc0006
 	MOVE.W	D0,D2			;0f94c: 3400
@@ -20379,25 +20422,26 @@ _0F970:
 	ADD.W	D3,D4			;0f990: d843
 	ADDA.L	D4,A0			;0f992: d1c4
 	TST.W	(2,A0)			;0f994: 4a680002
-	BEQ.W	_0F8F8			;0f998: 6700ff5e
+	BEQ.W	_ret0_0F8F8		;0f998: 6700ff5e
 	MOVE.B	D5,(12,A6)		;0f99c: 1d45000c
 	MOVE.B	D6,(13,A6)		;0f9a0: 1d46000d
 	MOVE.B	D7,(9,A6)		;0f9a4: 1d470009
 _0F9A8:
 	BSR.W	_0DD54			;0f9a8: 6100e3aa
-	BRA.W	_0F8F8			;0f9ac: 6000ff4a
+	BRA.W	_ret0_0F8F8		;0f9ac: 6000ff4a
 _WarheadMega:
 	MOVEA.L	ptrThisAstStats,A0	;0f9b0: 20790002ded8
-	CLR.L	unk0F9FA		;0f9b6: 42b90000f9fa
+	CLR.L	ptrMega0F9FA		;0f9b6: 42b90000f9fa
 	BTST	#6,(89,A0)		;0f9bc: 082800060059
-	BEQ.S	_0F9CA			;0f9c2: 6706
-	MOVE.L	A0,unk0F9FA		;0f9c4: 23c80000f9fa
-_0F9CA:
+	BEQ.S	_TerranMega		;0f9c2: 6706
+	MOVE.L	A0,ptrMega0F9FA		;0f9c4: 23c80000f9fa
+_TerranMega:
+; player asteroid destroyed
 	MOVE.W	#$0110,D0		;0f9ca: 303c0110
 	BSR.W	_12E50			;0f9ce: 61003480
 	BSR.W	_12E76			;0f9d2: 610034a2
-	ST	flg2E46D		;0f9d6: 50f90002e46d
-	MOVE.L	unk0F9FA,D1		;0f9dc: 22390000f9fa
+	ST	flgShipActive_2E46D	;0f9d6: 50f90002e46d
+	MOVE.L	ptrMega0F9FA,D1		;0f9dc: 22390000f9fa
 	BEQ.S	ret0F9F8		;0f9e2: 6714
 ; WELL DONE!
 ; YOU HAVE DESTROYED AN ENEMY ASTEROID!
@@ -20409,40 +20453,42 @@ _0F9CA:
 	JSR	_Message_08F7E		;0f9f2: 4eb900008f7e
 ret0F9F8:
 	RTS				;0f9f8: 4e75
-unk0F9FA:
+ptrMega0F9FA:
 	DS.L	1			;0f9fa
 _WarheadStasis:
 ; Used by Ore, Axz, Swi; Swix is a variant.
 	TST.B	(21,A6)			;0f9fe: 4a2e0015
-	BPL.S	_0FA14			;0fa02: 6a10
+	BPL.S	_Stasis_Normal		;0fa02: 6a10
 	CMPI.W	#$0006,intCurrentAlienID ;0fa04: 0c7900060002df02
-	BNE.S	_0FA14			;0fa0c: 6606
+	BNE.S	_Stasis_Normal		;0fa0c: 6606
 	JMP	_WarheadSwix08		;0fa0e: 4ef9000172b8
-_0FA14:
-	TST.B	flg2E468		;0fa14: 4a390002e468
-	BNE.S	_0FA60			;0fa1a: 6644
+_Stasis_Normal:
+	TST.B	flgShowGfx		;0fa14: 4a390002e468
+	BNE.S	_StasisHit		;0fa1a: 6644
 	CMPI.B	#$04,intScreen		;0fa1c: 0c3900040002e486
-	BEQ.S	_0FA60			;0fa24: 673a
-	MOVE.W	#$0ff0,data2E0A8	;0fa26: 33fc0ff00002e0a8
-	BSR.W	_0FCD6			;0fa2e: 610002a6
-	LEA	ptr1AF16,A0		;0fa32: 41f90001af16
-	LEA	ptr1AF96,A1		;0fa38: 43f90001af96
-	JSR	_0596E			;0fa3e: 4eb90000596e
+	BEQ.S	_StasisHit		;0fa24: 673a
+	MOVE.W	#$0ff0,screenFlashColor	;0fa26: 33fc0ff00002e0a8
+	BSR.W	_WarheadFlash		;0fa2e: 610002a6
+	LEA	paletteFlash,A0		;0fa32: 41f90001af16
+	LEA	palette,A1		;0fa38: 43f90001af96
+	JSR	_ScreenFlash_0596E	;0fa3e: 4eb90000596e
 _0FA44:
 	TST.W	unk059D0		;0fa44: 4a79000059d0
 	BNE.S	_0FA44			;0fa4a: 66f8
-	LEA	ptr1AF16,A0		;0fa4c: 41f90001af16
-	LEA	ptr1AF96,A1		;0fa52: 43f90001af96
+	LEA	paletteFlash,A0		;0fa4c: 41f90001af16
+	LEA	palette,A1		;0fa52: 43f90001af96
 	MOVEQ	#31,D0			;0fa58: 701f
 loop0FA5A:
 	MOVE.W	(A0)+,(A1)+		;0fa5a: 32d8
 	DBF	D0,loop0FA5A		;0fa5c: 51c8fffc
-_0FA60:
+_StasisHit:
 	MOVEA.L	ptrThisAstStats,A0	;0fa60: 20790002ded8
+; Set stasis
 	BSET	#7,(89,A0)		;0fa66: 08e800070059
 	MOVEA.L	ptrThisAstMap,A0	;0fa6c: 20790002decc
 	MOVE.W	#$0230,D0		;0fa72: 303c0230
 loop0FA76:
+; clear bit 6 on every square
 	BCLR	#6,(1,A0)		;0fa76: 08a800060001
 	ADDQ.L	#4,A0			;0fa7c: 5888
 	DBF	D0,loop0FA76		;0fa7e: 51c8fff6
@@ -20450,17 +20496,17 @@ loop0FA76:
 _WarheadNuclear:
 ; Rigellians have a more powerful nuke.
 	TST.B	(21,A6)			;0fa84: 4a2e0015
-	BPL.S	_0FA9A			;0fa88: 6a10
+	BPL.S	_NukeHit		;0fa88: 6a10
 	CMPI.W	#$0005,intCurrentAlienID ;0fa8a: 0c7900050002df02
-	BNE.S	_0FA9A			;0fa92: 6606
+	BNE.S	_NukeHit		;0fa92: 6606
 	JMP	_WarheadRigel05		;0fa94: 4ef90000fbee
-_0FA9A:
-	TST.B	flg2E468		;0fa9a: 4a390002e468
+_NukeHit:
+	TST.B	flgShowGfx		;0fa9a: 4a390002e468
 	BNE.S	_0FABE			;0faa0: 661c
 	CMPI.B	#$04,intScreen		;0faa2: 0c3900040002e486
 	BEQ.S	_0FABE			;0faaa: 6712
-	MOVE.W	#$0f00,data2E0A8	;0faac: 33fc0f000002e0a8
-	BSR.W	_0FCD6			;0fab4: 61000220
+	MOVE.W	#$0f00,screenFlashColor	;0faac: 33fc0f000002e0a8
+	BSR.W	_WarheadFlash		;0fab4: 61000220
 	JSR	_BigExplodeSound	;0fab8: 4eb90001a4e4
 _0FABE:
 	MOVEA.L	ptrThisAstBldg,A0	;0fabe: 20790002ded0
@@ -20474,7 +20520,7 @@ loop0FAC8:
 ; Nuclear deals 7 damage to each building
 	MOVEQ	#7,D7			;0fae0: 7e07
 	JSR	_DamageBldg		;0fae2: 4eb900006d4a
-	TST.B	flg2E468		;0fae8: 4a390002e468
+	TST.B	flgShowGfx		;0fae8: 4a390002e468
 	BNE.S	_0FB2A			;0faee: 663a
 	CMPI.B	#$01,D0			;0faf0: 0c000001
 	BEQ.W	_0FB0A			;0faf4: 67000014
@@ -20491,7 +20537,7 @@ _0FB0A:
 	MOVEQ	#6,D0			;0fb1c: 7006
 	JSR	_RandInt		;0fb1e: 4eb900000c0c
 	EXG	D0,D5			;0fb24: c145
-	BSR.W	_0E1FA			;0fb26: 6100e6d2
+	BSR.W	_ExplodeSprite_0E1FA	;0fb26: 6100e6d2
 _0FB2A:
 	MOVEM.L	(A7)+,D2/A0		;0fb2a: 4cdf0104
 _0FB2E:
@@ -20537,15 +20583,15 @@ _0FB9A:
 	MOVEA.L	D1,A0			;0fb9e: 2041
 	BRA.S	_0FB7A			;0fba0: 60d8
 _0FBA2:
-	TST.B	flg2E468		;0fba2: 4a390002e468
+	TST.B	flgShowGfx		;0fba2: 4a390002e468
 	BNE.S	_0FBDA			;0fba8: 6630
 	CMPI.B	#$04,intScreen		;0fbaa: 0c3900040002e486
 	BEQ.S	_0FBDA			;0fbb2: 6726
-	LEA	ptr1AF16,A0		;0fbb4: 41f90001af16
-	LEA	ptr1AF96,A1		;0fbba: 43f90001af96
-	JSR	_0596E			;0fbc0: 4eb90000596e
-	LEA	ptr1AF16,A0		;0fbc6: 41f90001af16
-	LEA	ptr1AF96,A1		;0fbcc: 43f90001af96
+	LEA	paletteFlash,A0		;0fbb4: 41f90001af16
+	LEA	palette,A1		;0fbba: 43f90001af96
+	JSR	_ScreenFlash_0596E	;0fbc0: 4eb90000596e
+	LEA	paletteFlash,A0		;0fbc6: 41f90001af16
+	LEA	palette,A1		;0fbcc: 43f90001af96
 	MOVEQ	#31,D0			;0fbd2: 701f
 loop0FBD4:
 	MOVE.W	(A0)+,(A1)+		;0fbd4: 32d8
@@ -20560,13 +20606,13 @@ ret0FBEC:
 	RTS				;0fbec: 4e75
 _WarheadRigel05:
 ; Rigellian nuke. Deals more damage.
-	TST.B	flg2E468		;0fbee: 4a390002e468
+	TST.B	flgShowGfx		;0fbee: 4a390002e468
 	BNE.S	_0FC12			;0fbf4: 661c
 	CMPI.B	#$04,intScreen		;0fbf6: 0c3900040002e486
 	BEQ.S	_0FC12			;0fbfe: 6712
 ; Not in space view
-	MOVE.W	#$0f00,data2E0A8	;0fc00: 33fc0f000002e0a8
-	BSR.W	_0FCD6			;0fc08: 610000cc
+	MOVE.W	#$0f00,screenFlashColor	;0fc00: 33fc0f000002e0a8
+	BSR.W	_WarheadFlash		;0fc08: 610000cc
 	JSR	_BigExplodeSound	;0fc0c: 4eb90001a4e4
 _0FC12:
 	MOVEA.L	ptrThisAstBldg,A0	;0fc12: 20790002ded0
@@ -20577,10 +20623,10 @@ loop0FC1C:
 	MOVEM.L	D2/A0,-(A7)		;0fc24: 48e72080
 	MOVEA.L	ptrThisAstBldgCount,A1	;0fc28: 22790002ded4
 	MOVEA.L	ptrThisAstMap,A6	;0fc2e: 2c790002decc
-; 10 damage per building instead of 7.
+; Rigellian nuke deals 10 damage per building instead of 7.
 	MOVEQ	#10,D7			;0fc34: 7e0a
 	JSR	_DamageBldg		;0fc36: 4eb900006d4a
-	TST.B	flg2E468		;0fc3c: 4a390002e468
+	TST.B	flgShowGfx		;0fc3c: 4a390002e468
 	BNE.S	_0FC7E			;0fc42: 663a
 	CMPI.B	#$01,D0			;0fc44: 0c000001
 	BEQ.W	_0FC5E			;0fc48: 67000014
@@ -20597,22 +20643,22 @@ _0FC5E:
 	MOVEQ	#6,D0			;0fc70: 7006
 	JSR	_RandInt		;0fc72: 4eb900000c0c
 	EXG	D0,D5			;0fc78: c145
-	BSR.W	_0E1FA			;0fc7a: 6100e57e
+	BSR.W	_ExplodeSprite_0E1FA	;0fc7a: 6100e57e
 _0FC7E:
 	MOVEM.L	(A7)+,D2/A0		;0fc7e: 4cdf0104
 _0FC82:
 	LEA	(14,A0),A0		;0fc82: 41e8000e
 	DBF	D2,loop0FC1C		;0fc86: 51caff94
-	TST.B	flg2E468		;0fc8a: 4a390002e468
+	TST.B	flgShowGfx		;0fc8a: 4a390002e468
 	BNE.S	_0FCC2			;0fc90: 6630
 	CMPI.B	#$04,intScreen		;0fc92: 0c3900040002e486
 	BEQ.S	_0FCC2			;0fc9a: 6726
 ; Not in space view
-	LEA	ptr1AF16,A0		;0fc9c: 41f90001af16
-	LEA	ptr1AF96,A1		;0fca2: 43f90001af96
-	JSR	_0596E			;0fca8: 4eb90000596e
-	LEA	ptr1AF16,A0		;0fcae: 41f90001af16
-	LEA	ptr1AF96,A1		;0fcb4: 43f90001af96
+	LEA	paletteFlash,A0		;0fc9c: 41f90001af16
+	LEA	palette,A1		;0fca2: 43f90001af96
+	JSR	_ScreenFlash_0596E	;0fca8: 4eb90000596e
+	LEA	paletteFlash,A0		;0fcae: 41f90001af16
+	LEA	palette,A1		;0fcb4: 43f90001af96
 	MOVEQ	#31,D0			;0fcba: 701f
 loop0FCBC:
 	MOVE.W	(A0)+,(A1)+		;0fcbc: 32d8
@@ -20624,12 +20670,12 @@ _0FCC2:
 	ADDQ.B	#3,(81,A1)		;0fcd0: 56290051
 ret0FCD4:
 	RTS				;0fcd4: 4e75
-_0FCD6:
-	LEA	ptr1AF16,A1		;0fcd6: 43f90001af16
-	LEA	ptr1AFD6,A2		;0fcdc: 45f90001afd6
-	LEA	ptr1AF96,A0		;0fce2: 41f90001af96
+_WarheadFlash:
+	LEA	paletteFlash,A1		;0fcd6: 43f90001af16
+	LEA	palette_standard,A2	;0fcdc: 45f90001afd6
+	LEA	palette,A0		;0fce2: 41f90001af96
 	MOVEQ	#31,D0			;0fce8: 701f
-	MOVE.W	data2E0A8,D1		;0fcea: 32390002e0a8
+	MOVE.W	screenFlashColor,D1	;0fcea: 32390002e0a8
 loop0FCF0:
 	MOVE.W	(A2)+,D2		;0fcf0: 341a
 	MOVE.W	D2,(A1)+		;0fcf2: 32c2
@@ -20639,16 +20685,16 @@ loop0FCF0:
 	MOVE.W	#$0019,data2E0A6	;0fcfe: 33fc00190002e0a6
 	CLR.W	unk059D0		;0fd06: 4279000059d0
 _0FD0C:
-	SF	flg00BB2		;0fd0c: 51f900000bb2
+	SF	flgWait			;0fd0c: 51f900000bb2
 _0FD12:
-	TST.B	flg00BB2		;0fd12: 4a3900000bb2
+	TST.B	flgWait			;0fd12: 4a3900000bb2
 	BEQ.S	_0FD12			;0fd18: 67f8
-	SF	flg00BB2		;0fd1a: 51f900000bb2
-	LEA	ptr1AF96,A0		;0fd20: 41f90001af96
+	SF	flgWait			;0fd1a: 51f900000bb2
+	LEA	palette,A0		;0fd20: 41f90001af96
 	JSR	_053CA			;0fd26: 4eb9000053ca
 	TST.W	data2E0A6		;0fd2c: 4a790002e0a6
 	BNE.S	_0FD3C			;0fd32: 6608
-	MOVE.W	data2E0A8,D1		;0fd34: 32390002e0a8
+	MOVE.W	screenFlashColor,D1	;0fd34: 32390002e0a8
 	BRA.S	_0FD64			;0fd3a: 6028
 _0FD3C:
 	MOVEQ	#4,D0			;0fd3c: 7004
@@ -20666,7 +20712,7 @@ _0FD3C:
 	BEQ.S	_0FD64			;0fd5e: 6704
 	MOVE.W	#$0eee,D1		;0fd60: 323c0eee
 _0FD64:
-	LEA	ptr1AF96,A0		;0fd64: 41f90001af96
+	LEA	palette,A0		;0fd64: 41f90001af96
 	MOVEQ	#31,D0			;0fd6a: 701f
 loop0FD6C:
 	MOVE.W	D1,(A0)+		;0fd6c: 30c1
@@ -20680,7 +20726,7 @@ _0FD7C:
 	MOVEA.L	ptrThisAstStats,A0	;0fd84: 20790002ded8
 	MOVEQ	#0,D0			;0fd8a: 7000
 	EXG	D0,D5			;0fd8c: c145
-	BSR.W	_0E1FA			;0fd8e: 6100e46a
+	BSR.W	_ExplodeSprite_0E1FA	;0fd8e: 6100e46a
 	MOVEM.L	(A7)+,D5/A0/A2		;0fd92: 4cdf0520
 	MOVE.W	(6,A0),D2		;0fd96: 34280006
 	EXT.L	D2			;0fd9a: 48c2
@@ -20696,7 +20742,7 @@ _0FD7C:
 	MOVEQ	#6,D0			;0fdb8: 7006
 	JSR	_RandInt		;0fdba: 4eb900000c0c
 	EXG	D0,D5			;0fdc0: c145
-	BSR.W	_0E1FA			;0fdc2: 6100e436
+	BSR.W	_ExplodeSprite_0E1FA	;0fdc2: 6100e436
 	MOVEM.L	(A7)+,D5/A0/A2		;0fdc6: 4cdf0520
 	MOVE.W	(8,A0),D2		;0fdca: 34280008
 	EXT.L	D2			;0fdce: 48c2
@@ -20712,7 +20758,7 @@ _0FD7C:
 	MOVEQ	#6,D0			;0fdec: 7006
 	JSR	_RandInt		;0fdee: 4eb900000c0c
 	EXG	D0,D5			;0fdf4: c145
-	BSR.W	_0E1FA			;0fdf6: 6100e402
+	BSR.W	_ExplodeSprite_0E1FA	;0fdf6: 6100e402
 	MOVEM.L	(A7)+,D5/A0/A2		;0fdfa: 4cdf0520
 	MOVE.W	(10,A0),D2		;0fdfe: 3428000a
 	EXT.L	D2			;0fe02: 48c2
@@ -20727,10 +20773,10 @@ _0FD7C:
 	MOVEQ	#6,D0			;0fe1c: 7006
 	JSR	_RandInt		;0fe1e: 4eb900000c0c
 	EXG	D0,D5			;0fe24: c145
-	BSR.W	_0E1FA			;0fe26: 6100e3d2
+	BSR.W	_ExplodeSprite_0E1FA	;0fe26: 6100e3d2
 	RTS				;0fe2a: 4e75
 _WarheadExplosive:
-	LEA	ptr1F07A,A0		;0fe2c: 41f90001f07a
+	LEA	unkMislHit,A0		;0fe2c: 41f90001f07a
 	MOVEQ	#26,D0			;0fe32: 701a
 loop0FE34:
 	MOVE.W	(A6)+,(A0)+		;0fe34: 30de
@@ -20738,7 +20784,7 @@ loop0FE34:
 	MOVEQ	#0,D0			;0fe3a: 7000
 	LEA	ptr1EBC6,A0		;0fe3c: 41f90001ebc6
 _0FE42:
-	LEA	ptr1F07A,A6		;0fe42: 4df90001f07a
+	LEA	unkMislHit,A6		;0fe42: 4df90001f07a
 	MOVE.B	(A0)+,D1		;0fe48: 1218
 	ADD.B	D1,(10,A6)		;0fe4a: d32e000a
 	MOVE.B	(A0)+,D1		;0fe4e: 1218
@@ -20757,6 +20803,7 @@ _WarheadMeteor:
 ; Meteors deal 30 damage. Really powerful.
 	MOVEQ	#30,D7			;0fe72: 7e1e
 _GroundHit:
+; Hit a building for d7 damage.
 	MOVEQ	#0,D0			;0fe74: 7000
 	MOVEQ	#0,D1			;0fe76: 7200
 	MOVE.B	(10,A6),D0		;0fe78: 102e000a
@@ -20784,13 +20831,13 @@ _GroundHit:
 	MOVEA.L	ptrThisAstBldgCount,A1	;0fec8: 22790002ded4
 	JSR	_DamageBldg		;0fece: 4eb900006d4a
 	MOVE.W	(A7)+,D1		;0fed4: 321f
-	TST.B	flg2E468		;0fed6: 4a390002e468
+	TST.B	flgShowGfx		;0fed6: 4a390002e468
 	BNE.W	ret0FF6A		;0fedc: 6600008c
 	JSR	_PlayExplosion		;0fee0: 4eb90001a4fa
 	CMPI.W	#$0004,D0		;0fee6: 0c400004
 	BEQ.S	_0FF38			;0feea: 674c
 	SUBQ.W	#1,D1			;0feec: 5341
-	LEA	ptr33452,A5		;0feee: 4bf900033452
+	LEA	arrBuildingSpriteList,A5 ;0feee: 4bf900033452
 	ADD.W	D1,D1			;0fef4: d241
 	MOVE.W	D1,D0			;0fef6: 3001
 	ASL.W	#2,D0			;0fef8: e540
@@ -20806,7 +20853,7 @@ _GroundHit:
 	MOVE.B	#$98,D1			;0ff18: 123c0098
 	MOVEA.L	ptrThisAstStats,A0	;0ff1c: 20790002ded8
 	MOVEQ	#0,D5			;0ff22: 7a00
-	BSR.W	_0E1FA			;0ff24: 6100e2d4
+	BSR.W	_ExplodeSprite_0E1FA	;0ff24: 6100e2d4
 	MOVE.W	(A7)+,(38,A0)		;0ff28: 315f0026
 	MOVE.W	(A7)+,D2		;0ff2c: 341f
 	LEA	ptr1EA22,A2		;0ff2e: 45f90001ea22
@@ -20824,12 +20871,12 @@ _0FF38:
 	MOVE.B	#$98,D1			;0ff56: 123c0098
 	MOVEA.L	ptrThisAstStats,A0	;0ff5a: 20790002ded8
 	MOVEQ	#0,D5			;0ff60: 7a00
-	BSR.W	_0E1FA			;0ff62: 6100e296
+	BSR.W	_ExplodeSprite_0E1FA	;0ff62: 6100e296
 	MOVE.W	(A7)+,(38,A0)		;0ff66: 315f0026
 ret0FF6A:
 	RTS				;0ff6a: 4e75
 _0FF6C:
-	TST.B	flg2E468		;0ff6c: 4a390002e468
+	TST.B	flgShowGfx		;0ff6c: 4a390002e468
 	BNE.S	ret0FF6A		;0ff72: 66f6
 	LEA	ptr1EA10,A2		;0ff74: 45f90001ea10
 	MOVEQ	#38,D5			;0ff7a: 7a26
@@ -20839,18 +20886,18 @@ _0FF7C:
 	MOVEQ	#6,D0			;0ff86: 7006
 	JSR	_RandInt		;0ff88: 4eb900000c0c
 	EXG	D0,D5			;0ff8e: c145
-	BSR.W	_0E1FA			;0ff90: 6100e268
+	BSR.W	_ExplodeSprite_0E1FA	;0ff90: 6100e268
 	RTS				;0ff94: 4e75
 _WarheadAreaExpl:
-	LEA	ptr1F07A,A0		;0ff96: 41f90001f07a
+	LEA	unkMislHit,A0		;0ff96: 41f90001f07a
 	MOVEQ	#26,D0			;0ff9c: 701a
 loop0FF9E:
 	MOVE.W	(A6)+,(A0)+		;0ff9e: 30de
 	DBF	D0,loop0FF9E		;0ffa0: 51c8fffc
 	MOVEQ	#0,D0			;0ffa4: 7000
-	LEA	ptr1EB82,A0		;0ffa6: 41f90001eb82
+	LEA	ptrNapalm_1EB82,A0	;0ffa6: 41f90001eb82
 _0FFAC:
-	LEA	ptr1F07A,A6		;0ffac: 4df90001f07a
+	LEA	unkMislHit,A6		;0ffac: 4df90001f07a
 	MOVE.B	(A0)+,D1		;0ffb2: 1218
 	ADD.B	D1,(10,A6)		;0ffb4: d32e000a
 	MOVE.B	(A0)+,D1		;0ffb8: 1218
@@ -20866,7 +20913,7 @@ _0FFAC:
 	RTS				;0ffd4: 4e75
 _WarheadHellfire:
 	ST	flg2E46A		;0ffd6: 50f90002e46a
-	LEA	ptr1F07A,A0		;0ffdc: 41f90001f07a
+	LEA	unkMislHit,A0		;0ffdc: 41f90001f07a
 	MOVEQ	#26,D0			;0ffe2: 701a
 loop0FFE4:
 	MOVE.W	(A6)+,(A0)+		;0ffe4: 30de
@@ -20874,13 +20921,13 @@ loop0FFE4:
 	MOVEQ	#0,D0			;0ffea: 7000
 	LEA	ptr1EBB4,A0		;0ffec: 41f90001ebb4
 _0FFF2:
-	LEA	ptr1F07A,A6		;0fff2: 4df90001f07a
+	LEA	unkMislHit,A6		;0fff2: 4df90001f07a
 	MOVE.B	(A0)+,D1		;0fff8: 1218
 	ADD.B	D1,(10,A6)		;0fffa: d32e000a
 	MOVE.B	(A0)+,D1		;0fffe: 1218
 	ADD.B	D1,(11,A6)		;10000: d32e000b
 	MOVEM.L	D0/A0,-(A7)		;10004: 48e78080
-	BSR.W	_GrounBurn		;10008: 61000052
+	BSR.W	_GroundBurn		;10008: 61000052
 	MOVEM.L	(A7)+,D0/A0		;1000c: 4cdf0101
 	ADDQ.B	#1,D0			;10010: 5200
 	CMPI.B	#$09,D0			;10012: 0c000009
@@ -20888,27 +20935,27 @@ _0FFF2:
 	SF	flg2E46A		;10018: 51f90002e46a
 	RTS				;1001e: 4e75
 _WarheadNapalm:
-	LEA	ptr1F07A,A0		;10020: 41f90001f07a
+	LEA	unkMislHit,A0		;10020: 41f90001f07a
 	MOVEQ	#26,D0			;10026: 701a
 loop10028:
 	MOVE.W	(A6)+,(A0)+		;10028: 30de
 	DBF	D0,loop10028		;1002a: 51c8fffc
 	MOVEQ	#0,D0			;1002e: 7000
-	LEA	ptr1EB82,A0		;10030: 41f90001eb82
+	LEA	ptrNapalm_1EB82,A0	;10030: 41f90001eb82
 _10036:
-	LEA	ptr1F07A,A6		;10036: 4df90001f07a
+	LEA	unkMislHit,A6		;10036: 4df90001f07a
 	MOVE.B	(A0)+,D1		;1003c: 1218
 	ADD.B	D1,(10,A6)		;1003e: d32e000a
 	MOVE.B	(A0)+,D1		;10042: 1218
 	ADD.B	D1,(11,A6)		;10044: d32e000b
 	MOVEM.L	D0/A0,-(A7)		;10048: 48e78080
-	BSR.S	_GrounBurn		;1004c: 610e
+	BSR.S	_GroundBurn		;1004c: 610e
 	MOVEM.L	(A7)+,D0/A0		;1004e: 4cdf0101
 	ADDQ.B	#1,D0			;10052: 5200
 	CMPI.B	#$19,D0			;10054: 0c000019
 	BNE.S	_10036			;10058: 66dc
 	RTS				;1005a: 4e75
-_GrounBurn:
+_GroundBurn:
 	MOVEQ	#0,D0			;1005c: 7000
 	MOVEQ	#0,D1			;1005e: 7200
 	MOVE.B	(10,A6),D0		;10060: 102e000a
@@ -20945,14 +20992,14 @@ _100C4:
 	MOVE.W	(A7)+,D1		;100ca: 321f
 	TST.B	flg2E46A		;100cc: 4a390002e46a
 	BNE.S	_100E2			;100d2: 660e
-	TST.B	flg2E468		;100d4: 4a390002e468
+	TST.B	flgShowGfx		;100d4: 4a390002e468
 	BNE.S	ret10134		;100da: 6658
 	JSR	_PlayExplosion		;100dc: 4eb90001a4fa
 _100E2:
 	CMPI.W	#$0004,D0		;100e2: 0c400004
 	BEQ.S	_1011A			;100e6: 6732
 	SUBQ.W	#1,D1			;100e8: 5341
-	LEA	ptr33452,A5		;100ea: 4bf900033452
+	LEA	arrBuildingSpriteList,A5 ;100ea: 4bf900033452
 	ADD.W	D1,D1			;100f0: d241
 	MOVE.W	D1,D0			;100f2: 3001
 	ASL.W	#2,D0			;100f4: e540
@@ -20988,7 +21035,7 @@ _1014C:
 	MOVEQ	#6,D0			;10156: 7006
 	JSR	_RandInt		;10158: 4eb900000c0c
 	EXG	D0,D5			;1015e: c145
-	BSR.W	_0E1FA			;10160: 6100e098
+	BSR.W	_ExplodeSprite_0E1FA	;10160: 6100e098
 	RTS				;10164: 4e75
 _10166:
 	MOVE.L	A6,D0			;10166: 200e
@@ -21189,9 +21236,9 @@ _1030E:
 	MOVEQ	#-1,D0			;1030e: 70ff
 	RTS				;10310: 4e75
 _10312:
-	BSR.W	_0C5AA			;10312: 6100c296
+	BSR.W	_Ships0C5AA		;10312: 6100c296
 	MOVEM.W	data1E402,D0-D2/D6	;10316: 4cb900470001e402
-	MOVEM.W	unk00760,D3-D4		;1031e: 4cb9001800000760
+	MOVEM.W	intMouseX,D3-D4		;1031e: 4cb9001800000760
 	CMP.W	D3,D0			;10326: b043
 	BPL.S	_102F6			;10328: 6acc
 	CMP.W	D4,D1			;1032a: b244
@@ -21213,7 +21260,7 @@ _10346:
 loop10350:
 	MOVE.W	D1,(A6)+		;10350: 3cc1
 	DBF	D0,loop10350		;10352: 51c8fffc
-	LEA	ptr1D54E,A0		;10356: 41f90001d54e
+	LEA	flgIntelHonest,A0	;10356: 41f90001d54e
 	MOVEQ	#0,D0			;1035c: 7000
 _1035E:
 	TST.W	(A0)+			;1035e: 4a58
@@ -21290,7 +21337,7 @@ _10420:
 	CMPI.L	#data1E96A,D0		;1043e: 0c800001e96a
 	BNE.S	_1045A			;10444: 6614
 _10446:
-	LEA	ptr1D54E,A0		;10446: 41f90001d54e
+	LEA	flgIntelHonest,A0	;10446: 41f90001d54e
 	MOVEQ	#0,D0			;1044c: 7000
 	MOVE.L	D0,(A0)+		;1044e: 20c0
 	MOVE.L	D0,(A0)+		;10450: 20c0
@@ -21304,7 +21351,7 @@ _1045A:
 	CMPI.L	#data1E980,D0		;10462: 0c800001e980
 	BNE.S	_1047E			;10468: 6614
 _1046A:
-	LEA	ptr1D54E,A0		;1046a: 41f90001d54e
+	LEA	flgIntelHonest,A0	;1046a: 41f90001d54e
 	MOVEQ	#0,D0			;10470: 7000
 	MOVE.L	D0,(A0)+		;10472: 20c0
 	MOVE.L	D0,(A0)+		;10474: 20c0
@@ -21313,7 +21360,7 @@ _1046A:
 	ADDQ.L	#2,A0			;1047a: 5488
 	MOVE.W	D0,(A0)+		;1047c: 30c0
 _1047E:
-	LEA	ptr1D54E,A0		;1047e: 41f90001d54e
+	LEA	flgIntelHonest,A0	;1047e: 41f90001d54e
 	MOVEQ	#2,D0			;10484: 7002
 	MOVE.W	(A0),D1			;10486: 3210
 	BEQ.S	_1048E			;10488: 6704
@@ -21349,7 +21396,7 @@ _104CA:
 	BEQ.S	_104D6			;104d0: 6704
 	BSR.W	_1058A			;104d2: 610000b6
 _104D6:
-	MOVEA.L	ptr2DEF4,A1		;104d6: 22790002def4
+	MOVEA.L	ptrBldCount_2DEF4,A1	;104d6: 22790002def4
 	TST.W	(52,A1)			;104dc: 4a690034
 	BEQ.S	_1050A			;104e0: 6728
 	MOVEQ	#2,D0			;104e2: 7002
@@ -21405,7 +21452,7 @@ _10572:
 	MOVE.L	#data1E93A,(28,A6)	;10572: 2d7c0001e93a001c
 	BRA.W	_105C8			;1057a: 6000004c
 _1057E:
-	MOVE.L	#data1E914,(28,A6)	;1057e: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;1057e: 2d7c0001e914001c
 	BRA.W	_105C8			;10586: 60000040
 _1058A:
 	MOVE.L	(28,A6),D2		;1058a: 242e001c
@@ -21413,7 +21460,7 @@ _1058A:
 	BEQ.S	_105C0			;10594: 672a
 	CMPI.L	#data1E928,D2		;10596: 0c820001e928
 	BEQ.S	_105C0			;1059c: 6722
-	CMPI.L	#data1E914,D2		;1059e: 0c820001e914
+	CMPI.L	#dataSpr1E914,D2	;1059e: 0c820001e914
 	BEQ.S	_105C0			;105a4: 671a
 	CMPI.L	#data1E94A,D2		;105a6: 0c820001e94a
 	BEQ.S	_105B6			;105ac: 6708
@@ -21513,7 +21560,7 @@ _ShipAct1e:
 	MOVE.L	A0,unk107D2		;106da: 23c8000107d2
 	MOVE.B	(25,A0),D2		;106e0: 14280019
 	BMI.W	_10778			;106e4: 6b000092
-	BTST	#3,data2E45A		;106e8: 083900030002e45a
+	BTST	#3,bFrameRule		;106e8: 083900030002e45a
 	BNE.S	_106F6			;106f0: 6604
 	MOVEQ	#0,D0			;106f2: 7000
 	RTS				;106f4: 4e75
@@ -21543,10 +21590,10 @@ _10726:
 	MOVEA.L	ptr107D6,A0		;10732: 2079000107d6
 	MOVEA.L	(6,A0),A0		;10738: 20680006
 	JSR	_024FA			;1073c: 4eb9000024fa
-	BSR.W	_0ED5E			;10742: 6100e61a
+	BSR.W	_Missiles_0ED5E		;10742: 6100e61a
 	CMPI.B	#$37,(8,A6)		;10746: 0c2e00370008
 	BPL.S	_10760			;1074c: 6a12
-	MOVE.L	#data1E914,(28,A6)	;1074e: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;1074e: 2d7c0001e914001c
 	MOVE.W	#$0405,(24,A6)		;10756: 3d7c04050018
 	CLR.L	(32,A6)			;1075c: 42ae0020
 _10760:
@@ -21561,7 +21608,7 @@ _10778:
 	MOVEQ	#0,D0			;1077c: 7000
 	RTS				;1077e: 4e75
 _10780:
-	BTST	#3,data2E45A		;10780: 083900030002e45a
+	BTST	#3,bFrameRule		;10780: 083900030002e45a
 	BEQ.S	_10722			;10788: 6798
 	MOVE.W	(2,A0),D2		;1078a: 34280002
 	MOVE.W	(4,A0),D3		;1078e: 36280004
@@ -21592,7 +21639,7 @@ ptr107D6:
 	DS.L	1			;107d6
 unk107DA:
 	DS.W	1			;107da
-_107DC:
+_ShipAtk_107DC:
 ; loop over a ship's hardpoints
 	ST	flg1EBD8		;107dc: 50f90001ebd8
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;107e2: 48e7fffe
@@ -21686,14 +21733,15 @@ _SwixSelfDestr15:
 	CMPI.B	#$03,D0			;108fc: 0c000003
 	BNE.S	ret1092E		;10900: 662c
 	SUBQ.B	#1,(49,A6)		;10902: 532e0031
-	BEQ.S	_10930			;10906: 6728
+	BEQ.S	_ExplodeAsteroid	;10906: 6728
+; WARNING! THE LARGE ALIEN SHIP IS SUPERHEATING ITS ENGINES!
 	MOVE.W	#$0218,D0		;10908: 303c0218
 	CMPI.B	#$32,(49,A6)		;1090c: 0c2e00320031
-	BEQ.S	_10920			;10912: 670c
+	BEQ.S	_MsgWin10920		;10912: 670c
 	MOVE.W	#$0219,D0		;10914: 303c0219
 	CMPI.B	#$14,(49,A6)		;10918: 0c2e00140031
 	BNE.S	ret1092E		;1091e: 660e
-_10920:
+_MsgWin10920:
 	MOVE.L	A0,D1			;10920: 2208
 	MOVEQ	#0,D2			;10922: 7400
 	MOVEQ	#1,D3			;10924: 7601
@@ -21701,7 +21749,7 @@ _10920:
 	JSR	_MessageWin		;10928: 4eb900008fd0
 ret1092E:
 	RTS				;1092e: 4e75
-_10930:
+_ExplodeAsteroid:
 	BSR.W	_WarheadMega		;10930: 6100f07e
 	RTS				;10934: 4e75
 _SwixBioWpn14:
@@ -21716,22 +21764,22 @@ _SwixBioWpn14:
 	BNE.S	ret109A4		;10952: 6650
 ; Reduce population by 5
 	SUBQ.W	#5,(684,A0)		;10954: 5b6802ac
-	TST.B	flg2E468		;10958: 4a390002e468
+	TST.B	flgShowGfx		;10958: 4a390002e468
 	BNE.S	ret109A4		;1095e: 6644
 	CMPI.B	#$04,intScreen		;10960: 0c3900040002e486
 	BEQ.S	ret109A4		;10968: 673a
 ; Not in space view:
-	MOVE.W	#$000f,data2E0A8	;1096a: 33fc000f0002e0a8
-	JSR	(_0FCD6,PC)		;10972: 4ebaf362
+	MOVE.W	#$000f,screenFlashColor	;1096a: 33fc000f0002e0a8
+	JSR	(_WarheadFlash,PC)	;10972: 4ebaf362
 ; Sound P: Alien whoosh
 ; Alien whoosh sound
 	MOVEQ	#16,D0			;10976: 7010
 	JSR	_PlaySound		;10978: 4eb90001a50e
-	LEA	ptr1AF16,A0		;1097e: 41f90001af16
-	LEA	ptr1AF96,A1		;10984: 43f90001af96
-	JSR	_0596E			;1098a: 4eb90000596e
-	LEA	ptr1AF16,A0		;10990: 41f90001af16
-	LEA	ptr1AF96,A1		;10996: 43f90001af96
+	LEA	paletteFlash,A0		;1097e: 41f90001af16
+	LEA	palette,A1		;10984: 43f90001af96
+	JSR	_ScreenFlash_0596E	;1098a: 4eb90000596e
+	LEA	paletteFlash,A0		;10990: 41f90001af16
+	LEA	palette,A1		;10996: 43f90001af96
 	MOVEQ	#31,D0			;1099c: 701f
 loop1099E:
 	MOVE.W	(A0)+,(A1)+		;1099e: 32d8
@@ -21749,7 +21797,7 @@ _RigelPowerDrain13:
 	CMPI.B	#$03,D0			;109c0: 0c000003
 	BNE.S	ret109DA		;109c4: 6614
 	ADDQ.B	#4,(97,A0)		;109c6: 58280061
-	TST.B	flg2E468		;109ca: 4a390002e468
+	TST.B	flgShowGfx		;109ca: 4a390002e468
 	BNE.S	ret109DA		;109d0: 6608
 ; Sound T: Imperial transporter warp
 ; Imperial warp?
@@ -21824,16 +21872,16 @@ ret10A62:
 	RTS				;10a62: 4e75
 _AlienCannon05:
 ; Alien laser cannon.
-	MOVE.W	intAlienCannon1Dmg,D7	;10a64: 3e3900020316
+	MOVE.W	intAlienCannon5Dmg,D7	;10a64: 3e3900020316
 	BRA.S	_FireAlienCannon	;10a6a: 600e
 _AlienCannon06:
 ; Alien photon cannon. Most powerful.
 ; Consistent with turrets in that photon weapons are most powerful.
-	MOVE.W	intAlienCannon3Dmg,D7	;10a6c: 3e390002031a
+	MOVE.W	intAlienCannon6Dmg,D7	;10a6c: 3e390002031a
 	BRA.S	_FireAlienCannon	;10a72: 6006
 _AlienCannon07:
 ; Alien plasma cannon.
-	MOVE.W	intAlienCannon2Dmg,D7	;10a74: 3e3900020318
+	MOVE.W	intAlienCannon7Dmg,D7	;10a74: 3e3900020318
 _FireAlienCannon:
 	MOVEQ	#10,D0			;10a7a: 700a
 	JSR	_RandInt		;10a7c: 4eb900000c0c
@@ -21843,7 +21891,7 @@ _FireAlienCannon:
 	BSR.W	_FireAtTerranShip	;10a8e: 6100035a
 	BMI.S	ret10AAA		;10a92: 6b16
 	BSET	#6,(21,A6)		;10a94: 08ee00060015
-	TST.B	flg2E468		;10a9a: 4a390002e468
+	TST.B	flgShowGfx		;10a9a: 4a390002e468
 	BNE.S	ret10AAA		;10aa0: 6608
 ; Sound L: Pew (ship cannon)
 ; Ship pew
@@ -21881,7 +21929,7 @@ _FireTerranCannon:
 	BSR.W	_FireAtAlienShip	;10aca: 61000370
 	BMI.S	ret10AE6		;10ace: 6b16
 	BSET	#6,(21,A6)		;10ad0: 08ee00060015
-	TST.B	flg2E468		;10ad6: 4a390002e468
+	TST.B	flgShowGfx		;10ad6: 4a390002e468
 	BNE.S	ret10AE6		;10adc: 6608
 ; Sound L: Pew (ship cannon)
 ; Ship pew
@@ -21913,9 +21961,9 @@ _IonCannon:
 _10B38:
 ; 5 damage.
 	MOVEQ	#5,D7			;10b38: 7e05
-	SF	flg315F0		;10b3a: 51f9000315f0
+	SF	flgDidGroundHit		;10b3a: 51f9000315f0
 	BSR.W	_GroundHit		;10b40: 6100f332
-	TST.B	flg315F0		;10b44: 4a39000315f0
+	TST.B	flgDidGroundHit		;10b44: 4a39000315f0
 	BNE.S	ret10B54		;10b4a: 6608
 ; Sound M: Zap (ion cannon miss)
 ; Ground zap
@@ -21945,16 +21993,16 @@ _Disruptor:
 	MOVEA.L	ptrThisAstStats,A0	;10ba0: 20790002ded8
 	ADDQ.B	#1,(172,A0)		;10ba6: 522800ac
 _10BAA:
-	LEA	ptr1F07A,A0		;10baa: 41f90001f07a
+	LEA	unkMislHit,A0		;10baa: 41f90001f07a
 	MOVEQ	#26,D0			;10bb0: 701a
 loop10BB2:
 	MOVE.W	(A6)+,(A0)+		;10bb2: 30de
 	DBF	D0,loop10BB2		;10bb4: 51c8fffc
-	SF	flg315F0		;10bb8: 51f9000315f0
+	SF	flgDidGroundHit		;10bb8: 51f9000315f0
 	MOVEQ	#0,D0			;10bbe: 7000
 	LEA	ptr1EBC6,A0		;10bc0: 41f90001ebc6
 _10BC6:
-	LEA	ptr1F07A,A6		;10bc6: 4df90001f07a
+	LEA	unkMislHit,A6		;10bc6: 4df90001f07a
 	MOVE.B	(A0)+,D1		;10bcc: 1218
 	ADD.B	D1,(10,A6)		;10bce: d32e000a
 	MOVE.B	(A0)+,D1		;10bd2: 1218
@@ -21967,7 +22015,7 @@ _10BC6:
 	ADDQ.B	#1,D0			;10be6: 5200
 	CMPI.B	#$04,D0			;10be8: 0c000004
 	BNE.S	_10BC6			;10bec: 66d8
-	TST.B	flg315F0		;10bee: 4a39000315f0
+	TST.B	flgDidGroundHit		;10bee: 4a39000315f0
 	BNE.S	ret10BFE		;10bf4: 6608
 ; Sound M: Zap (ion cannon miss)
 ; Ground zap
@@ -21997,9 +22045,9 @@ _NapalmOrb:
 	MOVEA.L	ptrThisAstStats,A0	;10c46: 20790002ded8
 	ADDQ.B	#1,(172,A0)		;10c4c: 522800ac
 _10C50:
-	SF	flg315F0		;10c50: 51f9000315f0
-	BSR.W	_GrounBurn		;10c56: 6100f404
-	TST.B	flg315F0		;10c5a: 4a39000315f0
+	SF	flgDidGroundHit		;10c50: 51f9000315f0
+	BSR.W	_GroundBurn		;10c56: 6100f404
+	TST.B	flgDidGroundHit		;10c5a: 4a39000315f0
 	BNE.S	ret10C6A		;10c60: 6608
 ; Sound M: Zap (ion cannon miss)
 	MOVEQ	#13,D0			;10c62: 700d
@@ -22028,27 +22076,27 @@ _ChaosBomb:
 	MOVEA.L	ptrThisAstStats,A0	;10cb6: 20790002ded8
 	ADDQ.B	#1,(172,A0)		;10cbc: 522800ac
 _10CC0:
-	LEA	ptr1F07A,A0		;10cc0: 41f90001f07a
+	LEA	unkMislHit,A0		;10cc0: 41f90001f07a
 	MOVEQ	#26,D0			;10cc6: 701a
 loop10CC8:
 	MOVE.W	(A6)+,(A0)+		;10cc8: 30de
 	DBF	D0,loop10CC8		;10cca: 51c8fffc
-	SF	flg315F0		;10cce: 51f9000315f0
+	SF	flgDidGroundHit		;10cce: 51f9000315f0
 	MOVEQ	#0,D0			;10cd4: 7000
 	LEA	ptr1EBC6,A0		;10cd6: 41f90001ebc6
 _10CDC:
-	LEA	ptr1F07A,A6		;10cdc: 4df90001f07a
+	LEA	unkMislHit,A6		;10cdc: 4df90001f07a
 	MOVE.B	(A0)+,D1		;10ce2: 1218
 	ADD.B	D1,(10,A6)		;10ce4: d32e000a
 	MOVE.B	(A0)+,D1		;10ce8: 1218
 	ADD.B	D1,(11,A6)		;10cea: d32e000b
 	MOVEM.L	D0/A0,-(A7)		;10cee: 48e78080
-	BSR.W	_GrounBurn		;10cf2: 6100f368
+	BSR.W	_GroundBurn		;10cf2: 6100f368
 	MOVEM.L	(A7)+,D0/A0		;10cf6: 4cdf0101
 	ADDQ.B	#1,D0			;10cfa: 5200
 	CMPI.B	#$04,D0			;10cfc: 0c000004
 	BNE.S	_10CDC			;10d00: 66da
-	TST.B	flg315F0		;10d02: 4a39000315f0
+	TST.B	flgDidGroundHit		;10d02: 4a39000315f0
 	BNE.S	ret10D12		;10d08: 6608
 ; Sound M: Zap (ion cannon miss)
 	MOVEQ	#13,D0			;10d0a: 700d
@@ -22059,14 +22107,14 @@ _AlienVortex04:
 	MOVEQ	#100,D0			;10d14: 7064
 	JSR	_RandInt		;10d16: 4eb900000c0c
 	CMPI.B	#$0a,D0			;10d1c: 0c00000a
-	BMI.S	_10D32			;10d20: 6b10
+	BMI.S	_Vortex_10D32		;10d20: 6b10
 	RTS				;10d22: 4e75
 _VortexMine:
 	MOVEQ	#100,D0			;10d24: 7064
 	JSR	_RandInt		;10d26: 4eb900000c0c
 	CMPI.B	#$14,D0			;10d2c: 0c000014
 	BPL.S	ret10D84		;10d30: 6a52
-_10D32:
+_Vortex_10D32:
 	TST.B	flg2E475		;10d32: 4a390002e475
 	BNE.S	ret10D84		;10d38: 664a
 	MOVEA.L	ptrThisAstStats,A0	;10d3a: 20790002ded8
@@ -22266,49 +22314,49 @@ _10F00:
 	CMPI.B	#$03,D0			;10f12: 0c000003
 	BNE.W	ret10FDE		;10f16: 660000c6
 _10F1A:
-	TST.B	flg2E470		;10f1a: 4a390002e470
+	TST.B	int2E470		;10f1a: 4a390002e470
 	BEQ.S	_10F4C			;10f20: 672a
 	MOVE.W	#$0afa,D2		;10f22: 343c0afa
 	MOVEQ	#0,D0			;10f26: 7000
 	MOVE.W	#$0096,D1		;10f28: 323c0096
-	LEA	ptr1D8F6,A2		;10f2c: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;10f2c: 45f90001d8f6
 	ADDA.W	D2,A2			;10f32: d4c2
 	MOVE.W	(8,A2),D2		;10f34: 342a0008
 	MOVEA.L	(A2),A0			;10f38: 2052
 	MOVEA.L	(4,A2),A2		;10f3a: 246a0004
 	MOVEQ	#2,D6			;10f3e: 7c02
 	MOVEA.L	ptrBuff00,A1		;10f40: 22790000052a
-	JSR	(_0C916,PC)		;10f46: 4ebab9ce
+	JSR	(_DrawGfx_0C916,PC)	;10f46: 4ebab9ce
 	BRA.S	_10F54			;10f4a: 6008
 _10F4C:
-	TST.B	flg2E46E		;10f4c: 4a390002e46e
+	TST.B	flgDSound1		;10f4c: 4a390002e46e
 	BEQ.S	_10F7C			;10f52: 6728
 _10F54:
 	MOVE.W	#$0af0,D2		;10f54: 343c0af0
 	MOVEQ	#0,D0			;10f58: 7000
 	MOVE.W	#$009b,D1		;10f5a: 323c009b
-	LEA	ptr1D8F6,A2		;10f5e: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;10f5e: 45f90001d8f6
 	ADDA.W	D2,A2			;10f64: d4c2
 	MOVE.W	(8,A2),D2		;10f66: 342a0008
 	MOVEA.L	(A2),A0			;10f6a: 2052
 	MOVEA.L	(4,A2),A2		;10f6c: 246a0004
 	MOVEQ	#2,D6			;10f70: 7c02
 	MOVEA.L	ptrBuff00,A1		;10f72: 22790000052a
-	JSR	(_0C916,PC)		;10f78: 4ebab99c
+	JSR	(_DrawGfx_0C916,PC)	;10f78: 4ebab99c
 _10F7C:
-	TST.B	flg2E472		;10f7c: 4a390002e472
+	TST.B	int2E472		;10f7c: 4a390002e472
 	BEQ.S	_10FAE			;10f82: 672a
 	MOVE.W	#$0afa,D2		;10f84: 343c0afa
 	MOVEQ	#28,D0			;10f88: 701c
 	MOVE.W	#$0096,D1		;10f8a: 323c0096
-	LEA	ptr1D8F6,A2		;10f8e: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;10f8e: 45f90001d8f6
 	ADDA.W	D2,A2			;10f94: d4c2
 	MOVE.W	(8,A2),D2		;10f96: 342a0008
 	MOVEA.L	(A2),A0			;10f9a: 2052
 	MOVEA.L	(4,A2),A2		;10f9c: 246a0004
 	MOVEQ	#2,D6			;10fa0: 7c02
 	MOVEA.L	ptrBuff00,A1		;10fa2: 22790000052a
-	JSR	(_0C916,PC)		;10fa8: 4ebab96c
+	JSR	(_DrawGfx_0C916,PC)	;10fa8: 4ebab96c
 	BRA.S	_10FB6			;10fac: 6008
 _10FAE:
 	TST.B	flg1F983		;10fae: 4a390001f983
@@ -22317,17 +22365,17 @@ _10FB6:
 	MOVE.W	#$0ae6,D2		;10fb6: 343c0ae6
 	MOVEQ	#28,D0			;10fba: 701c
 	MOVE.W	#$009b,D1		;10fbc: 323c009b
-	LEA	ptr1D8F6,A2		;10fc0: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;10fc0: 45f90001d8f6
 	ADDA.W	D2,A2			;10fc6: d4c2
 	MOVE.W	(8,A2),D2		;10fc8: 342a0008
 	MOVEA.L	(A2),A0			;10fcc: 2052
 	MOVEA.L	(4,A2),A2		;10fce: 246a0004
 	MOVEQ	#2,D6			;10fd2: 7c02
 	MOVEA.L	ptrBuff00,A1		;10fd4: 22790000052a
-	JSR	(_0C916,PC)		;10fda: 4ebab93a
+	JSR	(_DrawGfx_0C916,PC)	;10fda: 4ebab93a
 ret10FDE:
 	RTS				;10fde: 4e75
-_10FE0:
+_ButtonEffect:
 ; buttons
 	TST.W	D2			;10fe0: 4a42
 	BEQ.S	ret10FF6		;10fe2: 6712
@@ -22341,69 +22389,69 @@ ret10FF6:
 	RTS				;10ff6: 4e75
 arrButtons:
 ; 50, 31 unique including return
-	DC.L	unk111B8		;10ff8: 000111b8
-	DC.L	ret110C0		;10ffc: 000110c0
-	DC.L	unk11202		;11000: 00011202
-	DC.L	unk111F6		;11004: 000111f6
+	DC.L	_TetracorpScreen	;10ff8: 000111b8
+	DC.L	noButtonEffect		;10ffc: 000110c0
+	DC.L	_MilitaryButton		;11000: 00011202
+	DC.L	_AstControlButton	;11004: 000111f6
 	DC.L	_FleetWin		;11008: 0000bc1a
-	DC.L	_SpaceView		;1100c: 00007c7c
+	DC.L	_BuildButton		;1100c: 00007c7c
 	DC.L	_ToggleDetPtr		;11010: 00011256
-	DC.L	unk11220		;11014: 00011220
-	DC.L	_BuildingWin		;11018: 00011810
-	DC.L	ret110C0		;1101c: 000110c0
-	DC.L	_Toggle_11242		;11020: 00011242
-	DC.L	_Toggle_1124C		;11024: 0001124c
-	DC.L	ret110C0		;11028: 000110c0
+	DC.L	_InformationButton	;11014: 00011220
+	DC.L	_BlueButton		;11018: 00011810
+	DC.L	noButtonEffect		;1101c: 000110c0
+	DC.L	_AsteroidSpeedButton	;11020: 00011242
+	DC.L	_PAFWButton		;11024: 0001124c
+	DC.L	noButtonEffect		;11028: 000110c0
 	DC.L	_BlueprintsWin		;1102c: 0000b830
-	DC.L	ret110C0		;11030: 000110c0
+	DC.L	noButtonEffect		;11030: 000110c0
 	DC.L	_ScitekWin		;11034: 000111c2
 	DC.L	_MissileFireWin		;11038: 00008356
 	DC.L	_AstEngineWin		;1103c: 00009756
-	DC.L	ret110C0		;11040: 000110c0
+	DC.L	noButtonEffect		;11040: 000110c0
 	DC.L	_ToggleShipPtr		;11044: 00011274
-	DC.L	unk110CC		;11048: 000110cc
+	DC.L	_FleetRetreatButton	;11048: 000110cc
 	DC.L	_AsteroidView		;1104c: 00011180
-	DC.L	ret110C0		;11050: 000110c0
-	DC.L	ret110C0		;11054: 000110c0
-	DC.L	ret110C0		;11058: 000110c0
-	DC.L	unk112A6		;1105c: 000112a6
+	DC.L	noButtonEffect		;11050: 000110c0
+	DC.L	noButtonEffect		;11054: 000110c0
+	DC.L	noButtonEffect		;11058: 000110c0
+	DC.L	_DisplayButton		;1105c: 000112a6
 	DC.L	_HotkeysWin		;11060: 0000c30c
 	DC.L	_OreSurveyWin		;11064: 000087cc
 	DC.L	_FinanceWin		;11068: 0000aaac
-	DC.L	unk111CC		;1106c: 000111cc
-	DC.L	ret110C0		;11070: 000110c0
+	DC.L	_SpyingButton		;1106c: 000111cc
+	DC.L	noButtonEffect		;11070: 000110c0
 	DC.L	_PauseBtn		;11074: 000110c2
-	DC.L	ret110C0		;11078: 000110c0
-	DC.L	ret110C0		;1107c: 000110c0
+	DC.L	noButtonEffect		;11078: 000110c0
+	DC.L	noButtonEffect		;1107c: 000110c0
 	DC.L	_RotateRight		;11080: 0000605a
 	DC.L	_RotateLeft		;11084: 00006070
 	DC.L	_ToggleTactical		;11088: 0001177e
 	DC.L	_ToggleTactical		;1108c: 0001177e
-	DC.L	_Window04		;11090: 000111ae
-	DC.L	ret110C0		;11094: 000110c0
-	DC.L	ret110C0		;11098: 000110c0
-	DC.L	ret110C0		;1109c: 000110c0
-	DC.L	_SkyView		;110a0: 00011192
-	DC.L	_Toggle_11238		;110a4: 00011238
-	DC.L	ret110C0		;110a8: 000110c0
+	DC.L	_AstFieldButton		;11090: 000111ae
+	DC.L	noButtonEffect		;11094: 000110c0
+	DC.L	noButtonEffect		;11098: 000110c0
+	DC.L	noButtonEffect		;1109c: 000110c0
+	DC.L	_OrbitView		;110a0: 00011192
+	DC.L	_AstPathButton		;110a4: 00011238
+	DC.L	noButtonEffect		;110a8: 000110c0
 	DC.L	_ColonySummaryWin	;110ac: 0000b438
-	DC.L	ret110C0		;110b0: 000110c0
-	DC.L	ret110C0		;110b4: 000110c0
-	DC.L	ret110C0		;110b8: 000110c0
-	DC.L	ret110C0		;110bc: 000110c0
-ret110C0:
+	DC.L	noButtonEffect		;110b0: 000110c0
+	DC.L	noButtonEffect		;110b4: 000110c0
+	DC.L	noButtonEffect		;110b8: 000110c0
+	DC.L	noButtonEffect		;110bc: 000110c0
+noButtonEffect:
 	RTS				;110c0: 4e75
 _PauseBtn:
 ; 7200
-	MOVE.W	#$1c20,data1F984	;110c2: 33fc1c200001f984
+	MOVE.W	#$1c20,pauseTimer	;110c2: 33fc1c200001f984
 	RTS				;110ca: 4e75
-unk110CC:
+_FleetRetreatButton:
 ; fleet related?
-	MOVEA.L	ptr2DEC4,A0		;110cc: 20790002dec4
+	MOVEA.L	ptrFleet_2DEC4,A0	;110cc: 20790002dec4
 	MOVE.B	#$42,(27,A0)		;110d2: 117c0042001b
 	MOVE.W	#$000a,(24,A0)		;110d8: 317c000a0018
 	RTS				;110de: 4e75
-_110E0:
+_Button3_110E0:
 	SF	flg2E481		;110e0: 51f90002e481
 	SF	flg1F0B4		;110e6: 51f90001f0b4
 	MOVE.L	A0,ptr1117C		;110ec: 23c80001117c
@@ -22424,120 +22472,121 @@ _1111E:
 	TST.W	D2			;1112c: 4a42
 	BMI.S	_1111E			;1112e: 6bee
 	CMPI.W	#$0025,D2		;11130: 0c420025
-	BEQ.S	_11172			;11134: 673c
+	BEQ.S	_Button_11172		;11134: 673c
 	CMPI.W	#$0026,D2		;11136: 0c420026
-	BEQ.S	_11172			;1113a: 6736
+	BEQ.S	_Button_11172		;1113a: 6736
 	MOVE.W	D2,-(A7)		;1113c: 3f02
 	JSR	_07964			;1113e: 4eb900007964
 	MOVE.W	(A7)+,D2		;11144: 341f
 	TST.W	D2			;11146: 4a42
 	BMI.S	ret11170		;11148: 6b26
 	CMPI.W	#$000a,D2		;1114a: 0c42000a
-	BNE.S	_11158			;1114e: 6608
+	BNE.S	_Button_11158		;1114e: 6608
 	ST	flg2E481		;11150: 50f90002e481
 	RTS				;11156: 4e75
-_11158:
+_Button_11158:
 	MOVEA.L	ptr1117C,A0		;11158: 20790001117c
 	MOVE.L	A0,-(A7)		;1115e: 2f08
-	BSR.W	_10FE0			;11160: 6100fe7e
+	BSR.W	_ButtonEffect		;11160: 6100fe7e
 	MOVEA.L	(A7)+,A0		;11164: 205f
 	TST.B	flg2E481		;11166: 4a390002e481
-	BNE.W	_110E0			;1116c: 6600ff72
+	BNE.W	_Button3_110E0		;1116c: 6600ff72
 ret11170:
 	RTS				;11170: 4e75
-_11172:
+_Button_11172:
 	MOVE.L	A2,-(A7)		;11172: 2f0a
-	BSR.W	_10FE0			;11174: 6100fe6a
+	BSR.W	_ButtonEffect		;11174: 6100fe6a
 	MOVEA.L	(A7)+,A2		;11178: 245f
 	BRA.S	_1111E			;1117a: 60a2
 ptr1117C:
 	DS.L	1			;1117c
 _AsteroidView:
-	MOVE.B	#$01,intScrn3		;11180: 13fc00010002e488
+	MOVE.B	#$01,intNewScreen	;11180: 13fc00010002e488
 	MOVE.B	#$00,intPointer		;11188: 13fc00000002e48c
 	RTS				;11190: 4e75
-_SkyView:
+_OrbitView:
 	CMPI.B	#$03,intScreen		;11192: 0c3900030002e486
 	BEQ.S	_AsteroidView		;1119a: 67e4
-	MOVE.B	#$03,intScrn3		;1119c: 13fc00030002e488
+	MOVE.B	#$03,intNewScreen	;1119c: 13fc00030002e488
 	MOVE.B	#$02,intPointer		;111a4: 13fc00020002e48c
 	RTS				;111ac: 4e75
-_Window04:
-	MOVE.B	#$04,intScrn3		;111ae: 13fc00040002e488
+_AstFieldButton:
+	MOVE.B	#$04,intNewScreen	;111ae: 13fc00040002e488
 	RTS				;111b6: 4e75
-unk111B8:
-	MOVE.B	#$06,intScrn3		;111b8: 13fc00060002e488
+_TetracorpScreen:
+	MOVE.B	#$06,intNewScreen	;111b8: 13fc00060002e488
 	RTS				;111c0: 4e75
 _ScitekWin:
-	MOVE.B	#$07,intScrn3		;111c2: 13fc00070002e488
+	MOVE.B	#$07,intNewScreen	;111c2: 13fc00070002e488
 	RTS				;111ca: 4e75
-unk111CC:
+_SpyingButton:
 ; spy win?
-	ST	flg2E09F		;111cc: 50f90002e09f
-	BSET	#2,alien_2E00F		;111d2: 08f900020002e00f
-	BCLR	#3,alien_2E00F		;111da: 08b900030002e00f
-	MOVE.B	#$04,intScrn3		;111e2: 13fc00040002e488
-	MOVE.B	intScreen,intScrn2	;111ea: 13f90002e4860002e487
+	ST	flgScreen2E09F		;111cc: 50f90002e09f
+	BSET	#2,info_display		;111d2: 08f900020002e00f
+	BCLR	#3,info_display		;111da: 08b900030002e00f
+	MOVE.B	#$04,intNewScreen	;111e2: 13fc00040002e488
+	MOVE.B	intScreen,intPrevScreen	;111ea: 13f90002e4860002e487
 	RTS				;111f4: 4e75
-unk111F6:
+_AstControlButton:
 	LEA	ptr1F118,A0		;111f6: 41f90001f118
-	BSR.W	_110E0			;111fc: 6100fee2
+	BSR.W	_Button3_110E0		;111fc: 6100fee2
 	RTS				;11200: 4e75
-unk11202:
+_MilitaryButton:
 ; Probably ship-related
 	MOVEA.L	ptrCurrentAst,A0	;11202: 20790002de58
 	TST.B	(89,A0)			;11208: 4a280059
-	BMI.S	_1121A			;1120c: 6b0c
+	BMI.S	_StasisErr		;1120c: 6b0c
 ; Non Stasis:
 	LEA	ptr1F0F6,A0		;1120e: 41f90001f0f6
-	BSR.W	_110E0			;11214: 6100feca
+	BSR.W	_Button3_110E0		;11214: 6100feca
 	RTS				;11218: 4e75
-_1121A:
+_StasisErr:
 	JMP	_StasisErr		;1121a: 4ef9000069c2
-unk11220:
+_InformationButton:
 	MOVEA.L	ptrCurrentAst,A0	;11220: 20790002de58
 	TST.B	(89,A0)			;11226: 4a280059
-	BMI.S	_1121A			;1122a: 6bee
+	BMI.S	_StasisErr		;1122a: 6bee
 	LEA	ptr1F186,A0		;1122c: 41f90001f186
-	BSR.W	_110E0			;11232: 6100feac
+	BSR.W	_Button3_110E0		;11232: 6100feac
 	RTS				;11236: 4e75
-_Toggle_11238:
-	BCHG	#0,alien_2E00F		;11238: 087900000002e00f
+_AstPathButton:
+	BCHG	#0,info_display		;11238: 087900000002e00f
 	RTS				;11240: 4e75
-_Toggle_11242:
-	BCHG	#7,alien_2E00F		;11242: 087900070002e00f
+_AsteroidSpeedButton:
+	BCHG	#7,info_display		;11242: 087900070002e00f
 	RTS				;1124a: 4e75
-_Toggle_1124C:
-	BCHG	#5,alien_2E00F		;1124c: 087900050002e00f
+_PAFWButton:
+	BCHG	#5,info_display		;1124c: 087900050002e00f
 	RTS				;11254: 4e75
 _ToggleDetPtr:
 	CMPI.B	#$01,intPointer		;11256: 0c3900010002e48c
-	BNE.S	_1126A			;1125e: 660a
+	BNE.S	_SetDetonatePtr		;1125e: 660a
 	MOVE.B	#$00,intPointer		;11260: 13fc00000002e48c
 	RTS				;11268: 4e75
-_1126A:
+_SetDetonatePtr:
 	MOVE.B	#$01,intPointer		;1126a: 13fc00010002e48c
 	RTS				;11272: 4e75
 _ToggleShipPtr:
+; Used when you press S or click the ship pointer button.
 	CMPI.B	#$02,intScreen		;11274: 0c3900020002e486
 	BEQ.S	_11288			;1127c: 670a
 	CMPI.B	#$01,intScreen		;1127e: 0c3900010002e486
-	BNE.S	_1129C			;11286: 6614
+	BNE.S	_ShipPointer_1129C	;11286: 6614
 _11288:
 	CMPI.B	#$02,intPointer		;11288: 0c3900020002e48c
-	BNE.S	_1129C			;11290: 660a
+	BNE.S	_ShipPointer_1129C	;11290: 660a
 	MOVE.B	#$00,intPointer		;11292: 13fc00000002e48c
 	RTS				;1129a: 4e75
-_1129C:
+_ShipPointer_1129C:
 	MOVE.B	#$02,intPointer		;1129c: 13fc00020002e48c
 	RTS				;112a4: 4e75
-unk112A6:
-	LEA	ptr1F1B4,A0		;112a6: 41f90001f1b4
+_DisplayButton:
+	LEA	ptrAstTrkNone_1F1B4,A0	;112a6: 41f90001f1b4
 	TST.B	flgBPAstTracker		;112ac: 4a390002e433
 	BEQ.S	_112BA			;112b2: 6706
-	LEA	ptr1F1CA,A0		;112b4: 41f90001f1ca
+	LEA	ptrAstTrkYes_1F1CA,A0	;112b4: 41f90001f1ca
 _112BA:
-	BSR.W	_110E0			;112ba: 6100fe24
+	BSR.W	_Button3_110E0		;112ba: 6100fe24
 	RTS				;112be: 4e75
 _112C0:
 	MOVE.L	A2,-(A7)		;112c0: 2f0a
@@ -22553,7 +22602,7 @@ _112D2:
 	MOVEA.L	(A7)+,A2		;112d2: 245f
 	RTS				;112d4: 4e75
 _112D6:
-	LEA	ptr4D93C,A0		;112d6: 41f90004d93c
+	LEA	sprButtons,A0		;112d6: 41f90004d93c
 	MOVE.W	(A2),D4			;112dc: 3812
 	CMPI.W	#$0033,D4		;112de: 0c440033
 	BPL.W	_113AC			;112e2: 6a0000c8
@@ -22576,7 +22625,7 @@ _112EE:
 	ADDA.L	D1,A1			;1130c: d3c1
 	LEA	HARDBASE,A5		;1130e: 4bf900dff000
 	JSR	_05378			;11314: 4eb900005378
-	LEA	ptr4D810,A3		;1131a: 47f90004d810
+	LEA	sprButtonMask,A3	;1131a: 47f90004d810
 	MOVE.W	#$ffff,(BLTAFWM_68,A5)	;11320: 3b7cffff0044
 	MOVE.W	#$0000,(BLTALWM_70,A5)	;11326: 3b7c00000046
 	ROR.W	#4,D3			;1132c: e85b
@@ -22635,7 +22684,7 @@ _113BC:
 	ADDA.L	D1,A1			;113da: d3c1
 	LEA	HARDBASE,A5		;113dc: 4bf900dff000
 	JSR	_05378			;113e2: 4eb900005378
-	LEA	ptr4D84C,A3		;113e8: 47f90004d84c
+	LEA	sprButtonBlank,A3	;113e8: 47f90004d84c
 	MOVE.W	#$ffff,(BLTAFWM_68,A5)	;113ee: 3b7cffff0044
 	MOVE.W	#$0000,(BLTALWM_70,A5)	;113f4: 3b7c00000046
 	ROR.W	#4,D3			;113fa: e85b
@@ -22717,7 +22766,7 @@ _11508:
 	MOVEQ	#-1,D2			;11508: 74ff
 	RTS				;1150a: 4e75
 _1150C:
-	MOVEM.W	unk00760,D0-D1		;1150c: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;1150c: 4cb9000300000760
 	MOVEA.L	A2,A0			;11514: 204a
 _11516:
 	MOVE.W	(0,A0),D2		;11516: 34280000
@@ -22797,7 +22846,7 @@ _115BE:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;115be: 4cdf7fff
 	RTS				;115c2: 4e75
 _115C4:
-	LEA	ptr4D93C,A0		;115c4: 41f90004d93c
+	LEA	sprButtons,A0		;115c4: 41f90004d93c
 	MOVEA.L	ptrBuff06,A3		;115ca: 267900000542
 	MOVE.W	(0,A2),D4		;115d0: 382a0000
 	CMPI.W	#$0033,D4		;115d4: 0c440033
@@ -22865,7 +22914,7 @@ loop1164C:
 	RTS				;11692: 4e75
 _11694:
 	MOVEQ	#14,D0			;11694: 700e
-	LEA	arrBtns41,A2		;11696: 45f900020b90
+	LEA	arrButton0,A2		;11696: 45f900020b90
 loop1169C:
 	MOVE.W	(0,A2),D1		;1169c: 322a0000
 	BEQ.S	_116C4			;116a0: 6722
@@ -22895,7 +22944,7 @@ _116CC:
 	BNE.S	_1175C			;116f2: 6668
 	CMPI.W	#$000a,D2		;116f4: 0c42000a
 	BEQ.W	_1177A			;116f8: 67000080
-	LEA	arrBtns41,A4		;116fc: 49f900020b90
+	LEA	arrButton0,A4		;116fc: 49f900020b90
 	MOVEQ	#14,D0			;11702: 700e
 	MOVEA.L	A4,A5			;11704: 2a4c
 loop11706:
@@ -22914,7 +22963,7 @@ loop11714:
 	BRA.S	_1174E			;11722: 602a
 _11724:
 	MOVE.W	D2,(0,A4)		;11724: 39420000
-	ST	flg2E48B		;11728: 50f90002e48b
+	ST	flgRedraw		;11728: 50f90002e48b
 	MOVEA.L	ptrBuff01,A1		;1172e: 22790000052e
 	MOVEA.L	A4,A2			;11734: 244c
 	MOVE.L	A4,-(A7)		;11736: 2f0c
@@ -22940,7 +22989,7 @@ _1175C:
 	TST.W	(0,A2)			;11762: 4a6a0000
 	BEQ.S	_11754			;11766: 67ec
 	CLR.W	(0,A2)			;11768: 426a0000
-	ST	flg2E48B		;1176c: 50f90002e48b
+	ST	flgRedraw		;1176c: 50f90002e48b
 	MOVEM.L	(A7)+,A0/A2		;11772: 4cdf0500
 	MOVEQ	#-1,D0			;11776: 70ff
 	RTS				;11778: 4e75
@@ -22976,12 +23025,12 @@ _117C2:
 	BSR.S	_117DA			;117ca: 610e
 _117CC:
 	SF	flg1F0B4		;117cc: 51f90001f0b4
-	ST	flg2E48B		;117d2: 50f90002e48b
+	ST	flgRedraw		;117d2: 50f90002e48b
 	RTS				;117d8: 4e75
 _117DA:
 	MOVE.W	D1,D2			;117da: 3401
 	ADDQ.W	#1,D2			;117dc: 5242
-	LEA	arrBtns41,A0		;117de: 41f900020b90
+	LEA	arrButton0,A0		;117de: 41f900020b90
 	MOVEQ	#14,D0			;117e4: 700e
 loop117E6:
 	CMP.W	(0,A0),D1		;117e6: b2680000
@@ -22996,68 +23045,68 @@ _117FA:
 	MOVEA.L	A0,A2			;117fc: 2448
 	MOVEA.L	ptrBuff01,A1		;117fe: 22790000052e
 	BSR.W	_112D6			;11804: 6100fad0
-	ST	flg2E48B		;11808: 50f90002e48b
+	ST	flgRedraw		;11808: 50f90002e48b
 	RTS				;1180e: 4e75
-_BuildingWin:
-	MOVE.W	data2E088,D0		;11810: 30390002e088
+_BlueButton:
+	MOVE.W	currBlueBuild,D0	;11810: 30390002e088
 	ADDQ.W	#1,D0			;11816: 5240
 	CMPI.W	#$000a,D0		;11818: 0c40000a
 	BMI.S	_11820			;1181c: 6b02
 	MOVEQ	#0,D0			;1181e: 7000
 _11820:
-	MOVE.W	D0,data2E088		;11820: 33c00002e088
-	ST	flg2E48B		;11826: 50f90002e48b
+	MOVE.W	D0,currBlueBuild	;11820: 33c00002e088
+	ST	flgRedraw		;11826: 50f90002e48b
 	SF	flg1F0B4		;1182c: 51f90001f0b4
 	RTS				;11832: 4e75
-_11834:
-	MOVE.W	data2E484,-(A7)		;11834: 3f390002e484
-	CLR.W	data2E484		;1183a: 42790002e484
+_OrbitView:
+	MOVE.W	intAsteroidFacing,-(A7)	;11834: 3f390002e484
+	CLR.W	intAsteroidFacing	;1183a: 42790002e484
 _11840:
-	SF	flg2E48B		;11840: 51f90002e48b
+	SF	flgRedraw		;11840: 51f90002e48b
 	JSR	_06440			;11846: 4eb900006440
 	BSR.W	_0DFF2			;1184c: 6100c7a4
 	JSR	_05B98			;11850: 4eb900005b98
-	LEA	ptr1AF96,A0		;11856: 41f90001af96
+	LEA	palette,A0		;11856: 41f90001af96
 	JSR	_053CA			;1185c: 4eb9000053ca
 	BRA.S	_11880			;11862: 601c
 _11864:
-	TST.B	flg2E48B		;11864: 4a390002e48b
+	TST.B	flgRedraw		;11864: 4a390002e48b
 	BNE.S	_11840			;1186a: 66d4
-	CLR.W	data2E484		;1186c: 42790002e484
+	CLR.W	intAsteroidFacing	;1186c: 42790002e484
 	BSR.W	_13B3E			;11872: 610022ca
 _11876:
-	MOVE.B	intScrn3,D0		;11876: 10390002e488
+	MOVE.B	intNewScreen,D0		;11876: 10390002e488
 	BNE.W	_11B0E			;1187c: 66000290
 _11880:
 	MOVEA.L	ptrBuff02,A5		;11880: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;11886: 2c790000052a
 	JSR	_05540			;1188c: 4eb900005540
-	MOVEA.L	ptr2DEEC,A6		;11892: 2c790002deec
+	MOVEA.L	ptrAstMap_2DEEC,A6	;11892: 2c790002deec
 	BSR.W	_0E008			;11898: 6100c76e
 	JSR	_07884			;1189c: 4eb900007884
 	JSR	_056D0			;118a2: 4eb9000056d0
-	JSR	_025DC			;118a8: 4eb9000025dc
+	JSR	_Pause_025DC		;118a8: 4eb9000025dc
 	MOVEQ	#2,D0			;118ae: 7002
-	JSR	_00BB8			;118b0: 4eb900000bb8
+	JSR	_Wait			;118b0: 4eb900000bb8
 	TST.B	flg2E09B		;118b6: 4a390002e09b
 	BEQ.S	_118DA			;118bc: 671c
-	TST.L	lUnknown54		;118be: 4ab90002de5c
+	TST.L	lUnknownSat54		;118be: 4ab90002de5c
 	BEQ.S	_118DA			;118c4: 6714
 	SF	flg2E09B		;118c6: 51f90002e09b
-	SF	intScrn2		;118cc: 51f90002e487
+	SF	intPrevScreen		;118cc: 51f90002e487
 	JSR	_MissileFireWin		;118d2: 4eb900008356
 	BRA.S	_11864			;118d8: 608a
 _118DA:
-	TST.B	flg2E09F		;118da: 4a390002e09f
+	TST.B	flgScreen2E09F		;118da: 4a390002e09f
 	BEQ.S	_1191C			;118e0: 673a
-	TST.L	lUnknown54		;118e2: 4ab90002de5c
+	TST.L	lUnknownSat54		;118e2: 4ab90002de5c
 	BEQ.S	_1191C			;118e8: 6732
-	SF	flg2E09F		;118ea: 51f90002e09f
-	SF	intScrn2		;118f0: 51f90002e487
-	MOVEA.L	lUnknown54,A0		;118f6: 20790002de5c
+	SF	flgScreen2E09F		;118ea: 51f90002e09f
+	SF	intPrevScreen		;118f0: 51f90002e487
+	MOVEA.L	lUnknownSat54,A0	;118f6: 20790002de5c
 	TST.B	(96,A0)			;118fc: 4a280060
 	BEQ.S	_1190E			;11900: 670c
-	MOVE.B	#$09,intScrn3		;11902: 13fc00090002e488
+	MOVE.B	#$09,intNewScreen	;11902: 13fc00090002e488
 	BRA.W	_11876			;1190a: 6000ff6a
 _1190E:
 	MOVE.W	#$01f6,D0		;1190e: 303c01f6
@@ -23066,20 +23115,20 @@ _1190E:
 _1191C:
 	TST.B	flg2E09D		;1191c: 4a390002e09d
 	BEQ.S	_11948			;11922: 6724
-	TST.L	lUnknown54		;11924: 4ab90002de5c
+	TST.L	lUnknownSat54		;11924: 4ab90002de5c
 	BEQ.S	_11948			;1192a: 671c
 	SF	flg2E09D		;1192c: 51f90002e09d
-	SF	intScrn2		;11932: 51f90002e487
+	SF	intPrevScreen		;11932: 51f90002e487
 	MOVEA.L	ptr2DEB4,A6		;11938: 2c790002deb4
 	JSR	_0ACD0			;1193e: 4eb90000acd0
 	BRA.W	_11876			;11944: 6000ff30
 _11948:
 	TST.B	flg2E09E		;11948: 4a390002e09e
 	BEQ.S	_1196C			;1194e: 671c
-	TST.L	lUnknown54		;11950: 4ab90002de5c
+	TST.L	lUnknownSat54		;11950: 4ab90002de5c
 	BEQ.S	_1196C			;11956: 6714
 	SF	flg2E09E		;11958: 51f90002e09e
-	SF	intScrn2		;1195e: 51f90002e487
+	SF	intPrevScreen		;1195e: 51f90002e487
 	BSR.W	_FleetWin		;11964: 6100a2b4
 	BRA.W	_11876			;11968: 6000ff0c
 _1196C:
@@ -23090,32 +23139,32 @@ _1196C:
 	MOVEA.L	ptr2DEB8,A0		;1197a: 20790002deb8
 	MOVE.B	#$02,flg2E47B		;11980: 13fc00020002e47b
 	JSR	_HangarWin		;11988: 4eb9000090e2
-	ST	flg2E48B		;1198e: 50f90002e48b
+	ST	flgRedraw		;1198e: 50f90002e48b
 	BRA.W	_11864			;11994: 6000fece
 _11998:
 	BSR.W	_FleetWin		;11998: 6100a280
 	BRA.W	_11864			;1199c: 6000fec6
 _119A0:
 	MOVE.B	flg2E47C,D0		;119a0: 10390002e47c
-	BEQ.S	_119CA			;119a6: 6722
+	BEQ.S	_Button_119CA		;119a6: 6722
 	CMPI.B	#$01,D0			;119a8: 0c000001
 	BNE.S	_11998			;119ac: 66ea
 	MOVE.B	#$02,flg2E47C		;119ae: 13fc00020002e47c
 	MOVEA.L	ptr2DEB4,A6		;119b6: 2c790002deb4
 	BSR.W	_0B312			;119bc: 61009954
-	ST	flg2E48B		;119c0: 50f90002e48b
+	ST	flgRedraw		;119c0: 50f90002e48b
 	BRA.W	_11864			;119c6: 6000fe9c
-_119CA:
+_Button_119CA:
 	MOVE.B	MouseBtn,D0		;119ca: 103900000766
 	BEQ.W	_11A8E			;119d0: 670000bc
 	BTST	#0,D0			;119d4: 08000000
 	BEQ.W	_11A80			;119d8: 670000a6
 	MOVE.B	#$01,flg1F0B4		;119dc: 13fc00010001f0b4
-	LEA	arrBtns41,A2		;119e4: 45f900020b90
+	LEA	arrButton0,A2		;119e4: 45f900020b90
 	BSR.W	_1147A			;119ea: 6100fa8e
 	TST.W	D2			;119ee: 4a42
 	BMI.W	_11A02			;119f0: 6b000010
-	BSR.W	_10FE0			;119f4: 6100f5ea
+	BSR.W	_ButtonEffect		;119f4: 6100f5ea
 	SF	flg1F0B4		;119f8: 51f90001f0b4
 	BRA.W	_11864			;119fe: 6000fe64
 _11A02:
@@ -23135,12 +23184,12 @@ _11A36:
 	MOVEA.L	ptrCurrentAst,A0	;11a36: 20790002de58
 	CMPI.B	#$08,(735,A0)		;11a3c: 0c28000802df
 	BNE.W	_11864			;11a42: 6600fe20
-	MOVE.W	unk00760,D0		;11a46: 303900000760
+	MOVE.W	intMouseX,D0		;11a46: 303900000760
 	CMPI.W	#$0022,D0		;11a4c: 0c400022
 	BMI.W	_11864			;11a50: 6b00fe12
 	CMPI.W	#$009d,D0		;11a54: 0c40009d
 	BPL.W	_11864			;11a58: 6a00fe0a
-	MOVE.W	unk00762,D0		;11a5c: 303900000762
+	MOVE.W	intMouseY,D0		;11a5c: 303900000762
 	CMPI.W	#$002e,D0		;11a62: 0c40002e
 	BMI.W	_11864			;11a66: 6b00fdfc
 	CMPI.W	#$0079,D0		;11a6a: 0c400079
@@ -23150,7 +23199,7 @@ _11A36:
 	BRA.W	_11864			;11a7c: 6000fde6
 _11A80:
 	LEA	ptr1F0B6,A0		;11a80: 41f90001f0b6
-	BSR.W	_110E0			;11a86: 6100f658
+	BSR.W	_Button3_110E0		;11a86: 6100f658
 	BRA.W	_11864			;11a8a: 6000fdd8
 _11A8E:
 	MOVE.B	InKey,D0		;11a8e: 103900000764
@@ -23169,8 +23218,8 @@ _11AA8:
 _11AB8:
 ; keys 1-10
 	EXT.W	D0			;11ab8: 4880
-	MOVE.W	D0,data2E088		;11aba: 33c00002e088
-	ST	flg2E48B		;11ac0: 50f90002e48b
+	MOVE.W	D0,currBlueBuild	;11aba: 33c00002e088
+	ST	flgRedraw		;11ac0: 50f90002e48b
 	SF	flg1F0B4		;11ac6: 51f90001f0b4
 	BRA.W	_11864			;11acc: 6000fd96
 _11AD0:
@@ -23190,15 +23239,15 @@ _11AE6:
 _11AF4:
 ; 50-59 = F1-F10 (hotkeys)
 	CMPI.B	#$50,D0			;11af4: 0c000050
-	BMI.S	_11B0A			;11af8: 6b10
+	BMI.S	_11864			;11af8: 6b10
 	CMPI.B	#$5a,D0			;11afa: 0c00005a
-	BPL.S	_11B0A			;11afe: 6a0a
-	JSR	_02590			;11b00: 4eb900002590
+	BPL.S	_11864			;11afe: 6a0a
+	JSR	_Hotkeys_02590		;11b00: 4eb900002590
 	BRA.W	_11864			;11b06: 6000fd5c
-_11B0A:
+_11864:
 	BRA.W	_11864			;11b0a: 6000fd58
 _11B0E:
-	MOVE.W	(A7)+,data2E484		;11b0e: 33df0002e484
+	MOVE.W	(A7)+,intAsteroidFacing	;11b0e: 33df0002e484
 	RTS				;11b14: 4e75
 _11B16:
 	MOVEQ	#0,D1			;11b16: 7200
@@ -23238,14 +23287,14 @@ _11B52:
 	BSR.S	_11B16			;11b56: 61be
 ret11B58:
 	RTS				;11b58: 4e75
-_11B5A:
+_ScreenSpace:
 	SF	flg00BB5		;11b5a: 51f900000bb5
-	MOVE.B	#$0b,data2E476		;11b60: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;11b60: 13fc000b0002e476
 	SF	flg11F2A		;11b68: 51f900011f2a
 _11B6E:
-	LEA	ptr1AF96,A0		;11b6e: 41f90001af96
-	LEA	ptr1AFD6,A2		;11b74: 45f90001afd6
-	LEA	ptr1B016,A1		;11b7a: 43f90001b016
+	LEA	palette,A0		;11b6e: 41f90001af96
+	LEA	palette_standard,A2	;11b74: 45f90001afd6
+	LEA	palette_dark,A1		;11b7a: 43f90001b016
 	MOVE.L	(28,A2),data2DEBC	;11b80: 23ea001c0002debc
 	MOVE.W	(4,A2),(28,A0)		;11b88: 316a0004001c
 	MOVE.W	(2,A2),(30,A0)		;11b8e: 316a0002001e
@@ -23254,15 +23303,15 @@ _11B6E:
 	MOVE.L	(28,A1),data2DEC0	;11ba0: 23e9001c0002dec0
 	MOVE.W	(4,A1),(28,A1)		;11ba8: 33690004001c
 	MOVE.W	(2,A1),(30,A1)		;11bae: 33690002001e
-	SF	flg2E48B		;11bb4: 51f90002e48b
+	SF	flgRedraw		;11bb4: 51f90002e48b
 	BSR.W	_11F2E			;11bba: 61000372
-	LEA	ptr1AF96,A0		;11bbe: 41f90001af96
+	LEA	palette,A0		;11bbe: 41f90001af96
 	JSR	_053CA			;11bc4: 4eb9000053ca
 	BRA.S	_11BE8			;11bca: 601c
 _11BCC:
-	TST.B	flg2E48B		;11bcc: 4a390002e48b
+	TST.B	flgRedraw		;11bcc: 4a390002e48b
 	BNE.S	_11B6E			;11bd2: 669a
-	MOVE.B	intScrn3,D0		;11bd4: 10390002e488
+	MOVE.B	intNewScreen,D0		;11bd4: 10390002e488
 	BNE.W	_11EEE			;11bda: 66000312
 	SF	flg2E483		;11bde: 51f90002e483
 	BSR.W	_13B3E			;11be4: 61001f58
@@ -23274,12 +23323,12 @@ _11BE8:
 	BSR.W	_11F96			;11c00: 61000394
 	TST.B	flg11F2A		;11c04: 4a3900011f2a
 	BNE.S	_11C1A			;11c0a: 660e
-	MOVEM.W	unk00760,D0-D1		;11c0c: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;11c0c: 4cb9000300000760
 	MOVEQ	#6,D7			;11c14: 7e06
 	BSR.W	_1232C			;11c16: 61000714
 _11C1A:
 	JSR	_056D0			;11c1a: 4eb9000056d0
-	JSR	_025DC			;11c20: 4eb9000025dc
+	JSR	_Pause_025DC		;11c20: 4eb9000025dc
 	TST.B	flg1D7F4		;11c26: 4a390001d7f4
 	BEQ.S	_11C34			;11c2c: 6706
 	BSR.W	_0B99A			;11c2e: 61009d6a
@@ -23287,27 +23336,27 @@ _11C1A:
 _11C34:
 	TST.B	flg2E09B		;11c34: 4a390002e09b
 	BEQ.S	_11C60			;11c3a: 6724
-	TST.L	lUnknown54		;11c3c: 4ab90002de5c
+	TST.L	lUnknownSat54		;11c3c: 4ab90002de5c
 	BEQ.S	_11C60			;11c42: 671c
 	SF	flg2E09B		;11c44: 51f90002e09b
-	SF	intScrn2		;11c4a: 51f90002e487
+	SF	intPrevScreen		;11c4a: 51f90002e487
 	ST	flg2E483		;11c50: 50f90002e483
 	JSR	_MissileFireWin		;11c56: 4eb900008356
 	BRA.W	_11BCC			;11c5c: 6000ff6e
 _11C60:
 	TST.B	flg2E47E		;11c60: 4a390002e47e
 	BEQ.S	_11C78			;11c66: 6710
-	TST.L	lUnknown54		;11c68: 4ab90002de5c
+	TST.L	lUnknownSat54		;11c68: 4ab90002de5c
 	BEQ.S	_11C78			;11c6e: 6708
 	BSR.W	_HotkeysWin		;11c70: 6100a69a
 	BRA.W	_11BCC			;11c74: 6000ff56
 _11C78:
 	TST.B	flg2E09E		;11c78: 4a390002e09e
 	BEQ.S	_11C9C			;11c7e: 671c
-	TST.L	lUnknown54		;11c80: 4ab90002de5c
+	TST.L	lUnknownSat54		;11c80: 4ab90002de5c
 	BEQ.S	_11C9C			;11c86: 6714
 	SF	flg2E09E		;11c88: 51f90002e09e
-	SF	intScrn2		;11c8e: 51f90002e487
+	SF	intPrevScreen		;11c8e: 51f90002e487
 	BSR.W	_FleetWin		;11c94: 61009f84
 	BRA.W	_11BCC			;11c98: 6000ff32
 _11C9C:
@@ -23318,7 +23367,7 @@ _11C9C:
 	MOVEA.L	ptr2DEB8,A0		;11caa: 20790002deb8
 	MOVE.B	#$02,flg2E47B		;11cb0: 13fc00020002e47b
 	JSR	_HangarWin		;11cb8: 4eb9000090e2
-	ST	flg2E48B		;11cbe: 50f90002e48b
+	ST	flgRedraw		;11cbe: 50f90002e48b
 	BRA.W	_11BCC			;11cc4: 6000ff06
 _11CC8:
 	BSR.W	_FleetWin		;11cc8: 61009f50
@@ -23331,7 +23380,7 @@ _11CD0:
 	MOVE.B	#$02,flg2E47C		;11cde: 13fc00020002e47c
 	MOVEA.L	ptr2DEB4,A6		;11ce6: 2c790002deb4
 	BSR.W	_0B312			;11cec: 61009624
-	ST	flg2E48B		;11cf0: 50f90002e48b
+	ST	flgRedraw		;11cf0: 50f90002e48b
 	BRA.W	_11BCC			;11cf6: 6000fed4
 _11CFA:
 	TST.B	flg11F2A		;11cfa: 4a3900011f2a
@@ -23341,33 +23390,33 @@ _11CFA:
 	TST.B	InKey			;11d0a: 4a3900000764
 	BEQ.W	_11BCC			;11d10: 6700feba
 _11D14:
-	MOVE.B	MouseBtn,unk11F2B	;11d14: 13f90000076600011f2b
-	MOVE.B	InKey,unk11F2C		;11d1e: 13f90000076400011f2c
+	MOVE.B	MouseBtn,mouse11F2B	;11d14: 13f90000076600011f2b
+	MOVE.B	InKey,key11F2C		;11d1e: 13f90000076400011f2c
 	ST	flg11F2A		;11d28: 50f900011f2a
 	BRA.W	_11BCC			;11d2e: 6000fe9c
 _11D32:
 	SF	flg11F2A		;11d32: 51f900011f2a
-	MOVE.B	unk11F2B,D0		;11d38: 103900011f2b
+	MOVE.B	mouse11F2B,D0		;11d38: 103900011f2b
 	BEQ.W	_11EC4			;11d3e: 67000184
 	BTST	#0,D0			;11d42: 08000000
 	BEQ.W	_11EA4			;11d46: 6700015c
-	BTST	#4,alien_2E00F		;11d4a: 083900040002e00f
+	BTST	#4,info_display		;11d4a: 083900040002e00f
 	BNE.W	_11E4C			;11d52: 660000f8
-	BTST	#6,alien_2E00F		;11d56: 083900060002e00f
+	BTST	#6,info_display		;11d56: 083900060002e00f
 	BNE.W	_11DF2			;11d5e: 66000092
 	MOVE.L	lUnknown53,D0		;11d62: 20390002de54
 	TST.B	flg2E0A1		;11d68: 4a390002e0a1
 	BNE.S	_11DB4			;11d6e: 6644
-	BTST	#2,alien_2E00F		;11d70: 083900020002e00f
+	BTST	#2,info_display		;11d70: 083900020002e00f
 	BNE.W	_11E7A			;11d78: 66000100
 	TST.L	D0			;11d7c: 4a80
 	BEQ.W	_11BCC			;11d7e: 6700fe4c
 	MOVE.L	D0,ptrCurrentAst	;11d82: 23c00002de58
 	MOVEA.L	D0,A0			;11d88: 2040
 	BSR.W	_138E6			;11d8a: 61001b5a
-	MOVE.L	A6,ptr2DEEC		;11d8e: 23ce0002deec
-	MOVE.L	A5,ptr2DEF0		;11d94: 23cd0002def0
-	MOVE.L	A4,ptr2DEF4		;11d9a: 23cc0002def4
+	MOVE.L	A6,ptrAstMap_2DEEC	;11d8e: 23ce0002deec
+	MOVE.L	A5,ptrAstBldg_2DEF0	;11d94: 23cd0002def0
+	MOVE.L	A4,ptrBldCount_2DEF4	;11d9a: 23cc0002def4
 	MOVE.B	(25,A0),flgUnknown64	;11da0: 13e800190002e00d
 ; Sound D: Pip (button click)
 	MOVEQ	#4,D0			;11da8: 7004
@@ -23387,8 +23436,8 @@ _11DB4:
 	BSR.W	_FleetWin		;11dd8: 61009e40
 	BRA.W	_11BCC			;11ddc: 6000fdee
 _11DE0:
-	MOVE.B	#$05,intScrn3		;11de0: 13fc00050002e488
-	MOVE.L	A2,ptr2DEC4		;11de8: 23ca0002dec4
+	MOVE.B	#$05,intNewScreen	;11de0: 13fc00050002e488
+	MOVE.L	A2,ptrFleet_2DEC4	;11de8: 23ca0002dec4
 	BRA.W	_11BCC			;11dee: 6000fddc
 _11DF2:
 	MOVEA.L	ptrBuff15_AliFleet,A0	;11df2: 207900000566
@@ -23396,14 +23445,14 @@ _11DF2:
 loop11DFA:
 	TST.L	(6,A0)			;11dfa: 4aa80006
 	BEQ.S	_11E28			;11dfe: 6728
-	MOVE.W	unk00760,D0		;11e00: 303900000760
+	MOVE.W	intMouseX,D0		;11e00: 303900000760
 	SUB.W	(2,A0),D0		;11e06: 90680002
 	BPL.S	_11E0E			;11e0a: 6a02
 	NEG.W	D0			;11e0c: 4440
 _11E0E:
 	CMPI.W	#$0008,D0		;11e0e: 0c400008
 	BGT.S	_11E28			;11e12: 6e14
-	MOVE.W	unk00762,D0		;11e14: 303900000762
+	MOVE.W	intMouseY,D0		;11e14: 303900000762
 	SUB.W	(4,A0),D0		;11e1a: 90680004
 	BPL.S	_11E22			;11e1e: 6a02
 	NEG.W	D0			;11e20: 4440
@@ -23416,7 +23465,7 @@ _11E28:
 	LEA	EXT_0000.W,A0		;11e30: 41f80001
 _11E34:
 	MOVE.L	A0,D0			;11e34: 2008
-	BCLR	#6,alien_2E00F		;11e36: 08b900060002e00f
+	BCLR	#6,info_display		;11e36: 08b900060002e00f
 	MOVE.L	D0,-(A7)		;11e3e: 2f00
 ; Sound D: Pip (button click)
 	MOVEQ	#4,D0			;11e40: 7004
@@ -23424,49 +23473,49 @@ _11E34:
 	MOVE.L	(A7)+,D0		;11e48: 201f
 	BRA.S	_11E7A			;11e4a: 602e
 _11E4C:
-	MOVE.W	unk00762,D1		;11e4c: 323900000762
+	MOVE.W	intMouseY,D1		;11e4c: 323900000762
 	DIVU	#$0028,D1		;11e52: 82fc0028
 	ASL.W	#3,D1			;11e56: e741
 ; Sound D: Pip (button click)
 	MOVEQ	#4,D0			;11e58: 7004
 	JSR	_PlaySound		;11e5a: 4eb90001a50e
 	MOVEQ	#0,D0			;11e60: 7000
-	MOVE.W	unk00760,D0		;11e62: 303900000760
+	MOVE.W	intMouseX,D0		;11e62: 303900000760
 	DIVU	#$0028,D0		;11e68: 80fc0028
 	ADD.W	D1,D0			;11e6c: d041
 	ADDQ.B	#1,D0			;11e6e: 5200
 	EXT.L	D0			;11e70: 48c0
-	BCLR	#4,alien_2E00F		;11e72: 08b900040002e00f
+	BCLR	#4,info_display		;11e72: 08b900040002e00f
 _11E7A:
 	TST.L	D0			;11e7a: 4a80
 	BEQ.W	_11BCC			;11e7c: 6700fd4e
-	MOVE.L	D0,lUnknown54		;11e80: 23c00002de5c
-	BCLR	#2,alien_2E00F		;11e86: 08b900020002e00f
-	BCLR	#3,alien_2E00F		;11e8e: 08b900030002e00f
-	MOVE.B	intScrn2,intScrn3	;11e96: 13f90002e4870002e488
+	MOVE.L	D0,lUnknownSat54	;11e80: 23c00002de5c
+	BCLR	#2,info_display		;11e86: 08b900020002e00f
+	BCLR	#3,info_display		;11e8e: 08b900030002e00f
+	MOVE.B	intPrevScreen,intNewScreen ;11e96: 13f90002e4870002e488
 	BRA.W	_11BCC			;11ea0: 6000fd2a
 _11EA4:
-	BTST	#2,alien_2E00F		;11ea4: 083900020002e00f
+	BTST	#2,info_display		;11ea4: 083900020002e00f
 	BNE.W	_11BCC			;11eac: 6600fd1e
 	LEA	ptr1F146,A0		;11eb0: 41f90001f146
 	ST	flg2E483		;11eb6: 50f90002e483
-	BSR.W	_110E0			;11ebc: 6100f222
+	BSR.W	_Button3_110E0		;11ebc: 6100f222
 	BRA.W	_11BCC			;11ec0: 6000fd0a
 _11EC4:
-	MOVE.B	unk11F2C,D0		;11ec4: 103900011f2c
+	MOVE.B	key11F2C,D0		;11ec4: 103900011f2c
 	BEQ.W	_11BCC			;11eca: 6700fd00
 	SF	InKey			;11ece: 51f900000764
 ; hotkeys f1-f10
 	CMPI.B	#$50,D0			;11ed4: 0c000050
-	BMI.S	_11EEA			;11ed8: 6b10
+	BMI.S	_11BCC			;11ed8: 6b10
 	CMPI.B	#$5a,D0			;11eda: 0c00005a
-	BPL.S	_11EEA			;11ede: 6a0a
-	JSR	_02590			;11ee0: 4eb900002590
+	BPL.S	_11BCC			;11ede: 6a0a
+	JSR	_Hotkeys_02590		;11ee0: 4eb900002590
 	BRA.W	_11BCC			;11ee6: 6000fce4
-_11EEA:
+_11BCC:
 	BRA.W	_11BCC			;11eea: 6000fce0
 _11EEE:
-	MOVE.B	#$0c,data2E476		;11eee: 13fc000c0002e476
+	MOVE.B	#$0c,textcolor		;11eee: 13fc000c0002e476
 	ST	flg2E483		;11ef6: 50f90002e483
 	ST	flg00BB5		;11efc: 50f900000bb5
 	MOVE.L	D0,-(A7)		;11f02: 2f00
@@ -23474,19 +23523,20 @@ _11EEE:
 	JSR	_1A3BA			;11f06: 4eb90001a3ba
 	MOVE.L	(A7)+,D0		;11f0c: 201f
 	MOVEQ	#0,D1			;11f0e: 7200
-	MOVE.L	D1,data1AFB2		;11f10: 23c10001afb2
-	MOVE.L	D1,data1AFD2		;11f16: 23c10001afd2
-	MOVE.L	D1,data1B032		;11f1c: 23c10001b032
+	MOVE.L	D1,LAB_10C6		;11f10: 23c10001afb2
+	MOVE.L	D1,LAB_10C7		;11f16: 23c10001afd2
+	MOVE.L	D1,LAB_10CA		;11f1c: 23c10001b032
 	RTS				;11f22: 4e75
+; nop
 	NOP				;11f24: 4e71
 	NOP				;11f26: 4e71
 	NOP				;11f28: 4e71
 flg11F2A:
 ; key scancodes stored here
 	DS.B	1			;11f2a
-unk11F2B:
+mouse11F2B:
 	DS.B	1			;11f2b
-unk11F2C:
+key11F2C:
 	DS.W	1			;11f2c
 _11F2E:
 	MOVEA.L	ptrBuff02,A0		;11f2e: 207900000532
@@ -23505,10 +23555,10 @@ _11F2E:
 	MOVE.W	#$3228,(BLTSIZE_88,A5)	;11f70: 3b7c32280058
 	JSR	_05378			;11f76: 4eb900005378
 	BSR.W	_12362			;11f7c: 610003e4
-	TST.B	flg2E48A		;11f80: 4a390002e48a
+	TST.B	flgShowUI		;11f80: 4a390002e48a
 	BEQ.S	ret11F94		;11f86: 670c
 	MOVEA.L	ptrBuff02,A1		;11f88: 227900000532
-	JSR	_08348			;11f8e: 4eb900008348
+	JSR	_MsgLineCoords08348	;11f8e: 4eb900008348
 ret11F94:
 	RTS				;11f94: 4e75
 _11F96:
@@ -23551,18 +23601,18 @@ loop11FD8:
 	BSR.W	_138A2			;1202c: 61001874
 	SF	flg2E0A1		;12030: 51f90002e0a1
 	BSR.W	_13676			;12036: 6100163e
-	BTST	#3,alien_2E00F		;1203a: 083900030002e00f
+	BTST	#3,info_display		;1203a: 083900030002e00f
 	BEQ.S	_1207E			;12042: 673a
 	MOVE.W	intCometHoriz,D0	;12044: 30390002e096
 	ADDI.W	#$0018,D0		;1204a: 06400018
-	SUB.W	unk00760,D0		;1204e: 907900000760
+	SUB.W	intMouseX,D0		;1204e: 907900000760
 	BPL.S	_12058			;12054: 6a02
 	NEG.W	D0			;12056: 4440
 _12058:
 	CMPI.W	#$0008,D0		;12058: 0c400008
 	BGT.S	_1207E			;1205c: 6e20
 	MOVE.W	intCometVert,D0		;1205e: 30390002e098
-	SUB.W	unk00762,D0		;12064: 907900000762
+	SUB.W	intMouseY,D0		;12064: 907900000762
 	BMI.S	_1207E			;1206a: 6b12
 	CMPI.W	#$000c,D0		;1206c: 0c40000c
 	BGT.S	_1207E			;12070: 6e0c
@@ -23575,14 +23625,14 @@ _1207E:
 _12086:
 	TST.L	(6,A0)			;12086: 4aa80006
 	BEQ.S	_120C2			;1208a: 6736
-	MOVE.W	unk00760,D0		;1208c: 303900000760
+	MOVE.W	intMouseX,D0		;1208c: 303900000760
 	MOVE.W	(2,A0),D3		;12092: 36280002
 	CMP.W	D0,D3			;12096: b640
 	BPL.S	_120C2			;12098: 6a28
 	ADDQ.W	#8,D3			;1209a: 5043
 	CMP.W	D0,D3			;1209c: b640
 	BMI.S	_120C2			;1209e: 6b22
-	MOVE.W	unk00762,D0		;120a0: 303900000762
+	MOVE.W	intMouseY,D0		;120a0: 303900000762
 	MOVE.W	(4,A0),D3		;120a6: 36280004
 	CMP.W	D0,D3			;120aa: b640
 	BPL.S	_120C2			;120ac: 6a14
@@ -23604,23 +23654,23 @@ _120C2:
 	MOVEA.L	ptrBuff00,A1		;120de: 22790000052a
 	MOVEQ	#16,D0			;120e4: 7010
 	MOVE.W	#$00be,D1		;120e6: 323c00be
-	MOVE.B	#$06,data2E476		;120ea: 13fc00060002e476
-	JSR	_07310			;120f2: 4eb900007310
-	MOVE.B	#$0b,data2E476		;120f8: 13fc000b0002e476
+	MOVE.B	#$06,textcolor		;120ea: 13fc00060002e476
+	JSR	_DisplayText		;120f2: 4eb900007310
+	MOVE.B	#$0b,textcolor		;120f8: 13fc000b0002e476
 _12100:
-	BTST	#2,alien_2E00F		;12100: 083900020002e00f
+	BTST	#2,info_display		;12100: 083900020002e00f
 	BEQ.S	_12158			;12108: 674e
 ; <<< CLICK ON SECTOR >>>
 	MOVEQ	#71,D0			;1210a: 7047
-	BTST	#4,alien_2E00F		;1210c: 083900040002e00f
+	BTST	#4,info_display		;1210c: 083900040002e00f
 	BNE.S	_12132			;12114: 661c
 ; <<< CLICK ON TARGET FLEET >>>
 	MOVE.W	#$0137,D0		;12116: 303c0137
-	BTST	#6,alien_2E00F		;1211a: 083900060002e00f
+	BTST	#6,info_display		;1211a: 083900060002e00f
 	BNE.S	_12132			;12122: 660e
 ; <<< CLICK ON TARGET ASTEROID >>>
 	MOVEQ	#103,D0			;12124: 7067
-	TST.B	flg2E09F		;12126: 4a390002e09f
+	TST.B	flgScreen2E09F		;12126: 4a390002e09f
 	BEQ.S	_12132			;1212c: 6704
 ; <<< SELECT A SPY SATELLITE >>>
 	MOVE.W	#$01f5,D0		;1212e: 303c01f5
@@ -23629,21 +23679,21 @@ _12132:
 	MOVEA.L	ptrBuff00,A1		;12138: 22790000052a
 	MOVEQ	#88,D0			;1213e: 7058
 	MOVEQ	#24,D1			;12140: 7218
-	MOVE.B	#$07,data2E476		;12142: 13fc00070002e476
-	JSR	_07310			;1214a: 4eb900007310
-	MOVE.B	#$0b,data2E476		;12150: 13fc000b0002e476
+	MOVE.B	#$07,textcolor		;12142: 13fc00070002e476
+	JSR	_DisplayText		;1214a: 4eb900007310
+	MOVE.B	#$0b,textcolor		;12150: 13fc000b0002e476
 _12158:
-	BTST	#3,alien_2E00F		;12158: 083900030002e00f
+	BTST	#3,info_display		;12158: 083900030002e00f
 	BEQ.S	_12198			;12160: 6736
 	MOVEA.L	ptrCurrentAst,A0	;12162: 20790002de58
 	MOVEQ	#0,D0			;12168: 7000
 	MOVEQ	#0,D1			;1216a: 7200
-	MOVEM.W	unk00760,D0-D1		;1216c: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;1216c: 4cb9000300000760
 	MOVEM.W	(26,A0),D2-D3		;12174: 4ca8000c001a
 	BSR.W	_11B36			;1217a: 6100f9ba
-	CMP.W	data2E090,D0		;1217e: b0790002e090
+	CMP.W	dataAst2E090,D0		;1217e: b0790002e090
 	BEQ.S	_12194			;12184: 670e
-	MOVE.W	D0,data2E090		;12186: 33c00002e090
+	MOVE.W	D0,dataAst2E090		;12186: 33c00002e090
 ; Sound B: Tick
 ; tick
 	MOVEQ	#2,D0			;1218c: 7002
@@ -23651,11 +23701,11 @@ _12158:
 _12194:
 	BSR.W	_12294			;12194: 610000fe
 _12198:
-	BTST	#5,alien_2E00F		;12198: 083900050002e00f
+	BTST	#5,info_display		;12198: 083900050002e00f
 	BEQ.S	_121A6			;121a0: 6704
-	BSR.W	_1518E			;121a2: 61002fea
+	BSR.W	_RenderPAFW		;121a2: 61002fea
 _121A6:
-	BTST	#4,alien_2E00F		;121a6: 083900040002e00f
+	BTST	#4,info_display		;121a6: 083900040002e00f
 	BEQ.S	ret121D8		;121ae: 6728
 	MOVEQ	#10,D4			;121b0: 780a
 	LEA	ptr1F20E,A0		;121b2: 41f90001f20e
@@ -23682,6 +23732,8 @@ _121DA:
 	JSR	_054A8			;121fa: 4eb9000054a8
 	MOVEA.L	ptrBuff12_Asteroids,A2	;12200: 24790000055a
 	MOVEA.L	ptrBuff17_BldgTotal,A4	;12206: 28790000056e
+; Iterate over all asteroids and check for
+; sensors
 	MOVEQ	#23,D2			;1220c: 7417
 loop1220E:
 	MOVE.L	A2,-(A7)		;1220e: 2f0a
@@ -23690,23 +23742,23 @@ loop1220E:
 	MOVE.B	(89,A2),D0		;12214: 102a0059
 	ANDI.B	#$03,D0			;12218: 02000003
 	CMPI.B	#$03,D0			;1221c: 0c000003
-	BNE.S	_12270			;12220: 664e
+	BNE.S	_next_12270		;12220: 664e
 	MOVEM.W	(26,A2),D0-D1		;12222: 4caa0003001a
 	CMPI.W	#$000c,(718,A2)		;12228: 0c6a000c02ce
-	BPL.S	_1223E			;1222e: 6a0e
+	BPL.S	_NoSensors_1223E	;1222e: 6a0e
 	TST.W	(32,A4)			;12230: 4a6c0020
-	BNE.S	_12252			;12234: 661c
+	BNE.S	_Sensors_12252		;12234: 661c
 	TST.B	flgBPImpSensors		;12236: 4a390002e43a
-	BNE.S	_12252			;1223c: 6614
-_1223E:
-	LEA	ptr32220,A0		;1223e: 41f900032220
+	BNE.S	_Sensors_12252		;1223c: 6614
+_NoSensors_1223E:
+	LEA	sprSensorSmall,A0	;1223e: 41f900032220
 	MOVEQ	#43,D2			;12244: 742b
 	MOVEQ	#4,D6			;12246: 7c04
 	SUBI.W	#$0020,D0		;12248: 04400020
 	SUBI.W	#$0016,D1		;1224c: 04410016
 	BRA.S	_12264			;12250: 6012
-_12252:
-	LEA	ptr32378,A0		;12252: 41f900032378
+_Sensors_12252:
+	LEA	sprSensorLarge,A0	;12252: 41f900032378
 	MOVEQ	#87,D2			;12258: 7457
 	MOVEQ	#6,D6			;1225a: 7c06
 	SUBI.W	#$0030,D0		;1225c: 04400030
@@ -23714,8 +23766,8 @@ _12252:
 _12264:
 	MOVEA.L	A0,A2			;12264: 2448
 	MOVEA.L	ptrBuff05,A1		;12266: 22790000053e
-	BSR.W	_0C916			;1226c: 6100a6a8
-_12270:
+	BSR.W	_DrawGfx_0C916		;1226c: 6100a6a8
+_next_12270:
 	MOVE.W	(A7)+,D2		;12270: 341f
 	MOVEA.L	(A7)+,A4		;12272: 285f
 	MOVEA.L	(A7)+,A2		;12274: 245f
@@ -23727,7 +23779,7 @@ _12270:
 	MOVE.B	D0,flg2E482		;1228c: 13c00002e482
 	RTS				;12292: 4e75
 _12294:
-	MOVE.W	data2E090,D0		;12294: 30390002e090
+	MOVE.W	dataAst2E090,D0		;12294: 30390002e090
 	CMPI.W	#$0019,D0		;1229a: 0c400019
 	BPL.S	_122A2			;1229e: 6a02
 	MOVEQ	#25,D0			;122a0: 7019
@@ -23738,9 +23790,9 @@ _122A2:
 	BEQ.S	_122B4			;122ae: 6704
 	MOVE.W	#$00e1,D0		;122b0: 303c00e1
 _122B4:
-	MOVE.W	D0,data2E090		;122b4: 33c00002e090
+	MOVE.W	D0,dataAst2E090		;122b4: 33c00002e090
 	MOVE.W	#$00e1,D0		;122ba: 303c00e1
-	SUB.W	data2E090,D0		;122be: 90790002e090
+	SUB.W	dataAst2E090,D0		;122be: 90790002e090
 	ASR.W	#1,D0			;122c4: e240
 	EXT.L	D0			;122c6: 48c0
 	MOVE.W	D0,data2E08E		;122c8: 33c00002e08e
@@ -23751,13 +23803,13 @@ _122B4:
 	SF	(A0)			;122e0: 51d0
 	MOVEQ	#6,D7			;122e2: 7e06
 	MOVEA.L	ptrCurrentAst,A0	;122e4: 20790002de58
-	MOVE.W	data2E090,D6		;122ea: 3c390002e090
+	MOVE.W	dataAst2E090,D6		;122ea: 3c390002e090
 	BSR.W	_13804			;122f0: 61001512
 	TST.B	flgBPMislGuidance	;122f4: 4a390002e43d
 	BEQ.S	ret1232A		;122fa: 672e
 	LEA	ptr1C8F4,A0		;122fc: 41f90001c8f4
 	MOVEA.L	ptrBuff00,A1		;12302: 22790000052a
-	MOVEM.W	unk00760,D0-D1		;12308: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;12308: 4cb9000300000760
 	SUBI.W	#$0020,D0		;12310: 04400020
 	BPL.S	_1231A			;12314: 6a04
 	ADDI.W	#$0024,D0		;12316: 06400024
@@ -23766,7 +23818,7 @@ _1231A:
 	BPL.S	_12324			;1231e: 6a04
 	ADDI.W	#$0014,D1		;12320: 06410014
 _12324:
-	JSR	_07310			;12324: 4eb900007310
+	JSR	_DisplayText		;12324: 4eb900007310
 ret1232A:
 	RTS				;1232a: 4e75
 _1232C:
@@ -23896,33 +23948,33 @@ loop1246C:
 	DBF	D7,loop1246C		;1250c: 51cfff5e
 	MOVE.L	intRNG0,intRNG2		;12510: 23f900000c5800000c5c
 	RTS				;1251a: 4e75
-_1251C:
+_Screen5_1251C:
 	MOVE.B	#$02,intPointer		;1251c: 13fc00020002e48c
-	MOVE.W	data2E484,-(A7)		;12524: 3f390002e484
-	CLR.W	data2E484		;1252a: 42790002e484
+	MOVE.W	intAsteroidFacing,-(A7)	;12524: 3f390002e484
+	CLR.W	intAsteroidFacing	;1252a: 42790002e484
 _12530:
-	SF	flg2E48B		;12530: 51f90002e48b
+	SF	flgRedraw		;12530: 51f90002e48b
 	JSR	_06440			;12536: 4eb900006440
 	BSR.W	_0DFF2			;1253c: 6100bab4
 	MOVEA.L	ptrBuff02,A0		;12540: 207900000532
 	JSR	_056A6			;12546: 4eb9000056a6
-	JSR	_06840			;1254c: 4eb900006840
+	JSR	_RandomScreenCoordsThing_06840 ;1254c: 4eb900006840
 	MOVE.L	data2DEBC,D0		;12552: 20390002debc
 	BEQ.S	_12574			;12558: 671a
-	MOVE.L	D0,data1AFB2		;1255a: 23c00001afb2
-	MOVE.L	data2DEBC,data1AFD2	;12560: 23f90002debc0001afd2
-	MOVE.L	data2DEC0,data1B032	;1256a: 23f90002dec00001b032
+	MOVE.L	D0,LAB_10C6		;1255a: 23c00001afb2
+	MOVE.L	data2DEBC,LAB_10C7	;12560: 23f90002debc0001afd2
+	MOVE.L	data2DEC0,LAB_10CA	;1256a: 23f90002dec00001b032
 _12574:
-	LEA	ptr1AF96,A0		;12574: 41f90001af96
+	LEA	palette,A0		;12574: 41f90001af96
 	JSR	_053CA			;1257a: 4eb9000053ca
 	BRA.S	_12594			;12580: 6012
 _12582:
-	TST.B	flg2E48B		;12582: 4a390002e48b
+	TST.B	flgRedraw		;12582: 4a390002e48b
 	BNE.S	_12530			;12588: 66a6
-	CLR.W	data2E484		;1258a: 42790002e484
+	CLR.W	intAsteroidFacing	;1258a: 42790002e484
 	BSR.W	_13B3E			;12590: 610015ac
 _12594:
-	MOVEA.L	ptr2DEC4,A6		;12594: 2c790002dec4
+	MOVEA.L	ptrFleet_2DEC4,A6	;12594: 2c790002dec4
 	MOVEQ	#0,D0			;1259a: 7000
 	MOVE.B	(29,A6),D0		;1259c: 102e001d
 	ASL.L	#5,D0			;125a0: eb80
@@ -23933,12 +23985,12 @@ _12594:
 	BNE.S	_125C6			;125b2: 6612
 	TST.L	(8,A6)			;125b4: 4aae0008
 	BNE.S	_125C6			;125b8: 660c
-	MOVE.B	#$04,intScrn3		;125ba: 13fc00040002e488
+	MOVE.B	#$04,intNewScreen	;125ba: 13fc00040002e488
 	BRA.W	_125CA			;125c2: 60000006
 _125C6:
 	BSR.W	_0CF1E			;125c6: 6100a956
 _125CA:
-	MOVE.B	intScrn3,D0		;125ca: 10390002e488
+	MOVE.B	intNewScreen,D0		;125ca: 10390002e488
 	BNE.W	_1269E			;125d0: 660000cc
 	MOVEA.L	ptrBuff02,A5		;125d4: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;125da: 2c790000052a
@@ -23947,35 +23999,35 @@ _125CA:
 	JSR	_07884			;125ea: 4eb900007884
 	JSR	_056D0			;125f0: 4eb9000056d0
 	MOVEQ	#2,D0			;125f6: 7002
-	JSR	_00BB8			;125f8: 4eb900000bb8
+	JSR	_Wait			;125f8: 4eb900000bb8
 	TST.B	flg2E09E		;125fe: 4a390002e09e
 	BEQ.S	_12622			;12604: 671c
-	TST.L	lUnknown54		;12606: 4ab90002de5c
+	TST.L	lUnknownSat54		;12606: 4ab90002de5c
 	BEQ.S	_12622			;1260c: 6714
 	SF	flg2E09E		;1260e: 51f90002e09e
-	SF	intScrn2		;12614: 51f90002e487
+	SF	intPrevScreen		;12614: 51f90002e487
 	JSR	_FleetWin		;1261a: 4eb90000bc1a
 	BRA.S	_125CA			;12620: 60a8
 _12622:
 	MOVE.B	flg2E47C,D0		;12622: 10390002e47c
-	BEQ.S	_12658			;12628: 672e
+	BEQ.S	_Hotkeys_12658		;12628: 672e
 	CMPI.B	#$01,D0			;1262a: 0c000001
 	BNE.S	_1264E			;1262e: 661e
 	MOVE.B	#$02,flg2E47C		;12630: 13fc00020002e47c
 	MOVEA.L	ptr2DEB4,A6		;12638: 2c790002deb4
 	JSR	_0B312			;1263e: 4eb90000b312
-	ST	flg2E48B		;12644: 50f90002e48b
+	ST	flgRedraw		;12644: 50f90002e48b
 	BRA.W	_12582			;1264a: 6000ff36
 _1264E:
 	JSR	_FleetWin		;1264e: 4eb90000bc1a
 	BRA.W	_12582			;12654: 6000ff2c
-_12658:
+_Hotkeys_12658:
 	MOVE.B	MouseBtn,D0		;12658: 103900000766
 	BEQ.S	_12674			;1265e: 6714
 	BTST	#0,D0			;12660: 08000000
-	BNE.S	_12658			;12664: 66f2
+	BNE.S	_Hotkeys_12658		;12664: 66f2
 	LEA	ptr1F1EC,A0		;12666: 41f90001f1ec
-	BSR.W	_110E0			;1266c: 6100ea72
+	BSR.W	_Button3_110E0		;1266c: 6100ea72
 	BRA.W	_12582			;12670: 6000ff10
 _12674:
 	MOVE.B	InKey,D0		;12674: 103900000764
@@ -23986,12 +24038,12 @@ _12674:
 	BMI.W	_12582			;12688: 6b00fef8
 	CMPI.B	#$5a,D0			;1268c: 0c00005a
 	BPL.W	_12582			;12690: 6a00fef0
-	JSR	_02590			;12694: 4eb900002590
+	JSR	_Hotkeys_02590		;12694: 4eb900002590
 	BRA.W	_12582			;1269a: 6000fee6
 _1269E:
-	MOVE.W	(A7)+,data2E484		;1269e: 33df0002e484
+	MOVE.W	(A7)+,intAsteroidFacing	;1269e: 33df0002e484
 	MOVEQ	#0,D1			;126a4: 7200
-	MOVE.L	D1,ptr2DEC4		;126a6: 23c10002dec4
+	MOVE.L	D1,ptrFleet_2DEC4	;126a6: 23c10002dec4
 	MOVE.L	D1,ptr2DEC8		;126ac: 23c10002dec8
 	RTS				;126b2: 4e75
 _DailyComet:
@@ -24066,7 +24118,7 @@ _12774:
 ; Sound O: Comet
 ; comet sound
 	MOVEQ	#15,D0			;1277c: 700f
-	JSR	_PlaySound_Daily	;1277e: 4eb90001a36c
+	JSR	_PlaySoundLoop		;1277e: 4eb90001a36c
 	MOVE.W	intCometHoriz,D0	;12784: 30390002e096
 	MOVE.W	#$0083,D2		;1278a: 343c0083
 	ADD.B	data2E09A,D2		;1278e: d4390002e09a
@@ -24077,14 +24129,14 @@ _12774:
 _127AA:
 	MOVEA.L	ptrBuff00,A1		;127aa: 22790000052a
 	MULU	#$000a,D2		;127b0: c4fc000a
-	LEA	ptr1D8F6,A2		;127b4: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;127b4: 45f90001d8f6
 	ADDA.W	D2,A2			;127ba: d4c2
 	MOVE.W	(8,A2),D2		;127bc: 342a0008
 	MOVEA.L	(A2),A0			;127c0: 2052
 	MOVEA.L	(4,A2),A2		;127c2: 246a0004
 	MOVEQ	#2,D6			;127c6: 7c02
 	SUB.W	D2,D1			;127c8: 9242
-	BSR.W	_0C916			;127ca: 6100a14a
+	BSR.W	_DrawGfx_0C916		;127ca: 6100a14a
 ret127CE:
 	RTS				;127ce: 4e75
 _127D0:
@@ -24145,11 +24197,15 @@ _1283A:
 	MOVEQ	#0,D0			;12844: 7000
 ret12846:
 	RTS				;12846: 4e75
-_12848:
+_CountAsteroids:
+; Returns:
+; d1 = Player asteroids known to enemy(?)
+; d2 = Alien asteroid count
+; d3 = Player asteroid count
 	MOVEA.L	ptrBuff12_Asteroids,A0	;12848: 20790000055a
-	LEA	ptr1F856,A1		;1284e: 43f90001f856
-	LEA	ptr1F8BA,A2		;12854: 45f90001f8ba
-	LEA	ptr1F91E,A3		;1285a: 47f90001f91e
+	LEA	arrPlayerAstsKnown,A1	;1284e: 43f90001f856
+	LEA	arrAlienAsts,A2		;12854: 45f90001f8ba
+	LEA	arrPlayerAsts,A3	;1285a: 47f90001f91e
 	MOVEQ	#0,D1			;12860: 7200
 	MOVEQ	#0,D2			;12862: 7400
 	MOVEQ	#0,D3			;12864: 7600
@@ -24166,22 +24222,27 @@ _1287A:
 	ANDI.B	#$03,D4			;1287e: 02040003
 	CMPI.B	#$03,D4			;12882: 0c040003
 	BNE.S	_12898			;12886: 6610
+; ast[89] bits 1 and 2 set
+; Occupied and viewable to player
 	MOVE.L	A0,(A3)+		;12888: 26c8
 	ADDQ.B	#1,D3			;1288a: 5203
 	BTST	#3,(90,A0)		;1288c: 08280003005a
 	BEQ.S	_12898			;12892: 6704
+; ast[90] bit 3 set
+; known to enemy?
 	MOVE.L	A0,(A1)+		;12894: 22c8
 	ADDQ.B	#1,D1			;12896: 5201
 _12898:
 	LEA	(750,A0),A0		;12898: 41e802ee
 	DBF	D0,loop12868		;1289c: 51c8ffca
 	MOVEQ	#-1,D0			;128a0: 70ff
+; dummy asteroid entries FFFF FFFF
 	MOVE.L	D0,(A1)			;128a2: 2280
 	MOVE.L	D0,(A2)			;128a4: 2480
 	MOVE.L	D0,(A3)			;128a6: 2680
-	MOVE.W	D1,data2E054		;128a8: 33c10002e054
-	MOVE.W	D1,data2E052		;128ae: 33c10002e052
-	MOVE.W	D2,intAst2E056		;128b4: 33c20002e056
+	MOVE.W	D1,intOurAstsKnownUnused ;128a8: 33c10002e054
+	MOVE.W	D1,intOurAstsKnown	;128ae: 33c10002e052
+	MOVE.W	D2,intAlienAstCount	;128b4: 33c20002e056
 	RTS				;128ba: 4e75
 _ShipAct15_NewAst:
 	MOVEQ	#24,D0			;128bc: 7018
@@ -24298,8 +24359,8 @@ loop129D2:
 	MOVEQ	#1,D3			;12a24: 7601
 	MOVEQ	#6,D4			;12a26: 7806
 ; Known to player, since you're now close enough to hit it,
-; so you're close enough to see it, perhaps. But your radar range
-; is already enough to spot anything that close.
+; so you're close enough to see it, perhaps. But your radar
+; range is already enough to spot anything that close.
 	BSET	#4,(89,A1)		;12a28: 08e900040059
 	JSR	_MessageWin		;12a2e: 4eb900008fd0
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;12a34: 4cdf7fff
@@ -24339,22 +24400,24 @@ next12A8C:
 _12A98:
 	MOVEQ	#-1,D0			;12a98: 70ff
 	RTS				;12a9a: 4e75
-_12A9C:
+_MoveAsteroids:
 ; Must be move asteroids since it checks for iceman cheat
+; This is the only code which checks it
 	TST.B	flgIceman		;12a9c: 4a390001d4b7
 	BNE.W	ret12B32		;12aa2: 6600008e
-	TST.W	data2E00A		;12aa6: 4a790002e00a
+; move asteroids
+	TST.W	astCount		;12aa6: 4a790002e00a
 	BEQ.W	_12B2E			;12aac: 67000080
-	MOVEA.L	lUnkAst51,A0		;12ab0: 20790002de4c
+	MOVEA.L	ptrAsteroids2de4c,A0	;12ab0: 20790002de4c
 	LEA	(750,A0),A0		;12ab6: 41e802ee
-	ADDQ.B	#1,flgUnknown63		;12aba: 52390002e00c
-	CMPI.B	#$18,flgUnknown63	;12ac0: 0c3900180002e00c
+	ADDQ.B	#1,intAstUnknown63	;12aba: 52390002e00c
+	CMPI.B	#$18,intAstUnknown63	;12ac0: 0c3900180002e00c
 	BMI.S	_12ADA			;12ac8: 6b10
 	BSR.W	_12916			;12aca: 6100fe4a
 	MOVEA.L	ptrBuff12_Asteroids,A0	;12ace: 20790000055a
-	SF	flgUnknown63		;12ad4: 51f90002e00c
+	SF	intAstUnknown63		;12ad4: 51f90002e00c
 _12ADA:
-	MOVE.L	A0,lUnkAst51		;12ada: 23c80002de4c
+	MOVE.L	A0,ptrAsteroids2de4c	;12ada: 23c80002de4c
 	TST.B	(25,A0)			;12ae0: 4a280019
 	BMI.S	ret12B32		;12ae4: 6b4c
 	TST.B	(89,A0)			;12ae6: 4a280059
@@ -24386,8 +24449,8 @@ _12B2E:
 	BSR.W	_12E16			;12b2e: 610002e6
 ret12B32:
 	RTS				;12b32: 4e75
-_12B34:
-	CMPI.W	#$0018,data2E00A	;12b34: 0c7900180002e00a
+_PlaceEmptyAst:
+	CMPI.W	#$0018,astCount		;12b34: 0c7900180002e00a
 	BEQ.S	ret12B8E		;12b3c: 6750
 	MOVEQ	#22,D0			;12b3e: 7016
 	JSR	_RandInt		;12b40: 4eb900000c0c
@@ -24473,7 +24536,7 @@ _12BF6:
 	MOVE.B	(8,A1,D7.W),D2		;12c08: 14317008
 	MOVE.B	D2,(35,A0)		;12c0c: 11420023
 	LSL.W	#2,D2			;12c10: e54a
-	LEA	arrAstMove1F6C6,A1	;12c12: 43f90001f6c6
+	LEA	arrAstDirection,A1	;12c12: 43f90001f6c6
 	MOVEM.W	(0,A1,D2.W),D0-D1	;12c18: 4cb100032000
 	MOVEM.W	D0-D1,(56,A0)		;12c1e: 48a800030038
 	MOVEQ	#16,D0			;12c24: 7010
@@ -24483,19 +24546,19 @@ _12BF6:
 	MOVE.B	(0,A1,D0.W),(24,A0)	;12c32: 117100000018
 	MOVEQ	#24,D0			;12c38: 7018
 	JSR	_RandInt		;12c3a: 4eb900000c0c
-	MOVE.L	lUnknown52,D2		;12c40: 24390002de50
+	MOVE.L	lAstUnknown52,D2	;12c40: 24390002de50
 _12C46:
 	BSET	D0,D2			;12c46: 01c2
-	BEQ.S	_12C52			;12c48: 6708
+	BEQ.S	_NewAst_12C52		;12c48: 6708
 	SUBQ.B	#1,D0			;12c4a: 5300
 	BPL.S	_12C46			;12c4c: 6af8
 	MOVEQ	#23,D0			;12c4e: 7017
 	BRA.S	_12C46			;12c50: 60f4
-_12C52:
-	MOVE.L	D2,lUnknown52		;12c52: 23c20002de50
+_NewAst_12C52:
+	MOVE.L	D2,lAstUnknown52	;12c52: 23c20002de50
 	MOVE.B	D0,(25,A0)		;12c58: 11400019
 	SF	(89,A0)			;12c5c: 51e80059
-	LEA	ptr1F356,A1		;12c60: 43f90001f356
+	LEA	ptr1f356,A1		;12c60: 43f90001f356
 	MOVE.W	D0,D1			;12c66: 3200
 	MULU	#$000a,D0		;12c68: c0fc000a
 	MOVE.W	(8,A1,D0.W),(36,A0)	;12c6c: 317100080024
@@ -24532,11 +24595,11 @@ _12C52:
 	ADDI.B	#$30,D0			;12cdc: 06000030
 	MOVE.B	D0,(A1)+		;12ce0: 12c0
 	SF	(A1)			;12ce2: 51d1
-	ADDQ.W	#1,data2E00A		;12ce4: 52790002e00a
-	BSR.S	_12CF0			;12cea: 6104
+	ADDQ.W	#1,astCount		;12ce4: 52790002e00a
+	BSR.S	_InitOre		;12cea: 6104
 	MOVEA.L	(A7)+,A0		;12cec: 205f
 	RTS				;12cee: 4e75
-_12CF0:
+_InitOre:
 ; Init ore new asteroid
 ; Ore        |   % | Min | Max
 ; -----------|-----|-----|----
@@ -24555,18 +24618,19 @@ _12CF0:
 	MOVEQ	#9,D1			;12cfa: 7209
 loop12CFC:
 	CLR.W	(A2)			;12cfc: 4252
-; Each ore type has a random percentage chance of appearing in the asteroid
-; (see table). Empirical testing suggests that this is accurate, and dry run
-; agrees that e.g. selenium has an 80% chance to continue and a 20% chance to
-; take the branch and skip.
+; Each ore type has a random percentage chance of appearing
+; in the asteroid (see table). Empirical testing suggests that
+; this is accurate, and dry run agrees that e.g. selenium has
+; an 80% chance to continue and a 20% chance to take the branch
+; and skip.
 	MOVEQ	#100,D0			;12cfe: 7064
 	JSR	_RandInt		;12d00: 4eb900000c0c
 	CMP.W	(A1),D0			;12d06: b051
 	BPL.S	.next_12D20		;12d08: 6a16
-; RandInt(Max-Min) + Min
-; Selenium's minimum appears higher than its maximum, but the RNG appears to
-; only give positive values, so instead of rnd(-399)+500 we get something more
-; like rnd(399)+500 and Selenium is something like 900 max.
+; RandInt(1+Max-Min) + Min
+; Selenium's minimum is higher than its maximum, but the RNG
+; appears to only give positive values, so instead of
+; 500+rnd(-399) we get 500+rnd(399) and Selenium is 898 max.
 	MOVE.W	(4,A1),D0		;12d0a: 30290004
 	SUB.W	(2,A1),D0		;12d0e: 90690002
 	ADDQ.W	#1,D0			;12d12: 5240
@@ -24679,18 +24743,18 @@ _12E16:
 	BMI.S	_12E4C			;12e28: 6b22
 	MOVE.W	D0,-(A7)		;12e2a: 3f00
 	MOVEQ	#0,D1			;12e2c: 7200
-	BSR.W	_12B34			;12e2e: 6100fd04
+	BSR.W	_PlaceEmptyAst		;12e2e: 6100fd04
 	MOVE.W	(A7)+,D0		;12e32: 301f
 	SUBQ.B	#1,D0			;12e34: 5300
 	BMI.S	_12E4C			;12e36: 6b14
 	MOVE.W	D0,-(A7)		;12e38: 3f00
 	MOVEQ	#0,D1			;12e3a: 7200
-	BSR.W	_12B34			;12e3c: 6100fcf6
+	BSR.W	_PlaceEmptyAst		;12e3c: 6100fcf6
 	MOVE.W	(A7)+,D0		;12e40: 301f
 	SUBQ.B	#1,D0			;12e42: 5300
 	BMI.S	_12E4C			;12e44: 6b06
 	MOVEQ	#0,D1			;12e46: 7200
-	BSR.W	_12B34			;12e48: 6100fcea
+	BSR.W	_PlaceEmptyAst		;12e48: 6100fcea
 _12E4C:
 	MOVEA.L	(A7)+,A0		;12e4c: 205f
 	RTS				;12e4e: 4e75
@@ -24700,6 +24764,8 @@ _12E50:
 	ANDI.B	#$03,D1			;12e58: 02010003
 	CMPI.B	#$03,D1			;12e5c: 0c010003
 	BNE.S	_12E70			;12e60: 660e
+; If occupied and viewable to player
+; tell them a colony asteroid has been destroyed
 	MOVE.L	A0,D1			;12e62: 2208
 	MOVEQ	#0,D2			;12e64: 7400
 	MOVEQ	#1,D3			;12e66: 7601
@@ -24713,15 +24779,16 @@ _12E76:
 	MOVEQ	#0,D0			;12e7a: 7000
 	MOVE.B	(25,A0),D0		;12e7c: 10280019
 	MOVE.L	D0,D6			;12e80: 2c00
-	MOVE.L	lUnknown52,D1		;12e82: 22390002de50
+	MOVE.L	lAstUnknown52,D1	;12e82: 22390002de50
 	BCLR	D0,D1			;12e88: 0181
-	MOVE.L	D1,lUnknown52		;12e8a: 23c10002de50
-	SUBQ.W	#1,data2E00A		;12e90: 53790002e00a
+	MOVE.L	D1,lAstUnknown52	;12e8a: 23c10002de50
+	SUBQ.W	#1,astCount		;12e90: 53790002e00a
 	ST	flg2E00E		;12e96: 50f90002e00e
 	CMPI.B	#$04,intScreen		;12e9c: 0c3900040002e486
 	BNE.S	_12ED4			;12ea4: 662e
 	BTST	#4,(89,A0)		;12ea6: 082800040059
 	BEQ.S	_12ED4			;12eac: 6726
+; if asteroid known to player:
 	LEA	ptr2E012,A1		;12eae: 43f90002e012
 	MOVEQ	#7,D7			;12eb4: 7e07
 loop12EB6:
@@ -24848,9 +24915,9 @@ loop12FE6:
 _12FF4:
 	MOVE.L	A0,ptrCurrentAst	;12ff4: 23c80002de58
 	BSR.W	_138E6			;12ffa: 610008ea
-	MOVE.L	A6,ptr2DEEC		;12ffe: 23ce0002deec
-	MOVE.L	A5,ptr2DEF0		;13004: 23cd0002def0
-	MOVE.L	A4,ptr2DEF4		;1300a: 23cc0002def4
+	MOVE.L	A6,ptrAstMap_2DEEC	;12ffe: 23ce0002deec
+	MOVE.L	A5,ptrAstBldg_2DEF0	;13004: 23cd0002def0
+	MOVE.L	A4,ptrBldCount_2DEF4	;1300a: 23cc0002def4
 	MOVE.B	(25,A0),flgUnknown64	;13010: 13e800190002e00d
 	MOVEA.L	(A7)+,A0		;13018: 205f
 _1301A:
@@ -24861,18 +24928,18 @@ _1301A:
 	RTS				;1302c: 4e75
 _1302E:
 ; asteroid explosion?
-	MOVE.W	#$0fff,data2E0A8	;1302e: 33fc0fff0002e0a8
-	BSR.W	_0FCD6			;13036: 6100cc9e
+	MOVE.W	#$0fff,screenFlashColor	;1302e: 33fc0fff0002e0a8
+	BSR.W	_WarheadFlash		;13036: 6100cc9e
 	MOVEA.L	ptrBuff02,A0		;1303a: 207900000532
 	JSR	_056A6			;13040: 4eb9000056a6
-	JSR	_06840			;13046: 4eb900006840
+	JSR	_RandomScreenCoordsThing_06840 ;13046: 4eb900006840
 	MOVEA.L	ptrBuff02,A5		;1304c: 2a7900000532
 	MOVEA.L	ptrBuff00,A6		;13052: 2c790000052a
 	JSR	_05540			;13058: 4eb900005540
 	JSR	_07884			;1305e: 4eb900007884
-	LEA	ptr1AF16,A0		;13064: 41f90001af16
-	LEA	ptr1AF96,A1		;1306a: 43f90001af96
-	JSR	_0596E			;13070: 4eb90000596e
+	LEA	paletteFlash,A0		;13064: 41f90001af16
+	LEA	palette,A1		;1306a: 43f90001af96
+	JSR	_ScreenFlash_0596E	;13070: 4eb90000596e
 	JSR	_BigExplodeSound	;13076: 4eb90001a4e4
 	MOVEQ	#59,D2			;1307c: 743b
 	LEA	ptr1FA0A,A0		;1307e: 41f90001fa0a
@@ -24899,8 +24966,8 @@ _130C2:
 	MOVE.W	D6,-(A7)		;130c2: 3f06
 	TST.W	unk059D0		;130c4: 4a79000059d0
 	BNE.S	_130E0			;130ca: 6614
-	LEA	ptr1AF16,A0		;130cc: 41f90001af16
-	LEA	ptr1AF96,A1		;130d2: 43f90001af96
+	LEA	paletteFlash,A0		;130cc: 41f90001af16
+	LEA	palette,A1		;130d2: 43f90001af96
 	MOVEQ	#31,D0			;130d8: 701f
 loop130DA:
 	MOVE.W	(A0)+,(A1)+		;130da: 32d8
@@ -24918,14 +24985,14 @@ loop13100:
 	MOVE.W	(A0),D2			;13104: 3410
 	BMI.S	_13172			;13106: 6b6a
 	ADDI.W	#$00ff,D2		;13108: 064200ff
-	LEA	ptr1D8F6,A1		;1310c: 43f90001d8f6
+	LEA	arrShipSpriteList,A1	;1310c: 43f90001d8f6
 	MULU	#$000a,D2		;13112: c4fc000a
 	ADDA.L	D2,A1			;13116: d3c2
 	MOVEA.L	(A1)+,A3		;13118: 2659
 	MOVEA.L	(A1)+,A2		;1311a: 2459
 	MOVE.W	(A1),D2			;1311c: 3411
 	MOVE.W	(6,A0),D0		;1311e: 30280006
-	LEA	arrAstMove1F6C6,A1	;13122: 43f90001f6c6
+	LEA	arrAstDirection,A1	;13122: 43f90001f6c6
 	ASL.W	#2,D0			;13128: e540
 	ADDA.W	D0,A1			;1312a: d2c0
 	MOVE.W	(A1),D0			;1312c: 3011
@@ -24951,7 +25018,7 @@ _1315C:
 	MOVEA.L	ptrBuff00,A1		;1315e: 22790000052a
 	ST	flg131A4		;13164: 50f9000131a4
 	MOVEA.L	A3,A0			;1316a: 204b
-	JSR	_0C916			;1316c: 4eb90000c916
+	JSR	_DrawGfx_0C916		;1316c: 4eb90000c916
 _13172:
 	MOVEA.L	(A7)+,A0		;13172: 205f
 	MOVE.W	(A7)+,D7		;13174: 3e1f
@@ -24964,8 +25031,8 @@ _13172:
 	TST.B	flg131A4		;13188: 4a39000131a4
 	BNE.W	_130C2			;1318e: 6600ff32
 _13192:
-	MOVE.B	#$0b,data2E476		;13192: 13fc000b0002e476
-	MOVE.B	#$04,intScrn3		;1319a: 13fc00040002e488
+	MOVE.B	#$0b,textcolor		;13192: 13fc000b0002e476
+	MOVE.B	#$04,intNewScreen	;1319a: 13fc00040002e488
 	RTS				;131a2: 4e75
 flg131A4:
 	DC.W	$0000			;131a4
@@ -24993,7 +25060,7 @@ loop131D2:
 	ASR.W	#2,D0			;131ea: e440
 ; Enough damage to destroy building with detonation
 	MOVEQ	#120,D7			;131ec: 7e78
-	BSR.W	_DetonateBldg_0F5E4	;131ee: 6100c3f4
+	BSR.W	_DestroyBldg		;131ee: 6100c3f4
 	MOVEM.L	(A7)+,D2/A0		;131f2: 4cdf0104
 _131F6:
 	LEA	(14,A0),A0		;131f6: 41e8000e
@@ -25010,13 +25077,13 @@ loop1321C:
 	MOVE.W	(2,A6),D2		;1321c: 342e0002
 	BMI.S	_13228			;13220: 6b06
 	CMPI.W	#$003d,D2		;13222: 0c42003d
-	BMI.S	_13238			;13226: 6b10
+	BMI.S	LAB_0BB3		;13226: 6b10
 _13228:
 	MOVEQ	#3,D0			;13228: 7003
 	JSR	_RandInt		;1322a: 4eb900000c0c
 	ADDI.W	#$002d,D0		;13230: 0640002d
 	MOVE.W	D0,(2,A6)		;13234: 3d400002
-_13238:
+LAB_0BB3:
 	AND.L	D1,(A6)+		;13238: c39e
 	DBF	D7,loop1321C		;1323a: 51cfffe0
 	MOVEA.L	(A7)+,A0		;1323e: 205f
@@ -25049,6 +25116,7 @@ _13288:
 	BEQ.S	_132B4			;1329a: 6718
 	MOVEA.L	D0,A6			;1329c: 2c40
 _1329E:
+; Destroy Swixaran cloak generator station
 	CMPI.B	#$4b,(8,A6)		;1329e: 0c2e004b0008
 	BEQ.S	_132B0			;132a4: 670a
 	MOVE.L	(0,A6),D2		;132a6: 242e0000
@@ -25059,7 +25127,7 @@ _132B0:
 	BSR.W	_ShipAct0d_Expl		;132b0: 6100b2cc
 _132B4:
 	MOVEA.L	ptr13338,A0		;132b4: 207900013338
-	BSR.W	_16CF4			;132ba: 61003a38
+	BSR.W	_AliAstEffects		;132ba: 61003a38
 _132BE:
 	MOVEA.L	ptr1333C,A0		;132be: 20790001333c
 	MOVE.B	(89,A0),D2		;132c4: 14280059
@@ -25101,7 +25169,7 @@ _13322:
 	MOVEA.L	ptr1333C,A2		;13322: 24790001333c
 	BSR.W	_19382			;13328: 61006058
 	MOVEA.L	ptr1333C,A0		;1332c: 20790001333c
-	BSR.W	_16CF4			;13332: 610039c0
+	BSR.W	_AliAstEffects		;13332: 610039c0
 	BRA.S	_132BE			;13336: 6086
 ptr13338:
 	DS.L	1			;13338
@@ -25160,14 +25228,14 @@ _1336A:
 	MOVE.W	#$00fb,intOutroMsg	;13392: 33fc00fb0002defc
 	MOVE.L	#strOutro3MGL,ptrOutroImg ;1339a: 23fc0001ae9e0002defe
 _133A4:
-	MOVE.B	#$04,flgUnknown62	;133a4: 13fc00040002df05
+	MOVE.B	#$04,intAlienColonies	;133a4: 13fc00040002df05
 	RTS				;133ac: 4e75
 _133AE:
 	TST.B	D2			;133ae: 4a02
 	BNE.S	ret133CC		;133b0: 661a
 	MOVE.W	#$00fa,intOutroMsg	;133b2: 33fc00fa0002defc
 	MOVE.L	#strOutro2MGL,ptrOutroImg ;133ba: 23fc0001ae840002defe
-	MOVE.B	#$04,flgUnknown62	;133c4: 13fc00040002df05
+	MOVE.B	#$04,intAlienColonies	;133c4: 13fc00040002df05
 ret133CC:
 	RTS				;133cc: 4e75
 _133CE:
@@ -25206,7 +25274,7 @@ loop133FC:
 	BNE.S	_13446			;13432: 6612
 	CMPA.L	ptrEnemyHome,A2		;13434: b5f90002de60
 	BNE.S	_13446			;1343a: 660a
-	BTST	#2,bAlienSpec		;1343c: 083900020002e48d
+	BTST	#2,bAlienSpecial	;1343c: 083900020002e48d
 	BNE.S	_next13480		;13444: 663a
 _13446:
 	MOVE.L	A2,-(A7)		;13446: 2f0a
@@ -25236,7 +25304,7 @@ _next13480:
 	DBF	D7,loop133FC		;13484: 51cfff76
 	RTS				;13488: 4e75
 _1348A:
-	LEA	ptr1F356,A0		;1348a: 41f90001f356
+	LEA	ptr1f356,A0		;1348a: 41f90001f356
 	MOVEQ	#0,D0			;13490: 7000
 	MOVE.B	(25,A2),D0		;13492: 102a0019
 	BMI.W	ret13618		;13496: 6b000180
@@ -25255,7 +25323,7 @@ _134AC:
 	ADD.B	D1,D0			;134c4: d001
 	CMPI.B	#$08,D0			;134c6: 0c000008
 	BMI.S	_134E8			;134ca: 6b1c
-_134CC:
+_134E8:
 	SUBQ.B	#8,D0			;134cc: 5100
 	BRA.S	_134E8			;134ce: 6018
 _134D0:
@@ -25264,11 +25332,11 @@ _134D0:
 	ADD.B	D1,D0			;134d6: d001
 	CMPI.B	#$10,D0			;134d8: 0c000010
 	BMI.S	_134E8			;134dc: 6b0a
-	BRA.S	_134CC			;134de: 60ec
+	BRA.S	_134E8			;134de: 60ec
 _134E0:
 	ADD.B	D1,D0			;134e0: d001
 	CMPI.B	#$18,D0			;134e2: 0c000018
-	BPL.S	_134CC			;134e6: 6ae4
+	BPL.S	_134E8			;134e6: 6ae4
 _134E8:
 	MULU	#$000a,D0		;134e8: c0fc000a
 	ADDA.W	D0,A0			;134ec: d0c0
@@ -25281,7 +25349,7 @@ _134E8:
 	ADDI.W	#$0020,D2		;13500: 06420020
 	MULU	#$000a,D2		;13504: c4fc000a
 	MOVEM.L	D0-D1/A1-A2,-(A7)	;13508: 48e7c060
-	LEA	ptr1D8F6,A2		;1350c: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;1350c: 45f90001d8f6
 	ADDA.W	D2,A2			;13512: d4c2
 	MOVE.W	(8,A2),D2		;13514: 342a0008
 	MOVE.W	D2,D3			;13518: 3602
@@ -25294,7 +25362,7 @@ _13524:
 	MOVEA.L	(A2),A0			;13524: 2052
 	MOVEA.L	(4,A2),A2		;13526: 246a0004
 	MOVEQ	#2,D6			;1352a: 7c02
-	JSR	_0C916			;1352c: 4eb90000c916
+	JSR	_DrawGfx_0C916		;1352c: 4eb90000c916
 	MOVEM.L	(A7)+,D0-D1/A1-A2	;13532: 4cdf0603
 	TST.B	(96,A2)			;13536: 4a2a0060
 	BEQ.S	_13584			;1353a: 6748
@@ -25310,14 +25378,14 @@ _13524:
 	MOVE.W	(28,A2),D1		;1355c: 322a001c
 	ADDQ.W	#2,D0			;13560: 5440
 	ADDQ.W	#8,D1			;13562: 5041
-	LEA	ptr1D8F6,A2		;13564: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;13564: 45f90001d8f6
 	ADDA.W	D2,A2			;1356a: d4c2
 	MOVE.W	(8,A2),D2		;1356c: 342a0008
 	SUB.W	D2,D1			;13570: 9242
 	MOVEA.L	(A2),A0			;13572: 2052
 	MOVEA.L	(4,A2),A2		;13574: 246a0004
 	MOVEQ	#1,D6			;13578: 7c01
-	JSR	_0C916			;1357a: 4eb90000c916
+	JSR	_DrawGfx_0C916		;1357a: 4eb90000c916
 	MOVEM.L	(A7)+,D0-D1/A1-A2	;13580: 4cdf0603
 _13584:
 	MOVE.W	(728,A2),D2		;13584: 342a02d8
@@ -25338,7 +25406,7 @@ _13584:
 	JSR	_0592C			;135ae: 4eb90000592c
 	MOVEM.L	(A7)+,D0-D1/A1		;135b4: 4cdf0203
 	MOVE.W	#$0afa,D2		;135b8: 343c0afa
-	LEA	ptr1D8F6,A2		;135bc: 45f90001d8f6
+	LEA	arrShipSpriteList,A2	;135bc: 45f90001d8f6
 	ADDA.W	D2,A2			;135c2: d4c2
 	MOVE.W	(8,A2),D2		;135c4: 342a0008
 	MOVEA.L	(A2),A0			;135c8: 2052
@@ -25346,16 +25414,16 @@ _13584:
 	MOVEQ	#2,D6			;135ce: 7c02
 	SUBQ.W	#3,D0			;135d0: 5740
 	SUBQ.W	#5,D1			;135d2: 5b41
-	JSR	_0C916			;135d4: 4eb90000c916
+	JSR	_DrawGfx_0C916		;135d4: 4eb90000c916
 	MOVEM.L	(A7)+,D0-D1/A1-A2	;135da: 4cdf0603
 _135DE:
 	MOVE.B	(89,A2),D2		;135de: 142a0059
-	LEA	ptr332AA,A0		;135e2: 41f9000332aa
+	LEA	sprBox,A0		;135e2: 41f9000332aa
 	ANDI.B	#$03,D2			;135e8: 02020003
 	BEQ.S	_13614			;135ec: 6726
 	CMPI.B	#$03,D2			;135ee: 0c020003
 	BEQ.S	_135FA			;135f2: 6706
-	LEA	ptr33282,A0		;135f4: 41f900033282
+	LEA	sprDot,A0		;135f4: 41f900033282
 _135FA:
 	MOVEM.W	(26,A2),D0-D1		;135fa: 4caa0003001a
 	SUBQ.W	#2,D0			;13600: 5540
@@ -25364,14 +25432,14 @@ _135FA:
 	MOVEQ	#5,D2			;13606: 7405
 	MOVEQ	#1,D6			;13608: 7c01
 	MOVE.L	A1,-(A7)		;1360a: 2f09
-	JSR	_0C916			;1360c: 4eb90000c916
+	JSR	_DrawGfx_0C916		;1360c: 4eb90000c916
 	MOVEA.L	(A7)+,A1		;13612: 225f
 _13614:
 	MOVEM.L	(A7)+,D2/A2		;13614: 4cdf0404
 ret13618:
 	RTS				;13618: 4e75
 _1361A:
-	MOVEM.W	unk00760,D0-D1		;1361a: 4cb9000300000760
+	MOVEM.W	intMouseX,D0-D1		;1361a: 4cb9000300000760
 	MOVEA.L	ptrBuff12_Asteroids,A0	;13622: 20790000055a
 	MOVEQ	#23,D2			;13628: 7417
 loop1362A:
@@ -25405,7 +25473,7 @@ _1366A:
 	MOVEQ	#0,D0			;13672: 7000
 	RTS				;13674: 4e75
 _13676:
-	BTST	#7,alien_2E00F		;13676: 083900070002e00f
+	BTST	#7,info_display		;13676: 083900070002e00f
 	BEQ.W	ret1373C		;1367e: 670000bc
 	MOVE.L	ptrCurrentAst,D0	;13682: 20390002de58
 	BEQ.S	_136D6			;13688: 674c
@@ -25417,16 +25485,16 @@ _13676:
 	ADDI.B	#$31,D0			;1369c: 06000031
 	MOVE.B	D0,(A0)			;136a0: 1080
 	SF	(1,A0)			;136a2: 51e80001
-	MOVE.B	#$0b,data2E476		;136a6: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;136a6: 13fc000b0002e476
 	BTST	#1,(90,A2)		;136ae: 082a0001005a
 	BEQ.S	_136BE			;136b4: 6708
-	MOVE.B	#$09,data2E476		;136b6: 13fc00090002e476
+	MOVE.B	#$09,textcolor		;136b6: 13fc00090002e476
 _136BE:
 	MOVEA.L	ptrBuff00,A1		;136be: 22790000052a
 	MOVEM.W	(26,A2),D0-D1		;136c4: 4caa0003001a
 	SUBI.W	#$0010,D1		;136ca: 04410010
 	BMI.S	_136D6			;136ce: 6b06
-	JSR	_07310			;136d0: 4eb900007310
+	JSR	_DisplayText		;136d0: 4eb900007310
 _136D6:
 	MOVE.L	lUnknown53,D0		;136d6: 20390002de54
 	BEQ.S	ret1373C		;136dc: 675e
@@ -25443,20 +25511,20 @@ _136D6:
 	ADDI.B	#$31,D0			;13702: 06000031
 	MOVE.B	D0,(A0)			;13706: 1080
 	SF	(1,A0)			;13708: 51e80001
-	MOVE.B	#$0b,data2E476		;1370c: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;1370c: 13fc000b0002e476
 	BTST	#1,(90,A2)		;13714: 082a0001005a
 	BEQ.S	_13724			;1371a: 6708
-	MOVE.B	#$09,data2E476		;1371c: 13fc00090002e476
+	MOVE.B	#$09,textcolor		;1371c: 13fc00090002e476
 _13724:
 	MOVEA.L	ptrBuff00,A1		;13724: 22790000052a
 	MOVEM.W	(26,A2),D0-D1		;1372a: 4caa0003001a
 	SUBI.W	#$0010,D1		;13730: 04410010
 	BMI.S	ret1373C		;13734: 6b06
-	JSR	_07310			;13736: 4eb900007310
+	JSR	_DisplayText		;13736: 4eb900007310
 ret1373C:
 	RTS				;1373c: 4e75
 _1373E:
-	BTST	#0,alien_2E00F		;1373e: 083900000002e00f
+	BTST	#0,info_display		;1373e: 083900000002e00f
 	BEQ.S	_13780			;13746: 6738
 	MOVE.W	#$8888,data1B68E	;13748: 33fc88880001b68e
 	MOVE.L	ptrCurrentAst,D0	;13750: 20390002de58
@@ -25560,7 +25628,7 @@ loop13842:
 	ASL.W	#3,D3			;1385a: e743
 	ADD.W	D2,D2			;1385c: d442
 	ADD.W	D3,D2			;1385e: d443
-	LEA	ptr1D8F6,A1		;13860: 43f90001d8f6
+	LEA	arrShipSpriteList,A1	;13860: 43f90001d8f6
 	MOVEM.L	(0,A1,D2.W),A0/A2	;13866: 4cf105002000
 	MOVE.W	(8,A1,D2.W),D2		;1386c: 34312008
 	MOVE.W	D2,D3			;13870: 3602
@@ -25570,7 +25638,7 @@ loop13842:
 	MOVEQ	#2,D6			;1387c: 7c02
 	MOVE.L	A4,-(A7)		;1387e: 2f0c
 	MOVE.W	D7,-(A7)		;13880: 3f07
-	JSR	_0C916			;13882: 4eb90000c916
+	JSR	_DrawGfx_0C916		;13882: 4eb90000c916
 	MOVE.W	(A7)+,D7		;13888: 3e1f
 	MOVEA.L	(A7)+,A4		;1388a: 285f
 	ADDQ.W	#1,(4,A4)		;1388c: 526c0004
@@ -25657,7 +25725,7 @@ next_13968:
 	DBF	D7,loop1392C		;1396c: 51cfffbe
 	RTS				;13970: 4e75
 _13972:
-	LEA	ptr1F856,A4		;13972: 49f90001f856
+	LEA	arrPlayerAstsKnown,A4	;13972: 49f90001f856
 	MOVE.W	#$0100,D6		;13978: 3c3c0100
 _1397C:
 	MOVE.L	(A4)+,D0		;1397c: 201c
@@ -25771,13 +25839,14 @@ _Build_13AB4:
 	CMPI.B	#$28,D6			;13ab4: 0c060028
 	BNE.S	_13ACC			;13ab8: 6612
 	SF	(86,A5)			;13aba: 51ed0056
-; Building one reduces this by 100 immediately. Unrest?
+; Building one reduces this by 100 immediately. Unrest
 	SUBI.W	#$0064,(84,A5)		;13abe: 046d00640054
 	BPL.S	_13AF4			;13ac4: 6a2e
 	CLR.W	(84,A5)			;13ac6: 426d0054
 	BRA.S	_13AF4			;13aca: 6028
 _13ACC:
 ; Build a screen generator
+; Sets a screen generators recalc flag
 	CMPI.B	#$0b,D6			;13acc: 0c06000b
 	BNE.S	_13ADA			;13ad0: 6608
 	BSET	#5,(90,A5)		;13ad2: 08ed0005005a
@@ -25798,6 +25867,7 @@ _13AF4:
 	ADD.W	D6,D6			;13af6: dc46
 	ADDQ.W	#1,(0,A4,D6.W)		;13af8: 52746000
 ; Large 4 square buildings
+; Set the other three squares
 	CMPI.W	#$0015,D2		;13afc: 0c420015
 	BMI.W	ret13A62		;13b00: 6b00ff60
 	CMPI.W	#$001b,D2		;13b04: 0c42001b
@@ -25818,8 +25888,8 @@ _13B3E:
 	BNE.W	_13DA0			;13b44: 6600025a
 	TST.B	flg2E09D		;13b48: 4a390002e09d
 	BNE.W	_13DA0			;13b4e: 66000250
-	JSR	_12A9C			;13b52: 4eb900012a9c
-	BTST	#4,data2E45A		;13b58: 083900040002e45a
+	JSR	_MoveAsteroids		;13b52: 4eb900012a9c
+	BTST	#4,bFrameRule		;13b58: 083900040002e45a
 	BEQ.W	_13BC8			;13b60: 67000066
 	TST.B	intMagStorm		;13b64: 4a390002e454
 	BEQ.S	_13B74			;13b6a: 6708
@@ -25829,8 +25899,8 @@ _13B3E:
 _13B74:
 	TST.B	flg2E09E		;13b74: 4a390002e09e
 	BNE.S	_13BA4			;13b7a: 6628
-	MOVE.B	flg2E46E,flg2E46F	;13b7c: 13f90002e46e0002e46f
-	SF	flg2E46E		;13b86: 51f90002e46e
+	MOVE.B	flgDSound1,flgDSound2	;13b7c: 13f90002e46e0002e46f
+	SF	flgDSound1		;13b86: 51f90002e46e
 	MOVEA.L	ptrShips_2DEDC,A6	;13b8c: 2c790002dedc
 	JSR	_0CB2A			;13b92: 4eb90000cb2a
 	MOVEA.L	ptr2DEE4,A6		;13b98: 2c790002dee4
@@ -25841,94 +25911,97 @@ _13BA4:
 	MOVE.B	#$20,unk13DAC		;13bac: 13fc002000013dac
 	BSR.W	_133EA			;13bb4: 6100f834
 _13BB8:
-	BCLR	#4,data2E45A		;13bb8: 08b900040002e45a
-	BCLR	#3,data2E45A		;13bc0: 08b900030002e45a
+	BCLR	#4,bFrameRule		;13bb8: 08b900040002e45a
+	BCLR	#3,bFrameRule		;13bc0: 08b900030002e45a
 _13BC8:
-	BTST	#5,data2E45A		;13bc8: 083900050002e45a
+	BTST	#5,bFrameRule		;13bc8: 083900050002e45a
 	BEQ.W	_13C30			;13bd0: 6700005e
 	BSR.W	_DailyShipMove		;13bd4: 61005b60
 	BSR.W	_DailyComet		;13bd8: 6100eada
-	BSR.W	_Daily12		;13bdc: 6100426e
+	BSR.W	_DailyAliBuild		;13bdc: 6100426e
 	BSR.W	_DailyMissileCon	;13be0: 610003b0
 	BSR.W	_DailySatSilo		;13be4: 61000480
 	BSR.W	_DailyEvents		;13be8: 610018ae
-	TST.B	flgUnknown62		;13bec: 4a390002df05
+	TST.B	intAlienColonies	;13bec: 4a390002df05
 	BEQ.S	_13C04			;13bf2: 6710
-	SUBQ.B	#1,flgUnknown62		;13bf4: 53390002df05
+	SUBQ.B	#1,intAlienColonies	;13bf4: 53390002df05
 	BNE.S	_13C04			;13bfa: 6608
-	MOVE.B	#$0a,intScrn3		;13bfc: 13fc000a0002e488
+	MOVE.B	#$0a,intNewScreen	;13bfc: 13fc000a0002e488
 _13C04:
 	BSR.W	_DailyImpTransport	;13c04: 61001f8e
-	JSR	_003BE			;13c08: 4eb9000003be
-	SF	flg00BB2		;13c0e: 51f900000bb2
+	JSR	_Blit003BE		;13c08: 4eb9000003be
+	SF	flgWait			;13c0e: 51f900000bb2
 _13C14:
-	TST.B	flg00BB2		;13c14: 4a3900000bb2
+	TST.B	flgWait			;13c14: 4a3900000bb2
 	BEQ.S	_13C14			;13c1a: 67f8
-	SF	flg00BB2		;13c1c: 51f900000bb2
+	SF	flgWait			;13c1c: 51f900000bb2
 	JSR	_TakeBlit		;13c22: 4eb900000396
-	BCLR	#5,data2E45A		;13c28: 08b900050002e45a
+	BCLR	#5,bFrameRule		;13c28: 08b900050002e45a
 _13C30:
 	TST.B	flg2E459		;13c30: 4a390002e459
 	BEQ.W	_13D58			;13c36: 67000120
 	BSR.W	_UpdateClock		;13c3a: 610002dc
-	BTST	#0,data2E45A		;13c3e: 083900000002e45a
+	BTST	#0,bFrameRule		;13c3e: 083900000002e45a
 	BEQ.W	_13D4A			;13c46: 67000102
 	NOT.B	flg2E478		;13c4a: 46390002e478
 	BSR.W	_DailyShipMove		;13c50: 61005ae4
 	BSR.W	_DailyComet		;13c54: 6100ea5e
-	BSR.W	_Daily15078		;13c58: 6100141e
+	BSR.W	_DailyBldgUpdate	;13c58: 6100141e
 	BSR.W	_DailyBuilding		;13c5c: 61000150
 	BSR.W	_DailySwiCloak		;13c60: 6100418e
-	TST.B	pop2E457		;13c64: 4a390002e457
+	TST.B	popWarnTimer		;13c64: 4a390002e457
 	BEQ.S	_13C72			;13c6a: 6706
-	SUBQ.B	#1,pop2E457		;13c6c: 53390002e457
+	SUBQ.B	#1,popWarnTimer		;13c6c: 53390002e457
 _13C72:
-	TST.B	flg2E470		;13c72: 4a390002e470
+	TST.B	int2E470		;13c72: 4a390002e470
 	BEQ.S	_13C80			;13c78: 6706
-	SUBQ.B	#1,flg2E470		;13c7a: 53390002e470
+	SUBQ.B	#1,int2E470		;13c7a: 53390002e470
 _13C80:
-	TST.B	flg2E473		;13c80: 4a390002e473
+	TST.B	int2E473		;13c80: 4a390002e473
 	BEQ.S	_13C8E			;13c86: 6706
-	SUBQ.B	#1,flg2E473		;13c88: 53390002e473
+	SUBQ.B	#1,int2E473		;13c88: 53390002e473
 _13C8E:
-	TST.B	flg2E471		;13c8e: 4a390002e471
+	TST.B	int2E471		;13c8e: 4a390002e471
 	BEQ.S	_13C9C			;13c94: 6706
-	SUBQ.B	#1,flg2E471		;13c96: 53390002e471
+	SUBQ.B	#1,int2E471		;13c96: 53390002e471
 _13C9C:
-	TST.B	flg2E472		;13c9c: 4a390002e472
+	TST.B	int2E472		;13c9c: 4a390002e472
 	BEQ.S	_13CAA			;13ca2: 6706
-	SUBQ.B	#1,flg2E472		;13ca4: 53390002e472
+	SUBQ.B	#1,int2E472		;13ca4: 53390002e472
 _13CAA:
-	SUBQ.B	#1,intCountD_13DAA	;13caa: 533900013daa
+	SUBQ.B	#1,intVirusCounter	;13caa: 533900013daa
 	BPL.S	_13CBE			;13cb0: 6a0c
-	MOVE.B	#$05,intCountD_13DAA	;13cb2: 13fc000500013daa
+	MOVE.B	#$05,intVirusCounter	;13cb2: 13fc000500013daa
 	BSR.W	_DailyVirus		;13cba: 6100b7c6
 _13CBE:
-	TST.B	flg2E456		;13cbe: 4a390002e456
+	TST.B	intMeteorCountd		;13cbe: 4a390002e456
 	BEQ.S	_13CD2			;13cc4: 670c
-	SUBQ.B	#1,flg2E456		;13cc6: 53390002e456
+	SUBQ.B	#1,intMeteorCountd	;13cc6: 53390002e456
 	BNE.S	_13CD2			;13ccc: 6604
-	BSR.W	_15A7E			;13cce: 61001dae
+	BSR.W	_Meteors15A7E		;13cce: 61001dae
 _13CD2:
-	TST.B	flg2E455		;13cd2: 4a390002e455
+	TST.B	int2E455		;13cd2: 4a390002e455
 	BEQ.S	_13CF8			;13cd8: 671e
-	SUBQ.B	#1,flg2E455		;13cda: 53390002e455
+	SUBQ.B	#1,int2E455		;13cda: 53390002e455
 	BNE.S	_13CF8			;13ce0: 6616
-	MOVEA.L	lUnknown56,A0		;13ce2: 20790002de64
+	MOVEA.L	ptrHomeAst,A0		;13ce2: 20790002de64
 	BSR.W	_138E6			;13ce8: 6100fbfc
 	TST.W	(24,A4)			;13cec: 4a6c0018
 	BNE.S	_13CF8			;13cf0: 6606
+; Disable Gravity Nullifier
 	BCLR	#2,(89,A0)		;13cf2: 08a800020059
 _13CF8:
-	SUBQ.B	#1,unk13DAB		;13cf8: 533900013dab
-	BPL.S	_13D0C			;13cfe: 6a0c
-	MOVE.B	#$14,unk13DAB		;13d00: 13fc001400013dab
+	SUBQ.B	#1,intCycle20		;13cf8: 533900013dab
+	BPL.S	_Unstasis		;13cfe: 6a0c
+	MOVE.B	#$14,intCycle20		;13d00: 13fc001400013dab
 	BSR.W	_12998			;13d08: 6100ec8e
-_13D0C:
+_Unstasis:
 	MOVEQ	#0,D0			;13d0c: 7000
 	MOVE.B	intDay,D0		;13d0e: 10390002e45b
 	ANDI.B	#$1f,D0			;13d14: 0200001f
 	BNE.S	_13D4A			;13d18: 6630
+; Triggers 3 times per year
+; on days 32, 64, 96
 	MOVEQ	#23,D1			;13d1a: 7217
 	MOVEA.L	ptrBuff12_Asteroids,A0	;13d1c: 20790000055a
 loop13D22:
@@ -25940,6 +26013,7 @@ loop13D22:
 	JSR	_RandInt		;13d30: 4eb900000c0c
 	CMPI.B	#$1e,D0			;13d36: 0c00001e
 	BPL.S	_13D42			;13d3a: 6a06
+; clear stasis 30% chance
 	BCLR	#7,(89,A0)		;13d3c: 08a800070059
 _13D42:
 	LEA	(750,A0),A0		;13d42: 41e802ee
@@ -25950,26 +26024,26 @@ _13D4A:
 ; Recalculate the ore prices at the start of each year.
 	BSR.W	_EventOrePrice		;13d54: 61001dc6
 _13D58:
-	JSR	_Daily01		;13d58: 4eb90000cfee
-	JSR	_Daily02		;13d5e: 4eb90000cfdc
+	JSR	_Daily01Ship		;13d58: 4eb90000cfee
+	JSR	_Daily02Ship		;13d5e: 4eb90000cfdc
 	JSR	_Daily03		;13d64: 4eb90000cfca
-	JSR	_Daily04		;13d6a: 4eb90000cb78
-	JSR	_Daily05		;13d70: 4eb90000cd54
+	JSR	_Daily04Ast		;13d6a: 4eb90000cb78
+	JSR	_Daily05Ship		;13d70: 4eb90000cd54
 	JSR	_DailyCheat		;13d76: 4eb90001a94c
-	JSR	_Daily07		;13d7c: 4eb900008fa2
-	TST.B	flg2E46E		;13d82: 4a390002e46e
+	JSR	_Daily07Sound		;13d7c: 4eb900008fa2
+	TST.B	flgDSound1		;13d82: 4a390002e46e
 	BEQ.S	_13DA0			;13d88: 6716
-	TST.B	flg2E46F		;13d8a: 4a390002e46f
+	TST.B	flgDSound2		;13d8a: 4a390002e46f
 	BNE.S	_13DA0			;13d90: 660e
 	MOVEQ	#5,D0			;13d92: 7005
-	JSR	_Daily08		;13d94: 4eb90001a346
-	ST	flg2E46F		;13d9a: 50f90002e46f
+	JSR	_Daily08Sound		;13d94: 4eb90001a346
+	ST	flgDSound2		;13d9a: 50f90002e46f
 _13DA0:
-	BCLR	#0,data2E45A		;13da0: 08b900000002e45a
+	BCLR	#0,bFrameRule		;13da0: 08b900000002e45a
 	RTS				;13da8: 4e75
-intCountD_13DAA:
+intVirusCounter:
 	DS.B	1			;13daa
-unk13DAB:
+intCycle20:
 	DS.B	1			;13dab
 unk13DAC:
 	DS.W	1			;13dac
@@ -26087,32 +26161,31 @@ _UpdateClock:
 	SF	flg2E459		;13f18: 51f90002e459
 	LEA	ptr2E466,A0		;13f1e: 41f90002e466
 	ADDQ.B	#1,intDay		;13f24: 52390002e45b
-	BSET	#0,data2E45A		;13f2a: 08f900000002e45a
+	BSET	#0,bFrameRule		;13f2a: 08f900000002e45a
 	CMPI.B	#$64,intDay		;13f32: 0c3900640002e45b
 	BEQ.S	_NewYear		;13f3a: 6710
-	BSR.W	_13F80			;13f3c: 61000042
+	BSR.W	_IncClockDigit		;13f3c: 61000042
 	CMPI.B	#$30,D0			;13f40: 0c000030
 	BNE.S	ret13F4A		;13f44: 6604
-	BSR.W	_13F80			;13f46: 61000038
+	BSR.W	_IncClockDigit		;13f46: 61000038
 ret13F4A:
 	RTS				;13f4a: 4e75
 _NewYear:
 	MOVE.B	#$01,intDay		;13f4c: 13fc00010002e45b
 	ADDQ.W	#1,intClockYear		;13f54: 52790002e45c
-	BSET	#1,data2E45A		;13f5a: 08f900010002e45a
+	BSET	#1,bFrameRule		;13f5a: 08f900010002e45a
 	MOVE.B	#$31,(A0)		;13f62: 10bc0031
 	MOVE.B	#$30,-(A0)		;13f66: 113c0030
 	SUBQ.L	#2,A0			;13f6a: 5588
-	BSR.S	_13F80			;13f6c: 6112
+	BSR.S	_IncClockDigit		;13f6c: 6112
 	CMPI.B	#$30,D0			;13f6e: 0c000030
 	BNE.S	ret13F4A		;13f72: 66d6
-	BSR.S	_13F80			;13f74: 610a
+	BSR.S	_IncClockDigit		;13f74: 610a
 	CMPI.B	#$30,D0			;13f76: 0c000030
 	BNE.S	ret13F4A		;13f7a: 66ce
-	BSR.S	_13F80			;13f7c: 6102
+	BSR.S	_IncClockDigit		;13f7c: 6102
 	RTS				;13f7e: 4e75
-_13F80:
-; Triggers daily, and again if it sets d0=$30 (48)
+_IncClockDigit:
 	MOVE.B	(A0),D0			;13f80: 1010
 	ADDQ.B	#1,D0			;13f82: 5200
 	CMPI.B	#$39,D0			;13f84: 0c000039
@@ -26334,7 +26407,7 @@ _14198:
 	MOVEQ	#42,D0			;141b4: 702a
 	MOVE.B	#$88,D1			;141b6: 123c0088
 	MOVEQ	#0,D5			;141ba: 7a00
-	BSR.W	_0E1FA			;141bc: 6100a03c
+	BSR.W	_ExplodeSprite_0E1FA	;141bc: 6100a03c
 	MOVEA.L	(A7)+,A5		;141c0: 2a5f
 	MOVEA.L	(A7)+,A6		;141c2: 2c5f
 	EXG	A0,A6			;141c4: c14e
@@ -26655,7 +26728,7 @@ _DailyOSD:
 	MOVE.B	#$03,(23,A6)		;144ee: 1d7c00030017
 	MOVE.B	#$14,(20,A6)		;144f4: 1d7c00140014
 	BRA.S	_ClearShipyard		;144fa: 60b2
-_144FC:
+_UpdateShipyards:
 	TST.W	(14,A4)			;144fc: 4a6c000e
 ; Need a weapons factory
 	BEQ.S	ret14508		;14500: 6706
@@ -26819,7 +26892,7 @@ _146B0:
 _146CA:
 ; Destructor/Terminator
 	MOVE.W	#$0400,(24,A6)		;146ca: 3d7c04000018
-	MOVE.L	#data1E914,(28,A6)	;146d0: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;146d0: 2d7c0001e914001c
 _146D8:
 ; One less ship left to build
 	SUBQ.B	#1,(734,A5)		;146d8: 532d02de
@@ -26957,7 +27030,7 @@ _147E4:
 	MOVEQ	#0,D0			;14848: 7000
 	RTS				;1484a: 4e75
 _CalcRadiation:
-; Background radiation calculations
+; Radiation level calculations
 	LEA	(60,A5),A1		;1484c: 43ed003c
 ; +10% per 100 Asteros
 	MOVE.W	(2,A1),D1		;14850: 32290002
@@ -27009,35 +27082,35 @@ _UpdatePopulation:
 ; population
 	MOVE.W	(684,A5),D6		;148c0: 3c2d02ac
 	BEQ.W	ret14998		;148c4: 670000d2
-; Population must be at least 30
+; Population must be over 30 to avoid warning
 	CMPI.W	#$001e,D6		;148c8: 0c46001e
-	BGT.S	_14916			;148cc: 6e48
-	TST.B	pop2E457		;148ce: 4a390002e457
-	BNE.S	_14916			;148d4: 6640
+	BGT.S	_IncrementPop		;148cc: 6e48
+	TST.B	popWarnTimer		;148ce: 4a390002e457
+	BNE.S	_IncrementPop		;148d4: 6640
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;148d6: 48e7fffe
 	MOVEQ	#10,D4			;148da: 780a
 ; 450: RAPIDLY DECLINING POPULATION!! THIS MAY BE DUE TO LACK OF FOOD!
 	MOVE.W	#$01c2,D0		;148dc: 303c01c2
 	TST.W	(710,A5)		;148e0: 4a6d02c6
-	BEQ.S	_148FE			;148e4: 6718
+	BEQ.S	_msg148FE		;148e4: 6718
 ; 259: RAPIDLY DECLINING POPULATION! THIS MAY BE DUE TO LACK OF WATER!
 	MOVE.W	#$0103,D0		;148e6: 303c0103
 	TST.W	(716,A5)		;148ea: 4a6d02cc
-	BEQ.S	_148FE			;148ee: 670e
+	BEQ.S	_msg148FE		;148ee: 670e
 ; 449: RAPIDLY DECLINING POPULATION! THIS MAY BE DUE TO LACK OF AIR!
 	MOVE.W	#$01c1,D0		;148f0: 303c01c1
 	TST.W	(704,A5)		;148f4: 4a6d02c0
-	BEQ.S	_148FE			;148f8: 6704
+	BEQ.S	_msg148FE		;148f8: 6704
 ; 355: WARNING! RAPIDLY DECLINING POPULATION!
 	MOVE.W	#$0163,D0		;148fa: 303c0163
-_148FE:
+_msg148FE:
 	MOVE.L	A5,D1			;148fe: 220d
 	MOVEQ	#0,D2			;14900: 7400
 	MOVEQ	#1,D3			;14902: 7601
 	JSR	_MessageWin		;14904: 4eb900008fd0
-	MOVE.B	#$0a,pop2E457		;1490a: 13fc000a0002e457
+	MOVE.B	#$0a,popWarnTimer	;1490a: 13fc000a0002e457
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;14912: 4cdf7fff
-_14916:
+_IncrementPop:
 ; 40% chance of adding one population.
 	MOVEQ	#10,D0			;14916: 700a
 	JSR	_RandInt		;14918: 4eb900000c0c
@@ -27052,10 +27125,11 @@ _14926:
 	SUBQ.W	#1,D6			;14930: 5346
 _14932:
 ; Virus outbreak
-; You need one medical center for every hundred colonists, plus 50.
-; i.e. 49 colonists need 0, 50-149 colonists need 1, and so on.
-; If you have enough, the virus ends. Otherwise, lose two colonists.
-; A virus automatically cures itself when you are down to 49.
+; You need one medical center for every hundred colonists,
+; plus 50. i.e. 49 colonists need 0, 50-149 colonists
+; need 1, and so on. If you have enough, the virus ends.
+; Otherwise, lose two colonists. A virus automatically
+; cures itself when you are down to 49.
 	BTST	#2,(90,A5)		;14932: 082d0002005a
 	BEQ.S	_14956			;14938: 671c
 	MOVE.W	D6,D1			;1493a: 3206
@@ -27073,8 +27147,8 @@ _14956:
 ; 0, 10, 11, 13, 14, 17, 20, 25, 33, 50, 100
 	LEA	arrRadiation,A1		;14956: 43f90002014e
 	MOVE.B	(80,A5),D1		;1495c: 122d0050
-; Number of medical centres. Medical centres don't work on radiation
-; unles you got power!
+; Number of medical centres. Medical centres don't work
+; on radiation unless you got power!
 	MOVE.W	(68,A4),D2		;14960: 342c0044
 	CMPI.W	#$0010,(718,A5)		;14964: 0c6d001002ce
 	BMI.S	_1496E			;1496a: 6b02
@@ -27092,9 +27166,7 @@ _14976:
 	CMP.B	D0,D1			;14982: b200
 	BMI.S	_14988			;14984: 6b02
 ; Radiation is a lookup table, so the lethality isn't linear.
-; However, since it branches in negative, it's off-by-one because of
-; the zero. At 0% radiation, you still have a 1% chance to lose a
-; colonist to radiation.
+; However, since it branches on negative, it's off-by-one because of the zero. At 0% radiation, you still have a 1% chance to lose a colonist to radiation.
 ; The difference between 10% and 60% is only 10%.
 ; ;
 ; Display | Lethality | Actual
@@ -27648,11 +27720,11 @@ loop14F58:
 _14F6C:
 ; +4 per active Gravity Nullifier
 	CMPI.B	#$0d,D1			;14f6c: 0c01000d
-	BNE.S	_14F7C			;14f70: 660a
+	BNE.S	LAB_0CE4		;14f70: 660a
 	BTST	#2,(89,A5)		;14f72: 082d00020059
 	BEQ.S	next_14F8C		;14f78: 6712
 	ADDQ.W	#4,D3			;14f7a: 5843
-_14F7C:
+LAB_0CE4:
 ; +2+Speed Asteroid Engines
 	CMPI.B	#$17,D1			;14f7c: 0c010017
 	BNE.S	next_14F8C		;14f80: 660a
@@ -27758,7 +27830,7 @@ _15070:
 	ADDQ.L	#4,A1			;15070: 5889
 	DBF	D1,loop15038		;15072: 51c9ffc4
 	RTS				;15076: 4e75
-_Daily15078:
+_DailyBldgUpdate:
 	MOVEA.L	ptrBuff10_Buildings,A0	;15078: 207900000552
 	MOVEA.L	ptrBuff17_BldgTotal,A4	;1507e: 28790000056e
 	MOVEA.L	ptrBuff12_Asteroids,A5	;15084: 2a790000055a
@@ -27766,14 +27838,14 @@ _Daily15078:
 	MOVEQ	#23,D0			;15090: 7017
 loop15092:
 	TST.B	(25,A5)			;15092: 4a2d0019
-	BMI.W	_15170			;15096: 6b0000d8
+	BMI.W	_next_15170		;15096: 6b0000d8
 	MOVE.B	(89,A5),D1		;1509a: 122d0059
-	BMI.W	_15170			;1509e: 6b0000d0
+	BMI.W	_next_15170		;1509e: 6b0000d0
 	ANDI.B	#$03,D1			;150a2: 02010003
 	CMPI.B	#$03,D1			;150a6: 0c010003
-	BNE.W	_15170			;150aa: 660000c4
+	BNE.W	_next_15170		;150aa: 660000c4
 	TST.W	(692,A5)		;150ae: 4a6d02b4
-	BNE.W	_15170			;150b2: 660000bc
+	BNE.W	_next_15170		;150b2: 660000bc
 	MOVE.W	D0,-(A7)		;150b6: 3f00
 	MOVEQ	#0,D0			;150b8: 7000
 	MOVE.W	(684,A5),D0		;150ba: 302d02ac
@@ -27808,7 +27880,7 @@ _AddIncome:
 	MOVE.B	(13,A6),D1		;15132: 122e000d
 ; Enough damage to destroy building with detonation
 	MOVEQ	#120,D7			;15136: 7e78
-	BSR.W	_DetonateBldg_0F5E4	;15138: 6100a4aa
+	BSR.W	_DestroyBldg		;15138: 6100a4aa
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;1513c: 4cdf7fff
 _15140:
 	MOVEQ	#0,D1			;15140: 7200
@@ -27821,18 +27893,18 @@ _15140:
 	BSR.W	_UpdatePower		;1515a: 6100fd88
 	BSR.W	_UpdateWorkers		;1515e: 6100fbb2
 	BSR.W	_UpdateSecurity		;15162: 6100f836
-	BSR.W	_144FC			;15166: 6100f394
+	BSR.W	_UpdateShipyards	;15166: 6100f394
 	BSR.W	_UpdSwixWepn08		;1516a: 6100219a
 _1516E:
 	MOVE.W	(A7)+,D0		;1516e: 301f
-_15170:
+_next_15170:
 	ADDA.L	#$00000050,A4		;15170: d9fc00000050
 	ADDA.L	#$00000578,A0		;15176: d1fc00000578
 	ADDA.L	#$000002ee,A5		;1517c: dbfc000002ee
 	ADDA.L	#$000008c4,A6		;15182: ddfc000008c4
 	DBF	D0,loop15092		;15188: 51c8ff08
 	RTS				;1518c: 4e75
-_1518E:
+_RenderPAFW:
 	MOVEA.L	ptrBuff12_Asteroids,A2	;1518e: 24790000055a
 	MOVEQ	#23,D2			;15194: 7417
 loop15196:
@@ -27860,69 +27932,73 @@ _151D0:
 	BPL.S	_151D8			;151d4: 6a02
 	MOVEQ	#2,D0			;151d6: 7002
 _151D8:
-	MOVE.B	#$0b,data2E476		;151d8: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;151d8: 13fc000b0002e476
+; power production and usage
 	MOVE.W	(694,A2),D3		;151e0: 362a02b6
 	CMP.W	(696,A2),D3		;151e4: b66a02b8
 ; power production vs power usage
 	BPL.S	_151FE			;151e8: 6a14
-	MOVE.B	#$06,data2E476		;151ea: 13fc00060002e476
+	MOVE.B	#$06,textcolor		;151ea: 13fc00060002e476
 	TST.W	D3			;151f2: 4a43
 	BNE.S	_151FE			;151f4: 6608
-	MOVE.B	#$09,data2E476		;151f6: 13fc00090002e476
+	MOVE.B	#$09,textcolor		;151f6: 13fc00090002e476
 _151FE:
 	LEA	ptr1C8F4,A0		;151fe: 41f90001c8f4
 	MOVE.B	#$50,(A0)		;15204: 10bc0050
 	SF	(1,A0)			;15208: 51e80001
 	MOVEA.L	ptrBuff00,A1		;1520c: 22790000052a
 	MOVEM.L	D0-D2/A0-A2,-(A7)	;15212: 48e7e0e0
-	JSR	_07310			;15216: 4eb900007310
+	JSR	_DisplayText		;15216: 4eb900007310
 	MOVEM.L	(A7)+,D0-D2/A0-A2	;1521c: 4cdf0707
 	ADDQ.W	#6,D0			;15220: 5c40
-	MOVE.B	#$0b,data2E476		;15222: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;15222: 13fc000b0002e476
+; air production and usage
 	MOVE.W	(700,A2),D3		;1522a: 362a02bc
 	CMP.W	(702,A2),D3		;1522e: b66a02be
 	BPL.S	_15248			;15232: 6a14
-	MOVE.B	#$06,data2E476		;15234: 13fc00060002e476
+	MOVE.B	#$06,textcolor		;15234: 13fc00060002e476
 	TST.W	D3			;1523c: 4a43
 	BNE.S	_15248			;1523e: 6608
-	MOVE.B	#$09,data2E476		;15240: 13fc00090002e476
+	MOVE.B	#$09,textcolor		;15240: 13fc00090002e476
 _15248:
 	MOVE.B	#$41,(A0)		;15248: 10bc0041
 	MOVEM.L	D0-D2/A0-A2,-(A7)	;1524c: 48e7e0e0
-	JSR	_07310			;15250: 4eb900007310
+	JSR	_DisplayText		;15250: 4eb900007310
 	MOVEM.L	(A7)+,D0-D2/A0-A2	;15256: 4cdf0707
 	ADDQ.W	#6,D0			;1525a: 5c40
-	MOVE.B	#$0b,data2E476		;1525c: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;1525c: 13fc000b0002e476
+; food production and usage
 	MOVE.W	(706,A2),D3		;15264: 362a02c2
 	CMP.W	(708,A2),D3		;15268: b66a02c4
 	BPL.S	_15282			;1526c: 6a14
-	MOVE.B	#$06,data2E476		;1526e: 13fc00060002e476
+	MOVE.B	#$06,textcolor		;1526e: 13fc00060002e476
 	TST.W	D3			;15276: 4a43
 	BNE.S	_15282			;15278: 6608
-	MOVE.B	#$09,data2E476		;1527a: 13fc00090002e476
+	MOVE.B	#$09,textcolor		;1527a: 13fc00090002e476
 _15282:
 	MOVE.B	#$46,(A0)		;15282: 10bc0046
 	MOVEM.L	D0-D2/A0-A2,-(A7)	;15286: 48e7e0e0
-	JSR	_07310			;1528a: 4eb900007310
+	JSR	_DisplayText		;1528a: 4eb900007310
 	MOVEM.L	(A7)+,D0-D2/A0-A2	;15290: 4cdf0707
 	ADDQ.W	#6,D0			;15294: 5c40
-	MOVE.B	#$0b,data2E476		;15296: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;15296: 13fc000b0002e476
+; water usage and water surplus
 	MOVE.W	(712,A2),D3		;1529e: 362a02c8
 	CMP.W	(714,A2),D3		;152a2: b66a02ca
 	BPL.S	_152BC			;152a6: 6a14
-	MOVE.B	#$06,data2E476		;152a8: 13fc00060002e476
+	MOVE.B	#$06,textcolor		;152a8: 13fc00060002e476
 	TST.W	D3			;152b0: 4a43
 	BNE.S	_152BC			;152b2: 6608
-	MOVE.B	#$09,data2E476		;152b4: 13fc00090002e476
+	MOVE.B	#$09,textcolor		;152b4: 13fc00090002e476
 _152BC:
 	MOVE.B	#$57,(A0)		;152bc: 10bc0057
 	MOVEM.L	D2/A2,-(A7)		;152c0: 48e72020
-	JSR	_07310			;152c4: 4eb900007310
+	JSR	_DisplayText		;152c4: 4eb900007310
 	MOVEM.L	(A7)+,D2/A2		;152ca: 4cdf0404
 _152CE:
 	ADDA.L	#$000002ee,A2		;152ce: d5fc000002ee
 	DBF	D2,loop15196		;152d4: 51cafec0
-	MOVE.B	#$0b,data2E476		;152d8: 13fc000b0002e476
+	MOVE.B	#$0b,textcolor		;152d8: 13fc000b0002e476
 	RTS				;152e0: 4e75
 _DailyLaserTurr:
 ; Laser Turret deals 2 damage.
@@ -28001,7 +28077,7 @@ _FireAntMislPod:
 	JSR	_RandInt		;15382: 4eb900000c0c
 	EXG	D0,D5			;15388: c145
 	MOVE.L	A5,-(A7)		;1538a: 2f0d
-	JSR	_0E1FA			;1538c: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;1538c: 4eb90000e1fa
 	MOVE.W	#$001e,(38,A0)		;15392: 317c001e0026
 	JSR	_PlayExplosion		;15398: 4eb90001a4fa
 	MOVEA.L	(A7)+,A5		;1539e: 2a5f
@@ -28019,7 +28095,7 @@ _FireAntMislPod:
 	MOVEQ	#5,D0			;153c4: 7005
 	JSR	_RandInt		;153c6: 4eb900000c0c
 	EXG	D0,D5			;153cc: c145
-	JSR	_0E1FA			;153ce: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;153ce: 4eb90000e1fa
 	MOVE.W	#$0014,(38,A0)		;153d4: 317c00140026
 	JSR	_PlayExplosion		;153da: 4eb90001a4fa
 ret153E0:
@@ -28127,7 +28203,7 @@ _154EE:
 ; The first event will always be to ask you for a manual protection code.
 ; If iNextEvent was pre-set, that will be the next event.
 	TST.B	flgManualCodeGiven	;154ee: 4a390001af14
-	BNE.S	_15510			;154f4: 661a
+	BNE.S	_PickRandomEvent	;154f4: 661a
 	MOVEQ	#30,D0			;154f6: 701e
 	JSR	_RandInt		;154f8: 4eb900000c0c
 	ADDI.B	#$0a,D0			;154fe: 0600000a
@@ -28135,7 +28211,7 @@ _154EE:
 	MOVE.B	D0,intEventCountdown	;15502: 13c00002e452
 	JSR	_ManualCodeScreen	;15508: 4eb900003f66
 	RTS				;1550e: 4e75
-_15510:
+_PickRandomEvent:
 	LEA	arrRandomEvent,A0	;15510: 41f900015526
 	LSL.W	#2,D0			;15516: e548
 	MOVEA.L	(0,A0,D0.W),A1		;15518: 22700000
@@ -28194,12 +28270,12 @@ _EventScoutBreak:
 _loop_155B8:
 ; Check for ship ID 4 (scout)
 	CMPI.B	#$04,(8,A6)		;155b8: 0c2e00040008
-	BEQ.S	_155CA			;155be: 670a
+	BEQ.S	_Breakup155CA		;155be: 670a
 	MOVE.L	(0,A6),D0		;155c0: 202e0000
 	BEQ.S	ret155E2		;155c4: 671c
 	MOVEA.L	D0,A6			;155c6: 2c40
 	BRA.S	_loop_155B8		;155c8: 60ee
-_155CA:
+_Breakup155CA:
 	JSR	_ShipAct25_Destroy	;155ca: 4eb90000e804
 	MOVEQ	#0,D1			;155d0: 7200
 ; 294: RECEIVING A BROKEN-UP SIGNAL FROM A SCOUT. WE SUSPECT ITS DESTRUCTION, CAUSE UNKNOWN!
@@ -28210,22 +28286,22 @@ _155CA:
 	JSR	_MessageWin		;155dc: 4eb900008fd0
 ret155E2:
 	RTS				;155e2: 4e75
-_155E4:
-	BSR.W	_12848			;155e4: 6100d262
+_RandomPlayerAst:
+	BSR.W	_CountAsteroids		;155e4: 6100d262
 	MOVE.W	D3,D0			;155e8: 3003
-	BEQ.S	_15604			;155ea: 6718
+	BEQ.S	_retTrue_15604		;155ea: 6718
 	JSR	_RandInt		;155ec: 4eb900000c0c
-	LEA	ptr1F91E,A0		;155f2: 41f90001f91e
+	LEA	arrPlayerAsts,A0	;155f2: 41f90001f91e
 	ADD.W	D0,D0			;155f8: d040
 	ADD.W	D0,D0			;155fa: d040
 	MOVEA.L	(0,A0,D0.W),A0		;155fc: 20700000
 	MOVEQ	#0,D0			;15600: 7000
 	RTS				;15602: 4e75
-_15604:
+_retTrue_15604:
 	MOVEQ	#-1,D0			;15604: 70ff
 	RTS				;15606: 4e75
 _EventRadLeak:
-	BSR.S	_155E4			;15608: 61da
+	BSR.S	_RandomPlayerAst	;15608: 61da
 	BMI.S	ret15622		;1560a: 6b16
 	ADDQ.B	#1,(81,A0)		;1560c: 52280051
 	MOVE.L	A0,D1			;15610: 2208
@@ -28253,29 +28329,29 @@ loop1562C:
 	JSR	_MessageWin		;15644: 4eb900008fd0
 	RTS				;1564a: 4e75
 _EventFreakSensor:
-	BSR.W	_12848			;1564c: 6100d1fa
+	BSR.W	_CountAsteroids		;1564c: 6100d1fa
 	MOVE.W	D2,D0			;15650: 3002
 	BEQ.S	ret1566E		;15652: 671a
 	ADD.W	D2,D2			;15654: d442
 	ADD.W	D2,D2			;15656: d442
-	LEA	ptr1F8BA,A0		;15658: 41f90001f8ba
+	LEA	arrAlienAsts,A0		;15658: 41f90001f8ba
 	ADDA.W	D2,A0			;1565e: d0c2
 _15660:
 	MOVEA.L	-(A0),A1		;15660: 2260
 	BSET	#4,(89,A1)		;15662: 08e900040059
-	BEQ.S	_15670			;15668: 6706
+	BEQ.S	_Detect_15670		;15668: 6706
 	SUBQ.W	#1,D0			;1566a: 5340
 	BNE.S	_15660			;1566c: 66f2
 ret1566E:
 	RTS				;1566e: 4e75
-_15670:
+_Detect_15670:
 	CMPI.W	#$0006,intCurrentAlienID ;15670: 0c7900060002df02
 	BNE.S	_15694			;15678: 661a
 ; Swixaran-specific code. Freak sensor scan cannot discover
 ; cloaked Swixaran home asteroid
 	CMPA.L	ptrEnemyHome,A1		;1567a: b3f90002de60
 	BNE.S	_15694			;15680: 6612
-	BTST	#2,bAlienSpec		;15682: 083900020002e48d
+	BTST	#2,bAlienSpecial	;15682: 083900020002e48d
 	BEQ.S	_15694			;1568a: 6708
 	BCLR	#4,(89,A1)		;1568c: 08a900040059
 	RTS				;15692: 4e75
@@ -28297,7 +28373,7 @@ _EventMoreOre:
 ; Korellium: 0-19
 ; Dragonium: 0-9
 ; Traxium, Nexos: 0
-	BSR.W	_155E4			;156ac: 6100ff36
+	BSR.W	_RandomPlayerAst	;156ac: 6100ff36
 	BMI.S	ret156DE		;156b0: 6b2c
 	LEA	tblOreIncrease,A1	;156b2: 43f900020014
 	LEA	(60,A0),A2		;156b8: 45e8003c
@@ -28325,12 +28401,12 @@ _EventLessOre:
 ; Korellium: 0-9
 ; Dragonium: 0-4
 ; Traxium, Nexos: 0
-	BSR.W	_12848			;156e0: 6100d166
+	BSR.W	_CountAsteroids		;156e0: 6100d166
 	MOVE.W	D3,D0			;156e4: 3003
 	CMPI.W	#$0002,D0		;156e6: 0c400002
 	BMI.S	ret15734		;156ea: 6b48
 	JSR	_RandInt		;156ec: 4eb900000c0c
-	LEA	ptr1F91E,A0		;156f2: 41f90001f91e
+	LEA	arrPlayerAsts,A0	;156f2: 41f90001f91e
 	ADD.W	D0,D0			;156f8: d040
 	ADD.W	D0,D0			;156fa: d040
 	MOVEA.L	(0,A0,D0.W),A0		;156fc: 20700000
@@ -28339,6 +28415,7 @@ _EventLessOre:
 	MOVEQ	#7,D1			;1570a: 7207
 loop1570C:
 	MOVE.W	(A1)+,D0		;1570c: 3019
+; halved
 	ASR.W	#1,D0			;1570e: e240
 	JSR	_RandInt		;15710: 4eb900000c0c
 	SUB.W	D0,(A2)+		;15716: 915a
@@ -28356,7 +28433,8 @@ _1571E:
 	JSR	_MessageWin		;1572e: 4eb900008fd0
 ret15734:
 	RTS				;15734: 4e75
-_Destroy_15736:
+_DemolishBldg:
+; Demolish all buildings of a a given type
 	JSR	_071EE			;15736: 4eb9000071ee
 	BMI.S	_15774			;1573c: 6b36
 	MOVE.L	A0,ptrThisAstStats	;1573e: 23c80002ded8
@@ -28372,7 +28450,7 @@ _Destroy_15736:
 	ASR.W	#2,D0			;15768: e440
 ; Enough damage to destroy building with detonation
 	MOVEQ	#120,D7			;1576a: 7e78
-	BSR.W	_DetonateBldg_0F5E4	;1576c: 61009e76
+	BSR.W	_DestroyBldg		;1576c: 61009e76
 	MOVEQ	#0,D0			;15770: 7000
 	RTS				;15772: 4e75
 _15774:
@@ -28381,7 +28459,7 @@ _15774:
 _EventPlantBurnout:
 ; #24: powerplant
 	MOVEQ	#24,D5			;15778: 7a18
-	BSR.S	_Destroy_15736		;1577a: 61ba
+	BSR.S	_DemolishBldg		;1577a: 61ba
 	BMI.S	ret1579A		;1577c: 6b1c
 	MOVE.L	ptrThisAstStats,D1	;1577e: 22390002ded8
 	MOVEA.L	D1,A0			;15784: 2041
@@ -28399,7 +28477,7 @@ ret1579A:
 _EventEngBurnout:
 ; #23: asteroid engines
 	MOVEQ	#23,D5			;1579c: 7a17
-	BSR.S	_Destroy_15736		;1579e: 6196
+	BSR.S	_DemolishBldg		;1579e: 6196
 	BMI.S	ret157BE		;157a0: 6b1c
 	MOVE.L	ptrThisAstStats,D1	;157a2: 22390002ded8
 	MOVEA.L	D1,A0			;157a8: 2041
@@ -28415,7 +28493,7 @@ ret157BE:
 	RTS				;157be: 4e75
 _EventAirFail:
 ; Air surplus reduced to zero.
-	BSR.W	_155E4			;157c0: 6100fe22
+	BSR.W	_RandomPlayerAst	;157c0: 6100fe22
 	BMI.S	ret157DC		;157c4: 6b16
 	CLR.W	(704,A0)		;157c6: 426802c0
 	MOVE.L	A0,D1			;157ca: 2208
@@ -28428,7 +28506,7 @@ ret157DC:
 	RTS				;157dc: 4e75
 _EventWaterFail:
 ; Water surplus reduced to zero.
-	BSR.W	_155E4			;157de: 6100fe04
+	BSR.W	_RandomPlayerAst	;157de: 6100fe04
 	BMI.S	ret157FA		;157e2: 6b16
 	CLR.W	(716,A0)		;157e4: 426802cc
 	MOVE.L	A0,D1			;157e8: 2208
@@ -28441,7 +28519,7 @@ ret157FA:
 	RTS				;157fa: 4e75
 _EventPowerFail:
 ; Power surplus reduced to zero.
-	BSR.W	_155E4			;157fc: 6100fde6
+	BSR.W	_RandomPlayerAst	;157fc: 6100fde6
 	BMI.S	ret15818		;15800: 6b16
 	CLR.W	(698,A0)		;15802: 426802ba
 	MOVE.L	A0,D1			;15806: 2208
@@ -28460,7 +28538,7 @@ loop15822:
 	JSR	_RandInt		;15824: 4eb900000c0c
 	MOVE.B	D0,(35,A0)		;1582a: 11400023
 	LSL.W	#2,D0			;1582e: e548
-	LEA	arrAstMove1F6C6,A1	;15830: 43f90001f6c6
+	LEA	arrAstDirection,A1	;15830: 43f90001f6c6
 	MOVEM.W	(0,A1,D0.W),D0-D1	;15836: 4cb100030000
 	MOVEM.W	D0-D1,(56,A0)		;1583c: 48a800030038
 	MOVEQ	#16,D0			;15842: 7010
@@ -28479,7 +28557,7 @@ loop15822:
 	JSR	_MessageWin		;1586a: 4eb900008fd0
 	RTS				;15870: 4e75
 _EventVirusOutbr:
-	BSR.W	_155E4			;15872: 6100fd70
+	BSR.W	_RandomPlayerAst	;15872: 6100fd70
 	BMI.S	ret158A8		;15876: 6b30
 	BSR.W	_138E6			;15878: 6100e06c
 	MOVE.W	(684,A0),D1		;1587c: 322802ac
@@ -28522,7 +28600,7 @@ _EventComet:
 ret158EE:
 	RTS				;158ee: 4e75
 _EventReinforcem:
-	BSR.W	_155E4			;158f0: 6100fcf2
+	BSR.W	_RandomPlayerAst	;158f0: 6100fcf2
 	BMI.W	ret159AE		;158f4: 6b0000b8
 	MOVE.L	A0,-(A7)		;158f8: 2f08
 	MOVE.L	A0,D1			;158fa: 2208
@@ -28582,7 +28660,7 @@ unk159B0:
 unk159B2:
 	DS.W	1			;159b2
 _EventNewTransp:
-	BSR.W	_155E4			;159b4: 6100fc2e
+	BSR.W	_RandomPlayerAst	;159b4: 6100fc2e
 	BMI.W	ret15A4E		;159b8: 6b000094
 	MOVE.L	A0,-(A7)		;159bc: 2f08
 	MOVE.L	A0,D1			;159be: 2208
@@ -28628,10 +28706,10 @@ unk15A50:
 unk15A52:
 	DS.W	1			;15a52
 _EventMeteors:
-	BSR.W	_155E4			;15a54: 6100fb8e
+	BSR.W	_RandomPlayerAst	;15a54: 6100fb8e
 	BMI.W	ret15A7C		;15a58: 6b000022
-	MOVE.L	A0,ptr2DE7C		;15a5c: 23c80002de7c
-	MOVE.B	#$07,flg2E456		;15a62: 13fc00070002e456
+	MOVE.L	A0,ptrAstTarget		;15a5c: 23c80002de7c
+	MOVE.B	#$07,intMeteorCountd	;15a62: 13fc00070002e456
 	MOVEQ	#0,D2			;15a6a: 7400
 	MOVE.L	A0,D1			;15a6c: 2208
 	MOVE.W	#$014c,D0		;15a6e: 303c014c
@@ -28640,8 +28718,8 @@ _EventMeteors:
 	JSR	_MessageWin		;15a76: 4eb900008fd0
 ret15A7C:
 	RTS				;15a7c: 4e75
-_15A7E:
-	MOVEA.L	ptr2DE7C,A0		;15a7e: 20790002de7c
+_Meteors15A7E:
+	MOVEA.L	ptrAstTarget,A0		;15a7e: 20790002de7c
 	MOVE.L	A0,ptrThisAstStats	;15a84: 23c80002ded8
 	BSR.W	_138E6			;15a8a: 6100de5a
 	MOVE.L	A6,ptrThisAstMap	;15a8e: 23ce0002decc
@@ -28656,12 +28734,12 @@ loop15AAA:
 	MOVEQ	#42,D0			;15ab2: 702a
 	MOVE.B	#$98,D1			;15ab4: 123c0098
 	MOVEQ	#0,D5			;15ab8: 7a00
-	MOVEA.L	ptr2DE7C,A0		;15aba: 20790002de7c
-	JSR	_0E1FA			;15ac0: 4eb90000e1fa
+	MOVEA.L	ptrAstTarget,A0		;15aba: 20790002de7c
+	JSR	_ExplodeSprite_0E1FA	;15ac0: 4eb90000e1fa
 	BMI.S	_15B18			;15ac6: 6b50
 	MOVEA.L	A0,A6			;15ac8: 2c48
 	MOVE.B	#$0b,(27,A6)		;15aca: 1d7c000b001b
-	JSR	_0F0E4			;15ad0: 4eb90000f0e4
+	JSR	_Missiles_0F0E4		;15ad0: 4eb90000f0e4
 	MOVE.B	(8,A6),D0		;15ad6: 102e0008
 	MOVEQ	#70,D1			;15ada: 7246
 	CMPI.B	#$2d,D0			;15adc: 0c00002d
@@ -28676,7 +28754,7 @@ _15AE4:
 	BSET	#6,(20,A6)		;15afa: 08ee00060014
 	MOVE.W	(A7)+,D0		;15b00: 301f
 	DBF	D0,loop15AAA		;15b02: 51c8ffa6
-	TST.B	flg2E468		;15b06: 4a390002e468
+	TST.B	flgShowGfx		;15b06: 4a390002e468
 	BNE.S	ret15B16		;15b0c: 6608
 ; Sound F: Incoming missiles bleeper
 ; Missiles klaxon
@@ -28729,51 +28807,52 @@ _EventOreFix:
 	JSR	_MessageWin		;15b8c: 4eb900008fd0
 	RTS				;15b92: 4e75
 _DailyImpTransport:
-	MOVE.L	ptr2DE80,D0		;15b94: 20390002de80
+	MOVE.L	ptrAst2DE80,D0		;15b94: 20390002de80
 	BEQ.S	_15BBA			;15b9a: 671e
 	MOVEA.L	D0,A0			;15b9c: 2040
 	TST.B	(25,A0)			;15b9e: 4a280019
 	BPL.S	_15BBA			;15ba2: 6a16
 	MOVEQ	#0,D0			;15ba4: 7000
 	MOVE.W	D0,intImpLeaveTimer	;15ba6: 33c00002e05a
-	MOVE.L	D0,ptr2DE80		;15bac: 23c00002de80
+	MOVE.L	D0,ptrAst2DE80		;15bac: 23c00002de80
 	MOVE.L	D0,ptrImpTransport	;15bb2: 23c00002de84
-	BRA.S	_15C08			;15bb8: 604e
+	BRA.S	_ImpTransport15C08	;15bb8: 604e
 _15BBA:
 	CMPI.W	#$0005,intImpTransport	;15bba: 0c7900050002e058
 	BNE.S	_TransportUnknown2	;15bc2: 663a
-	BSR.W	_12848			;15bc4: 6100cc82
-	LEA	ptr1F91E,A3		;15bc8: 47f90001f91e
+	BSR.W	_CountAsteroids		;15bc4: 6100cc82
+	LEA	arrPlayerAsts,A3	;15bc8: 47f90001f91e
 	MOVEQ	#0,D1			;15bce: 7200
 	MOVEQ	#-1,D6			;15bd0: 7cff
-_15BD2:
+_ImpTransport15BD2:
 	MOVE.L	(A3)+,D0		;15bd2: 201b
-	BMI.S	_15BE6			;15bd4: 6b10
+	BMI.S	_ImpTranspInNotice	;15bd4: 6b10
 	MOVEA.L	D0,A0			;15bd6: 2040
 	CMP.W	(202,A0),D6		;15bd8: bc6800ca
-	BPL.S	_15BD2			;15bdc: 6af4
+	BPL.S	_ImpTransport15BD2	;15bdc: 6af4
 	MOVE.W	(202,A0),D6		;15bde: 3c2800ca
 	MOVE.L	A0,D1			;15be2: 2208
-	BRA.S	_15BD2			;15be4: 60ec
-_15BE6:
-	MOVE.L	D1,ptr2DE80		;15be6: 23c10002de80
-	BEQ.S	_15C1E			;15bec: 6730
+	BRA.S	_ImpTransport15BD2	;15be4: 60ec
+_ImpTranspInNotice:
+	MOVE.L	D1,ptrAst2DE80		;15be6: 23c10002de80
+	BEQ.S	_ImpTransport15C1E	;15bec: 6730
 	MOVEQ	#0,D2			;15bee: 7400
+; IMPERIAL TRANSPORTER DUE IN 5 DAYS. WARP GATE WILL OPEN ABOVE:
 	MOVE.W	#$0152,D0		;15bf0: 303c0152
 	MOVEQ	#1,D3			;15bf4: 7601
 	MOVEQ	#0,D4			;15bf6: 7800
 	JSR	_MessageWin		;15bf8: 4eb900008fd0
 _TransportUnknown2:
 	SUBQ.W	#1,intImpTransport	;15bfe: 53790002e058
-	BGT.S	_15C1E			;15c04: 6e18
+	BGT.S	_ImpTransport15C1E	;15c04: 6e18
 	BEQ.S	_ImpTransportArrives	;15c06: 6742
-_15C08:
+_ImpTransport15C08:
 	MOVEQ	#20,D0			;15c08: 7014
 	JSR	_RandInt		;15c0a: 4eb900000c0c
 	MULU	#$000a,D0		;15c10: c0fc000a
 	ADDI.W	#$0096,D0		;15c14: 06400096
 	MOVE.W	D0,intImpTransport	;15c18: 33c00002e058
-_15C1E:
+_ImpTransport15C1E:
 	TST.W	intImpLeaveTimer	;15c1e: 4a790002e05a
 	BEQ.S	ret15C48		;15c24: 6722
 	SUBQ.W	#1,intImpLeaveTimer	;15c26: 53790002e05a
@@ -28787,32 +28866,32 @@ ret15C48:
 _ImpTransportArrives:
 ; Only makes the warp sound if you're currently at the asteroid, and
 ; not on screen 4 (space view) or 5.
-	MOVE.L	ptr2DE80,D0		;15c4a: 20390002de80
-	BEQ.S	_15C1E			;15c50: 67cc
+	MOVE.L	ptrAst2DE80,D0		;15c4a: 20390002de80
+	BEQ.S	_ImpTransport15C1E	;15c50: 67cc
 	CMP.L	ptrCurrentAst,D0	;15c52: b0b90002de58
 	BNE.S	_CreateImpTransport	;15c58: 664e
 	CMPI.B	#$04,intScreen		;15c5a: 0c3900040002e486
 	BEQ.S	_CreateImpTransport	;15c62: 6744
 	CMPI.B	#$05,intScreen		;15c64: 0c3900050002e486
 	BEQ.S	_CreateImpTransport	;15c6c: 673a
-	MOVE.W	#$00f0,data2E0A8	;15c6e: 33fc00f00002e0a8
-	BSR.W	_0FCD6			;15c76: 6100a05e
+	MOVE.W	#$00f0,screenFlashColor	;15c6e: 33fc00f00002e0a8
+	BSR.W	_WarheadFlash		;15c76: 6100a05e
 ; Sound T: Imperial transporter warp
 ; Imperial warp
 	MOVEQ	#20,D0			;15c7a: 7014
 	JSR	_PlaySound		;15c7c: 4eb90001a50e
-	LEA	ptr1AF16,A0		;15c82: 41f90001af16
-	LEA	ptr1AF96,A1		;15c88: 43f90001af96
-	JSR	_0596E			;15c8e: 4eb90000596e
-	LEA	ptr1AF16,A0		;15c94: 41f90001af16
-	LEA	ptr1AF96,A1		;15c9a: 43f90001af96
+	LEA	paletteFlash,A0		;15c82: 41f90001af16
+	LEA	palette,A1		;15c88: 43f90001af96
+	JSR	_ScreenFlash_0596E	;15c8e: 4eb90000596e
+	LEA	paletteFlash,A0		;15c94: 41f90001af16
+	LEA	palette,A1		;15c9a: 43f90001af96
 	MOVEQ	#31,D0			;15ca0: 701f
 loop15CA2:
 	MOVE.W	(A0)+,(A1)+		;15ca2: 32d8
 	DBF	D0,loop15CA2		;15ca4: 51c8fffc
 _CreateImpTransport:
 ; Creating Imperial transporter
-	MOVEA.L	ptr2DE80,A0		;15ca8: 20790002de80
+	MOVEA.L	ptrAst2DE80,A0		;15ca8: 20790002de80
 	MOVEQ	#10,D0			;15cae: 700a
 	MOVEQ	#10,D1			;15cb0: 720a
 ; Instantiating it, initially, as a Terran transporter
@@ -28845,7 +28924,7 @@ _15CF0:
 	JSR	_03E38			;15cf8: 4eb900003e38
 	RTS				;15cfe: 4e75
 _ImpTransportLeaving:
-	MOVE.L	ptr2DE80,D1		;15d00: 22390002de80
+	MOVE.L	ptrAst2DE80,D1		;15d00: 22390002de80
 	MOVEQ	#0,D2			;15d06: 7400
 ; 399: IMPERIAL TRANSPORTER WILL DEPART IN 5 DAYS. FINISH ALL ORE LOADING NOW!
 	MOVE.W	#$0153,D0		;15d08: 303c0153
@@ -28856,32 +28935,32 @@ _ImpTransportLeaving:
 _ImpTransportLeaves:
 	MOVEA.L	ptrImpTransport,A6	;15d18: 2c790002de84
 	MOVE.L	ptrThisAstStats,-(A7)	;15d1e: 2f390002ded8
-	MOVE.L	ptr2DE80,ptrThisAstStats ;15d24: 23f90002de800002ded8
+	MOVE.L	ptrAst2DE80,ptrThisAstStats ;15d24: 23f90002de800002ded8
 	JSR	_0E6E4			;15d2e: 4eb90000e6e4
 	MOVE.L	(A7)+,ptrThisAstStats	;15d34: 23df0002ded8
-	MOVE.L	ptr2DE80,D0		;15d3a: 20390002de80
+	MOVE.L	ptrAst2DE80,D0		;15d3a: 20390002de80
 	CMP.L	ptrCurrentAst,D0	;15d40: b0b90002de58
 	BNE.S	_15D96			;15d46: 664e
 	CMPI.B	#$04,intScreen		;15d48: 0c3900040002e486
 	BEQ.S	_15D96			;15d50: 6744
 	CMPI.B	#$05,intScreen		;15d52: 0c3900050002e486
 	BEQ.S	_15D96			;15d5a: 673a
-	MOVE.W	#$00f0,data2E0A8	;15d5c: 33fc00f00002e0a8
-	BSR.W	_0FCD6			;15d64: 61009f70
+	MOVE.W	#$00f0,screenFlashColor	;15d5c: 33fc00f00002e0a8
+	BSR.W	_WarheadFlash		;15d64: 61009f70
 ; Sound T: Imperial transporter warp
 	MOVEQ	#20,D0			;15d68: 7014
 	JSR	_PlaySound		;15d6a: 4eb90001a50e
-	LEA	ptr1AF16,A0		;15d70: 41f90001af16
-	LEA	ptr1AF96,A1		;15d76: 43f90001af96
-	JSR	_0596E			;15d7c: 4eb90000596e
-	LEA	ptr1AF16,A0		;15d82: 41f90001af16
-	LEA	ptr1AF96,A1		;15d88: 43f90001af96
+	LEA	paletteFlash,A0		;15d70: 41f90001af16
+	LEA	palette,A1		;15d76: 43f90001af96
+	JSR	_ScreenFlash_0596E	;15d7c: 4eb90000596e
+	LEA	paletteFlash,A0		;15d82: 41f90001af16
+	LEA	palette,A1		;15d88: 43f90001af96
 	MOVEQ	#31,D0			;15d8e: 701f
 loop15D90:
 	MOVE.W	(A0)+,(A1)+		;15d90: 32d8
 	DBF	D0,loop15D90		;15d92: 51c8fffc
 _15D96:
-	CLR.L	ptr2DE80		;15d96: 42b90002de80
+	CLR.L	ptrAst2DE80		;15d96: 42b90002de80
 	RTS				;15d9c: 4e75
 _ImpTransportPays:
 	LEA	arrCargoImp,A0		;15d9e: 41f90002e174
@@ -28980,8 +29059,9 @@ _DailySpyDetect:
 	BNE.S	_15E9E			;15e8e: 660e
 ; Alien 1: Data Hive
 	MOVE.W	(42,A4),D7		;15e90: 3e2c002a
-	BSR.W	_17642			;15e94: 610017ac
-; Alien 1: Science Hive
+	BSR.W	_CountAliShips		;15e94: 610017ac
+; Alien 1: appears to be the number of rotator ships
+; The spinning immobile ships
 	ADD.W	(10,A2),D7		;15e98: de6a000a
 	BRA.S	loop15EBE		;15e9c: 6020
 _15E9E:
@@ -29014,20 +29094,20 @@ loop15EBE:
 	BMI.S	_retry_15EE0		;15ec8: 6b16
 ; Shoot down one satellite
 	SUBQ.B	#1,(96,A0)		;15eca: 53280060
-; Base chance of next satellite reset to 5. The next satellite detection
-; attempt has a base chance of 7%.
+; Base chance of next satellite reset to 5. The next
+; satellite detection attempt has a base chance of 7%.
 	MOVE.B	#$05,(97,A0)		;15ece: 117c00050061
 	CMPI.W	#$0006,intCurrentAlienID ;15ed4: 0c7900060002df02
-	BEQ.S	_Swix15EE6		;15edc: 6708
+	BEQ.S	_SwixSpySat		;15edc: 6708
 ret15EDE:
 	RTS				;15ede: 4e75
 _retry_15EE0:
 	DBF	D7,loop15EBE		;15ee0: 51cfffdc
 	RTS				;15ee4: 4e75
-_Swix15EE6:
+_SwixSpySat:
 	BSET	#4,(91,A0)		;15ee6: 08e80004005b
 	RTS				;15eec: 4e75
-_15EEE:
+_MoveAsts_15EEE:
 	MOVEA.L	ptrBuff12_Asteroids,A0	;15eee: 20790000055a
 	MOVEQ	#23,D0			;15ef4: 7017
 loop15EF6:
@@ -29052,12 +29132,12 @@ _15F22:
 	CMP.W	D4,D1			;15f22: b244
 	BPL.S	_15F32			;15f24: 6a0c
 	BSET	#3,(90,A0)		;15f26: 08e80003005a
-	ST	flg2E188		;15f2c: 50f90002e188
+	ST	flgAst2E188		;15f2c: 50f90002e188
 _15F32:
 	LEA	(750,A0),A0		;15f32: 41e802ee
 	DBF	D0,loop15EF6		;15f36: 51c8ffbe
 	RTS				;15f3a: 4e75
-_15F3C:
+_DailyAli_15F3C:
 	TST.B	flg2E47F		;15f3c: 4a390002e47f
 	BEQ.S	_15F4E			;15f42: 670a
 	SUBQ.B	#1,flg2E47F		;15f44: 53390002e47f
@@ -29081,14 +29161,14 @@ _15F5E:
 	BPL.S	_15F7A			;15f76: 6a02
 	NEG.W	D1			;15f78: 4441
 _15F7A:
-	CMP.W	intAlienUnk_12,D1	;15f7a: b2790002031c
+	CMP.W	intAlienMisl_12,D1	;15f7a: b2790002031c
 	BPL.S	_15F9A			;15f80: 6a18
 	MOVE.W	(28,A5),D1		;15f82: 322d001c
 	SUB.W	(12,A0),D1		;15f86: 9268000c
 	BPL.S	_15F8E			;15f8a: 6a02
 	NEG.W	D1			;15f8c: 4441
 _15F8E:
-	CMP.W	intAlienUnk_12,D1	;15f8e: b2790002031c
+	CMP.W	intAlienMisl_12,D1	;15f8e: b2790002031c
 	BPL.S	_15F9A			;15f94: 6a04
 	MOVEQ	#0,D0			;15f96: 7000
 	RTS				;15f98: 4e75
@@ -29116,14 +29196,14 @@ loop15FC4:
 	BPL.S	_15FDA			;15fd6: 6a02
 	NEG.W	D1			;15fd8: 4441
 _15FDA:
-	CMP.W	intAlienUnk_13,D1	;15fda: b2790002031e
+	CMP.W	intAlienMisl_13,D1	;15fda: b2790002031e
 	BPL.S	next_15FFA		;15fe0: 6a18
 	MOVE.W	(28,A5),D1		;15fe2: 322d001c
 	SUB.W	(4,A0),D1		;15fe6: 92680004
 	BPL.S	_15FEE			;15fea: 6a02
 	NEG.W	D1			;15fec: 4441
 _15FEE:
-	CMP.W	intAlienUnk_13,D1	;15fee: b2790002031e
+	CMP.W	intAlienMisl_13,D1	;15fee: b2790002031e
 	BPL.S	next_15FFA		;15ff4: 6a04
 	MOVEQ	#0,D0			;15ff6: 7000
 	RTS				;15ff8: 4e75
@@ -29132,31 +29212,30 @@ next_15FFA:
 	DBF	D7,loop15FC4		;15ffe: 51cfffc4
 	MOVEQ	#-1,D0			;16002: 70ff
 	RTS				;16004: 4e75
-_Daily_16006:
-; Fleets? ships?
-; Special buildings
-	BSR.W	_12848			;16006: 6100c840
+_DailyAliMislAtk:
+; Missile firing
+	BSR.W	_CountAsteroids		;16006: 6100c840
 	MOVE.W	intCurrentAlienID,D0	;1600a: 30390002df02
 	SUBQ.W	#1,D0			;16010: 5340
 	LSL.W	#2,D0			;16012: e548
-	LEA	ptr16022,A0		;16014: 41f900016022
+	LEA	arrDailyAli_16022,A0	;16014: 41f900016022
 	MOVEA.L	(0,A0,D0.W),A1		;1601a: 22700000
 	JSR	(A1)			;1601e: 4e91
 	RTS				;16020: 4e75
-ptr16022:
-	DC.L	unk1603A		;16022: 0001603a
-	DC.L	unk161A2		;16026: 000161a2
-	DC.L	unk16398		;1602a: 00016398
-	DC.L	unk1655C		;1602e: 0001655c
-	DC.L	unk166E2		;16032: 000166e2
-	DC.L	unk168BE		;16036: 000168be
-unk1603A:
-	BSR.W	_15F3C			;1603a: 6100ff00
-	BMI.S	_16076			;1603e: 6b36
+arrDailyAli_16022:
+	DC.L	_DailyAli1Atk		;16022: 0001603a
+	DC.L	_DailyAli2Atk		;16026: 000161a2
+	DC.L	_DailyAli3Atk		;1602a: 00016398
+	DC.L	_DailyAli4Atk		;1602e: 0001655c
+	DC.L	_DailyAli5Atk		;16032: 000166e2
+	DC.L	_DailyAli6Atk		;16036: 000168be
+_DailyAli1Atk:
+	BSR.W	_DailyAli_15F3C		;1603a: 6100ff00
+	BMI.S	_DailyAli_16076		;1603e: 6b36
 	MOVE.B	#$0c,flg2E47F		;16040: 13fc000c0002e47f
-	TST.W	data2E052		;16048: 4a790002e052
+	TST.W	intOurAstsKnown		;16048: 4a790002e052
 	BEQ.S	ret16074		;1604e: 6724
-	LEA	ptr1F8BA,A0		;16050: 41f90001f8ba
+	LEA	arrAlienAsts,A0		;16050: 41f90001f8ba
 _16056:
 	MOVE.L	(A0)+,D0		;16056: 2018
 	BMI.S	ret16074		;16058: 6b1a
@@ -29171,7 +29250,7 @@ _16056:
 	BRA.S	_16056			;16072: 60e2
 ret16074:
 	RTS				;16074: 4e75
-_16076:
+_DailyAli_16076:
 	BSR.W	_15FA4			;16076: 6100ff2c
 	BMI.W	_160EE			;1607a: 6b000072
 	MOVE.L	A0,ptr16A3A		;1607e: 23c800016a3a
@@ -29183,7 +29262,7 @@ _16076:
 	BMI.S	ret16074		;160a8: 6bca
 _160AA:
 	MOVEA.L	ptr16A3A,A2		;160aa: 247900016a3a
-	MOVE.L	A0,data20A88		;160b0: 23c800020a88
+	MOVE.L	A0,ptr20A88		;160b0: 23c800020a88
 	MOVE.L	A2,(18,A0)		;160b6: 214a0012
 	MOVEQ	#-1,D0			;160ba: 70ff
 	MOVE.L	D0,(6,A0)		;160bc: 21400006
@@ -29206,20 +29285,20 @@ _160EE:
 	MOVEQ	#5,D0			;160ee: 7005
 	JSR	_RandInt		;160f0: 4eb900000c0c
 	BNE.W	ret16074		;160f6: 6600ff7c
-	TST.W	data2E052		;160fa: 4a790002e052
+	TST.W	intOurAstsKnown		;160fa: 4a790002e052
 	BEQ.W	ret16074		;16100: 6700ff72
-	TST.B	flg2E473		;16104: 4a390002e473
+	TST.B	int2E473		;16104: 4a390002e473
 	BNE.W	ret16074		;1610a: 6600ff68
 	MOVE.W	#$000f,data20216	;1610e: 33fc000f00020216
 	MOVE.W	#$000a,data20218	;16116: 33fc000a00020218
 	MOVE.W	#$0014,data2021A	;1611e: 33fc00140002021a
-	MOVE.B	#$0e,flg2E473		;16126: 13fc000e0002e473
+	MOVE.B	#$0e,int2E473		;16126: 13fc000e0002e473
 	BSR.W	_16C48			;1612e: 61000b18
 	BMI.W	ret16074		;16132: 6b00ff40
 	MOVEQ	#0,D0			;16136: 7000
-	MOVE.W	data2E052,D0		;16138: 30390002e052
+	MOVE.W	intOurAstsKnown,D0	;16138: 30390002e052
 	JSR	_RandInt		;1613e: 4eb900000c0c
-	LEA	ptr1F856,A1		;16144: 43f90001f856
+	LEA	arrPlayerAstsKnown,A1	;16144: 43f90001f856
 	ADD.W	D0,D0			;1614a: d040
 	ADD.W	D0,D0			;1614c: d040
 	MOVEA.L	(0,A1,D0.W),A2		;1614e: 24710000
@@ -29247,16 +29326,18 @@ _16188:
 	MOVEA.L	(A7)+,A2		;1619a: 245f
 	MOVE.L	A2,(178,A5)		;1619c: 2b4a00b2
 	RTS				;161a0: 4e75
-unk161A2:
+_DailyAli2Atk:
 ; ore eaters
 	TST.B	D1			;161a2: 4a01
 	BEQ.S	_161C8			;161a4: 6722
-	SUBQ.W	#1,intAlienUnk7		;161a6: 537900020312
+	SUBQ.W	#1,intAlienMislFreq7	;161a6: 537900020312
 	BNE.S	_161C8			;161ac: 661a
-	MOVE.W	#$0064,intAlienUnk7	;161ae: 33fc006400020312
+	MOVE.W	#$0064,intAlienMislFreq7 ;161ae: 33fc006400020312
 	MOVEA.L	ptrThisAstStats,A5	;161b6: 2a790002ded8
-	LEA	ptr20250,A0		;161bc: 41f900020250
-	BSR.W	_170AE			;161c2: 61000eea
+; 1 Virus
+; Listed as 01 14 for some reason
+	LEA	tblMislV0114,A0		;161bc: 41f900020250
+	BSR.W	_FireMissiles		;161c2: 61000eea
 	RTS				;161c6: 4e75
 _161C8:
 	SUBQ.B	#1,data20222		;161c8: 533900020222
@@ -29265,36 +29346,40 @@ _161C8:
 	MOVEA.L	ptrThisAstStats,A0	;161d8: 20790002ded8
 	BSR.W	_12A62			;161de: 6100c882
 	BEQ.S	_16216			;161e2: 6732
+; target non-alien colony
 	BTST	#6,(89,A1)		;161e4: 082900060059
 	BNE.S	_16210			;161ea: 6624
 	MOVEA.L	ptrThisAstBldgCount,A2	;161ec: 24790002ded4
 	TST.W	(28,A2)			;161f2: 4a6a001c
 	BEQ.S	_16210			;161f6: 6718
-; If there is at least one Missile Silo:
+; If there is at least one Terran Missile Silo:
 	TST.W	(114,A0)		;161f8: 4a680072
 	BEQ.S	_16210			;161fc: 6712
+; Fire a Mega missile
 	SUBQ.W	#1,(114,A0)		;161fe: 53680072
 	ADDQ.W	#1,(166,A0)		;16202: 526800a6
 	ADDQ.W	#1,(136,A0)		;16206: 52680088
+; Missile target
 	MOVE.L	A1,(178,A0)		;1620a: 214900b2
 	RTS				;1620e: 4e75
 _16210:
-	BSR.W	_16CF4			;16210: 61000ae2
+	BSR.W	_AliAstEffects		;16210: 61000ae2
 	RTS				;16214: 4e75
 _16216:
-	BSR.W	_15F3C			;16216: 6100fd24
+	BSR.W	_DailyAli_15F3C		;16216: 6100fd24
 	BMI.S	_1624A			;1621a: 6b2e
 	MOVE.B	#$0c,flg2E47F		;1621c: 13fc000c0002e47f
-	TST.W	data2E052		;16224: 4a790002e052
+	TST.W	intOurAstsKnown		;16224: 4a790002e052
 	BEQ.S	ret16248		;1622a: 671c
 	MOVEQ	#100,D0			;1622c: 7064
 	JSR	_RandInt		;1622e: 4eb900000c0c
 	CMPI.B	#$1e,D0			;16234: 0c00001e
 	BPL.S	ret16248		;16238: 6a0e
+; 30% chance
 	MOVEQ	#10,D0			;1623a: 700a
 	MOVEQ	#5,D2			;1623c: 7405
 	MOVEA.L	ptrThisAstStats,A5	;1623e: 2a790002ded8
-	BSR.W	_17062			;16244: 61000e1c
+	BSR.W	_Misl_No_Mega17062	;16244: 61000e1c
 ret16248:
 	RTS				;16248: 4e75
 _1624A:
@@ -29302,19 +29387,21 @@ _1624A:
 	BMI.S	_162BC			;1624e: 6b6c
 	MOVE.L	A0,ptr16A3A		;16250: 23c800016a3a
 	MOVE.B	#$10,flg2E480		;16256: 13fc00100002e480
-	TST.W	data2E052		;1625e: 4a790002e052
+	TST.W	intOurAstsKnown		;1625e: 4a790002e052
 	BEQ.S	_1628E			;16264: 6728
-	LEA	ptr1F8BA,A0		;16266: 41f90001f8ba
+	LEA	arrAlienAsts,A0		;16266: 41f90001f8ba
 _1626C:
 	MOVE.L	(A0)+,D0		;1626c: 2018
 	BMI.W	_1628E			;1626e: 6b00001e
 	MOVEA.L	D0,A5			;16272: 2a40
 	MOVEQ	#10,D0			;16274: 700a
 	JSR	_RandInt		;16276: 4eb900000c0c
+; Seems like this would always loop
 	BPL.S	_1626C			;1627c: 6aee
 	MOVE.L	A0,-(A7)		;1627e: 2f08
-	LEA	ptr20224,A0		;16280: 41f900020224
-	BSR.W	_170AE			;16286: 61000e26
+; 4 Scatter, 1 Vortex, 4 Antivirus
+	LEA	tblMisl4S1V4Av,A0	;16280: 41f900020224
+	BSR.W	_FireMissiles		;16286: 61000e26
 	MOVEA.L	(A7)+,A0		;1628a: 205f
 	BRA.S	_1626C			;1628c: 60de
 _1628E:
@@ -29330,21 +29417,21 @@ _162BC:
 	MOVEQ	#5,D0			;162bc: 7005
 	JSR	_RandInt		;162be: 4eb900000c0c
 	BNE.W	_16364			;162c4: 6600009e
-	TST.W	data2E052		;162c8: 4a790002e052
+	TST.W	intOurAstsKnown		;162c8: 4a790002e052
 	BEQ.W	ret16248		;162ce: 6700ff78
-	TST.B	flg2E473		;162d2: 4a390002e473
+	TST.B	int2E473		;162d2: 4a390002e473
 	BNE.W	ret16248		;162d8: 6600ff6e
 	MOVE.W	#$0019,data20216	;162dc: 33fc001900020216
 	MOVE.W	#$000a,data20218	;162e4: 33fc000a00020218
 	MOVE.W	#$0014,data2021A	;162ec: 33fc00140002021a
-	MOVE.B	#$0e,flg2E473		;162f4: 13fc000e0002e473
+	MOVE.B	#$0e,int2E473		;162f4: 13fc000e0002e473
 	BSR.W	_16C48			;162fc: 6100094a
 	BMI.W	_16364			;16300: 6b000062
 _16304:
 	MOVEQ	#0,D0			;16304: 7000
-	MOVE.W	data2E052,D0		;16306: 30390002e052
+	MOVE.W	intOurAstsKnown,D0	;16306: 30390002e052
 	JSR	_RandInt		;1630c: 4eb900000c0c
-	LEA	ptr1F856,A1		;16312: 43f90001f856
+	LEA	arrPlayerAstsKnown,A1	;16312: 43f90001f856
 	ADD.W	D0,D0			;16318: d040
 	ADD.W	D0,D0			;1631a: d040
 	MOVEA.L	(0,A1,D0.W),A2		;1631c: 24710000
@@ -29370,7 +29457,7 @@ _1635A:
 ret16362:
 	RTS				;16362: 4e75
 _16364:
-	TST.W	data2E052		;16364: 4a790002e052
+	TST.W	intOurAstsKnown		;16364: 4a790002e052
 	BEQ.W	ret16248		;1636a: 6700fedc
 	LEA	(100,A5),A4		;1636e: 49ed0064
 	MOVEQ	#10,D0			;16372: 700a
@@ -29383,11 +29470,12 @@ loop16376:
 	MOVEQ	#5,D0			;16382: 7005
 	JSR	_RandInt		;16384: 4eb900000c0c
 	BNE.S	ret16362		;1638a: 66d6
-	LEA	ptr2023A,A0		;1638c: 41f90002023a
-	BSR.W	_170AE			;16392: 61000d1a
+; 6 Explosive, 4 Area Exp., 1 Stasis
+	LEA	tblMisl6E4A1St,A0	;1638c: 41f90002023a
+	BSR.W	_FireMissiles		;16392: 61000d1a
 	RTS				;16396: 4e75
-unk16398:
-; Azx. Trigger only ever 16th day
+_DailyAli3Atk:
+; Azx. Trigger only every 16th day
 	MOVE.B	intDay,D0		;16398: 10390002e45b
 	ANDI.B	#$0f,D0			;1639e: 0200000f
 	BNE.S	_163E2			;163a2: 663e
@@ -29396,20 +29484,23 @@ unk16398:
 ; Received 220 damage bombardment in 16 days?
 	CMPI.W	#$00dc,D0		;163ac: 0c4000dc
 	BMI.S	_163BE			;163b0: 6b0c
-	LEA	ptr20266,A0		;163b2: 41f900020266
-	BSR.W	_170AE			;163b8: 61000cf4
+; 6 Hellfire, 3 Nuclear, 3 Virus, 1 Mega, 1 Stasis
+	LEA	tblMisl6H3N3V1M1S,A0	;163b2: 41f900020266
+	BSR.W	_FireMissiles		;163b8: 61000cf4
 	RTS				;163bc: 4e75
 _163BE:
 	CMPI.W	#$0096,D0		;163be: 0c400096
 	BMI.S	_163D0			;163c2: 6b0c
-	LEA	ptr2027C,A0		;163c4: 41f90002027c
-	BSR.W	_170AE			;163ca: 61000ce2
+; 3 Area Exp., 3 Hellfire, 3 Scatter, 1 Stasis, 3 Vortex
+	LEA	tblMisl3A3H3Sc1St3V,A0	;163c4: 41f90002027c
+	BSR.W	_FireMissiles		;163ca: 61000ce2
 	RTS				;163ce: 4e75
 _163D0:
 	CMPI.W	#$0032,D0		;163d0: 0c400032
 	BMI.S	_163E2			;163d4: 6b0c
-	LEA	ptr20292,A0		;163d6: 41f900020292
-	BSR.W	_170AE			;163dc: 61000cd0
+; 3 Hellfire
+	LEA	tblMisl3H,A0		;163d6: 41f900020292
+	BSR.W	_FireMissiles		;163dc: 61000cd0
 	RTS				;163e0: 4e75
 _163E2:
 	MOVE.B	intDay,D0		;163e2: 10390002e45b
@@ -29427,7 +29518,7 @@ _163E2:
 ; Fire them
 	ADDQ.W	#1,(122,A5)		;16404: 526d007a
 	ADDQ.W	#1,(166,A5)		;16408: 526d00a6
-	MOVE.L	ptr1F856,(178,A5)	;1640c: 2b790001f85600b2
+	MOVE.L	arrPlayerAstsKnown,(178,A5) ;1640c: 2b790001f85600b2
 	RTS				;16414: 4e75
 _16416:
 	MOVEQ	#100,D0			;16416: 7064
@@ -29435,9 +29526,9 @@ _16416:
 	BNE.S	_1644E			;1641e: 662e
 ; 1% chance:
 	MOVEQ	#0,D0			;16420: 7000
-	MOVE.W	intAst2E056,D0		;16422: 30390002e056
+	MOVE.W	intAlienAstCount,D0	;16422: 30390002e056
 	JSR	_RandInt		;16428: 4eb900000c0c
-	LEA	ptr1F8BA,A1		;1642e: 43f90001f8ba
+	LEA	arrAlienAsts,A1		;1642e: 43f90001f8ba
 	ADD.W	D0,D0			;16434: d040
 	ADD.W	D0,D0			;16436: d040
 	MOVEA.L	(0,A1,D0.W),A0		;16438: 20710000
@@ -29447,7 +29538,7 @@ _1643C:
 	MOVEA.L	ptrThisAstBldgCount,A4	;1643c: 28790002ded4
 	TST.W	(76,A4)			;16442: 4a6c004c
 	BEQ.S	_1644E			;16446: 6706
-	BSR.W	_193E2			;16448: 61002f98
+	BSR.W	_AzxMassDisplPod	;16448: 61002f98
 	RTS				;1644c: 4e75
 _1644E:
 	SUBQ.B	#1,data20222		;1644e: 533900020222
@@ -29471,7 +29562,7 @@ _1644E:
 ret16494:
 	RTS				;16494: 4e75
 _16496:
-	BSR.W	_15F3C			;16496: 6100faa4
+	BSR.W	_DailyAli_15F3C		;16496: 6100faa4
 	BMI.S	_164DC			;1649a: 6b40
 	MOVE.B	#$08,flg2E47F		;1649c: 13fc00080002e47f
 	MOVEA.L	ptrThisAstBldgCount,A4	;164a4: 28790002ded4
@@ -29480,7 +29571,7 @@ _16496:
 ; If missile silos:
 	MOVE.W	(120,A5),D1		;164b0: 322d0078
 	BEQ.S	_164DC			;164b4: 6726
-; If Antivirus missiles in store:
+; If interceptor missiles in store:
 	MOVEQ	#4,D0			;164b6: 7004
 	JSR	_RandInt		;164b8: 4eb900000c0c
 	ADDQ.B	#1,D0			;164be: 5200
@@ -29489,17 +29580,17 @@ _16496:
 	BPL.S	_164C6			;164c2: 6a02
 	MOVE.W	D1,D0			;164c4: 3001
 _164C6:
-; Fire that many Antivirus missiles
+; Fire that many Antivirus (actually interceptor) missiles
 ; Take them out of storage
 	SUB.W	D0,(120,A5)		;164c6: 916d0078
 ; Add them to the launch set
 	ADD.W	D0,(142,A5)		;164ca: d16d008e
 ; Add them to the launch total
 	ADD.W	D0,(166,A5)		;164ce: d16d00a6
-	MOVE.L	ptr1F856,(178,A5)	;164d2: 2b790001f85600b2
+	MOVE.L	arrPlayerAstsKnown,(178,A5) ;164d2: 2b790001f85600b2
 	RTS				;164da: 4e75
 _164DC:
-; No missile silos/Antivirus:
+; No missile silos/interceptor missiles:
 	BSR.W	_15FA4			;164dc: 6100fac6
 	BMI.S	_16518			;164e0: 6b36
 	MOVE.L	A0,ptr16A3A		;164e2: 23c800016a3a
@@ -29512,10 +29603,10 @@ _164DC:
 	MOVE.W	#$0064,(24,A0)		;1650e: 317c00640018
 	BRA.W	_160AA			;16514: 6000fb94
 _16518:
-	BCLR	#1,bAlienSpec		;16518: 08b900010002e48d
+	BCLR	#1,bAlienSpecial	;16518: 08b900010002e48d
 	BEQ.W	ret16494		;16520: 6700ff72
 ; If Axz had previously lost a colony to building destruction:
-	TST.W	data2E052		;16524: 4a790002e052
+	TST.W	intOurAstsKnown		;16524: 4a790002e052
 	BEQ.S	ret1655A		;1652a: 672e
 	MOVE.W	#$000a,data20216	;1652c: 33fc000a00020216
 	MOVE.W	#$0005,data20218	;16534: 33fc000500020218
@@ -29528,7 +29619,7 @@ _16518:
 	MOVE.W	#$0064,(24,A0)		;16554: 317c00640018
 ret1655A:
 	RTS				;1655a: 4e75
-unk1655C:
+_DailyAli4Atk:
 ; tyl
 	MOVEA.L	ptrThisAstBldgCount,A1	;1655c: 22790002ded4
 	MOVEA.L	ptrThisAstStats,A0	;16562: 20790002ded8
@@ -29563,17 +29654,17 @@ _16584:
 ; Check some other things
 	BTST	#1,(91,A0)		;165aa: 08280001005b
 	BEQ.S	_165EC			;165b0: 673a
-	TST.W	data2E052		;165b2: 4a790002e052
+	TST.W	intOurAstsKnown		;165b2: 4a790002e052
 	BEQ.S	_165EC			;165b8: 6732
 ; ;
 	BSR.W	_13972			;165ba: 6100d3b6
 	BSR.W	_127D0			;165be: 6100c210
 	MOVE.B	D0,(35,A0)		;165c2: 11400023
 	LSL.W	#2,D0			;165c6: e548
-	LEA	arrAstMove1F6C6,A1	;165c8: 43f90001f6c6
+	LEA	arrAstDirection,A1	;165c8: 43f90001f6c6
 	MOVEM.W	(0,A1,D0.W),D0-D1	;165ce: 4cb100030000
 	MOVEM.W	D0-D1,(56,A0)		;165d4: 48a800030038
-; Speed 7?
+; Speed actually 8
 	MOVE.B	#$07,(24,A0)		;165da: 117c00070018
 ; Disable Gravity Nullifier
 	BCLR	#2,(89,A0)		;165e0: 08a800020059
@@ -29611,7 +29702,7 @@ loop16612:
 	MOVE.B	#$88,D1			;16640: 123c0088
 	MOVEQ	#0,D5			;16644: 7a00
 ; ??
-	JSR	_0E1FA			;16646: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;16646: 4eb90000e1fa
 	MOVEA.L	ptrThisAstStats,A0	;1664c: 20790002ded8
 	CMPA.L	ptrCurrentAst,A0	;16652: b1f90002de58
 	BNE.S	_16662			;16658: 6608
@@ -29633,21 +29724,21 @@ _16670:
 	MOVEA.L	ptrThisAstStats,A0	;16680: 20790002ded8
 	BSR.W	_12A62			;16686: 6100c3da
 	BEQ.S	_16692			;1668a: 6706
-	BSR.W	_16CF4			;1668c: 61000666
+	BSR.W	_AliAstEffects		;1668c: 61000666
 	RTS				;16690: 4e75
 _16692:
-	TST.W	data2E052		;16692: 4a790002e052
+	TST.W	intOurAstsKnown		;16692: 4a790002e052
 	BEQ.S	ret166E0		;16698: 6746
 	MOVEQ	#5,D0			;1669a: 7005
 	JSR	_RandInt		;1669c: 4eb900000c0c
 	BNE.S	ret166E0		;166a2: 663c
-	TST.B	flg2E473		;166a4: 4a390002e473
+	TST.B	int2E473		;166a4: 4a390002e473
 	BNE.S	ret166E0		;166aa: 6634
 ; 20% chance
 	MOVE.W	#$0008,data20216	;166ac: 33fc000800020216
 	MOVE.W	#$0005,data20218	;166b4: 33fc000500020218
 	MOVE.W	#$000f,data2021A	;166bc: 33fc000f0002021a
-	MOVE.B	#$0e,flg2E473		;166c4: 13fc000e0002e473
+	MOVE.B	#$0e,int2E473		;166c4: 13fc000e0002e473
 	BSR.W	_16A62			;166cc: 61000394
 	BMI.S	ret166E0		;166d0: 6b0e
 	MOVE.L	A0,-(A7)		;166d2: 2f08
@@ -29656,15 +29747,15 @@ _16692:
 	MOVE.W	#$0064,(24,A0)		;166da: 317c00640018
 ret166E0:
 	RTS				;166e0: 4e75
-unk166E2:
+_DailyAli5Atk:
 ; rigel
 ; Triggers every 100 days
-	TST.W	intAlienUnk7		;166e2: 4a7900020312
+	TST.W	intAlienMislFreq7	;166e2: 4a7900020312
 	BEQ.S	_166F4			;166e8: 670a
-	SUBQ.W	#1,intAlienUnk7		;166ea: 537900020312
+	SUBQ.W	#1,intAlienMislFreq7	;166ea: 537900020312
 	BNE.W	_16786			;166f0: 66000094
 _166F4:
-	MOVE.W	#$0064,intAlienUnk7	;166f4: 33fc006400020312
+	MOVE.W	#$0064,intAlienMislFreq7 ;166f4: 33fc006400020312
 	MOVEA.L	ptrThisAstBldgCount,A1	;166fc: 22790002ded4
 	TST.W	(42,A1)			;16702: 4a69002a
 	BEQ.W	_1673E			;16706: 67000036
@@ -29679,28 +29770,29 @@ loop16712:
 	CMPI.B	#$03,D1			;16722: 0c010003
 	BNE.S	_next16736		;16726: 660e
 	BSET	#3,(90,A0)		;16728: 08e80003005a
-	ST	flg2E188		;1672e: 50f90002e188
+	ST	flgAst2E188		;1672e: 50f90002e188
 	BRA.S	_1673E			;16734: 6008
 _next16736:
 	LEA	(750,A0),A0		;16736: 41e802ee
 	DBF	D0,loop16712		;1673a: 51c8ffd6
 _1673E:
 ; one asteroid picked
-	BSR.W	_12848			;1673e: 6100c108
+	BSR.W	_CountAsteroids		;1673e: 6100c108
 	TST.B	D1			;16742: 4a01
 	BEQ.S	ret16784		;16744: 673e
 	MOVEA.L	ptrThisAstStats,A5	;16746: 2a790002ded8
 	BSET	#3,(91,A5)		;1674c: 08ed0003005b
 ; 178: Missile strike target
 	CLR.L	(178,A5)		;16752: 42ad00b2
-	LEA	ptr202A8,A0		;16756: 41f9000202a8
-	BSR.W	_170AE			;1675c: 61000950
+; 2 Nuclear, 4 Scatter, 4 Antivirus
+	LEA	tblMisl2N4Sc4Av,A0	;16756: 41f9000202a8
+	BSR.W	_FireMissiles		;1675c: 61000950
 	TST.L	(178,A5)		;16760: 4aad00b2
 	BNE.S	ret16784		;16764: 661e
 	MOVEQ	#0,D0			;16766: 7000
-	MOVE.W	data2E052,D0		;16768: 30390002e052
+	MOVE.W	intOurAstsKnown,D0	;16768: 30390002e052
 	JSR	_RandInt		;1676e: 4eb900000c0c
-	LEA	ptr1F856,A0		;16774: 41f90001f856
+	LEA	arrPlayerAstsKnown,A0	;16774: 41f90001f856
 	ADD.W	D0,D0			;1677a: d040
 	ADD.W	D0,D0			;1677c: d040
 	MOVE.L	(0,A0,D0.W),(178,A5)	;1677e: 2b70000000b2
@@ -29730,25 +29822,26 @@ _16786:
 	MOVE.L	A1,(178,A0)		;167c8: 214900b2
 	RTS				;167cc: 4e75
 _167CE:
-	BSR.W	_16CF4			;167ce: 61000524
+	BSR.W	_AliAstEffects		;167ce: 61000524
 	RTS				;167d2: 4e75
 _167D4:
-	BSR.W	_12848			;167d4: 6100c072
+	BSR.W	_CountAsteroids		;167d4: 6100c072
 	MOVEA.L	ptrThisAstStats,A0	;167d8: 20790002ded8
 	BTST	#3,(91,A0)		;167de: 08280003005b
-	BEQ.W	_16864			;167e4: 6700007e
+	BEQ.W	_Misl_16864		;167e4: 6700007e
 ; 140
-	CMPI.W	#$008c,intAlienUnk7	;167e8: 0c79008c00020312
-	BPL.W	_16864			;167f0: 6a000072
+	CMPI.W	#$008c,intAlienMislFreq7 ;167e8: 0c79008c00020312
+	BPL.W	_Misl_16864		;167f0: 6a000072
 	MOVE.B	intDay,D0		;167f4: 10390002e45b
 	ANDI.B	#$03,D0			;167fa: 02000003
-	BNE.W	_16864			;167fe: 66000064
+	BNE.W	_Misl_16864		;167fe: 66000064
+; missile target
 	TST.L	(178,A0)		;16802: 4aa800b2
-	BEQ.S	_1685C			;16806: 6754
-	BSR.W	_17642			;16808: 61000e38
+	BEQ.S	_Clr91b3		;16806: 6754
+	BSR.W	_CountAliShips		;16808: 61000e38
 	CMPI.B	#$08,D0			;1680c: 0c000008
-	BMI.S	_1685C			;16810: 6b4a
-	LEA	ptr2015E,A1		;16812: 43f90002015e
+	BMI.S	_Clr91b3		;16810: 6b4a
+	LEA	ptrShip2015E,A1		;16812: 43f90002015e
 	MOVEQ	#4,D0			;16818: 7004
 	JSR	_RandInt		;1681a: 4eb900000c0c
 loop16820:
@@ -29770,75 +29863,81 @@ _1684C:
 	MOVEQ	#1,D0			;16852: 7001
 	JSR	_1A2CE			;16854: 4eb90001a2ce
 	RTS				;1685a: 4e75
-_1685C:
+_Clr91b3:
 	BCLR	#3,(91,A0)		;1685c: 08a80003005b
 	RTS				;16862: 4e75
-_16864:
-	SUBQ.W	#1,intAlienUnk8		;16864: 537900020314
+_Misl_16864:
+; Cycle counts down from 80 to 0. If it hits -1
+; it resets to 80 and has a 30% chance to fire.
+	SUBQ.W	#1,intAlienMislCdn	;16864: 537900020314
 	BPL.S	_1688E			;1686a: 6a22
-	MOVE.W	#$0050,intAlienUnk8	;1686c: 33fc005000020314
+	MOVE.W	#$0050,intAlienMislCdn	;1686c: 33fc005000020314
 	MOVEQ	#100,D0			;16874: 7064
 	JSR	_RandInt		;16876: 4eb900000c0c
 	CMPI.B	#$1e,D0			;1687c: 0c00001e
 	BPL.S	_1688E			;16880: 6a0c
-	LEA	ptr202BE,A0		;16882: 41f9000202be
-	BSR.W	_170AE			;16888: 61000824
+; 3 Virus, 4 Vortex, 3 Antivirus
+	LEA	tblMisl4V4V3A,A0	;16882: 41f9000202be
+	BSR.W	_FireMissiles		;16888: 61000824
 	RTS				;1688c: 4e75
 _1688E:
-	BSR.W	_15F3C			;1688e: 6100f6ac
+	BSR.W	_DailyAli_15F3C		;1688e: 6100f6ac
 	BMI.S	ret168BC		;16892: 6b28
 	MOVE.B	#$0c,flg2E47F		;16894: 13fc000c0002e47f
-	TST.W	data2E052		;1689c: 4a790002e052
+	TST.W	intOurAstsKnown		;1689c: 4a790002e052
 	BEQ.S	ret168BC		;168a2: 6718
 	MOVEQ	#100,D0			;168a4: 7064
 	JSR	_RandInt		;168a6: 4eb900000c0c
 	CMPI.B	#$1e,D0			;168ac: 0c00001e
 	BPL.S	ret168BC		;168b0: 6a0a
-	LEA	ptr202D4,A0		;168b2: 41f9000202d4
-	BSR.W	_170AE			;168b8: 610007f4
+; 6 Explosive, 4 Area Expl., 2 Nuclear, 3 Scatter, 1 Mega
+	LEA	tblMisl6E4A2N3Sc1M,A0	;168b2: 41f9000202d4
+	BSR.W	_FireMissiles		;168b8: 610007f4
 ret168BC:
 	RTS				;168bc: 4e75
-unk168BE:
+_DailyAli6Atk:
 ; Swix
 ; This is the path which sets up ghost fleets (?)
 	MOVEA.L	ptrThisAstStats,A5	;168be: 2a790002ded8
 	BCLR	#4,(91,A5)		;168c4: 08ad0004005b
-	BEQ.S	_168E2			;168ca: 6716
+	BEQ.S	_NormalAtk168E2		;168ca: 6716
 ; This occurs if they shot down a spy satellite
-	LEA	ptr202EA,A0		;168cc: 41f9000202ea
+; 4 Explosive, 4 Stasis, 4 Vortex, 2 Antivirus
+	LEA	tblMisl4E4St4V2A,A0	;168cc: 41f9000202ea
 ; Launch missile strike
-	BSR.W	_170AE			;168d2: 610007da
-	BSR.W	_16A3E			;168d6: 61000166
+	BSR.W	_FireMissiles		;168d2: 610007da
+	BSR.W	_TargetMostPop		;168d6: 61000166
 	BEQ.S	ret1690E		;168da: 6732
 ; missile strike target
 	MOVE.L	A2,(178,A5)		;168dc: 2b4a00b2
 	RTS				;168e0: 4e75
-_168E2:
-	BSR.W	_15F3C			;168e2: 6100f658
+_NormalAtk168E2:
+	BSR.W	_DailyAli_15F3C		;168e2: 6100f658
 	BMI.S	_16910			;168e6: 6b28
 	MOVE.B	#$0c,flg2E47F		;168e8: 13fc000c0002e47f
-	TST.W	data2E052		;168f0: 4a790002e052
+	TST.W	intOurAstsKnown		;168f0: 4a790002e052
 	BEQ.S	ret1690E		;168f6: 6716
 	MOVEQ	#100,D0			;168f8: 7064
 	JSR	_RandInt		;168fa: 4eb900000c0c
 	CMPI.B	#$1e,D0			;16900: 0c00001e
 	BPL.S	ret1690E		;16904: 6a08
+; 30% chance
 	MOVEQ	#5,D2			;16906: 7405
 	MOVEQ	#6,D0			;16908: 7006
-	BSR.W	_17062			;1690a: 61000756
+	BSR.W	_Misl_No_Mega17062	;1690a: 61000756
 ret1690E:
 	RTS				;1690e: 4e75
 _16910:
 	BSR.W	_15FA4			;16910: 6100f692
 	BMI.W	_16966			;16914: 6b000050
 	MOVE.L	A0,ptr16A3A		;16918: 23c800016a3a
-; 10% chance
 	MOVEQ	#10,D0			;1691e: 700a
 	JSR	_RandInt		;16920: 4eb900000c0c
 	BNE.S	_16930			;16926: 6608
+; 10% chance
 	MOVEQ	#1,D2			;16928: 7401
 	MOVEQ	#8,D0			;1692a: 7008
-	BSR.W	_17062			;1692c: 61000734
+	BSR.W	_Misl_No_Mega17062	;1692c: 61000734
 _16930:
 	MOVEA.L	ptr16A3A,A0		;16930: 207900016a3a
 	MOVE.B	#$10,flg2E480		;16936: 13fc00100002e480
@@ -29854,18 +29953,18 @@ _16966:
 	MOVEQ	#5,D0			;16966: 7005
 	JSR	_RandInt		;16968: 4eb900000c0c
 	BNE.S	ret1690E		;1696e: 669e
-	TST.W	data2E052		;16970: 4a790002e052
+	TST.W	intOurAstsKnown		;16970: 4a790002e052
 	BEQ.S	ret1690E		;16976: 6796
-	TST.B	flg2E473		;16978: 4a390002e473
+	TST.B	int2E473		;16978: 4a390002e473
 	BNE.S	ret1690E		;1697e: 668e
 	MOVE.W	#$000f,data20216	;16980: 33fc000f00020216
 	MOVE.W	#$0008,data20218	;16988: 33fc000800020218
 	MOVE.W	#$000e,data2021A	;16990: 33fc000e0002021a
-	MOVE.B	#$0e,flg2E473		;16998: 13fc000e0002e473
+	MOVE.B	#$0e,int2E473		;16998: 13fc000e0002e473
 	BSR.W	_16B7E			;169a0: 610001dc
 	BMI.W	ret1690E		;169a4: 6b00ff68
 	MOVE.L	A0,-(A7)		;169a8: 2f08
-	BSR.W	_16A3E			;169aa: 61000092
+	BSR.W	_TargetMostPop		;169aa: 61000092
 	MOVEA.L	(A7)+,A0		;169ae: 205f
 	MOVE.L	A2,(10,A0)		;169b0: 214a000a
 	MOVE.B	(25,A2),(1,A0)		;169b4: 116a00190001
@@ -29887,15 +29986,15 @@ _169EA:
 	DBF	D0,loop169D2		;169ea: 51c8ffe6
 	BSR.W	_175B8			;169ee: 61000bc8
 	MOVEA.L	A0,A1			;169f2: 2248
-	CMPI.W	#$0002,data2E052	;169f4: 0c7900020002e052
+	CMPI.W	#$0002,intOurAstsKnown	;169f4: 0c7900020002e052
 	BMI.W	ret1690E		;169fc: 6b00ff10
-	BSR.W	_175F4			;16a00: 61000bf2
+	BSR.W	_Fleet175F4		;16a00: 61000bf2
 	BEQ.W	ret1690E		;16a04: 6700ff08
 	MOVE.B	#$02,(0,A0)		;16a08: 117c00020000
 ; ghost fleet
 	MOVE.W	#$5555,(22,A0)		;16a0e: 317c55550016
 	MOVEA.L	(10,A1),A1		;16a14: 2269000a
-	LEA	ptr1F856,A2		;16a18: 45f90001f856
+	LEA	arrPlayerAstsKnown,A2	;16a18: 45f90001f856
 _16A1E:
 	MOVE.L	(A2)+,D0		;16a1e: 201a
 	BMI.S	_16A26			;16a20: 6b04
@@ -29910,38 +30009,39 @@ _16A26:
 	RTS				;16a38: 4e75
 ptr16A3A:
 	DS.L	1			;16a3a
-_16A3E:
-	LEA	ptr1F856,A1		;16a3e: 43f90001f856
+_TargetMostPop:
+; Intentionally target the most populated colony
+	LEA	arrPlayerAstsKnown,A1	;16a3e: 43f90001f856
 ; 30,000
 	MOVE.W	#$7530,D1		;16a44: 323c7530
 	SUBA.L	A2,A2			;16a48: 95ca
-_16A4A:
+loop_16A4A:
 	MOVE.L	(A1)+,D0		;16a4a: 2019
-	BMI.S	_16A5E			;16a4c: 6b10
+	BMI.S	retA2_16A5E		;16a4c: 6b10
 	MOVEA.L	D0,A0			;16a4e: 2040
 ; population
 	MOVE.W	(684,A0),D0		;16a50: 302802ac
 	CMP.W	D0,D1			;16a54: b240
-	BMI.S	_16A4A			;16a56: 6bf2
+	BMI.S	loop_16A4A		;16a56: 6bf2
 	MOVE.W	D0,D1			;16a58: 3200
 	MOVEA.L	A0,A2			;16a5a: 2448
-	BRA.S	_16A4A			;16a5c: 60ec
-_16A5E:
+	BRA.S	loop_16A4A		;16a5c: 60ec
+retA2_16A5E:
 	MOVE.L	A2,D0			;16a5e: 200a
 	RTS				;16a60: 4e75
 _16A62:
 	MOVEA.L	ptrThisAstStats,A0	;16a62: 20790002ded8
-	BSR.W	_17642			;16a68: 61000bd8
+	BSR.W	_CountAliShips		;16a68: 61000bd8
 	SUB.W	(12,A2),D0		;16a6c: 906a000c
 	CMP.W	data20216,D0		;16a70: b07900020216
 	BMI.W	_16B06			;16a76: 6b00008e
-	BSR.W	_175F4			;16a7a: 61000b78
+	BSR.W	_Fleet175F4		;16a7a: 61000b78
 	BEQ.W	_16B06			;16a7e: 67000086
 	MOVE.W	#$0046,(24,A0)		;16a82: 317c00460018
 	LEA	(32,A0),A3		;16a88: 47e80020
 	TST.W	(14,A2)			;16a8c: 4a6a000e
 	BEQ.S	_16AB6			;16a90: 6724
-	LEA	ptr2015E,A1		;16a92: 43f90002015e
+	LEA	ptrShip2015E,A1		;16a92: 43f90002015e
 _16A98:
 	MOVE.L	(A1)+,D1		;16a98: 2219
 	BMI.S	_16AB6			;16a9a: 6b1a
@@ -29960,7 +30060,7 @@ _16AB6:
 	MOVE.W	data2021A,D0		;16ac4: 30390002021a
 _16ACA:
 	JSR	_RandInt		;16aca: 4eb900000c0c
-	LEA	ptr2015E,A1		;16ad0: 43f90002015e
+	LEA	ptrShip2015E,A1		;16ad0: 43f90002015e
 _16AD6:
 	MOVE.L	(A1)+,D1		;16ad6: 2219
 	BEQ.S	_16AD6			;16ad8: 67fc
@@ -29986,11 +30086,11 @@ _16B06:
 	RTS				;16b08: 4e75
 _16B0A:
 	MOVEA.L	ptrThisAstStats,A0	;16b0a: 20790002ded8
-	BSR.W	_17642			;16b10: 61000b30
+	BSR.W	_CountAliShips		;16b10: 61000b30
 	SUB.W	(10,A2),D0		;16b14: 906a000a
 	CMP.W	data20216,D0		;16b18: b07900020216
 	BMI.S	_16B7A			;16b1e: 6b5a
-	BSR.W	_175F4			;16b20: 61000ad2
+	BSR.W	_Fleet175F4		;16b20: 61000ad2
 	BEQ.S	_16B7A			;16b24: 6754
 	LEA	(32,A0),A3		;16b26: 47e80020
 	MOVE.W	data20218,D0		;16b2a: 303900020218
@@ -29999,7 +30099,7 @@ _16B0A:
 	MOVE.W	data2021A,D0		;16b38: 30390002021a
 _16B3E:
 	JSR	_RandInt		;16b3e: 4eb900000c0c
-	LEA	ptr2015E,A1		;16b44: 43f90002015e
+	LEA	ptrShip2015E,A1		;16b44: 43f90002015e
 _16B4A:
 	MOVE.L	(A1)+,D1		;16b4a: 2219
 	BEQ.S	_16B4A			;16b4c: 67fc
@@ -30023,16 +30123,16 @@ _16B7A:
 	RTS				;16b7c: 4e75
 _16B7E:
 	MOVEA.L	ptrThisAstStats,A0	;16b7e: 20790002ded8
-	BSR.W	_17642			;16b84: 61000abc
+	BSR.W	_CountAliShips		;16b84: 61000abc
 	SUB.W	(10,A2),D0		;16b88: 906a000a
 	CMP.W	data20216,D0		;16b8c: b07900020216
 	BMI.W	_16C44			;16b92: 6b0000b0
-	BSR.W	_175F4			;16b96: 61000a5c
+	BSR.W	_Fleet175F4		;16b96: 61000a5c
 	BEQ.W	_16C44			;16b9a: 670000a8
 	LEA	(32,A0),A3		;16b9e: 47e80020
 	TST.W	(14,A2)			;16ba2: 4a6a000e
 	BEQ.S	_16BCC			;16ba6: 6724
-	LEA	ptr2015E,A1		;16ba8: 43f90002015e
+	LEA	ptrShip2015E,A1		;16ba8: 43f90002015e
 _16BAE:
 	MOVE.L	(A1)+,D1		;16bae: 2219
 	BMI.S	_16BCC			;16bb0: 6b1a
@@ -30046,7 +30146,7 @@ _16BAE:
 _16BCC:
 	TST.W	(12,A2)			;16bcc: 4a6a000c
 	BEQ.S	_16BF4			;16bd0: 6722
-	LEA	ptr2015E,A1		;16bd2: 43f90002015e
+	LEA	ptrShip2015E,A1		;16bd2: 43f90002015e
 _16BD8:
 	MOVE.L	(A1)+,D1		;16bd8: 2219
 	BMI.S	_16BF4			;16bda: 6b18
@@ -30064,7 +30164,7 @@ _16BF4:
 	MOVE.W	data2021A,D0		;16c02: 30390002021a
 _16C08:
 	JSR	_RandInt		;16c08: 4eb900000c0c
-	LEA	ptr2015E,A1		;16c0e: 43f90002015e
+	LEA	ptrShip2015E,A1		;16c0e: 43f90002015e
 _16C14:
 	MOVE.L	(A1)+,D1		;16c14: 2219
 	BEQ.S	_16C14			;16c16: 67fc
@@ -30088,18 +30188,18 @@ _16C44:
 	RTS				;16c46: 4e75
 _16C48:
 	MOVEA.L	ptrThisAstStats,A0	;16c48: 20790002ded8
-	BSR.W	_17642			;16c4e: 610009f2
+	BSR.W	_CountAliShips		;16c4e: 610009f2
 	SUB.W	(10,A2),D0		;16c52: 906a000a
 	SUB.W	(12,A2),D0		;16c56: 906a000c
 	CMP.W	data20216,D0		;16c5a: b07900020216
 	BMI.W	_16CF0			;16c60: 6b00008e
-	BSR.W	_175F4			;16c64: 6100098e
+	BSR.W	_Fleet175F4		;16c64: 6100098e
 	BEQ.W	_16CF0			;16c68: 67000086
 	MOVE.W	#$0046,(24,A0)		;16c6c: 317c00460018
 	LEA	(32,A0),A3		;16c72: 47e80020
 	TST.W	(14,A2)			;16c76: 4a6a000e
 	BEQ.S	_16CA0			;16c7a: 6724
-	LEA	ptr2015E,A1		;16c7c: 43f90002015e
+	LEA	ptrShip2015E,A1		;16c7c: 43f90002015e
 _16C82:
 	MOVE.L	(A1)+,D1		;16c82: 2219
 	BMI.S	_16CA0			;16c84: 6b1a
@@ -30117,7 +30217,7 @@ _16CA0:
 	MOVE.W	data2021A,D0		;16cae: 30390002021a
 _16CB4:
 	JSR	_RandInt		;16cb4: 4eb900000c0c
-	LEA	ptr2015E,A1		;16cba: 43f90002015e
+	LEA	ptrShip2015E,A1		;16cba: 43f90002015e
 _16CC0:
 	MOVE.L	(A1)+,D1		;16cc0: 2219
 	BEQ.S	_16CC0			;16cc2: 67fc
@@ -30139,13 +30239,17 @@ _16CE6:
 _16CF0:
 	MOVEQ	#-1,D0			;16cf0: 70ff
 	RTS				;16cf2: 4e75
-_16CF4:
-; Per-alien effects for an asteroid. Includes the ore eater ability
-; to boobytrap an asteroid so that it explodes when you colonize it
-; Triggers when Azx, Rig lose a colony
+_AliAstEffects:
+; Per-alien effects for an asteroid, probably when their
+; colony is destroyed. Includes the ore eater ability to
+; boobytrap an asteroid so that it explodes when you
+; colonize it. Triggers when Azx, Rig lose a colony
 	MOVE.L	ptrThisAstStats,-(A7)	;16cf4: 2f390002ded8
 	MOVE.L	A0,ptrThisAstStats	;16cfa: 23c80002ded8
-	BSR.W	_12848			;16d00: 6100bb46
+	BSR.W	_CountAsteroids		;16d00: 6100bb46
+; d1 = Player asteroids known to enemy
+; d2 = Alien asteroid count
+; d3 = Player asteroid count
 	MOVE.W	intCurrentAlienID,D0	;16d04: 30390002df02
 	SUBQ.W	#1,D0			;16d0a: 5340
 	LSL.W	#2,D0			;16d0c: e548
@@ -30155,25 +30259,27 @@ _16CF4:
 	MOVE.L	(A7)+,ptrThisAstStats	;16d1a: 23df0002ded8
 	RTS				;16d20: 4e75
 arr16D22:
-	DC.L	_16D3A			;16d22: 00016d3a
+	DC.L	_Ali123AstEffect	;16d22: 00016d3a
 	DC.L	_Boobytrap		;16d26: 00016df6
-	DC.L	_16D3A			;16d2a: 00016d3a
-	DC.L	_Tylar_16E06		;16d2e: 00016e06
-	DC.L	_Rigel_16EB2		;16d32: 00016eb2
-	DC.L	_Swix_16F34		;16d36: 00016f34
-_16D3A:
+	DC.L	_Ali123AstEffect	;16d2a: 00016d3a
+	DC.L	_TylarAstEffect		;16d2e: 00016e06
+	DC.L	_RigelAstEffect		;16d32: 00016eb2
+	DC.L	_SwixAstEffect		;16d36: 00016f34
+_Ali123AstEffect:
 ; occurs when alien 1-3
-	CMPI.W	#$0002,intAst2E056	;16d3a: 0c7900020002e056
+; possibly evacuate fleet or disband fleet
+	CMPI.W	#$0002,intAlienAstCount	;16d3a: 0c7900020002e056
 	BMI.W	ret16DF4		;16d42: 6b0000b0
+; Only do this if there is another colony left
 	MOVEA.L	ptrThisAstStats,A0	;16d46: 20790002ded8
-	BSR.W	_17642			;16d4c: 610008f4
+	BSR.W	_CountAliShips		;16d4c: 610008f4
 	SUB.W	(10,A2),D0		;16d50: 906a000a
 	BLE.W	ret16DF4		;16d54: 6f00009e
-	BSR.W	_175F4			;16d58: 6100089a
+	BSR.W	_Fleet175F4		;16d58: 6100089a
 	BEQ.W	ret16DF4		;16d5c: 67000096
 	MOVE.W	#$0046,(24,A0)		;16d60: 317c00460018
 	SUBQ.W	#1,D0			;16d66: 5340
-	LEA	ptr2015E,A1		;16d68: 43f90002015e
+	LEA	ptrShip2015E,A1		;16d68: 43f90002015e
 	LEA	(32,A0),A3		;16d6e: 47e80020
 _16D72:
 	MOVE.L	(A1)+,D1		;16d72: 2219
@@ -30190,9 +30296,9 @@ _16D72:
 	DBF	D0,_16D72		;16d94: 51c8ffdc
 _16D98:
 	MOVEQ	#0,D0			;16d98: 7000
-	MOVE.W	intAst2E056,D0		;16d9a: 30390002e056
+	MOVE.W	intAlienAstCount,D0	;16d9a: 30390002e056
 	JSR	_RandInt		;16da0: 4eb900000c0c
-	LEA	ptr1F8BA,A1		;16da6: 43f90001f8ba
+	LEA	arrAlienAsts,A1		;16da6: 43f90001f8ba
 	ADD.W	D0,D0			;16dac: d040
 	ADD.W	D0,D0			;16dae: d040
 	MOVEA.L	(0,A1,D0.W),A2		;16db0: 24710000
@@ -30218,24 +30324,27 @@ _16DF0:
 ret16DF4:
 	RTS				;16df4: 4e75
 _Boobytrap:
-; Rig asteroid to explode when colonized by terran player
+; Presumably rig asteroid to explode when
+; colonized by terran player
 	MOVEA.L	ptrThisAstStats,A0	;16df6: 20790002ded8
 	BSET	#6,(90,A0)		;16dfc: 08e80006005a
-	BRA.W	_16D3A			;16e02: 6000ff36
-_Tylar_16E06:
-	CMPI.W	#$0002,intAst2E056	;16e06: 0c7900020002e056
+	BRA.W	_Ali123AstEffect	;16e02: 6000ff36
+_TylarAstEffect:
+	CMPI.W	#$0002,intAlienAstCount	;16e06: 0c7900020002e056
 	BMI.W	ret16EB0		;16e0e: 6b0000a0
+; Only if there's a colony left
 	MOVEA.L	ptrThisAstStats,A0	;16e12: 20790002ded8
+; founded by small transporter?
 	BTST	#1,(91,A0)		;16e18: 08280001005b
 	BNE.W	ret16EB0		;16e1e: 66000090
-	BSR.W	_17642			;16e22: 6100081e
+	BSR.W	_CountAliShips		;16e22: 6100081e
 	TST.W	D0			;16e26: 4a40
 	BLE.W	ret16EB0		;16e28: 6f000086
-	BSR.W	_175F4			;16e2c: 610007c6
+	BSR.W	_Fleet175F4		;16e2c: 610007c6
 	BEQ.W	ret16EB0		;16e30: 6700007e
 	MOVE.W	#$0028,(24,A0)		;16e34: 317c00280018
 	SUBQ.W	#1,D0			;16e3a: 5340
-	LEA	ptr2015E,A1		;16e3c: 43f90002015e
+	LEA	ptrShip2015E,A1		;16e3c: 43f90002015e
 	LEA	(32,A0),A3		;16e42: 47e80020
 _16E46:
 	MOVE.L	(A1)+,D1		;16e46: 2219
@@ -30247,7 +30356,7 @@ _16E46:
 	ADDQ.W	#1,(22,A0)		;16e54: 52680016
 	DBF	D0,_16E46		;16e58: 51c8ffec
 _16E5C:
-	LEA	ptr1F8BA,A1		;16e5c: 43f90001f8ba
+	LEA	arrAlienAsts,A1		;16e5c: 43f90001f8ba
 	MOVEQ	#0,D0			;16e62: 7000
 _16E64:
 	MOVEA.L	(A1)+,A2		;16e64: 2459
@@ -30278,14 +30387,16 @@ _16EAC:
 	DBF	D0,loop16E94		;16eac: 51c8ffe6
 ret16EB0:
 	RTS				;16eb0: 4e75
-_Rigel_16EB2:
+_RigelAstEffect:
 ; Triggers when Rigellians lose a colony
-	CMPI.W	#$0002,intAst2E056	;16eb2: 0c7900020002e056
+	CMPI.W	#$0002,intAlienAstCount	;16eb2: 0c7900020002e056
 	BMI.W	ret16F2E		;16eba: 6b000072
+; only if there's a colony left
 	MOVEA.L	ptrThisAstStats,A0	;16ebe: 20790002ded8
+; gravity nullifier active?
 	BTST	#2,(89,A0)		;16ec4: 082800020059
 	BNE.W	ret16F2E		;16eca: 66000062
-	LEA	ptr1F8BA,A1		;16ece: 43f90001f8ba
+	LEA	arrAlienAsts,A1		;16ece: 43f90001f8ba
 	MOVEQ	#0,D0			;16ed4: 7000
 _16ED6:
 	MOVEA.L	(A1)+,A2		;16ed6: 2459
@@ -30293,6 +30404,7 @@ _16ED6:
 	BEQ.S	_16ED6			;16eda: 67fa
 	MOVE.L	A2,D1			;16edc: 220a
 	BMI.S	_16EEE			;16ede: 6b0e
+; population
 	CMP.W	(684,A2),D0		;16ee0: b06a02ac
 	BPL.S	_16ED6			;16ee4: 6af0
 	MOVE.W	(684,A2),D0		;16ee6: 302a02ac
@@ -30301,11 +30413,11 @@ _16ED6:
 _16EEE:
 	MOVE.L	A3,-(A7)		;16eee: 2f0b
 	MOVEA.L	ptrThisAstStats,A0	;16ef0: 20790002ded8
-	BSR.W	_17642			;16ef6: 6100074a
+	BSR.W	_CountAliShips		;16ef6: 6100074a
 	SUBQ.W	#1,D0			;16efa: 5340
 	BMI.S	_16F30			;16efc: 6b32
 	MOVEA.L	(A7)+,A3		;16efe: 265f
-	LEA	ptr2015E,A1		;16f00: 43f90002015e
+	LEA	ptrShip2015E,A1		;16f00: 43f90002015e
 loop16F06:
 	MOVEA.L	(A1)+,A6		;16f06: 2c59
 	MOVEM.L	D0/A1/A3,-(A7)		;16f08: 48e78050
@@ -30321,18 +30433,19 @@ ret16F2E:
 _16F30:
 	MOVEA.L	(A7)+,A3		;16f30: 265f
 	RTS				;16f32: 4e75
-_Swix_16F34:
-	CMPI.W	#$0002,intAst2E056	;16f34: 0c7900020002e056
+_SwixAstEffect:
+	CMPI.W	#$0002,intAlienAstCount	;16f34: 0c7900020002e056
 	BMI.W	ret16FEC		;16f3c: 6b0000ae
+; last colony
 	MOVEA.L	ptrThisAstStats,A0	;16f40: 20790002ded8
-	BSR.W	_17642			;16f46: 610006fa
+	BSR.W	_CountAliShips		;16f46: 610006fa
 	TST.W	D0			;16f4a: 4a40
 	BLE.W	ret16FEC		;16f4c: 6f00009e
-	BSR.W	_175F4			;16f50: 610006a2
+	BSR.W	_Fleet175F4		;16f50: 610006a2
 	BEQ.W	ret16FEC		;16f54: 67000096
 	MOVE.W	#$0046,(24,A0)		;16f58: 317c00460018
 	SUBQ.W	#1,D0			;16f5e: 5340
-	LEA	ptr2015E,A1		;16f60: 43f90002015e
+	LEA	ptrShip2015E,A1		;16f60: 43f90002015e
 	LEA	(32,A0),A3		;16f66: 47e80020
 _16F6A:
 	MOVE.L	(A1)+,D1		;16f6a: 2219
@@ -30350,9 +30463,9 @@ _16F6A:
 	DBF	D0,_16F6A		;16f8c: 51c8ffdc
 _16F90:
 	MOVEQ	#0,D0			;16f90: 7000
-	MOVE.W	intAst2E056,D0		;16f92: 30390002e056
+	MOVE.W	intAlienAstCount,D0	;16f92: 30390002e056
 	JSR	_RandInt		;16f98: 4eb900000c0c
-	LEA	ptr1F8BA,A1		;16f9e: 43f90001f8ba
+	LEA	arrAlienAsts,A1		;16f9e: 43f90001f8ba
 	ADD.W	D0,D0			;16fa4: d040
 	ADD.W	D0,D0			;16fa6: d040
 	MOVEA.L	(0,A1,D0.W),A2		;16fa8: 24710000
@@ -30378,7 +30491,7 @@ _16FE8:
 ret16FEC:
 	RTS				;16fec: 4e75
 _16FEE:
-	TST.W	data2E052		;16fee: 4a790002e052
+	TST.W	intOurAstsKnown		;16fee: 4a790002e052
 	BEQ.S	ret17060		;16ff4: 676a
 ; Missiles
 	LEA	(100,A5),A4		;16ff6: 49ed0064
@@ -30409,50 +30522,52 @@ _17018:
 _17038:
 	TST.W	(166,A5)		;17038: 4a6d00a6
 	BEQ.S	ret17060		;1703c: 6722
-_1703E:
+_RandomMislTarget:
 	MOVEQ	#0,D0			;1703e: 7000
-	MOVE.W	data2E052,D0		;17040: 30390002e052
+	MOVE.W	intOurAstsKnown,D0	;17040: 30390002e052
 	JSR	_RandInt		;17046: 4eb900000c0c
-	LEA	ptr1F856,A0		;1704c: 41f90001f856
+	LEA	arrPlayerAstsKnown,A0	;1704c: 41f90001f856
 	ADD.W	D0,D0			;17052: d040
 	ADD.W	D0,D0			;17054: d040
 	MOVE.L	(0,A0,D0.W),(178,A5)	;17056: 2b70000000b2
 	BSR.W	_17580			;1705c: 61000522
 ret17060:
 	RTS				;17060: 4e75
-_17062:
-	TST.W	data2E052		;17062: 4a790002e052
+_Misl_No_Mega17062:
+	TST.W	intOurAstsKnown		;17062: 4a790002e052
 	BEQ.S	ret170AC		;17068: 6742
 	LEA	(100,A5),A4		;1706a: 49ed0064
 	LEA	(122,A5),A3		;1706e: 47ed007a
 	JSR	_RandInt		;17072: 4eb900000c0c
+; Try to launch 100 random non-Mega missiles
 	ADD.W	D0,D2			;17078: d440
 	MOVEQ	#100,D3			;1707a: 7664
-_1707C:
+_loop_1707C:
 	SUBQ.B	#1,D3			;1707c: 5303
-	BEQ.S	_170A6			;1707e: 6726
+	BEQ.S	_Shoot170A6		;1707e: 6726
 	MOVEQ	#11,D0			;17080: 700b
 	JSR	_RandInt		;17082: 4eb900000c0c
 	CMPI.B	#$07,D0			;17088: 0c000007
-	BEQ.S	_1707C			;1708c: 67ee
+	BEQ.S	_loop_1707C		;1708c: 67ee
 	ADD.W	D0,D0			;1708e: d040
 	TST.W	(0,A4,D0.W)		;17090: 4a740000
-	BEQ.S	_1707C			;17094: 67e6
+	BEQ.S	_loop_1707C		;17094: 67e6
 	SUBQ.W	#1,(0,A4,D0.W)		;17096: 53740000
 	ADDQ.W	#1,(0,A3,D0.W)		;1709a: 52730000
 	ADDQ.W	#1,(166,A5)		;1709e: 526d00a6
 	SUBQ.W	#1,D2			;170a2: 5342
-	BNE.S	_1707C			;170a4: 66d6
-_170A6:
+	BNE.S	_loop_1707C		;170a4: 66d6
+_Shoot170A6:
+; If missiles launching, pick a random target
 	TST.W	(166,A5)		;170a6: 4a6d00a6
-	BNE.S	_1703E			;170aa: 6692
+	BNE.S	_RandomMislTarget	;170aa: 6692
 ret170AC:
 	RTS				;170ac: 4e75
-_170AE:
-	TST.W	data2E052		;170ae: 4a790002e052
+_FireMissiles:
+	TST.W	intOurAstsKnown		;170ae: 4a790002e052
 	BEQ.S	ret17116		;170b4: 6760
 	MOVEA.L	ptrThisAstBldgCount,A4	;170b6: 28790002ded4
-; requires missile silo
+; requires at least one missile silo
 	TST.W	(28,A4)			;170bc: 4a6c001c
 	BEQ.S	ret17116		;170c0: 6754
 ; a4: missiles in store
@@ -30463,13 +30578,18 @@ _170AE:
 loop170CC:
 	MOVEQ	#0,D0			;170cc: 7000
 	MOVE.B	(A0),D0			;170ce: 1010
-	BEQ.S	_17104			;170d0: 6732
+	BEQ.S	_next17104		;170d0: 6732
+; 0 missiles: skip to next
+; 1 missile: 1 missile
+; 2+ missiles: random between 1 and n missiles
 	CMPI.B	#$01,D0			;170d2: 0c000001
 	BEQ.S	_170E0			;170d6: 6708
 	JSR	_RandInt		;170d8: 4eb900000c0c
-; minimum 2
 	ADDQ.B	#1,D0			;170de: 5200
 _170E0:
+; Appears to be a sub-chance on the second byte
+; appears to only used for Ore-eater Virus 01 14
+; Due to an off-by-one, it has a 21% chance.
 	MOVE.W	D0,D2			;170e0: 3400
 	MOVEQ	#0,D3			;170e2: 7600
 	MOVE.B	(1,A0),D3		;170e4: 16280001
@@ -30477,32 +30597,34 @@ _170E0:
 	MOVEQ	#100,D0			;170ea: 7064
 	JSR	_RandInt		;170ec: 4eb900000c0c
 	CMP.W	D0,D3			;170f2: b640
-	BMI.S	_17104			;170f4: 6b0e
+	BMI.S	_next17104		;170f4: 6b0e
 _170F6:
+; check we have enough missiles
 	CMP.W	(A4),D2			;170f6: b454
 	BMI.S	_170FC			;170f8: 6b02
 	MOVE.W	(A4),D2			;170fa: 3414
 _170FC:
+; +N missiles launching
 	SUB.W	D2,(A4)			;170fc: 9554
 	ADD.W	D2,(A3)			;170fe: d553
 	ADD.W	D2,(166,A5)		;17100: d56d00a6
-_17104:
+_next17104:
 	ADDQ.L	#2,A4			;17104: 548c
 	ADDQ.L	#2,A3			;17106: 548b
 	ADDQ.L	#2,A0			;17108: 5488
 	DBF	D1,loop170CC		;1710a: 51c9ffc0
 	TST.W	(166,A5)		;1710e: 4a6d00a6
-	BNE.W	_1703E			;17112: 6600ff2a
+	BNE.W	_RandomMislTarget	;17112: 6600ff2a
 ret17116:
 	RTS				;17116: 4e75
 _WarheadKll09:
 	MOVEA.L	ptrThisAstStats,A0	;17118: 20790002ded8
 ; -20 population
 	SUBI.W	#$0014,(684,A0)		;1711e: 0468001402ac
-_17124:
-; This effect occurs whenever the Rigellians or Swixarans use their
-; bioweapon too
-	TST.B	flg2E468		;17124: 4a390002e468
+_BioweaponFlash:
+; This effect occurs whenever the Rigellians or Swixarans
+; use their bioweapon too
+	TST.B	flgShowGfx		;17124: 4a390002e468
 	BNE.S	ret171A4		;1712a: 6678
 	CMPI.B	#$04,intScreen		;1712c: 0c3900040002e486
 	BEQ.S	ret171A4		;17134: 676e
@@ -30512,22 +30634,22 @@ _17124:
 	MOVEA.L	ptrCurrentAst,A0	;17144: 20790002de58
 	MOVEQ	#51,D0			;1714a: 7033
 	MOVEQ	#0,D5			;1714c: 7a00
-	JSR	_0E1FA			;1714e: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;1714e: 4eb90000e1fa
 	CMPI.B	#$04,intScreen		;17154: 0c3900040002e486
 	BEQ.S	ret171A4		;1715c: 6746
 	CMPI.B	#$05,intScreen		;1715e: 0c3900050002e486
 	BEQ.S	ret171A4		;17166: 673c
-	MOVE.W	#$000f,data2E0A8	;17168: 33fc000f0002e0a8
-	JSR	_0FCD6			;17170: 4eb90000fcd6
+	MOVE.W	#$000f,screenFlashColor	;17168: 33fc000f0002e0a8
+	JSR	_WarheadFlash		;17170: 4eb90000fcd6
 ; Sound P: Alien whoosh
 ; whoosh sound
 	MOVEQ	#16,D0			;17176: 7010
 	JSR	_PlaySound		;17178: 4eb90001a50e
-	LEA	ptr1AF16,A0		;1717e: 41f90001af16
-	LEA	ptr1AF96,A1		;17184: 43f90001af96
-	JSR	_0596E			;1718a: 4eb90000596e
-	LEA	ptr1AF16,A0		;17190: 41f90001af16
-	LEA	ptr1AF96,A1		;17196: 43f90001af96
+	LEA	paletteFlash,A0		;1717e: 41f90001af16
+	LEA	palette,A1		;17184: 43f90001af96
+	JSR	_ScreenFlash_0596E	;1718a: 4eb90000596e
+	LEA	paletteFlash,A0		;17190: 41f90001af16
+	LEA	palette,A1		;17196: 43f90001af96
 	MOVEQ	#31,D0			;1719c: 701f
 loop1719E:
 	MOVE.W	(A0)+,(A1)+		;1719e: 32d8
@@ -30540,12 +30662,12 @@ _WarheadRigel09:
 	SUBI.W	#$0014,(684,A0)		;171ac: 0468001402ac
 ; Virus outbreak
 	BSET	#2,(90,A0)		;171b2: 08e80002005a
-	BRA.W	_17124			;171b8: 6000ff6a
+	BRA.W	_BioweaponFlash		;171b8: 6000ff6a
 _WarheadSwix10:
 ; -50 population
 	MOVEA.L	ptrThisAstStats,A0	;171bc: 20790002ded8
 	SUBI.W	#$0032,(684,A0)		;171c2: 0468003202ac
-	BRA.W	_17124			;171c8: 6000ff5a
+	BRA.W	_BioweaponFlash		;171c8: 6000ff5a
 _WarheadRigel10:
 	MOVEA.L	ptrThisAstStats,A0	;171cc: 20790002ded8
 	CLR.W	(698,A0)		;171d2: 426802ba
@@ -30554,7 +30676,7 @@ _WarheadRigel10:
 	JSR	_RandInt		;171d8: 4eb900000c0c
 	ADDI.B	#$14,D0			;171de: 06000014
 	MOVE.B	D0,(97,A0)		;171e2: 11400061
-	TST.B	flg2E468		;171e6: 4a390002e468
+	TST.B	flgShowGfx		;171e6: 4a390002e468
 	BNE.S	ret1721E		;171ec: 6630
 	CMPI.B	#$04,intScreen		;171ee: 0c3900040002e486
 	BEQ.S	ret1721E		;171f6: 6726
@@ -30565,7 +30687,7 @@ _WarheadRigel10:
 	MOVEA.L	ptrCurrentAst,A0	;17206: 20790002de58
 	MOVEQ	#51,D0			;1720c: 7033
 	MOVEQ	#0,D5			;1720e: 7a00
-	JSR	_0E1FA			;17210: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;17210: 4eb90000e1fa
 ; Sound P: Alien whoosh
 ; Whoosh
 	MOVEQ	#16,D0			;17216: 7010
@@ -30585,7 +30707,7 @@ _17230:
 	LEA	(14,A0),A0		;17230: 41e8000e
 	DBF	D0,loop17228		;17234: 51c8fff2
 ; having gone through all buildings:
-	TST.B	flg2E468		;17238: 4a390002e468
+	TST.B	flgShowGfx		;17238: 4a390002e468
 	BNE.S	ret1726C		;1723e: 662c
 	MOVE.W	(10,A6),D2		;17240: 342e000a
 	LEA	ptr1EA46,A2		;17244: 45f90001ea46
@@ -30593,7 +30715,7 @@ _17230:
 	MOVEA.L	ptrCurrentAst,A0	;1724e: 20790002de58
 	MOVEQ	#51,D0			;17254: 7033
 	MOVEQ	#0,D5			;17256: 7a00
-	JSR	_0E1FA			;17258: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;17258: 4eb90000e1fa
 	MOVE.W	#$001e,(38,A0)		;1725e: 317c001e0026
 ; Sound P: Alien whoosh
 	MOVEQ	#16,D0			;17264: 7010
@@ -30607,7 +30729,7 @@ _1726E:
 ; Enough damage to destroy building with detonation
 	MOVEQ	#120,D7			;1727e: 7e78
 	JSR	_DamageBldg		;17280: 4eb900006d4a
-	TST.B	flg2E468		;17286: 4a390002e468
+	TST.B	flgShowGfx		;17286: 4a390002e468
 	BNE.S	_172B0			;1728c: 6622
 	LEA	ptr1E9FE,A2		;1728e: 45f90001e9fe
 	MOVE.B	#$98,D1			;17294: 123c0098
@@ -30616,18 +30738,19 @@ _1726E:
 	MOVEQ	#6,D0			;172a0: 7006
 	JSR	_RandInt		;172a2: 4eb900000c0c
 	EXG	D0,D5			;172a8: c145
-	JSR	_0E1FA			;172aa: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;172aa: 4eb90000e1fa
 _172B0:
 	MOVEM.L	(A7)+,D0/A0/A6		;172b0: 4cdf4101
 	BRA.W	_17230			;172b4: 6000ff7a
 _WarheadSwix08:
+; Damage over time sabotage warhead
 	MOVEA.L	ptrThisAstStats,A0	;172b8: 20790002ded8
 	MOVEQ	#5,D0			;172be: 7005
 	JSR	_RandInt		;172c0: 4eb900000c0c
 	ADDQ.B	#5,D0			;172c6: 5a00
 	ADD.B	D0,(98,A0)		;172c8: d1280062
 	MOVE.B	#$04,(99,A0)		;172cc: 117c00040063
-	TST.B	flg2E468		;172d2: 4a390002e468
+	TST.B	flgShowGfx		;172d2: 4a390002e468
 	BNE.S	ret17304		;172d8: 662a
 	MOVE.W	(10,A6),D2		;172da: 342e000a
 	LEA	ptr1EA46,A2		;172de: 45f90001ea46
@@ -30635,12 +30758,13 @@ _WarheadSwix08:
 	MOVEA.L	ptrCurrentAst,A0	;172e8: 20790002de58
 	MOVEQ	#51,D0			;172ee: 7033
 	MOVEQ	#0,D5			;172f0: 7a00
-	JSR	_0E1FA			;172f2: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;172f2: 4eb90000e1fa
 	MOVE.W	#$001e,(38,A0)		;172f8: 317c001e0026
 	JSR	_PlayExplosion		;172fe: 4eb90001a4fa
 ret17304:
 	RTS				;17304: 4e75
 _UpdSwixWepn08:
+; Swixaran hardpoint hits a random building
 	TST.B	(98,A5)			;17306: 4a2d0062
 	BNE.S	_1730E			;1730a: 6602
 	RTS				;1730c: 4e75
@@ -30667,17 +30791,17 @@ _17350:
 	BMI.W	_173E6			;1735c: 6b000088
 	TST.B	(0,A0)			;17360: 4a280000
 	BEQ.S	_17350			;17364: 67ea
-	SF	flg2E468		;17366: 51f90002e468
+	SF	flgShowGfx		;17366: 51f90002e468
 	CMPA.L	ptrCurrentAst,A5	;1736c: bbf90002de58
 	BEQ.S	_1737A			;17372: 6706
-	ST	flg2E468		;17374: 50f90002e468
+	ST	flgShowGfx		;17374: 50f90002e468
 _1737A:
 	MOVEA.L	ptrThisAstBldgCount,A1	;1737a: 22790002ded4
 	MOVEA.L	ptrThisAstMap,A6	;17380: 2c790002decc
 ; 10 damage
 	MOVEQ	#10,D7			;17386: 7e0a
 	JSR	_DamageBldg		;17388: 4eb900006d4a
-	TST.B	flg2E468		;1738e: 4a390002e468
+	TST.B	flgShowGfx		;1738e: 4a390002e468
 	BNE.S	_173E6			;17394: 6650
 	CMPI.B	#$01,D0			;17396: 0c000001
 	BEQ.W	_173BE			;1739a: 67000022
@@ -30686,7 +30810,7 @@ _1737A:
 	JSR	_0FD7C			;173a6: 4eb90000fd7c
 	JSR	_PlayExplosion		;173ac: 4eb90001a4fa
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;173b2: 4cdf7fff
-	SF	flg2E468		;173b6: 51f90002e468
+	SF	flgShowGfx		;173b6: 51f90002e468
 	RTS				;173bc: 4e75
 _173BE:
 	LEA	ptr1EA10,A2		;173be: 45f90001ea10
@@ -30696,15 +30820,15 @@ _173BE:
 	MOVEQ	#6,D0			;173d0: 7006
 	JSR	_RandInt		;173d2: 4eb900000c0c
 	EXG	D0,D5			;173d8: c145
-	JSR	_0E1FA			;173da: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;173da: 4eb90000e1fa
 	JSR	_PlayExplosion		;173e0: 4eb90001a4fa
 _173E6:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;173e6: 4cdf7fff
-	SF	flg2E468		;173ea: 51f90002e468
+	SF	flgShowGfx		;173ea: 51f90002e468
 	RTS				;173f0: 4e75
 _WarheadOreEtr10:
 ; "Antivirus" but fired by Ore Eaters. Considered medium yield.
-; Is this a terraforming warhead?
+; Gives you more ore.
 	MOVEA.L	ptrThisAstBldg,A0	;173f2: 20790002ded0
 	MOVEQ	#100,D0			;173f8: 7064
 	JSR	_RandInt		;173fa: 4eb900000c0c
@@ -30728,7 +30852,7 @@ _17406:
 ; Appears to dissolve building.
 	MOVEQ	#120,D7			;1742a: 7e78
 	JSR	_DamageBldg		;1742c: 4eb900006d4a
-	TST.B	flg2E468		;17432: 4a390002e468
+	TST.B	flgShowGfx		;17432: 4a390002e468
 	BNE.S	_17474			;17438: 663a
 ; ;
 	CMPI.B	#$01,D0			;1743a: 0c000001
@@ -30745,7 +30869,7 @@ _17452:
 	MOVEQ	#6,D0			;17464: 7006
 	JSR	_RandInt		;17466: 4eb900000c0c
 	EXG	D0,D5			;1746c: c145
-	JSR	_0E1FA			;1746e: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;1746e: 4eb90000e1fa
 _17474:
 	MOVEQ	#4,D0			;17474: 7004
 	JSR	_RandInt		;17476: 4eb900000c0c
@@ -30768,7 +30892,7 @@ _174A6:
 ; Have observed this. Free ore missile.
 	MOVE.W	D0,(0,A0,D1.W)		;174a6: 31801000
 	MOVEA.L	(A7)+,A6		;174aa: 2c5f
-	TST.B	flg2E468		;174ac: 4a390002e468
+	TST.B	flgShowGfx		;174ac: 4a390002e468
 	BNE.S	ret174E0		;174b2: 662c
 	MOVE.W	(10,A6),D2		;174b4: 342e000a
 	LEA	ptr1EA46,A2		;174b8: 45f90001ea46
@@ -30776,7 +30900,7 @@ _174A6:
 	MOVEA.L	ptrCurrentAst,A0	;174c2: 20790002de58
 	MOVEQ	#51,D0			;174c8: 7033
 	MOVEQ	#0,D5			;174ca: 7a00
-	JSR	_0E1FA			;174cc: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;174cc: 4eb90000e1fa
 	MOVE.W	#$001e,(38,A0)		;174d2: 317c001e0026
 ; Sound P: Alien whoosh
 	MOVEQ	#16,D0			;174d8: 7010
@@ -30785,7 +30909,7 @@ ret174E0:
 	RTS				;174e0: 4e75
 _WarheadOreEtr09:
 ; High yield.
-; Loops over every building
+; Loops over every building.
 	MOVEA.L	ptrThisAstBldg,A0	;174e2: 20790002ded0
 	MOVE.W	#$0063,D2		;174e8: 343c0063
 loop174EC:
@@ -30797,7 +30921,7 @@ loop174EC:
 ; 14 damage to every building
 	MOVEQ	#14,D7			;17504: 7e0e
 	JSR	_DamageBldg		;17506: 4eb900006d4a
-	TST.B	flg2E468		;1750c: 4a390002e468
+	TST.B	flgShowGfx		;1750c: 4a390002e468
 	BNE.S	_17552			;17512: 663e
 	CMPI.B	#$01,D0			;17514: 0c000001
 	BEQ.W	_17530			;17518: 67000016
@@ -30814,13 +30938,13 @@ _17530:
 	MOVEQ	#6,D0			;17542: 7006
 	JSR	_RandInt		;17544: 4eb900000c0c
 	EXG	D0,D5			;1754a: c145
-	JSR	_0E1FA			;1754c: 4eb90000e1fa
+	JSR	_ExplodeSprite_0E1FA	;1754c: 4eb90000e1fa
 _17552:
 	MOVEM.L	(A7)+,D2/A0		;17552: 4cdf0104
 _17556:
 	LEA	(14,A0),A0		;17556: 41e8000e
 	DBF	D2,loop174EC		;1755a: 51caff90
-	TST.B	flg2E468		;1755e: 4a390002e468
+	TST.B	flgShowGfx		;1755e: 4a390002e468
 	BNE.S	ret1757E		;17564: 6618
 	CMPI.B	#$04,intScreen		;17566: 0c3900040002e486
 	BEQ.S	ret1757E		;1756e: 670e
@@ -30836,7 +30960,7 @@ _17580:
 	JSR	_RandInt		;1758c: 4eb900000c0c
 	CMPI.B	#$50,D0			;17592: 0c000050
 	BPL.S	_175B2			;17596: 6a1a
-	MOVE.B	#$08,flg2E470		;17598: 13fc00080002e470
+	MOVE.B	#$08,int2E470		;17598: 13fc00080002e470
 	MOVE.W	#$0008,(728,A5)		;175a0: 3b7c000802d8
 	ADDQ.B	#1,(97,A5)		;175a6: 522d0061
 	MOVEQ	#19,D0			;175aa: 7013
@@ -30854,7 +30978,7 @@ _175B8:
 	CMPI.B	#$50,D0			;175ca: 0c000050
 	BPL.S	_175EE			;175ce: 6a1e
 	MOVE.L	A0,(730,A5)		;175d0: 2b4802da
-	MOVE.B	#$08,flg2E472		;175d4: 13fc00080002e472
+	MOVE.B	#$08,int2E472		;175d4: 13fc00080002e472
 	MOVE.W	#$0008,(728,A5)		;175dc: 3b7c000802d8
 	ADDQ.B	#1,(97,A5)		;175e2: 522d0061
 	MOVEQ	#20,D0			;175e6: 7014
@@ -30863,7 +30987,7 @@ _175B8:
 _175EE:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;175ee: 4cdf7fff
 	RTS				;175f2: 4e75
-_175F4:
+_Fleet175F4:
 	MOVE.L	D0,-(A7)		;175f4: 2f00
 	MOVE.L	A1,-(A7)		;175f6: 2f09
 	MOVEA.L	ptrBuff15_AliFleet,A0	;175f8: 207900000566
@@ -30893,18 +31017,18 @@ loop17620:
 	MOVE.L	(A7)+,D0		;1763c: 201f
 	MOVE.L	A0,D7			;1763e: 2e08
 	RTS				;17640: 4e75
-_17642:
+_CountAliShips:
 	MOVEQ	#0,D0			;17642: 7000
-	LEA	ptr2015E,A1		;17644: 43f90002015e
-	LEA	ptr20206,A2		;1764a: 45f900020206
+	LEA	ptrShip2015E,A1		;17644: 43f90002015e
+	LEA	tblAliShipCount,A2	;1764a: 45f900020206
 	MOVE.L	D0,(A2)			;17650: 2480
 	MOVE.L	D0,(4,A2)		;17652: 25400004
 	MOVE.L	D0,(8,A2)		;17656: 25400008
 	MOVE.L	D0,(12,A2)		;1765a: 2540000c
 	MOVE.L	(8,A0),D1		;1765e: 22280008
-	BEQ.S	_17698			;17662: 6734
+	BEQ.S	_ret-1_17698		;17662: 6734
 	MOVEA.L	D1,A6			;17664: 2c41
-_17666:
+loop_17666:
 	MOVE.B	(8,A6),D1		;17666: 122e0008
 	SUBI.B	#$3c,D1			;1766a: 0401003c
 	BMI.S	_1768E			;1766e: 6b1e
@@ -30918,27 +31042,27 @@ _17666:
 	ADDQ.W	#1,D0			;17684: 5240
 	MOVE.L	A6,(A1)+		;17686: 22ce
 	CMPI.W	#$0027,D0		;17688: 0c400027
-	BEQ.S	_17698			;1768c: 670a
+	BEQ.S	_ret-1_17698		;1768c: 670a
 _1768E:
 	MOVE.L	(0,A6),D1		;1768e: 222e0000
-	BEQ.S	_17698			;17692: 6704
+	BEQ.S	_ret-1_17698		;17692: 6704
 	MOVEA.L	D1,A6			;17694: 2c41
-	BRA.S	_17666			;17696: 60ce
-_17698:
+	BRA.S	loop_17666		;17696: 60ce
+_ret-1_17698:
 	MOVEQ	#-1,D1			;17698: 72ff
 	MOVE.L	D1,(A1)			;1769a: 2281
 	RTS				;1769c: 4e75
-_Turret_1769E:
-	MOVE.W	intAlienCannon1Dmg,D7	;1769e: 3e3900020316
+_TriggerAlienTurret:
+	MOVE.W	intAlienCannon5Dmg,D7	;1769e: 3e3900020316
 	MOVE.B	(0,A0),D1		;176a4: 12280000
 ; $6b: Alien equivalent to laser turret.
 	CMPI.B	#$6b,D1			;176a8: 0c01006b
 	BEQ.S	_FireAlienTurret	;176ac: 6720
-	MOVE.W	intAlienCannon2Dmg,D7	;176ae: 3e3900020318
+	MOVE.W	intAlienCannon7Dmg,D7	;176ae: 3e3900020318
 ; $61: Alien equivalent to plasma turret. Medium damage.
 	CMPI.B	#$61,D1			;176b4: 0c010061
 	BEQ.S	_FireAlienTurret	;176b8: 6714
-	MOVE.W	intAlienCannon3Dmg,D7	;176ba: 3e390002031a
+	MOVE.W	intAlienCannon6Dmg,D7	;176ba: 3e390002031a
 ; $62: Alien equivalent to photon turret. Most damage.
 ; Consistent with Terran turrets.
 	CMPI.B	#$62,D1			;176c0: 0c010062
@@ -30999,11 +31123,11 @@ _InitEnemy:
 	MOVE.W	intCurrentAlienID,D0	;17768: 30390002df02
 	SUBQ.W	#1,D0			;1776e: 5340
 	LSL.W	#2,D0			;17770: e548
-	LEA	arrInitSomething2,A2	;17772: 45f900017780
+	LEA	arrInitAliAst2,A2	;17772: 45f900017780
 	MOVEA.L	(0,A2,D0.W),A1		;17778: 22720000
 	JSR	(A1)			;1777c: 4e91
 	RTS				;1777e: 4e75
-arrInitSomething2:
+arrInitAliAst2:
 	DC.L	_InitAstKll		;17780: 00017798
 	DC.L	_InitAstOre		;17784: 0001780e
 	DC.L	_InitAstAxz		;17788: 000177d2
@@ -31144,7 +31268,7 @@ loop178BC:
 ; Additional Swixaran colonies
 	MOVE.W	(A7)+,D7		;178c4: 3e1f
 	DBF	D7,loop178BC		;178c6: 51cffff4
-	MOVEA.L	ptr2021E,A0		;178ca: 20790002021e
+	MOVEA.L	ptrAlienAst_2021E,A0	;178ca: 20790002021e
 	MOVE.W	(A0)+,D0		;178d0: 3018
 	MOVE.L	A0,-(A7)		;178d2: 2f08
 	JSR	_12B4E			;178d4: 4eb900012b4e
@@ -31227,7 +31351,7 @@ loop179D2:
 	MOVE.W	intCurrentAlienID,D0	;179ee: 30390002df02
 	SUBQ.W	#1,D0			;179f4: 5340
 	LSL.W	#2,D0			;179f6: e548
-	LEA	ptr17A34,A0		;179f8: 41f900017a34
+	LEA	arr17A34,A0		;179f8: 41f900017a34
 	MOVEA.L	(0,A0,D0.W),A1		;179fe: 22700000
 	MOVE.L	A6,-(A7)		;17a02: 2f0e
 	JSR	(A1)			;17a04: 4e91
@@ -31239,28 +31363,28 @@ loop179D2:
 _17A10:
 	MOVEA.L	ptrThisAstStats,A0	;17a10: 20790002ded8
 	BSET	#3,(90,A0)		;17a16: 08e80003005a
-	ST	flg2E188		;17a1c: 50f90002e188
+	ST	flgAst2E188		;17a1c: 50f90002e188
 _17A22:
 	MOVEA.L	ptrThisAstStats,A0	;17a22: 20790002ded8
 	MOVE.L	A6,-(A7)		;17a28: 2f0e
-	BSR.W	_16CF4			;17a2a: 6100f2c8
+	BSR.W	_AliAstEffects		;17a2a: 6100f2c8
 	MOVEA.L	(A7)+,A6		;17a2e: 2c5f
 	MOVEQ	#0,D0			;17a30: 7000
 	RTS				;17a32: 4e75
-ptr17A34:
-	DC.L	_17A4C			;17a34: 00017a4c
+arr17A34:
+	DC.L	_NewColAlien		;17a34: 00017a4c
 	DC.L	_NewColOreEater		;17a38: 00017aca
-	DC.L	_17A4C			;17a3c: 00017a4c
+	DC.L	_NewColAlien		;17a3c: 00017a4c
 	DC.L	_NewColTyl		;17a40: 00017aa0
-	DC.L	_17A4C			;17a44: 00017a4c
-	DC.L	_17A4C			;17a48: 00017a4c
-_17A4C:
+	DC.L	_NewColAlien		;17a44: 00017a4c
+	DC.L	_NewColAlien		;17a48: 00017a4c
+_NewColAlien:
 ; Start a new colony.
 	MOVEA.L	ptrThisAstStats,A0	;17a4c: 20790002ded8
 ; Tyl ignores this check. Affected by Virus missile
 	BTST	#7,(90,A0)		;17a52: 08280007005a
-	BNE.S	_17A9C			;17a58: 6642
-_17A5A:
+	BNE.S	ret_17A9C		;17a58: 6642
+_InitNewAlienCol:
 	MOVE.B	(89,A0),D0		;17a5a: 10280059
 ; Clear bit 1.
 	BCLR	#1,D0			;17a5e: 08800001
@@ -31280,49 +31404,52 @@ _17A5A:
 	BSR.W	_BuildCluster		;17a94: 61000072
 	MOVEQ	#0,D0			;17a98: 7000
 	RTS				;17a9a: 4e75
-_17A9C:
+ret_17A9C:
 	MOVEQ	#-1,D0			;17a9c: 70ff
 	RTS				;17a9e: 4e75
 _NewColTyl:
 	MOVEA.L	ptrThisAstStats,A0	;17aa0: 20790002ded8
 	CMPI.B	#$40,(8,A6)		;17aa6: 0c2e00400008
-	BNE.S	_17A5A			;17aac: 66ac
-; Ship $40 has special effects on a colony mission
+	BNE.S	_InitNewAlienCol	;17aac: 66ac
+; Ship $40 is a transporter for Tylarans, despite normally
+; being a medium sized ship in the Destructor slot.
 	BSET	#1,(91,A0)		;17aae: 08e80001005b
-	MOVE.L	#data1E9B6,(28,A6)	;17ab4: 2d7c0001e9b6001c
+	MOVE.L	#TylSmallTransp_1E9B6,(28,A6) ;17ab4: 2d7c0001e9b6001c
+; patrol asteroid
 	MOVE.W	#$0400,(24,A6)		;17abc: 3d7c04000018
-; Reset Energiser countdown
+; Reset Energiser countdown to 60
 	MOVE.W	#$003c,(710,A0)		;17ac2: 317c003c02c6
-	BRA.S	_17A5A			;17ac8: 6090
+	BRA.S	_InitNewAlienCol	;17ac8: 6090
 _NewColOreEater:
+; Ore Eaters clear Virus on colonizing an asteroid.
 	MOVEA.L	ptrThisAstMap,A6	;17aca: 2c790002decc
 	MOVE.W	#$0230,D1		;17ad0: 323c0230
 loop17AD4:
 	MOVE.W	(2,A6),D2		;17ad4: 342e0002
-	BMI.S	_17AEC			;17ad8: 6b12
+	BMI.S	next17AEC		;17ad8: 6b12
 	CMPI.W	#$003d,D2		;17ada: 0c42003d
-	BMI.S	_17AEC			;17ade: 6b0c
-; Must be 3e or 3f. Sound like ID numbers of small ships
-; No: virus
+	BMI.S	next17AEC		;17ade: 6b0c
 	CMPI.W	#$0040,D2		;17ae0: 0c420040
-	BPL.S	_17AEC			;17ae4: 6a06
+	BPL.S	next17AEC		;17ae4: 6a06
+; Convert green virus squares into empty tiles
 	SUBI.W	#$0010,(2,A6)		;17ae6: 046e00100002
-_17AEC:
+next17AEC:
 	ADDQ.L	#4,A6			;17aec: 588e
 	DBF	D1,loop17AD4		;17aee: 51c9ffe4
 	MOVEA.L	ptrThisAstStats,A0	;17af2: 20790002ded8
+; Clear Virus status
 	BCLR	#7,(90,A0)		;17af8: 08a80007005a
 	BCLR	#0,(90,A0)		;17afe: 08a80000005a
-	BRA.W	_17A4C			;17b04: 6000ff46
+	BRA.W	_NewColAlien		;17b04: 6000ff46
 _BuildCluster:
 	MOVEA.L	ptrThisAstStats,A1	;17b08: 22790002ded8
 	BSET	#5,(90,A1)		;17b0e: 08e90005005a
 ; clear priority
 	CLR.W	(720,A1)		;17b14: 426902d0
-	LEA	tblAlienUnk21,A1	;17b18: 43f9000204b2
+	LEA	tblAlienBuildClusters,A1 ;17b18: 43f9000204b2
 	ASL.W	#3,D0			;17b1e: e740
 	ADDA.W	D0,A1			;17b20: d2c0
-; Place four buildings at a time?
+; Place four buildings at a time
 	MOVE.W	(A1)+,D4		;17b22: 3819
 	BSR.W	_PlaceAlienBldg		;17b24: 61000016
 	MOVE.W	(A1)+,D4		;17b28: 3819
@@ -31350,10 +31477,10 @@ _PlaceAlienBldg:
 	ANDI.B	#$7f,D1			;17b64: 0201007f
 	CMP.B	D1,D0			;17b68: b001
 	BMI.S	_ApproveBuild_17B86	;17b6a: 6b1a
-; Building is automatically approved if we have not reached the softcap for
-; that building type, and if this building will not go over the softcap.
-; However, buildings with $81 (-127) count as 1 and never build more than 1
-; $81 is a hardcap of 1
+; Building is automatically approved if we have not reached
+; the softcap for that building type, and if this building
+; will not go over the softcap. However, buildings with $81
+; (-127) count as 1 and never build more than 1. hardcap
 	TST.B	(5,A1)			;17b6c: 4a290005
 	BMI.W	_next_17C68		;17b70: 6b0000f6
 ; Alien-specific chance of ignoring building cap
@@ -31430,19 +31557,19 @@ _17C70:
 	MOVE.W	intCurrentAlienID,D0	;17c74: 30390002df02
 	SUBQ.W	#1,D0			;17c7a: 5340
 	LSL.W	#2,D0			;17c7c: e548
-	LEA	ptr17C90,A0		;17c7e: 41f900017c90
+	LEA	arr17C90,A0		;17c7e: 41f900017c90
 	MOVEA.L	(0,A0,D0.W),A1		;17c84: 22700000
 	JSR	(A1)			;17c88: 4e91
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;17c8a: 4cdf7fff
 	RTS				;17c8e: 4e75
-ptr17C90:
-	DC.L	unk17CA8		;17c90: 00017ca8
-	DC.L	unk17CDA		;17c94: 00017cda
+arr17C90:
+	DC.L	_Ali1_17CA8		;17c90: 00017ca8
+	DC.L	_Ali2_17CDA		;17c94: 00017cda
 	DC.L	ret17DBC		;17c98: 00017dbc
-	DC.L	unk17DBE		;17c9c: 00017dbe
+	DC.L	_Ali4_17DBE		;17c9c: 00017dbe
 	DC.L	ret17DBC		;17ca0: 00017dbc
 	DC.L	ret17DBC		;17ca4: 00017dbc
-unk17CA8:
+_Ali1_17CA8:
 ; kll
 	MOVEA.L	ptrBuff12_Asteroids,A5	;17ca8: 2a790000055a
 	MOVE.W	#$0017,D0		;17cae: 303c0017
@@ -31459,7 +31586,7 @@ _next_17CD0:
 	LEA	(750,A5),A5		;17cd0: 4bed02ee
 	DBF	D0,loop17CB2		;17cd4: 51c8ffdc
 	RTS				;17cd8: 4e75
-unk17CDA:
+_Ali2_17CDA:
 ; ore
 	MOVEA.L	ptrBuff12_Asteroids,A6	;17cda: 2c790000055a
 	MOVE.W	#$0017,D0		;17ce0: 303c0017
@@ -31477,11 +31604,11 @@ _17D02:
 	DBF	D0,loop17CE4		;17d06: 51c8ffdc
 ; ;
 	MOVE.L	ptrThisAstStats,-(A7)	;17d0a: 2f390002ded8
-	BSR.W	_12848			;17d10: 6100ab36
+	BSR.W	_CountAsteroids		;17d10: 6100ab36
 	TST.B	D1			;17d14: 4a01
 	BEQ.W	_17DA4			;17d16: 6700008c
 	SUBQ.W	#1,D2			;17d1a: 5342
-	LEA	ptr1F8BA,A0		;17d1c: 41f90001f8ba
+	LEA	arrAlienAsts,A0		;17d1c: 41f90001f8ba
 loop17D22:
 	MOVE.W	D2,-(A7)		;17d22: 3f02
 	MOVE.L	(A0)+,ptrThisAstStats	;17d24: 23d80002ded8
@@ -31491,8 +31618,8 @@ loop17D22:
 	MOVE.W	#$000a,data2021A	;17d3c: 33fc000a0002021a
 	BSR.W	_16C48			;17d44: 6100ef02
 	BMI.W	_17DAC			;17d48: 6b000062
-	MOVE.L	A0,data20A88		;17d4c: 23c800020a88
-	MOVEA.L	ptr1F856,A2		;17d52: 24790001f856
+	MOVE.L	A0,ptr20A88		;17d4c: 23c800020a88
+	MOVEA.L	arrPlayerAstsKnown,A2	;17d52: 24790001f856
 	MOVE.L	A2,(10,A0)		;17d58: 214a000a
 	MOVE.B	(25,A2),(1,A0)		;17d5c: 116a00190001
 	MOVE.W	#$000a,(24,A0)		;17d62: 317c000a0018
@@ -31526,7 +31653,7 @@ _17DAC:
 	RTS				;17dba: 4e75
 ret17DBC:
 	RTS				;17dbc: 4e75
-unk17DBE:
+_Ali4_17DBE:
 ; tyl
 	MOVEA.L	ptrBuff12_Asteroids,A5	;17dbe: 2a790000055a
 ; check every asteroid
@@ -31548,7 +31675,7 @@ _DailySwiCloak:
 ; Check for Swixaran cloak
 	CMPI.W	#$0006,intCurrentAlienID ;17df0: 0c7900060002df02
 	BNE.S	ret17E4A		;17df8: 6650
-	BTST	#2,bAlienSpec		;17dfa: 083900020002e48d
+	BTST	#2,bAlienSpecial	;17dfa: 083900020002e48d
 	BEQ.S	ret17E4A		;17e02: 6746
 	MOVEA.L	ptrBuff12_Asteroids,A0	;17e04: 20790000055a
 	MOVEQ	#23,D0			;17e0a: 7017
@@ -31559,12 +31686,13 @@ loop17E0C:
 	ANDI.B	#$03,D1			;17e16: 02010003
 	CMPI.B	#$01,D1			;17e1a: 0c010001
 	BNE.S	next17E28		;17e1e: 6608
+; check for orbital space dock
 	BTST	#4,(90,A0)		;17e20: 08280004005a
 	BNE.S	ret17E4A		;17e26: 6622
 next17E28:
 	LEA	(750,A0),A0		;17e28: 41e802ee
 	DBF	D0,loop17E0C		;17e2c: 51c8ffde
-	BCLR	#2,bAlienSpec		;17e30: 08b900020002e48d
+	BCLR	#2,bAlienSpecial	;17e30: 08b900020002e48d
 ; 540: REPORTS ARRIVING SUGGEST THAT THE ALIEN CLOAKING DEVICE HAS POWERED DOWN!
 	MOVE.W	#$021c,D0		;17e38: 303c021c
 	MOVEQ	#0,D1			;17e3c: 7200
@@ -31574,18 +31702,17 @@ next17E28:
 	JSR	_MessageWin		;17e44: 4eb900008fd0
 ret17E4A:
 	RTS				;17e4a: 4e75
-_Daily12:
-	CMPI.W	#$ff00,flg2E188		;17e4c: 0c79ff000002e188
+_DailyAliBuild:
+	CMPI.W	#$ff00,flgAst2E188	;17e4c: 0c79ff000002e188
 	BNE.S	_17E62			;17e54: 660c
-; Set by certain stuffs
-	ST	flg2E189		;17e56: 50f90002e189
+	ST	flgAst2E189		;17e56: 50f90002e189
 	BSR.W	_17C70			;17e5c: 6100fe12
 	BRA.S	_17E76			;17e60: 6014
 _17E62:
 ; iAlienBuildRate: 60 60 60 70 60 50
-; iAlienBuildTimer: Cycles in the range
+; iAlienBuildTimer: Cycles up from zero to iAlienBuildRate
 	ADDQ.W	#1,intAlienBuildTimer	;17e62: 527900020308
-	MOVE.W	intAlienBuildRate,D1	;17e68: 323900020306
+	MOVE.W	intAlienBuildFreq,D1	;17e68: 323900020306
 	CMP.W	intAlienBuildTimer,D1	;17e6e: b27900020308
 	BNE.S	_17E7C			;17e74: 6606
 _17E76:
@@ -31622,7 +31749,7 @@ loop17E98:
 	MOVE.B	(13,A6),D1		;17eec: 122e000d
 ; Enough damage to destroy building with detonation
 	MOVEQ	#120,D7			;17ef0: 7e78
-	JSR	_DetonateBldg_0F5E4	;17ef2: 4eb90000f5e4
+	JSR	_DestroyBldg		;17ef2: 4eb90000f5e4
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;17ef8: 4cdf7fff
 _17EFC:
 	MOVEA.L	A1,A0			;17efc: 2049
@@ -31630,68 +31757,74 @@ _17EFC:
 	BSR.W	_UpdateScreenGen	;17f00: 6100d4ec
 	MOVE.W	(26,A5),D1		;17f04: 322d001a
 	CMPI.W	#$0004,D1		;17f08: 0c410004
-	BMI.S	_17F24			;17f0c: 6b16
+	BMI.S	_Jump_17F24		;17f0c: 6b16
 	CMPI.W	#$013c,D1		;17f0e: 0c41013c
-	BPL.S	_17F24			;17f12: 6a10
+	BPL.S	_Jump_17F24		;17f12: 6a10
 	MOVE.W	(28,A5),D1		;17f14: 322d001c
 	CMPI.W	#$0004,D1		;17f18: 0c410004
-	BMI.S	_17F24			;17f1c: 6b06
+	BMI.S	_Jump_17F24		;17f1c: 6b06
 	CMPI.W	#$00c4,D1		;17f1e: 0c4100c4
-	BMI.S	_17F6E			;17f22: 6b4a
-_17F24:
+	BMI.S	_NoJump_17F6E		;17f22: 6b4a
+_Jump_17F24:
+; If an Axz asteroid has no gravity nullifier, it teleports
+; to save itself from running off the edge of the screen
 	BTST	#2,(89,A5)		;17f24: 082d00020059
-	BNE.S	_17F6E			;17f2a: 6642
+	BNE.S	_NoJump_17F6E		;17f2a: 6642
 	BTST	#1,(90,A5)		;17f2c: 082d0001005a
-	BNE.S	_17F6E			;17f32: 663a
+	BNE.S	_NoJump_17F6E		;17f32: 663a
 	CMPI.W	#$0003,intCurrentAlienID ;17f34: 0c7900030002df02
-	BNE.S	_17F5C			;17f3c: 661e
+	BNE.S	_NotAzx_17F5C		;17f3c: 661e
 	MOVEA.L	ptrThisAstBldgCount,A4	;17f3e: 28790002ded4
 ; Ax-Zilanth: Mass Displacement Podule
 	TST.W	(76,A4)			;17f44: 4a6c004c
-	BEQ.S	_17F6E			;17f48: 6724
+	BEQ.S	_NoJump_17F6E		;17f48: 6724
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;17f4a: 48e7fffe
 	MOVEA.L	A5,A0			;17f4e: 204d
-	BSR.W	_193E2			;17f50: 61001490
+	BSR.W	_AzxMassDisplPod	;17f50: 61001490
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;17f54: 4cdf7fff
 	BRA.W	next_1805E		;17f58: 60000104
-_17F5C:
+_NotAzx_17F5C:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;17f5c: 48e7fffe
 	MOVEA.L	A5,A0			;17f60: 204d
-	BSR.W	_16CF4			;17f62: 6100ed90
+	BSR.W	_AliAstEffects		;17f62: 6100ed90
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;17f66: 4cdf7fff
 	BRA.W	next_1805E		;17f6a: 600000f2
-_17F6E:
-	SUBQ.B	#1,unk18076		;17f6e: 533900018076
+_NoJump_17F6E:
+	SUBQ.B	#1,intCycle10_18076	;17f6e: 533900018076
 	BPL.S	_17F94			;17f74: 6a1e
-	MOVE.B	#$0a,unk18076		;17f76: 13fc000a00018076
+	MOVE.B	#$0a,intCycle10_18076	;17f76: 13fc000a00018076
 	MOVEQ	#40,D4			;17f7e: 7828
 	MOVE.W	(26,A5),D2		;17f80: 342d001a
 	MOVE.W	(28,A5),D3		;17f84: 362d001c
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;17f88: 48e7fffe
-	BSR.W	_15EEE			;17f8c: 6100df60
+	BSR.W	_MoveAsts_15EEE		;17f8c: 6100df60
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;17f90: 4cdf7fff
 _17F94:
-; 100. probably looping over all buildings on an asteroid
+; 100. looping over all buildings on an asteroid
 	MOVEQ	#99,D7			;17f94: 7e63
 loop17F96:
 	MOVEM.L	D0/D7/A0-A1/A4-A6,-(A7)	;17f96: 48e781ce
+; Days to build
 	TST.B	(2,A0)			;17f9a: 4a280002
 	BPL.S	_17FA6			;17f9e: 6a06
-	BSR.W	_18078			;17fa0: 610000d6
+	BSR.W	_AliBuildProgress	;17fa0: 610000d6
 	BRA.S	_17FB8			;17fa4: 6012
 _17FA6:
-; 94
+; building is not under construction
+; Seems to trigger turrets on building 94
+; but there are only 80 buildings
+; in this case, missile silo would never trigger here
 	CMPI.B	#$5e,(0,A0)		;17fa6: 0c28005e0000
-	BNE.S	_17FB4			;17fac: 6606
+	BNE.S	_Turret17FB4		;17fac: 6606
 	BSR.W	_DailyMissileSilo	;17fae: 6100c13e
 	BRA.S	_17FB8			;17fb2: 6004
-_17FB4:
-	BSR.W	_Turret_1769E		;17fb4: 6100f6e8
+_Turret17FB4:
+	BSR.W	_TriggerAlienTurret	;17fb4: 6100f6e8
 _17FB8:
 	MOVEM.L	(A7)+,D0/D7/A0-A1/A4-A6	;17fb8: 4cdf7381
 	LEA	(14,A0),A0		;17fbc: 41e8000e
 	DBF	D7,loop17F96		;17fc0: 51cfffd4
-; CPU degrades?
+; CPU-style resource generation degrades by 1 per day
 	TST.B	(692,A5)		;17fc4: 4a2d02b4
 	BEQ.S	_17FD2			;17fc8: 6708
 	SUBQ.B	#1,(692,A5)		;17fca: 532d02b4
@@ -31719,16 +31852,18 @@ _18006:
 	MOVEA.L	ptrThisAstStats,A0	;1800a: 20790002ded8
 	BTST	#6,(89,A0)		;18010: 082800060059
 	BEQ.W	_18044			;18016: 6700002c
-; can't happen if ast[89] bit 6 is unset
-	BSR.W	_Daily_16006		;1801a: 6100dfea
+; can't happen if ast[89] bit 6 (alien colony) is unset
+	BSR.W	_DailyAliMislAtk	;1801a: 6100dfea
 	BSR.W	_DailySpyDetect		;1801e: 6100de3a
-	BSR.W	_Daily_1857C		;18022: 61000558
+	BSR.W	_DailyAliScout		;18022: 61000558
 	BSR.W	_DailyNewColony		;18026: 610005b2
 	MOVEA.L	ptrThisAstStats,A5	;1802a: 2a790002ded8
 	BTST	#1,(91,A5)		;18030: 082d0001005b
 	BNE.S	_18044			;18036: 660c
-; can't happen if ast[91] bit 1 is set
-	BSR.W	_AlMine_18B0C		;18038: 61000ad2
+; Ast[91] bit 1 is set by Tylaran ship 40
+; Does it designate a military outpost?
+; Does not mine, build missiles, or build ships
+	BSR.W	_AlienMining		;18038: 61000ad2
 	BSR.W	_AlienMislBuild		;1803c: 61000c5e
 	BSR.W	_AlienShipBuild		;18040: 61000cb8
 _18044:
@@ -31744,11 +31879,12 @@ next_1805E:
 	LEA	(750,A5),A5		;1806c: 4bed02ee
 	DBF	D0,loop17E98		;18070: 51c8fe26
 	RTS				;18074: 4e75
-unk18076:
+intCycle10_18076:
 	DC.W	$0000			;18076
-_18078:
+_AliBuildProgress:
 	MOVE.B	(2,A0),D1		;18078: 12280002
 	BPL.W	ret18120		;1807c: 6a0000a2
+; Progress building
 	BCLR	#7,D1			;18080: 08810007
 	SUBQ.B	#1,(2,A0)		;18084: 53280002
 	MOVEQ	#0,D2			;18088: 7400
@@ -31838,11 +31974,11 @@ _DailyAliPop:
 	MOVE.W	intCurrentAlienID,D0	;1819a: 30390002df02
 	SUBQ.W	#1,D0			;181a0: 5340
 	LSL.W	#2,D0			;181a2: e548
-	LEA	ptr181B2,A2		;181a4: 45f9000181b2
+	LEA	arr181B2,A2		;181a4: 45f9000181b2
 	MOVEA.L	(0,A2,D0.W),A2		;181aa: 24720000
 	JSR	(A2)			;181ae: 4e92
 	RTS				;181b0: 4e75
-ptr181B2:
+arr181B2:
 	DC.L	_DailyKllPop		;181b2: 000181ca
 	DC.L	_DailyOrePop		;181b6: 00018300
 	DC.L	_DailyAzxPop		;181ba: 00018256
@@ -31917,7 +32053,7 @@ _18238:
 _DailyAzxPop:
 ; Disable asteroid engine
 	BCLR	#3,(89,A0)		;18256: 08a800030059
-; ?
+; speed 2
 	MOVE.B	#$01,(24,A0)		;1825c: 117c00010018
 ; Disable gravity nullifier
 	BCLR	#2,(89,A0)		;18262: 08a800020059
@@ -31927,8 +32063,8 @@ _DailyAzxPop:
 _AzxClearAll:
 	MOVEQ	#0,D0			;18270: 7000
 	BSR.W	_DemolishAll		;18272: 6100af32
-	BSET	#1,bAlienSpec		;18276: 08f900010002e48d
-	BSR.W	_16CF4			;1827e: 6100ea74
+	BSET	#1,bAlienSpecial	;18276: 08f900010002e48d
+	BSR.W	_AliAstEffects		;1827e: 6100ea74
 	RTS				;18282: 4e75
 _AzxProblem:
 ; If there's a resource deficiency (power, food, air shortage):
@@ -32137,7 +32273,7 @@ _DailyRigPop:
 _RigClear:
 	MOVEQ	#0,D0			;18426: 7000
 	BSR.W	_DemolishAll		;18428: 6100ad7c
-	BSR.W	_16CF4			;1842c: 6100e8c6
+	BSR.W	_AliAstEffects		;1842c: 6100e8c6
 	RTS				;18430: 4e75
 _RigProblem:
 	MOVE.B	intDay,D0		;18432: 10390002e45b
@@ -32287,7 +32423,7 @@ _1856E:
 _18576:
 	MOVE.B	D3,(80,A0)		;18576: 11430050
 	RTS				;1857a: 4e75
-_Daily_1857C:
+_DailyAliScout:
 ; Scout Ship?
 ; iAlienScoutFreq
 ; Triggers every n days based on alien type:
@@ -32327,18 +32463,18 @@ _DailyNewColony:
 	MOVE.W	intCurrentAlienID,D0	;185da: 30390002df02
 	SUBQ.W	#1,D0			;185e0: 5340
 	LSL.W	#2,D0			;185e2: e548
-	LEA	ptr185F2,A0		;185e4: 41f9000185f2
+	LEA	arr185F2,A0		;185e4: 41f9000185f2
 	MOVEA.L	(0,A0,D0.W),A1		;185ea: 22700000
 	JSR	(A1)			;185ee: 4e91
 	RTS				;185f0: 4e75
-ptr185F2:
-	DC.L	unk1860A		;185f2: 0001860a
-	DC.L	unk18744		;185f6: 00018744
-	DC.L	unk186B4		;185fa: 000186b4
-	DC.L	unk187DC		;185fe: 000187dc
-	DC.L	unk188DA		;18602: 000188da
-	DC.L	unk18968		;18606: 00018968
-unk1860A:
+arr185F2:
+	DC.L	_DailyNewColAli1	;185f2: 0001860a
+	DC.L	_DailyNewColAli2	;185f6: 00018744
+	DC.L	_DailyNewColAli3	;185fa: 000186b4
+	DC.L	_DailyNewColAli4	;185fe: 000187dc
+	DC.L	_DailyNewColAli5	;18602: 000188da
+	DC.L	_DailyNewColAli6	;18606: 00018968
+_DailyNewColAli1:
 ; Kll - Every 200 days
 	MOVEA.L	ptrThisAstStats,A0	;1860a: 20790002ded8
 	SUBQ.W	#1,(698,A0)		;18610: 536802ba
@@ -32396,7 +32532,7 @@ _18698:
 	MOVE.B	#$07,(A1)		;186a8: 12bc0007
 	MOVE.B	#$5f,(1,A1)		;186ac: 137c005f0001
 	RTS				;186b2: 4e75
-unk186B4:
+_DailyNewColAli3:
 ; Azx - every 35 days
 	MOVEA.L	ptrThisAstBldgCount,A1	;186b4: 22790002ded4
 ; Requires Command Centre (Strategy Control)
@@ -32441,7 +32577,7 @@ _18726:
 	MOVE.B	#$07,(A1)		;18738: 12bc0007
 	MOVE.B	#$3c,(1,A1)		;1873c: 137c003c0001
 	RTS				;18742: 4e75
-unk18744:
+_DailyNewColAli2:
 ; Ore - Every 30 days
 	MOVEA.L	ptrThisAstBldgCount,A1	;18744: 22790002ded4
 	TST.W	(48,A1)			;1874a: 4a690030
@@ -32496,7 +32632,7 @@ _187B0:
 ; Carry 50 population.
 	MOVE.W	#$0032,(26,A6)		;187d4: 3d7c0032001a
 	RTS				;187da: 4e75
-unk187DC:
+_DailyNewColAli4:
 ; Tyl - 45 days
 	MOVEA.L	ptrThisAstStats,A0	;187dc: 20790002ded8
 	SUBQ.W	#1,(698,A0)		;187e2: 536802ba
@@ -32555,14 +32691,14 @@ _1887A:
 	MOVE.L	(8,A0),D0		;1887a: 20280008
 	BEQ.S	_188BE			;1887e: 673e
 	MOVEA.L	D0,A6			;18880: 2c40
-_18882:
+_loop_18882:
 ; Regular "transporter"
 	CMPI.B	#$42,(8,A6)		;18882: 0c2e00420008
 	BEQ.S	_18894			;18888: 670a
 	MOVE.L	(0,A6),D1		;1888a: 222e0000
 	BEQ.S	_188BE			;1888e: 672e
 	MOVEA.L	D1,A6			;18890: 2c41
-	BRA.S	_18882			;18892: 60ee
+	BRA.S	_loop_18882		;18892: 60ee
 _18894:
 	MOVE.W	#$0400,(24,A6)		;18894: 3d7c04000018
 	MOVE.L	#data1E99B,(28,A6)	;1889a: 2d7c0001e99b001c
@@ -32583,7 +32719,7 @@ _188BE:
 	MOVE.B	#$07,(A1)		;188ce: 12bc0007
 	MOVE.B	#$3c,(1,A1)		;188d2: 137c003c0001
 	RTS				;188d8: 4e75
-unk188DA:
+_DailyNewColAli5:
 ; Rig - every 35 days
 	MOVEA.L	ptrThisAstStats,A0	;188da: 20790002ded8
 	SUBQ.W	#1,(698,A0)		;188e0: 536802ba
@@ -32631,7 +32767,7 @@ _1894C:
 	MOVE.B	#$07,(A1)		;1895c: 12bc0007
 	MOVE.B	#$46,(1,A1)		;18960: 137c00460001
 	RTS				;18966: 4e75
-unk18968:
+_DailyNewColAli6:
 ; Swix - Every 120 days
 	MOVEA.L	ptrThisAstBldgCount,A1	;18968: 22790002ded4
 ; Requires Brain
@@ -32658,14 +32794,14 @@ _189AA:
 	MOVE.L	(8,A0),D0		;189aa: 20280008
 	BEQ.S	_189EE			;189ae: 673e
 	MOVEA.L	D0,A6			;189b0: 2c40
-_189B2:
-; ship type $41
+_loop_189B2:
+; Swixaran transporter
 	CMPI.B	#$41,(8,A6)		;189b2: 0c2e00410008
 	BEQ.S	_189C4			;189b8: 670a
 	MOVE.L	(0,A6),D1		;189ba: 222e0000
 	BEQ.S	_189EE			;189be: 672e
 	MOVEA.L	D1,A6			;189c0: 2c41
-	BRA.S	_189B2			;189c2: 60ee
+	BRA.S	_loop_189B2		;189c2: 60ee
 _189C4:
 	MOVE.W	#$0400,(24,A6)		;189c4: 3d7c04000018
 	MOVE.L	#data1E9A2,(28,A6)	;189ca: 2d7c0001e9a2001c
@@ -32790,16 +32926,16 @@ _18AFE:
 	DBF	D7,loop18ACA		;18b04: 51cfffc4
 	MOVEQ	#-1,D0			;18b08: 70ff
 	RTS				;18b0a: 4e75
-_AlMine_18B0C:
+_AlienMining:
 ; Alien mining?
 	MOVE.W	intCurrentAlienID,D0	;18b0c: 30390002df02
 	SUBQ.W	#1,D0			;18b12: 5340
 	LSL.W	#2,D0			;18b14: e548
-	LEA	ptr18B24,A0		;18b16: 41f900018b24
+	LEA	arr18B24,A0		;18b16: 41f900018b24
 	MOVEA.L	(0,A0,D0.W),A1		;18b1c: 22700000
 	JSR	(A1)			;18b20: 4e91
 	RTS				;18b22: 4e75
-ptr18B24:
+arr18B24:
 ; Alien mining. Tylarans and Swixarans do not mine.
 ; Aliens appear to not actually do anything with their ores.
 	DC.L	_Alien01Mining		;18b24: 00018b3c
@@ -33024,6 +33160,9 @@ _18CF0:
 ; Each asteroid builds only one each time, and skips building
 ; entirely if it picked one it already had 5 of.
 ; This may explain why the ICBM cheat only gives 4 missiles.
+; Since cheats occur before missile building in the main game
+; loop, it's possible for a missile to be built after ICBM,
+; which would max the alien out at 5 missiles.
 	CMPI.W	#$0005,(A2)		;18cf0: 0c520005
 	BEQ.S	ret18CF8		;18cf4: 6702
 	ADDQ.W	#1,(A2)			;18cf6: 5252
@@ -33031,13 +33170,15 @@ ret18CF8:
 	RTS				;18cf8: 4e75
 _AlienShipBuild:
 	MOVE.W	intCurrentAlienID,D0	;18cfa: 30390002df02
+; Making daily progress on building ships
+; Actual decision to build a new ship is elsewhere
 	SUBQ.W	#1,D0			;18d00: 5340
 	LSL.W	#2,D0			;18d02: e548
-	LEA	ptr18D12,A0		;18d04: 41f900018d12
+	LEA	arr18D12,A0		;18d04: 41f900018d12
 	MOVEA.L	(0,A0,D0.W),A1		;18d0a: 22700000
 	JSR	(A1)			;18d0e: 4e91
 	RTS				;18d10: 4e75
-ptr18D12:
+arr18D12:
 	DC.L	_KllKpShipBuild		;18d12: 00018d2a
 	DC.L	_OreEatrShipBuild	;18d16: 00018e70
 	DC.L	_AxZilShipBuild		;18d1a: 00018dd6
@@ -33172,45 +33313,46 @@ ret18E6E:
 	RTS				;18e6e: 4e75
 _OreEatrShipBuild:
 	MOVEA.L	ptrThisAstStats,A0	;18e70: 20790002ded8
-	SF	flg190F2		;18e76: 51f9000190f2
+	SF	intTriangles		;18e76: 51f9000190f2
 	MOVEA.L	ptrThisAstBldgCount,A1	;18e7c: 22790002ded4
 	TST.W	(46,A1)			;18e82: 4a69002e
-	BEQ.W	_18F36			;18e86: 670000ae
+	BEQ.W	_NoProgress_18F36	;18e86: 670000ae
 	TST.W	(14,A1)			;18e8a: 4a69000e
-	BEQ.W	_18F36			;18e8e: 670000a6
+	BEQ.W	_NoProgress_18F36	;18e8e: 670000a6
 	MOVE.W	(16,A1),D0		;18e92: 30290010
 	ADD.W	(26,A1),D0		;18e96: d069001a
 	ADD.W	(4,A1),D0		;18e9a: d0690004
-	BEQ.W	_18F36			;18e9e: 67000096
+	BEQ.W	_NoProgress_18F36	;18e9e: 67000096
 	MOVEQ	#0,D1			;18ea2: 7200
 	MOVE.L	(8,A0),D0		;18ea4: 20280008
-	BEQ.S	_18EC0			;18ea8: 6716
+	BEQ.S	_NoShip_18EC0		;18ea8: 6716
 	MOVEA.L	D0,A6			;18eaa: 2c40
-_18EAC:
+_loop_18EAC:
+; d1 increases for each orbital triangular ship
 	CMPI.B	#$41,(8,A6)		;18eac: 0c2e00410008
 	BNE.S	_18EB6			;18eb2: 6602
 	ADDQ.B	#1,D1			;18eb4: 5201
 _18EB6:
 	MOVE.L	(0,A6),D0		;18eb6: 202e0000
-	BEQ.S	_18EC0			;18eba: 6704
+	BEQ.S	_NoShip_18EC0		;18eba: 6704
 	MOVEA.L	D0,A6			;18ebc: 2c40
-	BRA.S	_18EAC			;18ebe: 60ec
-_18EC0:
-	MOVE.B	D1,flg190F2		;18ec0: 13c1000190f2
+	BRA.S	_loop_18EAC		;18ebe: 60ec
+_NoShip_18EC0:
+	MOVE.B	D1,intTriangles		;18ec0: 13c1000190f2
 	CMPI.B	#$02,D1			;18ec6: 0c010002
-	BMI.S	_18ED8			;18eca: 6b0c
+	BMI.S	_Build_18ED8		;18eca: 6b0c
 	MOVEQ	#0,D1			;18ecc: 7200
 	MOVE.L	D1,(712,A0)		;18ece: 214102c8
 	MOVE.L	D1,(716,A0)		;18ed2: 214102cc
-	BRA.S	_18F36			;18ed6: 605e
-_18ED8:
+	BRA.S	_NoProgress_18F36	;18ed6: 605e
+_Build_18ED8:
 	MOVE.W	(50,A1),D7		;18ed8: 3e290032
 	CMPI.W	#$0003,D7		;18edc: 0c470003
 	BMI.S	_18EE4			;18ee0: 6b02
 	MOVEQ	#2,D7			;18ee2: 7e02
 _18EE4:
 	SUBQ.W	#1,D7			;18ee4: 5347
-	BMI.S	_18F36			;18ee6: 6b4e
+	BMI.S	_NoProgress_18F36	;18ee6: 6b4e
 	LEA	(712,A0),A2		;18ee8: 45e802c8
 loop18EEC:
 	SUBQ.B	#1,(1,A2)		;18eec: 532a0001
@@ -33237,13 +33379,13 @@ _18F26:
 _18F30:
 	ADDQ.L	#2,A2			;18f30: 548a
 	DBF	D7,loop18EEC		;18f32: 51cfffb8
-_18F36:
-	TST.B	flg190F2		;18f36: 4a39000190f2
+_NoProgress_18F36:
+	TST.B	intTriangles		;18f36: 4a39000190f2
 	BNE.S	_18F40			;18f3c: 6602
 	RTS				;18f3e: 4e75
 _18F40:
 	MOVEQ	#0,D7			;18f40: 7e00
-	MOVE.B	flg190F2,D7		;18f42: 1e39000190f2
+	MOVE.B	intTriangles,D7		;18f42: 1e39000190f2
 	MOVEA.L	ptrThisAstStats,A0	;18f48: 20790002ded8
 	MOVEA.L	ptrThisAstBldgCount,A1	;18f4e: 22790002ded4
 	BRA.W	_18D64			;18f54: 6000fe0e
@@ -33356,14 +33498,14 @@ _SwixShipBuild:
 	MOVEA.L	ptrThisAstStats,A0	;19056: 20790002ded8
 	TST.W	(694,A0)		;1905c: 4a6802b6
 	BEQ.S	_19076			;19060: 6714
-; Power production for Terrans, but 694 is set to 80 by Tractor Generator,
-; a unique Defence type building
+; Power production for Terrans, but 694 is set to 80
+; by Tractor Generator, a unique Defence type building
 	SUBQ.W	#1,(694,A0)		;19062: 536802b6
 	BNE.S	_19076			;19066: 660e
 ; orbital space dock
 	BSET	#4,(90,A0)		;19068: 08e80004005a
 	BNE.S	_19076			;1906e: 6606
-; spawn cloak generator ship
+; spawn space dock
 	MOVEQ	#75,D2			;19070: 744b
 	BSR.W	_SpawnAlienShip		;19072: 61000080
 _19076:
@@ -33416,7 +33558,7 @@ _190EA:
 	DBF	D7,loop190AA		;190ec: 51cfffbc
 ret190F0:
 	RTS				;190f0: 4e75
-flg190F2:
+intTriangles:
 	DC.W	$0000			;190f2
 _SpawnAlienShip:
 ; Alien ships always have fixed hardpoints
@@ -33468,7 +33610,7 @@ _1913E:
 	MOVE.B	D0,(9,A6)		;19198: 1d400009
 	MOVE.B	(8,A6),D2		;1919c: 142e0008
 	CMPI.B	#$4b,D2			;191a0: 0c02004b
-	BEQ.W	_19276			;191a4: 670000d0
+	BEQ.W	_AlienOSD		;191a4: 670000d0
 	CMPI.B	#$42,D2			;191a8: 0c020042
 	BPL.W	_19242			;191ac: 6a000094
 	CMPI.B	#$40,D2			;191b0: 0c020040
@@ -33526,26 +33668,27 @@ _19266:
 	MOVE.W	(14,A4),(46,A6)		;1926c: 3d6c000e002e
 	MOVEQ	#0,D0			;19272: 7000
 	RTS				;19274: 4e75
-_19276:
+_AlienOSD:
 	MOVE.W	#$0315,(10,A6)		;19276: 3d7c0315000a
 	MOVE.B	#$03,(23,A6)		;1927c: 1d7c00030017
 	CLR.W	(38,A6)			;19282: 426e0026
 	MOVE.B	#$14,(20,A6)		;19286: 1d7c00140014
-; Azx only: 200, 6 6 7 10
+; Azx only: 200 armour, Photon, Photon, Plasma, Deflector
 	MOVE.W	#$00c8,(50,A6)		;1928c: 3d7c00c80032
 	MOVE.L	#$0606070a,(42,A6)	;19292: 2d7c0606070a002a
 	CMPI.W	#$0003,intCurrentAlienID ;1929a: 0c7900030002df02
-	BEQ.S	_192B2			;192a2: 670e
-; Anyone but Azx: 100, 7 7 7 7
+	BEQ.S	_AxzOSD			;192a2: 670e
+; Anyone but Azx armour, 4 Photon
 	MOVE.W	#$0064,(50,A6)		;192a4: 3d7c00640032
 	MOVE.L	#$07070707,(42,A6)	;192aa: 2d7c07070707002a
-_192B2:
+_AxzOSD:
 	MOVEQ	#-1,D0			;192b2: 70ff
+; Sets the last two hardpoint slots to FFFF.
 	MOVE.W	D0,(46,A6)		;192b4: 3d40002e
 	MOVEQ	#0,D0			;192b8: 7000
 	RTS				;192ba: 4e75
 _AlienHP11:
-	MOVE.L	#data1E9C2,D0		;192bc: 203c0001e9c2
+	MOVE.L	#ptrHardpointB,D0	;192bc: 203c0001e9c2
 	CMP.L	(28,A6),D0		;192c2: b0ae001c
 	BEQ.S	ret192E6		;192c6: 671e
 	MOVEA.L	ptrThisAstStats,A0	;192c8: 20790002ded8
@@ -33577,7 +33720,7 @@ _ShipAct22:
 	MOVEQ	#0,D5			;1931e: 7a00
 	MOVE.B	(0,A1),D5		;19320: 1a290000
 	SUBQ.W	#1,D5			;19324: 5345
-	LEA	ptr33452,A5		;19326: 4bf900033452
+	LEA	arrBuildingSpriteList,A5 ;19326: 4bf900033452
 	ADD.W	D5,D5			;1932c: da45
 	MOVE.W	D5,D6			;1932e: 3c05
 	ASL.W	#2,D6			;19330: e546
@@ -33635,7 +33778,7 @@ _193B8:
 	MOVE.B	D1,(32,A6)		;193d6: 1d410020
 	MOVE.W	#$0032,(26,A6)		;193da: 3d7c0032001a
 	RTS				;193e0: 4e75
-_193E2:
+_AzxMassDisplPod:
 ; Ax-Zilanth: Mass Displacement Podule
 	MOVE.L	A0,-(A7)		;193e2: 2f08
 ; random square?
@@ -33697,8 +33840,8 @@ loop19474:
 _19482:
 	LEA	(750,A1),A1		;19482: 43e902ee
 	DBF	D0,loop19460		;19486: 51c8ffd8
-; Probably checking to see if any of the player's 8 fleets is already at the
-; asteroid when it jumps.
+; Probably checking to see if any of the player's 8 fleets
+; is already at the asteroid when it jumps.
 	MOVEA.L	ptrBuff14_Fleet,A1	;1948a: 227900000562
 	MOVEQ	#7,D0			;19490: 7007
 loop19492:
@@ -33764,7 +33907,7 @@ _1950A:
 	BEQ.S	ret19534		;19524: 670e
 ; If ship is not one of the large ships (e.g. transporter, alien transporter)
 	MOVE.W	#$0400,(24,A0)		;19526: 317c04000018
-	MOVE.L	#data1E914,(28,A0)	;1952c: 217c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A0)	;1952c: 217c0001e914001c
 ret19534:
 	RTS				;19534: 4e75
 _19536:
@@ -33800,7 +33943,7 @@ _19560:
 	CMPI.B	#$43,D0			;19588: 0c000043
 	BEQ.S	_1959C			;1958c: 670e
 	MOVE.W	#$0400,(24,A5)		;1958e: 3b7c04000018
-	MOVE.L	#data1E914,(28,A5)	;19594: 2b7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A5)	;19594: 2b7c0001e914001c
 _1959C:
 	MOVE.L	A5,(-4,A1)		;1959c: 234dfffc
 	MOVEQ	#0,D0			;195a0: 7000
@@ -33845,7 +33988,7 @@ _19612:
 	MOVEM.L	D0-D1/D3/A0,-(A7)	;19612: 48e7d080
 	MOVE.W	D0,(2,A0)		;19616: 31400002
 	MOVE.W	D1,(4,A0)		;1961a: 31410004
-	LEA	ptr332D2,A0		;1961e: 41f9000332d2
+	LEA	sprFltIcons,A0		;1961e: 41f9000332d2
 	ASL.W	#6,D2			;19624: ed42
 	ADDA.W	D2,A0			;19626: d0c2
 	MOVEA.L	A0,A2			;19628: 2448
@@ -33853,7 +33996,7 @@ _19612:
 	MOVEA.L	ptrBuff00,A1		;19630: 22790000052a
 	MOVEQ	#1,D6			;19636: 7c01
 	MOVEQ	#8,D2			;19638: 7408
-	JSR	_0C916			;1963a: 4eb90000c916
+	JSR	_DrawGfx_0C916		;1963a: 4eb90000c916
 	MOVEM.L	(A7)+,D0-D1/D3/A0	;19640: 4cdf010b
 	ADDQ.W	#5,D0			;19644: 5a40
 	SUBQ.W	#4,D1			;19646: 5941
@@ -33868,9 +34011,9 @@ _19612:
 	LEA	ptr1C8F4,A0		;19662: 41f90001c8f4
 	MOVEA.L	ptrBuff00,A1		;19668: 22790000052a
 	MOVE.W	D4,D0			;1966e: 3004
-	MOVE.B	#$04,data2E476		;19670: 13fc00040002e476
-	JSR	_07310			;19678: 4eb900007310
-	MOVE.B	#$0b,data2E476		;1967e: 13fc000b0002e476
+	MOVE.B	#$04,textcolor		;19670: 13fc00040002e476
+	JSR	_DisplayText		;19678: 4eb900007310
+	MOVE.B	#$0b,textcolor		;1967e: 13fc000b0002e476
 	MOVEM.L	(A7)+,D3/A0		;19686: 4cdf0108
 _1968A:
 	LEA	(292,A0),A0		;1968a: 41e80124
@@ -33916,12 +34059,12 @@ _196FC:
 	MOVEM.L	D0-D1/D3/A0,-(A7)	;196fc: 48e7d080
 	MOVE.W	D0,(2,A0)		;19700: 31400002
 	MOVE.W	D1,(4,A0)		;19704: 31410004
-	LEA	ptr33412,A0		;19708: 41f900033412
+	LEA	sprAliFltIcons,A0	;19708: 41f900033412
 	MOVEA.L	A0,A2			;1970e: 2448
 	MOVEA.L	ptrBuff00,A1		;19710: 22790000052a
 	MOVEQ	#1,D6			;19716: 7c01
 	MOVEQ	#8,D2			;19718: 7408
-	JSR	_0C916			;1971a: 4eb90000c916
+	JSR	_DrawGfx_0C916		;1971a: 4eb90000c916
 	MOVEM.L	(A7)+,D0-D1/D3/A0	;19720: 4cdf010b
 _19724:
 	LEA	(292,A0),A0		;19724: 41e80124
@@ -33944,7 +34087,7 @@ loop19752:
 	MOVEQ	#0,D0			;19752: 7000
 	MOVE.B	(0,A0),D0		;19754: 10280000
 	ASL.W	#2,D0			;19758: e540
-	LEA	ptr197C2,A3		;1975a: 47f9000197c2
+	LEA	arr197C2,A3		;1975a: 47f9000197c2
 	MOVEA.L	(0,A3,D0.W),A3		;19760: 26730000
 	MOVE.L	A0,-(A7)		;19764: 2f08
 	MOVE.W	D4,-(A7)		;19766: 3f04
@@ -33955,44 +34098,44 @@ loop19752:
 	DBF	D4,loop19752		;19772: 51ccffde
 	MOVE.B	intDay,D4		;19776: 18390002e45b
 	ANDI.B	#$03,D4			;1977c: 02040003
-	BNE.S	_19788			;19780: 6606
+	BNE.S	_AlienFleet_19788	;19780: 6606
 ; set this to -1 every 4 days
 	SF	flg1F983		;19782: 51f90001f983
-_19788:
-	SF	flg1F982		;19788: 51f90001f982
+_AlienFleet_19788:
+	SF	intAliFlt_1F982		;19788: 51f90001f982
 	MOVEA.L	ptrBuff15_AliFleet,A0	;1978e: 207900000566
 	MOVEQ	#7,D4			;19794: 7807
 loop19796:
 	MOVEQ	#0,D0			;19796: 7000
 	MOVE.B	(0,A0),D0		;19798: 10280000
 	ASL.W	#2,D0			;1979c: e540
-	LEA	ptr197DA,A3		;1979e: 47f9000197da
+	LEA	arrAliFlt_197DA,A3	;1979e: 47f9000197da
 	MOVEA.L	(0,A3,D0.W),A3		;197a4: 26730000
 	MOVE.L	A0,-(A7)		;197a8: 2f08
 	MOVE.W	D4,-(A7)		;197aa: 3f04
 	JSR	(A3)			;197ac: 4e93
 	MOVE.W	(A7)+,D4		;197ae: 381f
 	MOVEA.L	(A7)+,A0		;197b0: 205f
-	ADDQ.B	#1,flg1F982		;197b2: 52390001f982
+	ADDQ.B	#1,intAliFlt_1F982	;197b2: 52390001f982
 	LEA	(292,A0),A0		;197b8: 41e80124
 	DBF	D4,loop19796		;197bc: 51ccffd8
 ret197C0:
 	RTS				;197c0: 4e75
-ptr197C2:
+arr197C2:
 	DC.L	ret197C0		;197c2: 000197c0
-	DC.L	unk198AC		;197c6: 000198ac
-	DC.L	unk199C4		;197ca: 000199c4
-	DC.L	unk19ABA		;197ce: 00019aba
-	DC.L	unk197F2		;197d2: 000197f2
-	DC.L	unk19C14		;197d6: 00019c14
-ptr197DA:
+	DC.L	_AliFleet2_198AC	;197c6: 000198ac
+	DC.L	_AliFleet3_199C4	;197ca: 000199c4
+	DC.L	_AliFleet4_19ABA	;197ce: 00019aba
+	DC.L	_AliFleet5_197F2	;197d2: 000197f2
+	DC.L	_AliFleet6_19C14	;197d6: 00019c14
+arrAliFlt_197DA:
 	DC.L	ret197C0		;197da: 000197c0
-	DC.L	unk19CAA		;197de: 00019caa
-	DC.L	unk19DF8		;197e2: 00019df8
-	DC.L	unk1A064		;197e6: 0001a064
+	DC.L	_AliFleet2_19CAA	;197de: 00019caa
+	DC.L	_AliFleet3_19DF8	;197e2: 00019df8
+	DC.L	_AliFleet4_1A064	;197e6: 0001a064
 	DC.L	ret197C0		;197ea: 000197c0
-	DC.L	unk1A19C		;197ee: 0001a19c
-unk197F2:
+	DC.L	_AliFleet6_1A19C	;197ee: 0001a19c
+_AliFleet5_197F2:
 	BSET	#5,(30,A0)		;197f2: 08e80005001e
 	MOVEA.L	ptrBuff15_AliFleet,A1	;197f8: 227900000566
 	MOVEA.L	(6,A0),A5		;197fe: 2a680006
@@ -34052,7 +34195,7 @@ _19894:
 	MOVEQ	#2,D4			;198a2: 7802
 	JSR	_MessageWin		;198a4: 4eb900008fd0
 	RTS				;198aa: 4e75
-unk198AC:
+_AliFleet2_198AC:
 	TST.W	(22,A0)			;198ac: 4a680016
 	BEQ.W	_199A8			;198b0: 670000f6
 	MOVEA.L	(10,A0),A1		;198b4: 2268000a
@@ -34112,11 +34255,11 @@ loop19952:
 	MOVEA.L	D0,A0			;1996a: 2040
 	MOVEA.L	(6,A0),A0		;1996c: 20680006
 	JSR	_024FA			;19970: 4eb9000024fa
-	JSR	_0ED5E			;19976: 4eb90000ed5e
+	JSR	_Missiles_0ED5E		;19976: 4eb90000ed5e
 	CMPI.B	#$37,(8,A6)		;1997c: 0c2e00370008
 	BPL.S	_19996			;19982: 6a12
 ; Terran transporter or other large ship
-	MOVE.L	#data1E914,(28,A6)	;19984: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;19984: 2d7c0001e914001c
 	MOVE.W	#$0405,(24,A6)		;1998c: 3d7c04050018
 	CLR.L	(32,A6)			;19992: 42ae0020
 _19996:
@@ -34138,12 +34281,12 @@ _199AC:
 	MOVE.W	D0,(24,A0)		;199ba: 31400018
 	MOVE.B	D0,(1,A0)		;199be: 11400001
 	RTS				;199c2: 4e75
-unk199C4:
+_AliFleet3_199C4:
 	TST.W	(22,A0)			;199c4: 4a680016
 	BEQ.S	_199A8			;199c8: 67de
 	TST.L	(6,A0)			;199ca: 4aa80006
 	BPL.W	_19A50			;199ce: 6a000080
-	BTST	#5,data2E45A		;199d2: 083900050002e45a
+	BTST	#5,bFrameRule		;199d2: 083900050002e45a
 	BEQ.S	ret1999E		;199da: 67c2
 	MOVEA.L	(10,A0),A1		;199dc: 2268000a
 	MOVE.B	(25,A1),D0		;199e0: 10290019
@@ -34168,6 +34311,7 @@ _19A1A:
 	CMPI.W	#$0008,D0		;19a1c: 0c400008
 	BGT.W	ret1999E		;19a20: 6e00ff7c
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;19a24: 48e7fffe
+; fleet arrived
 	MOVEQ	#17,D0			;19a28: 7011
 	BSR.W	_PlayVoice		;19a2a: 610008b0
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;19a2e: 4cdf7fff
@@ -34208,10 +34352,10 @@ _19AB4:
 	DBF	D0,loop19A8A		;19ab4: 51c8ffd4
 ret19AB8:
 	RTS				;19ab8: 4e75
-unk19ABA:
+_AliFleet4_19ABA:
 	TST.W	(22,A0)			;19aba: 4a680016
 	BEQ.W	_199A8			;19abe: 6700fee8
-	BTST	#5,data2E45A		;19ac2: 083900050002e45a
+	BTST	#5,bFrameRule		;19ac2: 083900050002e45a
 	BEQ.W	ret19BEA		;19aca: 6700011e
 	MOVEA.L	(18,A0),A1		;19ace: 22680012
 	MOVEQ	#-1,D0			;19ad2: 70ff
@@ -34316,7 +34460,7 @@ loop19C0C:
 	MOVE.W	D0,(A1)+		;19c0c: 32c0
 	DBF	D1,loop19C0C		;19c0e: 51c9fffc
 	BRA.S	_19BD0			;19c12: 60bc
-unk19C14:
+_AliFleet6_19C14:
 	TST.W	(22,A0)			;19c14: 4a680016
 	BEQ.W	_199A8			;19c18: 6700fd8e
 	CMPI.W	#$0064,(24,A0)		;19c1c: 0c6800640018
@@ -34364,7 +34508,7 @@ _19C84:
 	MOVEQ	#-1,D0			;19ca2: 70ff
 	MOVE.L	D0,(6,A0)		;19ca4: 21400006
 	BRA.S	_19C4C			;19ca8: 60a2
-unk19CAA:
+_AliFleet2_19CAA:
 	TST.W	(22,A0)			;19caa: 4a680016
 	BEQ.W	_19DB0			;19cae: 67000100
 	MOVEA.L	(10,A0),A1		;19cb2: 2268000a
@@ -34377,7 +34521,7 @@ unk19CAA:
 	MOVEM.W	(2,A0),D0-D1		;19cd2: 4ca800030002
 	JSR	_101E0			;19cd8: 4eb9000101e0
 	MOVEM.W	D0-D1,(2,A0)		;19cde: 48a800030002
-	MOVE.B	flg1F982,D4		;19ce4: 18390001f982
+	MOVE.B	intAliFlt_1F982,D4	;19ce4: 18390001f982
 	BCLR	D4,flg1F983		;19cea: 09b90001f983
 	MOVE.W	D0,-(A7)		;19cf0: 3f00
 	MOVE.W	D1,-(A7)		;19cf2: 3f01
@@ -34401,7 +34545,7 @@ unk19CAA:
 	BCLR	#7,(30,A0)		;19d1e: 08a80007001e
 	BRA.S	_19D38			;19d24: 6012
 _19D26:
-	MOVE.B	flg1F982,D4		;19d26: 18390001f982
+	MOVE.B	intAliFlt_1F982,D4	;19d26: 18390001f982
 	BSET	D4,flg1F983		;19d2c: 09f90001f983
 	BSET	#7,(30,A0)		;19d32: 08e80007001e
 _19D38:
@@ -34432,10 +34576,10 @@ loop19D58:
 	LEA	(8,A0),A0		;19d78: 41e80008
 	JSR	_024FA			;19d7c: 4eb9000024fa
 	MOVEA.L	(A7)+,A0		;19d82: 205f
-	JSR	_0ED5E			;19d84: 4eb90000ed5e
+	JSR	_Missiles_0ED5E		;19d84: 4eb90000ed5e
 	CMPI.B	#$42,(8,A6)		;19d8a: 0c2e00420008
 	BPL.S	_19DA4			;19d90: 6a12
-	MOVE.L	#data1E914,(28,A6)	;19d92: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;19d92: 2d7c0001e914001c
 	MOVE.W	#$0405,(24,A6)		;19d9a: 3d7c04050018
 	CLR.L	(32,A6)			;19da0: 42ae0020
 _19DA4:
@@ -34454,14 +34598,14 @@ ret19DBE:
 	RTS				;19dbe: 4e75
 _19DC0:
 	MOVE.L	A0,-(A7)		;19dc0: 2f08
-	JSR	_12848			;19dc2: 4eb900012848
+	JSR	_CountAsteroids		;19dc2: 4eb900012848
 	MOVEA.L	(A7)+,A0		;19dc8: 205f
 	TST.W	D2			;19dca: 4a42
 	BEQ.S	_19DB0			;19dcc: 67e2
 	MOVEQ	#0,D0			;19dce: 7000
 	MOVE.W	D2,D0			;19dd0: 3002
 	JSR	_RandInt		;19dd2: 4eb900000c0c
-	LEA	ptr1F8BA,A1		;19dd8: 43f90001f8ba
+	LEA	arrAlienAsts,A1		;19dd8: 43f90001f8ba
 	ADD.W	D0,D0			;19dde: d040
 	ADD.W	D0,D0			;19de0: d040
 	MOVEA.L	(0,A1,D0.W),A2		;19de2: 24710000
@@ -34470,7 +34614,7 @@ _19DE6:
 	MOVE.B	(25,A2),(1,A0)		;19dea: 116a00190001
 	MOVE.B	#$01,(0,A0)		;19df0: 117c00010000
 	RTS				;19df6: 4e75
-unk19DF8:
+_AliFleet3_19DF8:
 	TST.W	(22,A0)			;19df8: 4a680016
 	BEQ.S	_19DB0			;19dfc: 67b2
 	TST.L	(6,A0)			;19dfe: 4aa80006
@@ -34481,7 +34625,7 @@ unk19DF8:
 	BEQ.S	_19E24			;19e18: 670a
 ; Something to do with asteroid engines?
 ; Alien 3/4 skip this check
-	BTST	#5,data2E45A		;19e1a: 083900050002e45a
+	BTST	#5,bFrameRule		;19e1a: 083900050002e45a
 	BEQ.S	ret19DBE		;19e22: 679a
 _19E24:
 	MOVEA.L	(10,A0),A1		;19e24: 2268000a
@@ -34492,7 +34636,7 @@ _19E24:
 	MOVEM.W	(2,A0),D0-D1		;19e38: 4ca800030002
 	JSR	_101E0			;19e3e: 4eb9000101e0
 	MOVEM.W	D0-D1,(2,A0)		;19e44: 48a800030002
-	MOVE.B	flg1F982,D4		;19e4a: 18390001f982
+	MOVE.B	intAliFlt_1F982,D4	;19e4a: 18390001f982
 	BCLR	D4,flg1F983		;19e50: 09b90001f983
 	MOVE.W	D0,-(A7)		;19e56: 3f00
 	MOVE.W	D1,-(A7)		;19e58: 3f01
@@ -34516,7 +34660,7 @@ _19E24:
 	BCLR	#7,(30,A0)		;19e84: 08a80007001e
 	BRA.S	_19EB0			;19e8a: 6024
 _19E8C:
-	MOVE.B	flg1F982,D4		;19e8c: 18390001f982
+	MOVE.B	intAliFlt_1F982,D4	;19e8c: 18390001f982
 	BSET	D4,flg1F983		;19e92: 09f90001f983
 	BSET	#7,(30,A0)		;19e98: 08e80007001e
 	BNE.S	_19EB0			;19e9e: 6610
@@ -34539,7 +34683,7 @@ _19EC0:
 	BGT.W	ret19DBE		;19ec6: 6e00fef6
 	CMPI.W	#$5555,(22,A0)		;19eca: 0c6855550016
 ; fleet vanishes
-	BEQ.W	_1A04A			;19ed0: 67000178
+	BEQ.W	_FleetVanished_1A04A	;19ed0: 67000178
 	MOVE.L	(10,A0),(6,A0)		;19ed4: 2168000a0006
 	MOVE.W	(22,A0),D0		;19eda: 30280016
 	MULU	(24,A0),D0		;19ede: c0e80018
@@ -34565,10 +34709,10 @@ loop19EFE:
 	LEA	(8,A0),A0		;19f1e: 41e80008
 	JSR	_024FA			;19f22: 4eb9000024fa
 	MOVEA.L	(A7)+,A0		;19f28: 205f
-	JSR	_0ED5E			;19f2a: 4eb90000ed5e
+	JSR	_Missiles_0ED5E		;19f2a: 4eb90000ed5e
 	CMPI.B	#$42,(8,A6)		;19f30: 0c2e00420008
 	BPL.S	_19F4A			;19f36: 6a12
-	MOVE.L	#data1E914,(28,A6)	;19f38: 2d7c0001e914001c
+	MOVE.L	#dataSpr1E914,(28,A6)	;19f38: 2d7c0001e914001c
 	MOVE.W	#$0405,(24,A6)		;19f40: 3d7c04050018
 	CLR.L	(32,A6)			;19f46: 42ae0020
 _19F4A:
@@ -34606,10 +34750,10 @@ _19F8A:
 _19FAA:
 ; Tylarans only trigger this variant every 16 days.
 	MOVEQ	#0,D0			;19faa: 7000
-	MOVE.W	data2E052,D0		;19fac: 30390002e052
+	MOVE.W	intOurAstsKnown,D0	;19fac: 30390002e052
 	BEQ.S	_19F8A			;19fb2: 67d6
 	JSR	_RandInt		;19fb4: 4eb900000c0c
-	LEA	ptr1F856,A3		;19fba: 47f90001f856
+	LEA	arrPlayerAstsKnown,A3	;19fba: 47f90001f856
 	ADD.W	D0,D0			;19fc0: d040
 	ADD.W	D0,D0			;19fc2: d040
 	MOVEA.L	(0,A3,D0.W),A3		;19fc4: 26730000
@@ -34649,7 +34793,7 @@ loop1A01A:
 _1A044:
 	DBF	D0,loop1A01A		;1a044: 51c8ffd4
 	RTS				;1a048: 4e75
-_1A04A:
+_FleetVanished_1A04A:
 ; THE ENEMY FLEET WE WERE TRACKING HAS VANISHED!
 	MOVE.W	#$021a,D0		;1a04a: 303c021a
 	MOVEQ	#0,D1			;1a04e: 7200
@@ -34660,7 +34804,7 @@ _1A04A:
 	JSR	_MessageWin		;1a058: 4eb900008fd0
 	MOVEA.L	(A7)+,A0		;1a05e: 205f
 	BRA.W	_19DB0			;1a060: 6000fd4e
-unk1A064:
+_AliFleet4_1A064:
 	TST.W	(22,A0)			;1a064: 4a680016
 	BEQ.W	_19DB0			;1a068: 6700fd46
 	CMPI.W	#$0003,intCurrentAlienID ;1a06c: 0c7900030002df02
@@ -34668,7 +34812,7 @@ unk1A064:
 	CMPI.W	#$0004,intCurrentAlienID ;1a076: 0c7900040002df02
 	BEQ.S	_1A08C			;1a07e: 670c
 ; skip check for Azx and Tyl
-	BTST	#5,data2E45A		;1a080: 083900050002e45a
+	BTST	#5,bFrameRule		;1a080: 083900050002e45a
 	BEQ.W	ret1A19A		;1a088: 67000110
 _1A08C:
 	MOVEA.L	(18,A0),A1		;1a08c: 22680012
@@ -34755,7 +34899,7 @@ _1A18C:
 	BRA.W	_19DE6			;1a196: 6000fc4e
 ret1A19A:
 	RTS				;1a19a: 4e75
-unk1A19C:
+_AliFleet6_1A19C:
 	TST.W	(22,A0)			;1a19c: 4a680016
 	BEQ.W	_19DB0			;1a1a0: 6700fc0e
 	MOVE.B	(27,A0),D0		;1a1a4: 1028001b
@@ -34853,7 +34997,7 @@ _1A2CE:
 	TST.B	flgVoice		;1a2ce: 4a390002e451
 	BNE.S	_PlayVoice		;1a2d4: 6606
 	MOVE.W	D1,D0			;1a2d6: 3001
-	BRA.W	_Daily08		;1a2d8: 6000006c
+	BRA.W	_Daily08Sound		;1a2d8: 6000006c
 _PlayVoice:
 ; called by bjork speech cheat
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;1a2dc: 48e7fffe
@@ -34863,11 +35007,10 @@ _PlayVoice:
 	MOVEQ	#24,D0			;1a2ea: 7018
 	BSR.W	_1A3BA			;1a2ec: 610000cc
 	MOVE.W	(A7)+,D0		;1a2f0: 301f
-	CMP.W	data315EE,D0		;1a2f2: b079000315ee
-; play unknown sound X
-	BEQ.S	_1A33A			;1a2f8: 6740
-	MOVE.W	D0,data315EE		;1a2fa: 33c0000315ee
-	LEA	ptr31762,A1		;1a300: 43f900031762
+	CMP.W	currentVoice,D0		;1a2f2: b079000315ee
+	BEQ.S	_PlaySilence		;1a2f8: 6740
+	MOVE.W	D0,currentVoice		;1a2fa: 33c0000315ee
+	LEA	ptrSoundVoice,A1	;1a300: 43f900031762
 	MOVEA.L	ptrBuff19_Voice,A5	;1a306: 2a7900000576
 	MOVE.L	A5,(A1)			;1a30c: 228d
 	MOVE.W	#$0002,(10,A1)		;1a30e: 337c0002000a
@@ -34903,7 +35046,7 @@ _1A320:
 	ASR.W	#1,D0			;1a32e: e240
 	MOVE.W	D0,(4,A1)		;1a330: 33400004
 	JSR	_LoadMGLFile		;1a334: 4eb900000d2c
-_1A33A:
+_PlaySilence:
 ; Sound: No sound
 ; Peculiar. There is no sound 24. Perhaps this mutes current sound
 	MOVEQ	#24,D0			;1a33a: 7018
@@ -34911,38 +35054,39 @@ _1A33A:
 _1A340:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;1a340: 4cdf7fff
 	RTS				;1a344: 4e75
-_Daily08:
-	CMP.W	data315D4,D0		;1a346: b079000315d4
+_Daily08Sound:
+; Probably checking if all 4 sound channels are empty
+	CMP.W	soundID0,D0		;1a346: b079000315d4
 	BEQ.S	ret1A36A		;1a34c: 671c
-	CMP.W	data315DC,D0		;1a34e: b079000315dc
+	CMP.W	soundID1,D0		;1a34e: b079000315dc
 	BEQ.S	ret1A36A		;1a354: 6714
-	CMP.W	data315E4,D0		;1a356: b079000315e4
+	CMP.W	soundID2,D0		;1a356: b079000315e4
 	BEQ.S	ret1A36A		;1a35c: 670c
-	CMP.W	data315EC,D0		;1a35e: b079000315ec
+	CMP.W	soundID3,D0		;1a35e: b079000315ec
 	BEQ.S	ret1A36A		;1a364: 6704
 	BSR.W	_PlaySound		;1a366: 610001a6
 ret1A36A:
 	RTS				;1a36a: 4e75
-_PlaySound_Daily:
+_PlaySoundLoop:
 ; Perhaps ongoing sound
-	CMP.W	data315D4,D0		;1a36c: b079000315d4
+	CMP.W	soundID0,D0		;1a36c: b079000315d4
 	BNE.S	_1A37E			;1a372: 660a
-	MOVE.B	#$02,flg315CE		;1a374: 13fc0002000315ce
+	MOVE.B	#$02,flgSound0		;1a374: 13fc0002000315ce
 	RTS				;1a37c: 4e75
 _1A37E:
-	CMP.W	data315DC,D0		;1a37e: b079000315dc
+	CMP.W	soundID1,D0		;1a37e: b079000315dc
 	BNE.S	_1A390			;1a384: 660a
-	MOVE.B	#$02,flg315D6		;1a386: 13fc0002000315d6
+	MOVE.B	#$02,flgSound1		;1a386: 13fc0002000315d6
 	RTS				;1a38e: 4e75
 _1A390:
-	CMP.W	data315E4,D0		;1a390: b079000315e4
+	CMP.W	soundID2,D0		;1a390: b079000315e4
 	BNE.S	_1A3A2			;1a396: 660a
-	MOVE.B	#$02,flg315DE		;1a398: 13fc0002000315de
+	MOVE.B	#$02,flgSound2		;1a398: 13fc0002000315de
 	RTS				;1a3a0: 4e75
 _1A3A2:
-	CMP.W	data315EC,D0		;1a3a2: b079000315ec
+	CMP.W	soundID3,D0		;1a3a2: b079000315ec
 	BNE.S	_1A3B4			;1a3a8: 660a
-	MOVE.B	#$02,flg315E6		;1a3aa: 13fc0002000315e6
+	MOVE.B	#$02,flgSound3		;1a3aa: 13fc0002000315e6
 	RTS				;1a3b2: 4e75
 _1A3B4:
 	BSR.W	_PlaySound		;1a3b4: 61000158
@@ -34952,40 +35096,40 @@ _1A3BA:
 	LEA	HARDBASE,A1		;1a3bc: 43f900dff000
 	TST.W	D0			;1a3c2: 4a40
 	BMI.W	_1A45E			;1a3c4: 6b000098
-	CMP.W	data315D4,D0		;1a3c8: b079000315d4
+	CMP.W	soundID0,D0		;1a3c8: b079000315d4
 	BNE.S	_1A3F6			;1a3ce: 6626
 	MOVE.W	#$0001,(DMACON_150,A1)	;1a3d0: 337c00010096
 	MOVE.L	#$00080000,(AUD0PER_166,A1) ;1a3d6: 237c0008000000a6
 	MOVE.W	#$0080,(INTREQ_156,A1)	;1a3de: 337c0080009c
 	MOVEQ	#0,D0			;1a3e4: 7000
-	MOVE.W	D0,data315D4		;1a3e6: 33c0000315d4
-	MOVE.W	D0,flg315CE		;1a3ec: 33c0000315ce
+	MOVE.W	D0,soundID0		;1a3e6: 33c0000315d4
+	MOVE.W	D0,flgSound0		;1a3ec: 33c0000315ce
 	MOVEA.L	(A7)+,A1		;1a3f2: 225f
 	RTS				;1a3f4: 4e75
 _1A3F6:
-	CMP.W	data315DC,D0		;1a3f6: b079000315dc
+	CMP.W	soundID1,D0		;1a3f6: b079000315dc
 	BNE.S	_1A424			;1a3fc: 6626
 	MOVE.W	#$0002,(DMACON_150,A1)	;1a3fe: 337c00020096
 	MOVE.L	#$00080000,(AUD1PER_182,A1) ;1a404: 237c0008000000b6
 	MOVE.W	#$0100,(INTREQ_156,A1)	;1a40c: 337c0100009c
 	MOVEQ	#0,D0			;1a412: 7000
-	MOVE.W	D0,data315DC		;1a414: 33c0000315dc
-	MOVE.W	D0,flg315D6		;1a41a: 33c0000315d6
+	MOVE.W	D0,soundID1		;1a414: 33c0000315dc
+	MOVE.W	D0,flgSound1		;1a41a: 33c0000315d6
 	MOVEA.L	(A7)+,A1		;1a420: 225f
 	RTS				;1a422: 4e75
 _1A424:
-	CMP.W	data315E4,D0		;1a424: b079000315e4
+	CMP.W	soundID2,D0		;1a424: b079000315e4
 	BNE.S	_1A452			;1a42a: 6626
 	MOVE.W	#$0004,(DMACON_150,A1)	;1a42c: 337c00040096
 	MOVE.L	#$00080000,(AUD2PER_198,A1) ;1a432: 237c0008000000c6
 	MOVE.W	#$0200,(INTREQ_156,A1)	;1a43a: 337c0200009c
 	MOVEQ	#0,D0			;1a440: 7000
-	MOVE.W	D0,data315E4		;1a442: 33c0000315e4
-	MOVE.W	D0,flg315DE		;1a448: 33c0000315de
+	MOVE.W	D0,soundID2		;1a442: 33c0000315e4
+	MOVE.W	D0,flgSound2		;1a448: 33c0000315de
 	MOVEA.L	(A7)+,A1		;1a44e: 225f
 	RTS				;1a450: 4e75
 _1A452:
-	CMP.W	data315EC,D0		;1a452: b079000315ec
+	CMP.W	soundID3,D0		;1a452: b079000315ec
 	BEQ.S	_1A4C0			;1a458: 6766
 	MOVEA.L	(A7)+,A1		;1a45a: 225f
 	RTS				;1a45c: 4e75
@@ -34994,24 +35138,24 @@ _1A45E:
 	MOVE.L	#$00080000,(166,A1)	;1a464: 237c0008000000a6
 	MOVE.W	#$0080,(156,A1)		;1a46c: 337c0080009c
 	MOVEQ	#0,D0			;1a472: 7000
-	MOVE.W	D0,data315D4		;1a474: 33c0000315d4
-	MOVE.W	D0,flg315CE		;1a47a: 33c0000315ce
+	MOVE.W	D0,soundID0		;1a474: 33c0000315d4
+	MOVE.W	D0,flgSound0		;1a47a: 33c0000315ce
 	MOVE.W	#$0002,(150,A1)		;1a480: 337c00020096
 	MOVE.L	#$00080000,(182,A1)	;1a486: 237c0008000000b6
 	MOVE.W	#$0100,(156,A1)		;1a48e: 337c0100009c
-	MOVE.W	D0,data315DC		;1a494: 33c0000315dc
-	MOVE.W	D0,flg315D6		;1a49a: 33c0000315d6
+	MOVE.W	D0,soundID1		;1a494: 33c0000315dc
+	MOVE.W	D0,flgSound1		;1a49a: 33c0000315d6
 	MOVE.W	#$0004,(150,A1)		;1a4a0: 337c00040096
 	MOVE.L	#$00080000,(198,A1)	;1a4a6: 237c0008000000c6
 	MOVE.W	#$0200,(156,A1)		;1a4ae: 337c0200009c
-	MOVE.W	D0,data315E4		;1a4b4: 33c0000315e4
-	MOVE.W	D0,flg315DE		;1a4ba: 33c0000315de
+	MOVE.W	D0,soundID2		;1a4b4: 33c0000315e4
+	MOVE.W	D0,flgSound2		;1a4ba: 33c0000315de
 _1A4C0:
 	MOVE.W	#$0008,(150,A1)		;1a4c0: 337c00080096
 	MOVE.L	#$00080000,(214,A1)	;1a4c6: 237c0008000000d6
 	MOVE.W	#$0400,(156,A1)		;1a4ce: 337c0400009c
-	CLR.W	data315EC		;1a4d4: 4279000315ec
-	CLR.W	flg315E6		;1a4da: 4279000315e6
+	CLR.W	soundID3		;1a4d4: 4279000315ec
+	CLR.W	flgSound3		;1a4da: 4279000315e6
 	MOVEA.L	(A7)+,A1		;1a4e0: 225f
 	RTS				;1a4e2: 4e75
 _BigExplodeSound:
@@ -35039,72 +35183,72 @@ _PlayExplosion:
 _PlaySound:
 	MOVEM.L	D0-D3/A0-A6,-(A7)	;1a50e: 48e7f0fe
 	CMPI.W	#$0018,D0		;1a512: 0c400018
-	BEQ.S	_1A520			;1a516: 6708
-	TST.B	flgSound		;1a518: 4a390002e450
-	BEQ.S	_1A58E			;1a51e: 676e
-_1A520:
-	LEA	ptr315F2,A0		;1a520: 41f9000315f2
+	BEQ.S	_Sound_1A520		;1a516: 6708
+	TST.B	flgSoundEnabled		;1a518: 4a390002e450
+	BEQ.S	_ret1A58E		;1a51e: 676e
+_Sound_1A520:
+	LEA	arSoundList,A0		;1a520: 41f9000315f2
 	MOVE.W	D0,D1			;1a526: 3200
 	SUBQ.W	#1,D0			;1a528: 5340
 	ASL.W	#4,D0			;1a52a: e940
 	ADDA.W	D0,A0			;1a52c: d0c0
 	LEA	HARDBASE,A5		;1a52e: 4bf900dff000
-	TST.B	flg315CE		;1a534: 4a39000315ce
+	TST.B	flgSound0		;1a534: 4a39000315ce
 	BGT.S	_1A54C			;1a53a: 6e10
-	MOVE.W	D1,data315D4		;1a53c: 33c1000315d4
-	BSR.W	_1A6EC			;1a542: 610001a8
+	MOVE.W	D1,soundID0		;1a53c: 33c1000315d4
+	BSR.W	_Sound0_1A6EC		;1a542: 610001a8
 	MOVEM.L	(A7)+,D0-D3/A0-A6	;1a546: 4cdf7f0f
 	RTS				;1a54a: 4e75
 _1A54C:
-	TST.B	flg315D6		;1a54c: 4a39000315d6
+	TST.B	flgSound1		;1a54c: 4a39000315d6
 	BGT.S	_1A564			;1a552: 6e10
-	MOVE.W	D1,data315DC		;1a554: 33c1000315dc
-	BSR.W	_1A706			;1a55a: 610001aa
+	MOVE.W	D1,soundID1		;1a554: 33c1000315dc
+	BSR.W	_Sound1_1A706		;1a55a: 610001aa
 	MOVEM.L	(A7)+,D0-D3/A0-A6	;1a55e: 4cdf7f0f
 	RTS				;1a562: 4e75
 _1A564:
-	TST.B	flg315DE		;1a564: 4a39000315de
+	TST.B	flgSound2		;1a564: 4a39000315de
 	BGT.S	_1A57C			;1a56a: 6e10
-	MOVE.W	D1,data315E4		;1a56c: 33c1000315e4
-	BSR.W	_1A720			;1a572: 610001ac
+	MOVE.W	D1,soundID2		;1a56c: 33c1000315e4
+	BSR.W	_Sound2_1A720		;1a572: 610001ac
 	MOVEM.L	(A7)+,D0-D3/A0-A6	;1a576: 4cdf7f0f
 	RTS				;1a57a: 4e75
 _1A57C:
-	TST.B	flg315E6		;1a57c: 4a39000315e6
-	BGT.S	_1A58E			;1a582: 6e0a
-	MOVE.W	D1,data315EC		;1a584: 33c1000315ec
-	BSR.W	_1A73A			;1a58a: 610001ae
-_1A58E:
+	TST.B	flgSound3		;1a57c: 4a39000315e6
+	BGT.S	_ret1A58E		;1a582: 6e0a
+	MOVE.W	D1,soundID3		;1a584: 33c1000315ec
+	BSR.W	_Sound3_1A73A		;1a58a: 610001ae
+_ret1A58E:
 	MOVEM.L	(A7)+,D0-D3/A0-A6	;1a58e: 4cdf7f0f
 	RTS				;1a592: 4e75
-unk1A594:
+_1A594:
 	LEA	HARDBASE,A0		;1a594: 41f900dff000
-	TST.B	flg315CF		;1a59a: 4a39000315cf
+	TST.B	flgSound315CF		;1a59a: 4a39000315cf
 	BNE.S	_1A5C6			;1a5a0: 6624
-	SUBQ.B	#1,flg315CE		;1a5a2: 5339000315ce
+	SUBQ.B	#1,flgSound0		;1a5a2: 5339000315ce
 	BNE.S	_1A5BE			;1a5a8: 6614
 	MOVE.W	#$0001,(DMACON_150,A0)	;1a5aa: 317c00010096
 	MOVE.L	#$00080000,(AUD0PER_166,A0) ;1a5b0: 217c0008000000a6
-	CLR.W	data315D4		;1a5b8: 4279000315d4
+	CLR.W	soundID0		;1a5b8: 4279000315d4
 _1A5BE:
 	MOVE.W	#$0080,(INTREQ_156,A0)	;1a5be: 317c0080009c
 	RTS				;1a5c4: 4e75
 _1A5C6:
-	MOVE.W	data315D0,(AUD0PER_166,A0) ;1a5c6: 3179000315d000a6
-	MOVE.W	data315D2,(AUD0VAL_168,A0) ;1a5ce: 3179000315d200a8
+	MOVE.W	sound315D0,(AUD0PER_166,A0) ;1a5c6: 3179000315d000a6
+	MOVE.W	sound315D2,(AUD0VAL_168,A0) ;1a5ce: 3179000315d200a8
 	MOVE.W	#$8001,(DMACON_150,A0)	;1a5d6: 317c80010096
-	SF	flg315CF		;1a5dc: 51f9000315cf
+	SF	flgSound315CF		;1a5dc: 51f9000315cf
 	MOVE.W	#$0080,(INTREQ_156,A0)	;1a5e2: 317c0080009c
 	RTS				;1a5e8: 4e75
-unk1A5EA:
+_1A5EA:
 	LEA	HARDBASE,A0		;1a5ea: 41f900dff000
 	TST.B	flg315D7		;1a5f0: 4a39000315d7
 	BNE.S	_1A61C			;1a5f6: 6624
-	SUBQ.B	#1,flg315D6		;1a5f8: 5339000315d6
+	SUBQ.B	#1,flgSound1		;1a5f8: 5339000315d6
 	BNE.S	_1A614			;1a5fe: 6614
 	MOVE.W	#$0002,(DMACON_150,A0)	;1a600: 317c00020096
 	MOVE.L	#$00080000,(AUD1PER_182,A0) ;1a606: 217c0008000000b6
-	CLR.W	data315DC		;1a60e: 4279000315dc
+	CLR.W	soundID1		;1a60e: 4279000315dc
 _1A614:
 	MOVE.W	#$0100,(INTREQ_156,A0)	;1a614: 317c0100009c
 	RTS				;1a61a: 4e75
@@ -35115,15 +35259,15 @@ _1A61C:
 	SF	flg315D7		;1a632: 51f9000315d7
 	MOVE.W	#$0100,(INTREQ_156,A0)	;1a638: 317c0100009c
 	RTS				;1a63e: 4e75
-unk1A640:
+_1A640:
 	LEA	HARDBASE,A0		;1a640: 41f900dff000
 	TST.B	flg315DF		;1a646: 4a39000315df
 	BNE.S	_1A672			;1a64c: 6624
-	SUBQ.B	#1,flg315DE		;1a64e: 5339000315de
+	SUBQ.B	#1,flgSound2		;1a64e: 5339000315de
 	BNE.S	_1A66A			;1a654: 6614
 	MOVE.W	#$0004,(DMACON_150,A0)	;1a656: 317c00040096
 	MOVE.L	#$00080000,(AUD2PER_198,A0) ;1a65c: 217c0008000000c6
-	CLR.W	data315E4		;1a664: 4279000315e4
+	CLR.W	soundID2		;1a664: 4279000315e4
 _1A66A:
 	MOVE.W	#$0200,(INTREQ_156,A0)	;1a66a: 317c0200009c
 	RTS				;1a670: 4e75
@@ -35134,52 +35278,52 @@ _1A672:
 	SF	flg315DF		;1a688: 51f9000315df
 	MOVE.W	#$0200,(INTREQ_156,A0)	;1a68e: 317c0200009c
 	RTS				;1a694: 4e75
-unk1A696:
+_1A696:
 	LEA	HARDBASE,A0		;1a696: 41f900dff000
 	TST.B	flg315E7		;1a69c: 4a39000315e7
 	BNE.S	_1A6C8			;1a6a2: 6624
-	SUBQ.B	#1,flg315E6		;1a6a4: 5339000315e6
+	SUBQ.B	#1,flgSound3		;1a6a4: 5339000315e6
 	BNE.S	_1A6C0			;1a6aa: 6614
 	MOVE.W	#$0008,(DMACON_150,A0)	;1a6ac: 317c00080096
 	MOVE.L	#$00080000,(AUD3PER_214,A0) ;1a6b2: 217c0008000000d6
-	CLR.W	data315EC		;1a6ba: 4279000315ec
+	CLR.W	soundID3		;1a6ba: 4279000315ec
 _1A6C0:
 	MOVE.W	#$0400,(INTREQ_156,A0)	;1a6c0: 317c0400009c
 	RTS				;1a6c6: 4e75
 _1A6C8:
-	MOVE.W	data315E8,(AUD3PER_214,A0) ;1a6c8: 3179000315e800d6
-	MOVE.W	data315EA,(AUD3VAL_216,A0) ;1a6d0: 3179000315ea00d8
+	MOVE.W	sndAUD3PER,(AUD3PER_214,A0) ;1a6c8: 3179000315e800d6
+	MOVE.W	sndAUD3VOL,(AUD3VAL_216,A0) ;1a6d0: 3179000315ea00d8
 	MOVE.W	#$8008,(DMACON_150,A0)	;1a6d8: 317c80080096
 	SF	flg315E7		;1a6de: 51f9000315e7
 	MOVE.W	#$0400,(INTREQ_156,A0)	;1a6e4: 317c0400009c
 	RTS				;1a6ea: 4e75
-_1A6EC:
+_Sound0_1A6EC:
 	LEA	AUD0LCH,A4		;1a6ec: 49f900dff0a0
-	LEA	flg315CE,A3		;1a6f2: 47f9000315ce
+	LEA	flgSound0,A3		;1a6f2: 47f9000315ce
 	MOVEQ	#1,D1			;1a6f8: 7201
 	MOVE.W	#$0080,D3		;1a6fa: 363c0080
-	ST	flg315F0		;1a6fe: 50f9000315f0
+	ST	flgDidGroundHit		;1a6fe: 50f9000315f0
 	BRA.S	_1A752			;1a704: 604c
-_1A706:
+_Sound1_1A706:
 	LEA	AUD1LCH,A4		;1a706: 49f900dff0b0
-	LEA	flg315D6,A3		;1a70c: 47f9000315d6
+	LEA	flgSound1,A3		;1a70c: 47f9000315d6
 	MOVEQ	#2,D1			;1a712: 7202
 	MOVE.W	#$0100,D3		;1a714: 363c0100
-	ST	flg315F0		;1a718: 50f9000315f0
+	ST	flgDidGroundHit		;1a718: 50f9000315f0
 	BRA.S	_1A752			;1a71e: 6032
-_1A720:
+_Sound2_1A720:
 	LEA	AUD2LCH,A4		;1a720: 49f900dff0c0
-	LEA	flg315DE,A3		;1a726: 47f9000315de
+	LEA	flgSound2,A3		;1a726: 47f9000315de
 	MOVEQ	#4,D1			;1a72c: 7204
 	MOVE.W	#$0200,D3		;1a72e: 363c0200
-	ST	flg315F0		;1a732: 50f9000315f0
+	ST	flgDidGroundHit		;1a732: 50f9000315f0
 	BRA.S	_1A752			;1a738: 6018
-_1A73A:
+_Sound3_1A73A:
 	LEA	AUD3LCH,A4		;1a73a: 49f900dff0d0
-	LEA	flg315E6,A3		;1a740: 47f9000315e6
+	LEA	flgSound3,A3		;1a740: 47f9000315e6
 	MOVEQ	#8,D1			;1a746: 7208
 	MOVE.W	#$0400,D3		;1a748: 363c0400
-	ST	flg315F0		;1a74c: 50f9000315f0
+	ST	flgDidGroundHit		;1a74c: 50f9000315f0
 _1A752:
 	MOVEA.L	ABSEXECBASE.W,A6	;1a752: 2c780004
 	JSR	(_DOSDisable,A6)	;1a756: 4eaeff88
@@ -35252,8 +35396,8 @@ _CheatNoises:
 	MOVEQ	#50,D0			;1a7ea: 7032
 	MOVEQ	#50,D1			;1a7ec: 7232
 ; these appear to be requestors used in cheats
-	JSR	_07310			;1a7ee: 4eb900007310
-	JSR	_00768			;1a7f4: 4eb900000768
+	JSR	_DisplayText		;1a7ee: 4eb900007310
+	JSR	_WaitKey		;1a7f4: 4eb900000768
 	LEA	ptr1CCC4,A1		;1a7fa: 43f90001ccc4
 _1A800:
 	MOVE.B	(A1)+,D1		;1a800: 1219
@@ -35296,8 +35440,8 @@ _CheatBjork:
 	MOVEQ	#50,D0			;1a844: 7032
 	MOVEQ	#50,D1			;1a846: 7232
 ; cheat requestor
-	JSR	_07310			;1a848: 4eb900007310
-	JSR	_00768			;1a84e: 4eb900000768
+	JSR	_DisplayText		;1a848: 4eb900007310
+	JSR	_WaitKey		;1a84e: 4eb900000768
 	LEA	ptr1CCC4,A1		;1a854: 43f90001ccc4
 _1A85A:
 	MOVE.B	(A1)+,D1		;1a85a: 1219
@@ -35310,12 +35454,12 @@ _1A85A:
 	BEQ.S	ret1A87E		;1a868: 6714
 	MOVE.B	D2,D0			;1a86a: 1002
 ; Returns on V or higher. Doesn't check for results below A.
-; Leads to very interesting results when you try to play sound "1"
-; and it asks you to insert disk SIGMA.
-; Returns on V or higher. Doesn't exclude results below A, so you can
-; hit the numbers 1-9 and 0 for bugged attempts to load non-audio.
-; In one instance it asked to insert disk SIGMA (capital Greek sigma),
-; ASCII 06 in this font.
+; Leads to very interesting results when you try to play
+; sound "1" and it asks you to insert disk SIGMA.
+; Returns on V or higher. Doesn't exclude results below A, so
+; you can hit the numbers 1-9 and 0 for bugged attempts to
+; load non-audio. In one instance it asked to insert
+; disk SIGMA (capital Greek sigma), ASCII 06 in this font.
 	CMPI.B	#$56,D0			;1a86c: 0c000056
 	BPL.S	ret1A87E		;1a870: 6a0c
 ; A = 0. This differs from the noises cheat where A = 1
@@ -35336,8 +35480,8 @@ _CheatNASA:
 	MOVEA.L	ptrBuff01,A1		;1a896: 22790000052e
 	MOVEQ	#50,D0			;1a89c: 7032
 	MOVEQ	#50,D1			;1a89e: 7232
-	JSR	_07310			;1a8a0: 4eb900007310
-	JSR	_00768			;1a8a6: 4eb900000768
+	JSR	_DisplayText		;1a8a0: 4eb900007310
+	JSR	_WaitKey		;1a8a6: 4eb900000768
 ; Number entered must be between 1 and 8
 	CMPI.B	#$09,D0			;1a8ac: 0c000009
 	BPL.W	ret1A92A		;1a8b0: 6a000078
@@ -35356,6 +35500,7 @@ _CheatNASA:
 	BSET	#4,(90,A0)		;1a8d6: 08e80004005a
 	BNE.S	ret1A92A		;1a8dc: 664c
 _CreateShip:
+; cheat function create a new ship
 	MOVEQ	#8,D0			;1a8de: 7008
 	MOVEQ	#8,D1			;1a8e0: 7208
 	MOVEQ	#0,D7			;1a8e2: 7e00
@@ -35379,7 +35524,7 @@ ret1A92A:
 	RTS				;1a92a: 4e75
 _CheatPanel:
 ; Extracts 13 useful buttons, in practice.
-	LEA	arrBtns41,A0		;1a92c: 41f900020b90
+	LEA	arrButton0,A0		;1a92c: 41f900020b90
 	LEA	arrPanelBtns,A1		;1a932: 43f90001d3d2
 	MOVEQ	#13,D0			;1a938: 700d
 loop1A93A:
@@ -35391,25 +35536,25 @@ _CheatSkyscraper:
 	NOT.B	flgSkyscraper		;1a944: 46390001d478
 	RTS				;1a94a: 4e75
 _DailyCheat:
-	MOVE.W	data1AA38,D0		;1a94c: 30390001aa38
+	MOVE.W	dataCheat1AA38,D0	;1a94c: 30390001aa38
 	LEA	ptr1AB26,A0		;1a952: 41f90001ab26
 	MOVE.B	(-1,A0,D0.W),D0		;1a958: 103000ff
 ; $44 = Amiga keycode for enter key
 	CMPI.B	#$44,D0			;1a95c: 0c000044
-	BEQ.S	_1A964			;1a960: 6702
+	BEQ.S	_Cheat1A964		;1a960: 6702
 	RTS				;1a962: 4e75
-_1A964:
+_Cheat1A964:
 	MOVEQ	#11,D1			;1a964: 720b
 	LEA	arrCheatcodes,A2	;1a966: 45f90001d3ee
 loop1A96C:
 	MOVEA.L	(A2)+,A3		;1a96c: 265a
 	MOVEA.L	A0,A1			;1a96e: 2248
-_1A970:
+_retry1A970:
 	MOVE.B	(A1)+,D0		;1a970: 1019
 	CMP.B	(A3)+,D0		;1a972: b01b
 	BNE.S	_1A99E			;1a974: 6628
 	CMPI.B	#$44,D0			;1a976: 0c000044
-	BNE.S	_1A970			;1a97a: 66f4
+	BNE.S	_retry1A970		;1a97a: 66f4
 	MOVE.W	D1,-(A7)		;1a97c: 3f01
 ; Beep
 	MOVE.W	#$0001,D0		;1a97e: 303c0001
@@ -35419,11 +35564,11 @@ _1A970:
 	LEA	arrCheats,A0		;1a98a: 41f90001a9aa
 	MOVEA.L	(0,A0,D1.W),A1		;1a990: 22701000
 	JSR	(A1)			;1a994: 4e91
-	CLR.W	data1AA38		;1a996: 42790001aa38
+	CLR.W	dataCheat1AA38		;1a996: 42790001aa38
 	RTS				;1a99c: 4e75
 _1A99E:
 	DBF	D1,loop1A96C		;1a99e: 51c9ffcc
-	CLR.W	data1AA38		;1a9a2: 42790001aa38
+	CLR.W	dataCheat1AA38		;1a9a2: 42790001aa38
 	RTS				;1a9a8: 4e75
 arrCheats:
 	DC.L	_CheatLemings		;1a9aa: 0001a7bc
@@ -35485,7 +35630,7 @@ intChipMemUsed:
 	DS.L	1			;1aa30
 intFastMemUsed:
 	DS.L	1			;1aa34
-data1AA38:
+dataCheat1AA38:
 	DS.W	1			;1aa38
 dataDMACONR:
 	DS.L	6			;1aa3a
@@ -35507,7 +35652,7 @@ ptr1AAAA:
 ptr1AAC0:
 	DS.L	5			;1aac0
 	DS.W	1			;1aad4
-flg1AAD6:
+intErr:
 	DS.B	1			;1aad6
 flgReading:
 	DS.B	1			;1aad7
@@ -35547,10 +35692,7 @@ strIDfile:
 	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$69,$64,$66,$69,$6c,$65,$00,$00
 	DC.B	"k240_2:idfile",0,0
 ptr1AB26:
-; Filename strings follow. Appear to be stored as two longs followed by
-; a filename; the longs are probably uncompressed and compressed filesize,
-; respectively; the second matches the size on disk, and the first is
-; larger than that. MGL appears to be a compressed data format.
+; Filename strings follow. Appear to be stored as two longs followed by a filename; the longs are probably uncompressed and compressed filesize, respectively; the second matches the size on disk, and the first is larger than that. MGL appears to be a compressed data format.
 	DS.L	4			;1ab26
 	DS.W	1			;1ab36
 strWireplanMGL:
@@ -35682,10 +35824,8 @@ strOutro2MGL:
 	DC.W	$6c00			;1ae9c
 strOutro3MGL:
 ; Swixaran win screen.
-; Interesting: The filename here is actually outro1.mgl, the default
-; win screen. There is an outro3 on the disk, and it matches the file size
-; here; if you rename outro3.mgl to outro1.mgl and defeat the Swixarans,
-; you can see the intended win screen.
+; Interesting: The filename here is actually outro1.mgl, the default win screen. There is an outro3 on the disk, and it matches the file size here;
+; if you rename outro3.mgl to outro1.mgl and defeat the Swixarans, you can see the intended win screen.
 	DC.L	$000084b8,$0000798e,$6b323430,$5f333a6f ;1ae9e
 	DC.L	$7574726f,$312e6d67	;1aeae
 	DC.W	$6c00			;1aeb6
@@ -35716,91 +35856,102 @@ flgManualCodeGiven:
 	DS.B	1			;1af14
 flgIDFile:
 	DS.B	1			;1af15
-ptr1AF16:
+paletteFlash:
 	DS.L	16			;1af16
-ptr1AF56:
+paletteScreen:
 	DS.L	1			;1af56
 	DS.W	1			;1af5a
-data1AF5C:
+LAB_10C4:
 	DS.L	14			;1af5c
 	DS.W	1			;1af94
-ptr1AF96:
+palette:
+; "Palette" is a 32-color palette used for most of the game.
+; The second 16 colors just repeat the first.
+; 000, 666, 444, 222,
+; 09F, 038, D60, FC0,
+; 700, C00, 060, 0C0,
+; FFF, CBB, 700, FF2,
+; The last two, 700 and FF2, alternate. It's used for
+; blinkenlights and faux building animations.
+; The other two palettes are default palette and a
+; dark palette used when the game is paused for a while.
 	DC.L	$00000666,$04440222,$009f0038,$0d600fc0 ;1af96
 	DC.L	$07000c00,$006000c0,$0fff0cbb ;1afa6
-data1AFB2:
+LAB_10C6:
 	DC.L	$07000ff2,$00000666,$04440222,$009f0038 ;1afb2
 	DC.L	$0d600fc0,$07000c00,$006000c0,$0fff0cbb ;1afc2
-data1AFD2:
+LAB_10C7:
 	DC.L	$07000ff2		;1afd2
-ptr1AFD6:
+palette_standard:
+; Backup copy of the original palette.
 	DC.L	$00000666,$04440222,$009f0038,$0d600fc0 ;1afd6
 	DC.L	$07000c00,$006000c0,$0fff0cbb,$07000ff2 ;1afe6
 	DC.L	$00000666,$04440222,$009f0038,$0d600fc0 ;1aff6
 	DC.L	$07000c00,$006000c0,$0fff0cbb,$07000ff2 ;1b006
-ptr1B016:
+palette_dark:
 	DC.L	$00000222,$01110000,$00230012,$03100330 ;1b016
 	DC.L	$01000300,$00100030,$03330322 ;1b026
-data1B032:
+LAB_10CA:
 	DC.L	$01000331,$00000222,$01110000,$00230012 ;1b032
 	DC.L	$03100330,$01000300,$00100030,$03330322 ;1b042
 	DC.L	$01000331		;1b052
-ptr1B056:
-	DC.L	data1B06E		;1b056: 0001b06e
-	DC.L	data1B082		;1b05a: 0001b082
-	DC.L	data1B096		;1b05e: 0001b096
-	DC.L	data1B0AA		;1b062: 0001b0aa
-	DC.L	data1B0BE		;1b066: 0001b0be
-	DC.L	data1B0D2		;1b06a: 0001b0d2
-data1B06E:
+arrAli_1B056:
+	DC.L	datAli1_1B06E		;1b056: 0001b06e
+	DC.L	datAli2_1B082		;1b05a: 0001b082
+	DC.L	datAli3_1B096		;1b05e: 0001b096
+	DC.L	datAli4_1B0AA		;1b062: 0001b0aa
+	DC.L	datAli5_1B0BE		;1b066: 0001b0be
+	DC.L	datAli6_1B0D2		;1b06a: 0001b0d2
+datAli1_1B06E:
 	DC.L	$000001c0,$0000001c,$000002a0,$00800058 ;1b06e
 	DC.L	$06000300		;1b07e
-data1B082:
+datAli2_1B082:
 	DC.L	$000003a0,$0000003a,$00000570,$00800048 ;1b082
 	DC.L	$06300210		;1b092
-data1B096:
+datAli3_1B096:
 	DC.L	$00000350,$00000035,$000004f8,$007e004b ;1b096
 	DC.L	$06600330		;1b0a6
-data1B0AA:
+datAli4_1B0AA:
 	DC.L	$000003f0,$0000003f,$000005e8,$00800046 ;1b0aa
 	DC.L	$06360313		;1b0ba
-data1B0BE:
+datAli5_1B0BE:
 	DC.L	$00000250,$00000025,$00000378,$00800052 ;1b0be
 	DC.L	$00600030		;1b0ce
-data1B0D2:
+datAli6_1B0D2:
 	DC.L	$000003d0,$0000003d,$000005b8,$00800046 ;1b0d2
 	DC.L	$00660033		;1b0e2
-ptr1B0E6:
-	DC.L	data1B0FE		;1b0e6: 0001b0fe
-	DC.L	data1B118		;1b0ea: 0001b118
-	DC.L	data1B132		;1b0ee: 0001b132
-	DC.L	data1B14C		;1b0f2: 0001b14c
-	DC.L	data1B166		;1b0f6: 0001b166
-	DC.L	data1B180		;1b0fa: 0001b180
-data1B0FE:
+arr1B0E6:
+	DC.L	datAli1_1B0FE		;1b0e6: 0001b0fe
+	DC.L	datAli2_1B118		;1b0ea: 0001b118
+	DC.L	datAli3_1B132		;1b0ee: 0001b132
+	DC.L	datAli4_1B14C		;1b0f2: 0001b14c
+	DC.L	datAli5_1B166		;1b0f6: 0001b166
+	DC.L	datAli6_1B180		;1b0fa: 0001b180
+datAli1_1B0FE:
 	DC.L	$00000c4e,$00000069,$00000005,$00200032 ;1b0fe
 	DC.L	$0bb00870,$05400220	;1b10e
 	DC.W	$0110			;1b116
-data1B118:
+datAli2_1B118:
 	DC.L	$00000f66,$00000049,$00000009,$0008003c ;1b118
 	DC.L	$0d000a01,$06110200	;1b128
 	DS.W	1			;1b130
-data1B132:
+datAli3_1B132:
 	DC.L	$000007f8,$00000044,$00000005,$00180043 ;1b132
 	DC.L	$0ccc0988,$06550222	;1b142
 	DS.W	1			;1b14a
-data1B14C:
+datAli4_1B14C:
 	DC.L	$000008a0,$0000005c,$00000004,$00180035 ;1b14c
 	DC.L	$09960753,$05210301	;1b15c
 	DC.W	$0100			;1b164
-data1B166:
+datAli5_1B166:
 	DC.L	$00000fea,$00000061,$00000007,$00100035 ;1b166
 	DC.L	$05990377,$01550033	;1b176
 	DS.W	1			;1b17e
-data1B180:
+datAli6_1B180:
 	DC.L	$0000157e,$00000083,$00000007,$0010001e ;1b180
 	DC.L	$00b00091,$00710050	;1b190
 	DC.W	$0030			;1b198
-ptr1B19A:
+arrAlienIntros:
 	DC.L	$01b601b7,$01b801b9,$01af01b0,$01b101b9 ;1b19a
 	DC.L	$01ab01ac,$01ad01ae,$01ba01bb,$01bc01ae ;1b1aa
 	DC.L	$01b201b3,$01b401b5,$01bd01be,$01bf01b5 ;1b1ba
@@ -35819,21 +35970,21 @@ ptr1B20E:
 	DC.L	$00ad00d8,$00b400c2,$00e200fb,$00b400c2 ;1b22e
 	DC.L	$01080120,$00b400c2	;1b23e
 	DC.W	$ffff			;1b246
-ptr1B248:
+intelPricePop:
 	DC.W	$1f40			;1b248
-data1B24A:
+intelPriceMislInv:
 	DC.W	$3a98			;1b24a
-data1B24C:
+intelPriceEnemyAsts:
 	DC.W	$7530			;1b24c
-data1B24E:
+intelPriceOurAsts:
 	DC.W	$9c40			;1b24e
-data1B250:
+intelPriceBldgInv:
 	DC.W	$1f40			;1b250
-data1B252:
+intelPriceFleetMakeup:
 	DC.W	$61a8			;1b252
-data1B254:
+intelPriceFleetDest:
 	DC.W	$61a8			;1b254
-data1B256:
+intelPriceMislDest:
 	DC.W	$61a8			;1b256
 strSaveFileName:
 	DS.L	1			;1b258
@@ -35941,12 +36092,15 @@ ptr1B4B8:
 ; ---- save file ----
 ; This data is saved in the save game file
 	DS.L	16			;1b4b8
-saved_1B4F8:
+strSaveName:
+; ---------BEGIN SAVE SECTION---------
+; First save game data section
+; 16 bytes: save game name
 	DS.L	4			;1b4f8
 savedAlienID:
-; ---- save file ----
 	DS.W	1			;1b508
 ptr1B50A:
+; ---------END SAVE SECTION---------
 	DS.L	1			;1b50a
 ptr1B50E:
 	DS.L	48			;1b50e
@@ -35960,7 +36114,7 @@ ptr1B694:
 	DC.L	$01110915,$05190d1d	;1b694
 flg1B69C:
 	DS.B	1			;1b69c
-flg1B69D:
+flgScreenSwitch_1B69D:
 	DC.B	$ff			;1b69d
 ptr1B69E:
 	DC.L	$005b3b6f		;1b69e
@@ -36026,7 +36180,7 @@ tblTerranBldtStats:
 	DS.W	1			;1c6fc
 arrAlienBldgStats:
 	DS.L	100			;1c6fe
-ptr1C88E:
+ptrWind_1C88E:
 	;1c88e
 	;DC.B	$45,$00,$00,$00,$4b,$00,$00,$00,$4c,$00,$00,$00,$4e,$00,$00,$00
 	;DC.B	$48,$48,$00,$00,$4b,$4b,$00,$00,$48,$4f,$00,$00,$4d,$4d,$00,$00
@@ -36058,13 +36212,13 @@ textField05:
 	DS.L	1			;1c8da
 textField06:
 	DS.L	1			;1c8de
-ptr1C8E2:
+textField07:
 	DC.L	data1CB0A		;1c8e2: 0001cb0a
-ptr1C8E6:
+textField08:
 	DC.L	data1CD36		;1c8e6: 0001cd36
-data1C8EA:
+textField09:
 	DS.L	1			;1c8ea
-data1C8EE:
+txtBuffer_1C8EE:
 	DS.W	1			;1c8ee
 data1C8F0:
 	DS.W	1			;1c8f0
@@ -36113,7 +36267,7 @@ data1CB0A:
 	DC.L	$4f505152,$53545556,$5758595a,$5b5c5d5e ;1cbba
 	DC.L	$5f604142,$43444546,$4748494a,$4b4c4d4e ;1cbca
 	DC.L	$4f505152,$53545556,$5758595a ;1cbda
-data1CBE6:
+dataIntel1CBE6:
 	DC.L	$00070607,$06080808,$08000705,$05060606 ;1cbe6
 	DC.L	$07070707		;1cbf6
 	DS.L	3			;1cbfa
@@ -36201,7 +36355,7 @@ data1CD36:
 	DC.L	$808080e0,$00008040,$20100804,$02003808 ;1d06e
 	DC.L	$08080808		;1d07e
 	DC.W	$0838			;1d082
-data1D084:
+dataIntel1D084:
 	DS.L	2			;1d084
 	DC.L	$00000078,$c0c0c078,$10300000,$5000c8c8 ;1d08c
 	DC.L	$c8c87800,$00500070,$c8f8c8c8,$00005000 ;1d09c
@@ -36375,21 +36529,22 @@ data1D518:
 ptr1D538:
 	DS.L	5			;1d538
 	DS.W	1			;1d54c
-ptr1D54E:
+flgIntelHonest:
+; 50% chance of intel reports being honest
 	DS.W	1			;1d54e
-data1D550:
+LAB_1161:
 	DS.W	1			;1d550
-data1D552:
+LAB_1162:
 	DS.W	1			;1d552
-data1D554:
+LAB_1163:
 	DS.W	1			;1d554
-data1D556:
+LAB_1164:
 	DS.W	1			;1d556
-data1D558:
+LAB_1165:
 	DS.W	1			;1d558
-data1D55A:
+LAB_1166:
 	DS.W	1			;1d55a
-data1D55C:
+LAB_1167:
 	DS.W	1			;1d55c
 data1D55E:
 	DS.W	1			;1d55e
@@ -36562,7 +36717,7 @@ ptr1D836:
 	DC.L	$001a004e,$004b004e,$000e006a,$0024006a ;1d8d6
 	DC.L	$003a006a,$0050006a	;1d8e6
 	DS.L	2			;1d8ee
-ptr1D8F6:
+arrShipSpriteList:
 	DS.L	1			;1d8f6
 	DC.L	$00000050,$000a0000,$00640000,$00c4000c ;1d8fa
 	DC.L	$000000dc,$00000144,$000d0000,$015e0000 ;1d90a
@@ -36697,6 +36852,7 @@ ptr1DA86:
 	DC.L	$02600010		;1e04a
 blobAlienFile1:
 ; Loaded from a1data1. 610 bytes.
+; Sprite list for 61 entries.
 	DS.L	154			;1e04e
 	DC.L	$0078000f,$00000096,$000000fe,$000d0000 ;1e2b6
 	DC.L	$01180000,$01a80012,$000001cc,$00000244 ;1e2c6
@@ -36713,7 +36869,7 @@ blobAlienFile1:
 	DC.L	$00310000		;1e376
 	DS.L	1			;1e37a
 	DC.L	$0690002a		;1e37e
-ptr1E382:
+arrSattSpriteList:
 	DS.L	1			;1e382
 	DC.L	$00000c90,$00430000	;1e386
 	DS.L	1			;1e38e
@@ -36807,11 +36963,15 @@ arrTerranShipStats01:
 ; room for two more ships in theory
 	DS.L	12			;1e620
 arrAlienShipStats:
-; room for 8 alien ships
+; Slots for 8 alien ship stats
+; Probably the same as the Terran ship format
+; but some fields such as cost are unused
 	DS.L	48			;1e650
 data1E710:
 	DS.L	1			;1e710
 extOSD:
+; Perhaps the coordinates for the ship scaffolding
+; when it is built
 	DC.L	$000000f0,$00101000,$00e00020,$10f01010 ;1e714
 	DC.L	$f8f0f810,$20f010e0,$18d820e0,$20001020 ;1e724
 	DC.L	$201030f0,$30002020,$182830e0,$40e040f0 ;1e734
@@ -36827,6 +36987,7 @@ extTranspBatls:
 	DC.L	$101030f0,$20e83000,$20103010,$20184000 ;1e790
 	DC.L	$40f04010,$4800ffff	;1e7a0
 arrHPArmrValues:
+; How much armor each hardpoint gives.
 	DS.L	5			;1e7a8
 	DC.L	$0000000a,$0014001e,$00280032 ;1e7bc
 ptr1E7C8:
@@ -36854,8 +37015,8 @@ ptr1E878:
 	DC.L	$06060607		;1e8b4
 data1E8B8:
 	DS.L	2			;1e8b8
-ptr1E8C0:
-	DC.L	data1E914		;1e8c0: 0001e914
+arrSprHardpoints:
+	DC.L	dataSpr1E914		;1e8c0: 0001e914
 	DC.L	data1E922		;1e8c4: 0001e922
 	DC.L	data1E928		;1e8c8: 0001e928
 	DC.L	data1E934		;1e8cc: 0001e934
@@ -36878,7 +37039,7 @@ data1E910:
 	DC.B	$ff			;1e912
 data1E913:
 	DC.B	$ff			;1e913
-data1E914:
+dataSpr1E914:
 	DC.L	$03080108,$01110801,$08010919 ;1e914
 	DC.W	$01ff			;1e920
 data1E922:
@@ -36937,9 +37098,9 @@ data1E9A2:
 	DC.L	$03121009,$08011cff	;1e9a2
 ptr1E9AA:
 	DC.L	$08010801,$09080108,$011105ff ;1e9aa
-data1E9B6:
+TylSmallTransp_1E9B6:
 	DC.L	$08010801,$11080108,$010905ff ;1e9b6
-data1E9C2:
+ptrHardpointB:
 	DC.L	$09230122		;1e9c2
 	DC.W	$05ff			;1e9c6
 data1E9C8:
@@ -37010,7 +37171,7 @@ ptr1EB4C:
 	DC.L	$15fd05fd,$04fd0403,$fd0302fd,$0201fdfc ;1eb6c
 	DC.L	$0100fa16		;1eb7c
 	DC.W	$fe00			;1eb80
-ptr1EB82:
+ptrNapalm_1EB82:
 	DC.L	$fe020100,$01000100,$010000ff,$00ff00ff ;1eb82
 	DC.L	$00ffff00,$ff00ff00,$ff000001,$00010001 ;1eb92
 	DC.L	$01000100,$010000ff,$00ffff00,$ff000001 ;1eba2
@@ -37032,218 +37193,218 @@ ptr1EBDE:
 	DC.L	$05000000,$05010000,$05020000,$05030000 ;1ebee
 	DC.L	$05060a00,$05070a00,$0b080a00,$05090000 ;1ebfe
 	DC.L	$05060a00,$05070a00,$0b080a00,$09000000 ;1ec0e
-ptr1EC1E:
-	DC.L	chip4BA8E		;1ec1e: 0004ba8e
-	DC.L	chip4BABE		;1ec22: 0004babe
+arrGunfireSprites:
+	DC.L	spr_ShipFire0		;1ec1e: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1ec22: 0004babe
 	DC.L	$00060007,$ffffffff	;1ec26
-	DC.L	chip4BACA		;1ec2e: 0004baca
-	DC.L	chip4BB02		;1ec32: 0004bb02
+	DC.L	spr_ShipFire1		;1ec2e: 0004baca
+	DC.L	spr_ShipFire1Mask	;1ec32: 0004bb02
 	DC.L	$00070008,$00030000	;1ec36
-	DC.L	chip4BB10		;1ec3e: 0004bb10
-	DC.L	chip4BB40		;1ec42: 0004bb40
+	DC.L	spr_ShipFire2		;1ec3e: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1ec42: 0004bb40
 	DC.L	$00060007,$00070000	;1ec46
-	DC.L	chip4BB4C		;1ec4e: 0004bb4c
-	DC.L	chip4BB7C		;1ec52: 0004bb7c
+	DC.L	spr_ShipFire3		;1ec4e: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1ec52: 0004bb7c
 	DC.L	$00060000,$00090000	;1ec56
-	DC.L	chip4BB88		;1ec5e: 0004bb88
-	DC.L	chip4BBB8		;1ec62: 0004bbb8
+	DC.L	spr_ShipFire4		;1ec5e: 0004bb88
+	DC.L	spr_ShipFire4Mask	;1ec62: 0004bbb8
 	DC.L	$0006fff9,$00070000	;1ec66
-	DC.L	chip4BBC4		;1ec6e: 0004bbc4
-	DC.L	chip4BBFC		;1ec72: 0004bbfc
+	DC.L	spr_ShipFire5		;1ec6e: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1ec72: 0004bbfc
 	DC.L	$0007fff7,$00030000	;1ec76
-	DC.L	chip4BC0A		;1ec7e: 0004bc0a
-	DC.L	chip4BC3A		;1ec82: 0004bc3a
+	DC.L	spr_ShipFire6		;1ec7e: 0004bc0a
+	DC.L	spr_ShipFire6Mask	;1ec82: 0004bc3a
 	DC.L	$0006fff7,$ffffffff	;1ec86
-	DC.L	chip4BC46		;1ec8e: 0004bc46
-	DC.L	chip4BC76		;1ec92: 0004bc76
+	DC.L	spr_ShipFire7		;1ec8e: 0004bc46
+	DC.L	spr_ShipFire7Mask	;1ec92: 0004bc76
 	DC.L	$00060000,$fffcffff	;1ec96
-	DC.L	chip4BA8E		;1ec9e: 0004ba8e
-	DC.L	chip4BABE		;1eca2: 0004babe
+	DC.L	spr_ShipFire0		;1ec9e: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1eca2: 0004babe
 	DC.L	$00060008,$0001ffff	;1eca6
-	DC.L	chip4BACA		;1ecae: 0004baca
-	DC.L	chip4BB02		;1ecb2: 0004bb02
+	DC.L	spr_ShipFire1		;1ecae: 0004baca
+	DC.L	spr_ShipFire1Mask	;1ecb2: 0004bb02
 	DC.L	$00070008,$00030000	;1ecb6
-	DC.L	chip4BB10		;1ecbe: 0004bb10
-	DC.L	chip4BB40		;1ecc2: 0004bb40
+	DC.L	spr_ShipFire2		;1ecbe: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1ecc2: 0004bb40
 	DC.L	$00060007,$00060000	;1ecc6
-	DC.L	chip4BB4C		;1ecce: 0004bb4c
-	DC.L	chip4BB7C		;1ecd2: 0004bb7c
+	DC.L	spr_ShipFire3		;1ecce: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1ecd2: 0004bb7c
 	DC.L	$00060000,$00090000	;1ecd6
-	DC.L	chip4BB88		;1ecde: 0004bb88
-	DC.L	chip4BBB8		;1ece2: 0004bbb8
+	DC.L	spr_ShipFire4		;1ecde: 0004bb88
+	DC.L	spr_ShipFire4Mask	;1ece2: 0004bbb8
 	DC.L	$0006fff9,$00060000	;1ece6
-	DC.L	chip4BBC4		;1ecee: 0004bbc4
-	DC.L	chip4BBFC		;1ecf2: 0004bbfc
+	DC.L	spr_ShipFire5		;1ecee: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1ecf2: 0004bbfc
 	DC.L	$0007fff7,$00030000	;1ecf6
-	DC.L	chip4BC0A		;1ecfe: 0004bc0a
-	DC.L	chip4BC3A		;1ed02: 0004bc3a
+	DC.L	spr_ShipFire6		;1ecfe: 0004bc0a
+	DC.L	spr_ShipFire6Mask	;1ed02: 0004bc3a
 	DC.L	$0006fff7,$ffffffff	;1ed06
-	DC.L	chip4BC46		;1ed0e: 0004bc46
-	DC.L	chip4BC76		;1ed12: 0004bc76
+	DC.L	spr_ShipFire7		;1ed0e: 0004bc46
+	DC.L	spr_ShipFire7Mask	;1ed12: 0004bc76
 	DC.L	$00060000,$fffcffff	;1ed16
-	DC.L	chip4BA8E		;1ed1e: 0004ba8e
-	DC.L	chip4BABE		;1ed22: 0004babe
+	DC.L	spr_ShipFire0		;1ed1e: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1ed22: 0004babe
 	DC.L	$00060008,$0000ffff	;1ed26
-	DC.L	chip4BACA		;1ed2e: 0004baca
-	DC.L	chip4BB02		;1ed32: 0004bb02
+	DC.L	spr_ShipFire1		;1ed2e: 0004baca
+	DC.L	spr_ShipFire1Mask	;1ed32: 0004bb02
 	DC.L	$00070008,$00030000	;1ed36
-	DC.L	chip4BB10		;1ed3e: 0004bb10
-	DC.L	chip4BB40		;1ed42: 0004bb40
+	DC.L	spr_ShipFire2		;1ed3e: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1ed42: 0004bb40
 	DC.L	$00060007,$00070000	;1ed46
-	DC.L	chip4BB4C		;1ed4e: 0004bb4c
-	DC.L	chip4BB7C		;1ed52: 0004bb7c
+	DC.L	spr_ShipFire3		;1ed4e: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1ed52: 0004bb7c
 	DC.L	$00060000,$00090000	;1ed56
-	DC.L	chip4BB88		;1ed5e: 0004bb88
-	DC.L	chip4BBB8		;1ed62: 0004bbb8
+	DC.L	spr_ShipFire4		;1ed5e: 0004bb88
+	DC.L	spr_ShipFire4Mask	;1ed62: 0004bbb8
 	DC.L	$0006fff9,$00070000	;1ed66
-	DC.L	chip4BBC4		;1ed6e: 0004bbc4
-	DC.L	chip4BBFC		;1ed72: 0004bbfc
+	DC.L	spr_ShipFire5		;1ed6e: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1ed72: 0004bbfc
 	DC.L	$0007fff7,$00030000	;1ed76
-	DC.L	chip4BC0A		;1ed7e: 0004bc0a
-	DC.L	chip4BC3A		;1ed82: 0004bc3a
+	DC.L	spr_ShipFire6		;1ed7e: 0004bc0a
+	DC.L	spr_ShipFire6Mask	;1ed82: 0004bc3a
 	DC.L	$0006fff8,$ffffffff	;1ed86
-	DC.L	chip4BC46		;1ed8e: 0004bc46
-	DC.L	chip4BC76		;1ed92: 0004bc76
+	DC.L	spr_ShipFire7		;1ed8e: 0004bc46
+	DC.L	spr_ShipFire7Mask	;1ed92: 0004bc76
 	DC.L	$00060000,$fffcffff	;1ed96
-data1ED9E:
-	DC.L	chip4BA8E		;1ed9e: 0004ba8e
-	DC.L	chip4BABE		;1eda2: 0004babe
+firemask1ED9E:
+	DC.L	spr_ShipFire0		;1ed9e: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1eda2: 0004babe
 	DC.L	$0006000a,$fffdffff	;1eda6
-	DC.L	chip4BA8E		;1edae: 0004ba8e
-	DC.L	chip4BABE		;1edb2: 0004babe
+	DC.L	spr_ShipFire0		;1edae: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1edb2: 0004babe
 	DC.L	$00060014,$0002ffff	;1edb6
-	DC.L	chip4BACA		;1edbe: 0004baca
-	DC.L	chip4BB02		;1edc2: 0004bb02
+	DC.L	spr_ShipFire1		;1edbe: 0004baca
+	DC.L	spr_ShipFire1Mask	;1edc2: 0004bb02
 	DC.L	$00070012,$ffff0000	;1edc6
-	DC.L	chip4BACA		;1edce: 0004baca
-	DC.L	chip4BB02		;1edd2: 0004bb02
+	DC.L	spr_ShipFire1		;1edce: 0004baca
+	DC.L	spr_ShipFire1Mask	;1edd2: 0004bb02
 	DC.L	$00070012,$00060000	;1edd6
-	DC.L	chip4BB10		;1edde: 0004bb10
-	DC.L	chip4BB40		;1ede2: 0004bb40
+	DC.L	spr_ShipFire2		;1edde: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1ede2: 0004bb40
 	DC.L	$00060014,$00050000	;1ede6
-	DC.L	chip4BB10		;1edee: 0004bb10
-	DC.L	chip4BB40		;1edf2: 0004bb40
+	DC.L	spr_ShipFire2		;1edee: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1edf2: 0004bb40
 	DC.L	$0006000a,$000a0000	;1edf6
-	DC.L	chip4BB4C		;1edfe: 0004bb4c
-	DC.L	chip4BB7C		;1ee02: 0004bb7c
+	DC.L	spr_ShipFire3		;1edfe: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1ee02: 0004bb7c
 	DC.L	$00060011,$000a0000	;1ee06
-	DC.L	chip4BB4C		;1ee0e: 0004bb4c
-	DC.L	chip4BB7C		;1ee12: 0004bb7c
+	DC.L	spr_ShipFire3		;1ee0e: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1ee12: 0004bb7c
 	DC.L	$00060001,$000a0000	;1ee16
-	DC.L	chip4BB88		;1ee1e: 0004bb88
-	DC.L	chip4BBB8		;1ee22: 0004bbb8
+	DC.L	spr_ShipFire4		;1ee1e: 0004bb88
+	DC.L	spr_ShipFire4Mask	;1ee22: 0004bbb8
 	DC.L	$00060007,$000a0000	;1ee26
-	DC.L	chip4BB88		;1ee2e: 0004bb88
-	DC.L	chip4BBB8		;1ee32: 0004bbb8
+	DC.L	spr_ShipFire4		;1ee2e: 0004bb88
+	DC.L	spr_ShipFire4Mask	;1ee32: 0004bbb8
 	DC.L	$0006fffd,$00050000	;1ee36
-	DC.L	chip4BBC4		;1ee3e: 0004bbc4
-	DC.L	chip4BBFC		;1ee42: 0004bbfc
+	DC.L	spr_ShipFire5		;1ee3e: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1ee42: 0004bbfc
 	DC.L	$00070001,$00070000	;1ee46
-	DC.L	chip4BBC4		;1ee4e: 0004bbc4
-	DC.L	chip4BBFC		;1ee52: 0004bbfc
+	DC.L	spr_ShipFire5		;1ee4e: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1ee52: 0004bbfc
 	DC.L	$00070001		;1ee56
 	DS.L	1			;1ee5a
-	DC.L	chip4BC0A		;1ee5e: 0004bc0a
-	DC.L	chip4BC3A		;1ee62: 0004bc3a
+	DC.L	spr_ShipFire6		;1ee5e: 0004bc0a
+	DC.L	spr_ShipFire6Mask	;1ee62: 0004bc3a
 	DC.L	$0006fffc,$0002ffff	;1ee66
-	DC.L	chip4BC0A		;1ee6e: 0004bc0a
-	DC.L	chip4BC3A		;1ee72: 0004bc3a
+	DC.L	spr_ShipFire6		;1ee6e: 0004bc0a
+	DC.L	spr_ShipFire6Mask	;1ee72: 0004bc3a
 	DC.L	$00060006,$fffdffff	;1ee76
-	DC.L	chip4BC46		;1ee7e: 0004bc46
-	DC.L	chip4BC76		;1ee82: 0004bc76
+	DC.L	spr_ShipFire7		;1ee7e: 0004bc46
+	DC.L	spr_ShipFire7Mask	;1ee82: 0004bc76
 	DC.L	$00060001,$fffeffff	;1ee86
-	DC.L	chip4BC46		;1ee8e: 0004bc46
-	DC.L	chip4BC76		;1ee92: 0004bc76
+	DC.L	spr_ShipFire7		;1ee8e: 0004bc46
+	DC.L	spr_ShipFire7Mask	;1ee92: 0004bc76
 	DC.L	$00060011,$fffeffff	;1ee96
-data1EE9E:
-	DC.L	chip4BA8E		;1ee9e: 0004ba8e
-	DC.L	chip4BABE		;1eea2: 0004babe
+firemask1EE9E:
+	DC.L	spr_ShipFire0		;1ee9e: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1eea2: 0004babe
 	DC.L	$00060010,$fffeffff	;1eea6
-	DC.L	chip4BA8E		;1eeae: 0004ba8e
-	DC.L	chip4BABE		;1eeb2: 0004babe
+	DC.L	spr_ShipFire0		;1eeae: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1eeb2: 0004babe
 	DC.L	$00060019,$0002ffff	;1eeb6
-	DC.L	chip4BACA		;1eebe: 0004baca
-	DC.L	chip4BB02		;1eec2: 0004bb02
+	DC.L	spr_ShipFire1		;1eebe: 0004baca
+	DC.L	spr_ShipFire1Mask	;1eec2: 0004bb02
 	DC.L	$00070018,$00040000	;1eec6
-	DC.L	chip4BACA		;1eece: 0004baca
-	DC.L	chip4BB02		;1eed2: 0004bb02
+	DC.L	spr_ShipFire1		;1eece: 0004baca
+	DC.L	spr_ShipFire1Mask	;1eed2: 0004bb02
 	DC.L	$00070018,$00080000	;1eed6
-	DC.L	chip4BB10		;1eede: 0004bb10
-	DC.L	chip4BB40		;1eee2: 0004bb40
+	DC.L	spr_ShipFire2		;1eede: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1eee2: 0004bb40
 	DC.L	$00060018,$000c0000	;1eee6
-	DC.L	chip4BB10		;1eeee: 0004bb10
-	DC.L	chip4BB40		;1eef2: 0004bb40
+	DC.L	spr_ShipFire2		;1eeee: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1eef2: 0004bb40
 	DC.L	$00060013,$000f0000	;1eef6
-	DC.L	chip4BB4C		;1eefe: 0004bb4c
-	DC.L	chip4BB7C		;1ef02: 0004bb7c
+	DC.L	spr_ShipFire3		;1eefe: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1ef02: 0004bb7c
 	DC.L	$0006000d,$00120000	;1ef06
-	DC.L	chip4BB4C		;1ef0e: 0004bb4c
-	DC.L	chip4BB7C		;1ef12: 0004bb7c
+	DC.L	spr_ShipFire3		;1ef0e: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1ef12: 0004bb7c
 	DC.L	$00060003,$00120000	;1ef16
-	DC.L	chip4BB88		;1ef1e: 0004bb88
-	DC.L	chip4BBB8		;1ef22: 0004bbb8
+	DC.L	spr_ShipFire4		;1ef1e: 0004bb88
+	DC.L	spr_ShipFire4Mask	;1ef22: 0004bbb8
 	DC.L	$0006fffd,$000f0000	;1ef26
-	DC.L	chip4BB88		;1ef2e: 0004bb88
-	DC.L	chip4BBB8		;1ef32: 0004bbb8
+	DC.L	spr_ShipFire4		;1ef2e: 0004bb88
+	DC.L	spr_ShipFire4Mask	;1ef32: 0004bbb8
 	DC.L	$0006fff8,$000c0000	;1ef36
-	DC.L	chip4BBC4		;1ef3e: 0004bbc4
-	DC.L	chip4BBFC		;1ef42: 0004bbfc
+	DC.L	spr_ShipFire5		;1ef3e: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1ef42: 0004bbfc
 	DC.L	$0007fff7,$00080000	;1ef46
-	DC.L	chip4BBC4		;1ef4e: 0004bbc4
-	DC.L	chip4BBFC		;1ef52: 0004bbfc
+	DC.L	spr_ShipFire5		;1ef4e: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1ef52: 0004bbfc
 	DC.L	$0007fff7,$00040000	;1ef56
-	DC.L	chip4BC0A		;1ef5e: 0004bc0a
-	DC.L	chip4BC3A		;1ef62: 0004bc3a
+	DC.L	spr_ShipFire6		;1ef5e: 0004bc0a
+	DC.L	spr_ShipFire6Mask	;1ef62: 0004bc3a
 	DC.L	$0006fff6,$0002ffff	;1ef66
-	DC.L	chip4BC0A		;1ef6e: 0004bc0a
-	DC.L	chip4BC3A		;1ef72: 0004bc3a
+	DC.L	spr_ShipFire6		;1ef6e: 0004bc0a
+	DC.L	spr_ShipFire6Mask	;1ef72: 0004bc3a
 	DC.L	$0006ffff,$fffeffff	;1ef76
-	DC.L	chip4BC46		;1ef7e: 0004bc46
-	DC.L	chip4BC76		;1ef82: 0004bc76
+	DC.L	spr_ShipFire7		;1ef7e: 0004bc46
+	DC.L	spr_ShipFire7Mask	;1ef82: 0004bc76
 	DC.L	$00060003,$ffffffff	;1ef86
-	DC.L	chip4BC46		;1ef8e: 0004bc46
-	DC.L	chip4BC76		;1ef92: 0004bc76
+	DC.L	spr_ShipFire7		;1ef8e: 0004bc46
+	DC.L	spr_ShipFire7Mask	;1ef92: 0004bc76
 	DC.L	$0006000b,$ffffffff	;1ef96
-data1EF9E:
+firemask1EF9E:
 	DC.W	$0001			;1ef9e
-	DC.L	chip4BACA		;1efa0: 0004baca
-	DC.L	chip4BB02		;1efa4: 0004bb02
+	DC.L	spr_ShipFire1		;1efa0: 0004baca
+	DC.L	spr_ShipFire1Mask	;1efa4: 0004bb02
 	DC.L	$00070044,$00170000	;1efa8
-	DC.L	chip4BACA		;1efb0: 0004baca
-	DC.L	chip4BB02		;1efb4: 0004bb02
+	DC.L	spr_ShipFire1		;1efb0: 0004baca
+	DC.L	spr_ShipFire1Mask	;1efb4: 0004bb02
 	DC.L	$00070044,$001e0000	;1efb8
-data1EFC0:
+firemask1EFC0:
 	DC.W	$0004			;1efc0
-	DC.L	chip4BBC4		;1efc2: 0004bbc4
-	DC.L	chip4BBFC		;1efc6: 0004bbfc
+	DC.L	spr_ShipFire5		;1efc2: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1efc6: 0004bbfc
 	DC.L	$00070000,$00040000	;1efca
-	DC.L	chip4BB4C		;1efd2: 0004bb4c
-	DC.L	chip4BB7C		;1efd6: 0004bb7c
+	DC.L	spr_ShipFire3		;1efd2: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1efd6: 0004bb7c
 	DC.L	$0006000c,$00160000	;1efda
-	DC.L	chip4BA8E		;1efe2: 0004ba8e
-	DC.L	chip4BABE		;1efe6: 0004babe
+	DC.L	spr_ShipFire0		;1efe2: 0004ba8e
+	DC.L	spr_ShipFire0Mask	;1efe6: 0004babe
 	DC.L	$00060037,$0004ffff	;1efea
-	DC.L	chip4BACA		;1eff2: 0004baca
-	DC.L	chip4BB02		;1eff6: 0004bb02
+	DC.L	spr_ShipFire1		;1eff2: 0004baca
+	DC.L	spr_ShipFire1Mask	;1eff6: 0004bb02
 	DC.L	$0007003b,$000c0000	;1effa
-	DC.L	chip4BB10		;1f002: 0004bb10
-	DC.L	chip4BB40		;1f006: 0004bb40
+	DC.L	spr_ShipFire2		;1f002: 0004bb10
+	DC.L	spr_ShipFire2Mask	;1f006: 0004bb40
 	DC.L	$00060038,$00150000	;1f00a
-data1F012:
+firemask1F012:
 	DC.W	$0002			;1f012
-	DC.L	chip4BBC4		;1f014: 0004bbc4
-	DC.L	chip4BBFC		;1f018: 0004bbfc
+	DC.L	spr_ShipFire5		;1f014: 0004bbc4
+	DC.L	spr_ShipFire5Mask	;1f018: 0004bbfc
 	DC.L	$0007fff5,$001f0000	;1f01c
-	DC.L	chip4BB4C		;1f024: 0004bb4c
-	DC.L	chip4BB7C		;1f028: 0004bb7c
+	DC.L	spr_ShipFire3		;1f024: 0004bb4c
+	DC.L	spr_ShipFire3Mask	;1f028: 0004bb7c
 	DC.L	$0006002f,$003e0000	;1f02c
-	DC.L	chip4BACA		;1f034: 0004baca
-	DC.L	chip4BB02		;1f038: 0004bb02
+	DC.L	spr_ShipFire1		;1f034: 0004baca
+	DC.L	spr_ShipFire1Mask	;1f038: 0004bb02
 	DC.L	$0007006a,$001f0000	;1f03c
 ptr1F044:
 	DS.L	13			;1f044
 	DS.W	1			;1f078
-ptr1F07A:
+unkMislHit:
 	DS.L	13			;1f07a
 	DS.W	1			;1f0ae
 data1F0B0:
@@ -37287,13 +37448,13 @@ ptr1F186:
 	DC.L	$00790010,$00890079,$000e0067,$008a000a ;1f19e
 	DC.L	$0089008a		;1f1ae
 	DC.W	$ffff			;1f1b2
-ptr1F1B4:
+ptrAstTrkNone_1F1B4:
 ; Used if asteroid tracker is not enabled
 	DC.L	$000c000c		;1f1b4
 	DC.L	data2FF0B		;1f1b8: 0002ff0b
 	DC.L	$000c0067,$0065000a,$00890065 ;1f1bc
 	DC.W	$ffff			;1f1c8
-ptr1F1CA:
+ptrAstTrkYes_1F1CA:
 ; Used if asteroid tracker is enabled
 	DC.L	$000c000c		;1f1ca
 	DC.L	data2FF1C		;1f1ce: 0002ff1c
@@ -37332,7 +37493,7 @@ tblInitOre:
 arrStartingOres:
 	DC.L	$00fa012c,$012c0064,$00320032,$0019001c ;1f342
 	DS.L	1			;1f352
-ptr1F356:
+ptr1f356:
 	DC.L	$00000010,$00070031,$00000001,$00100007 ;1f356
 	DC.L	$00310000,$00020010,$00070031,$00000003 ;1f366
 	DC.L	$00100006,$00240000,$00040010,$00070031 ;1f376
@@ -37349,7 +37510,7 @@ ptr1F356:
 	DC.L	$00000015,$0010000a,$00640000,$00160010 ;1f426
 	DC.L	$00090051,$00000017,$0010000a,$00640000 ;1f436
 ptr1F446:
-; Asteroid locations (x/y coords)
+; Asteroid locations (x/y coords)?
 	DS.L	1			;1f446
 	DC.L	$00140000,$0b0a0a09,$09080807,$00280000 ;1f44a
 	DC.L	$003c0000,$0a0a0909,$0c080807,$00500000 ;1f45a
@@ -37392,8 +37553,32 @@ ptr1F446:
 	DC.L	$00b4008c,$06060614,$05070704,$00c80078 ;1f69a
 	DC.L	$00dc008c,$06060605,$13070704,$00f00078 ;1f6aa
 	DC.L	$0104008c,$06061605,$13070704 ;1f6ba
-arrAstMove1F6C6:
+arrAstDirection:
 ; Asteroid movement
+; +0,  -8
+; +8, -24
+; +8, -16
+; +8,  -8
+; +16,  -8
+; +24,  -8
+; +8,  +0
+; +24,  +8
+; +16,  +8
+; +8,  +8
+; +8, +16
+; +8, +24
+; +0,  +8
+; -8, +24
+; -8, +16
+; -8,  +8
+; -16,  +8
+; -24,  +8
+; -8,  +0
+; -24,  -8
+; -16,  -8
+; -8,  -8
+; -8, -16
+; -8, -24
 	DC.L	$0000fff8,$0008ffe8,$0008fff0,$0008fff8 ;1f6c6
 	DC.L	$0010fff8,$0018fff8,$00080000,$00180008 ;1f6d6
 	DC.L	$00100008,$00080008,$00080010,$00080018 ;1f6e6
@@ -37401,9 +37586,9 @@ arrAstMove1F6C6:
 	DC.L	$fff00008,$ffe80008,$fff80000,$ffe8fff8 ;1f706
 	DC.L	$fff0fff8,$fff8fff8,$fff8fff0,$fff8ffe8 ;1f716
 arrAstSpd:
+; Random asteroid speed table
 	DC.L	$01010101,$01010202,$02020203,$04040303 ;1f726
-ptr1F736:
-; random choice table to select enemy asteroid, probably
+ptrAlienAst_1F736:
 	DC.L	$001a001b,$001f0020,$00210025,$00260027 ;1f736
 	DC.L	$001a001b,$001f0020,$00210025,$00260027 ;1f746
 	DC.L	$001b0021,$00260027,$001c0022,$00230025 ;1f756
@@ -37422,17 +37607,18 @@ ptr1F736:
 	DC.L	$0016001c,$00220017,$001d001b,$0021001a ;1f826
 	DC.L	$0016001c,$00220017,$001d0023,$00180024 ;1f836
 	DC.L	$0016001c,$00220017,$001d0023,$00180025 ;1f846
-ptr1F856:
+arrPlayerAstsKnown:
+; Our asteroids known to enemy
 	DS.L	25			;1f856
-ptr1F8BA:
+arrAlienAsts:
 	DS.L	25			;1f8ba
-ptr1F91E:
+arrPlayerAsts:
 	DS.L	25			;1f91e
-flg1F982:
+intAliFlt_1F982:
 	DS.B	1			;1f982
 flg1F983:
 	DS.B	1			;1f983
-data1F984:
+pauseTimer:
 	DS.W	1			;1f984
 ptr1F986:
 	DS.L	32			;1f986
@@ -37513,6 +37699,7 @@ tblOreIncrease:
 ; [200, 200, 200, 100, 50, 50, 20, 10]
 	DC.L	$00c800c8,$00c80064,$00320032,$0014000a ;20014
 tblScreenGen:
+; Used by the screen generator for some purpose
 	DC.L	$ff280004,$00040004,$00040004,$00040044 ;20024
 	DC.L	$fffcfffc,$fffcfffc,$fffcfffc,$00440004 ;20034
 	DC.L	$00040004,$00040004,$00040044,$fffcfffc ;20044
@@ -37538,30 +37725,35 @@ arrPowerUsage:
 	DC.L	$02030502,$00030000,$03020002,$00020200 ;20094
 	DC.L	$05040100,$03020102	;200a4
 arrPowerfailOrder:
-; A list of building IDs and strings. When there is a power outage,
-; buildings higher in this list list receive priority:
+; A list of building IDs and strings. When there is a power
+; outage, buildings higher in this list list receive priority:
 ; ;
-; C.P.U, Powerplant, Living Quarters, Resiblock, Power Store, Storage Facility,
-; Solar Panel, Solar Generator, Solar Matrix, Protected Solar Matrix,
-; Storage Tower, Environment Control, Protected Env/Ctrl, Landing Pad,
-; Missile Silo, Life Support, Hydration Plant, Hydroponics, Comand Centre,
-; Screen Generator, Decontamination Filter, Repair Facility,
-; Protected Resiblock, Protected Storage Tower, Medical Centre, Photon Turret,
-; Plasma Turret, Laser Turret, Sensor Array, Construction Yard, Weapons Factory,
-; Mine, Deep Bore Mine, Security Centre, Seismic Penetrator, Anti-Missile Pod,
-; Satellite Silo, Gravity Nullifier, Ore Teleporter, Asteroid Engines
+; C.P.U, Powerplant, Living Quarters, Resiblock, Power Store,
+; Storage Facility, Solar Panel, Solar Generator, Solar Matrix,
+; Protected Solar Matrix, Storage Tower, Environment Control,
+; Protected Env/Ctrl, Landing Pad, Missile Silo, Life Support,
+; Hydration Plant, Hydroponics, Comand Centre, Screen Generator,
+; Decontamination Filter, Repair Facility, Protected Resiblock,
+; Protected Storage Tower, Medical Centre, Photon Turret,
+; Plasma Turret, Laser Turret, Sensor Array, Construction Yard,
+; Weapons Factory, Mine, Deep Bore Mine, Security Centre,
+; Seismic Penetrator, Anti-Missile Pod, Satellite Silo,
+; Gravity Nullifier, Ore Teleporter, Asteroid Engines
 ; ;
-; For example, asteroid engines fail first. Gravity Nullifier has an annoying
-; habit of failing first, then not switching itself back on...
+; For example, asteroid engines fail first. Gravity Nullifier
+; has an annoying habit of failing first, then not switching
+; itself back on...
 ; ;
-; Building list has an interesting feature that some buildings have either
-; an unexpectedly high building ID, or a higher string ID than their building
-; ID, suggesting perhaps that they were added later in development.
-; These include security centre, photon/plasma turret, env control, and
+; Building list has an interesting feature that some buildings
+; have either an unexpectedly high building ID, or a higher
+; string ID than their building ID, suggesting perhaps that
+; they were added later in development. These include
+; security centre, photon/plasma turret, env control, and
 ; hydration/hydroponics.
 ; ;
-; Further, all the building (in string order) are single-square until
-; #1, sensor array, suggesting that tall and 2x2 buildings were added later.
+; Further, all the building (in string order) are single-square
+; until sensor array, suggesting that tall and 2x2 buildings
+; were added later.
 	DC.L	$00150015,$00180018,$00010001,$001e001e ;200ac
 	DC.L	$00020002,$00030003,$00050005,$00070007 ;200bc
 	DC.L	$001d001d,$00200020,$001f001f,$002400c2 ;200cc
@@ -37583,9 +37775,9 @@ tblReinforcemt:
 ; Assault Fighter, Combat Eagle, Scout Ship, Destructor, Terminator
 	DC.B	$02			;20159
 	DC.L	$03043536		;2015a
-ptr2015E:
+ptrShip2015E:
 	DS.L	42			;2015e
-ptr20206:
+tblAliShipCount:
 	DS.L	4			;20206
 data20216:
 	DS.W	1			;20216
@@ -37595,57 +37787,69 @@ data2021A:
 	DS.W	1			;2021a
 data2021C:
 	DS.W	1			;2021c
-ptr2021E:
+ptrAlienAst_2021E:
 	DS.L	1			;2021e
 data20222:
 	DS.W	1			;20222
-ptr20224:
+tblMisl4S1V4Av:
+; Missile tables
+; When firing, use between 1 and n missiles.
+; ;
+; 4 Scatter, 1 Vortex, 4 Antivirus
 	DS.L	2			;20224
 	DC.L	$00000400		;2022c
 	DS.L	1			;20230
 	DC.L	$00000100		;20234
 	DC.W	$0400			;20238
-ptr2023A:
+tblMisl6E4A1St:
+; 6 Explosive, 4 Area Exp., 1 Stasis
 	DC.L	$06000400		;2023a
 	DS.L	3			;2023e
 	DC.L	$01000000		;2024a
 	DS.W	1			;2024e
-ptr20250:
+tblMislV0114:
+; 0114 Virus (?)
 	DS.L	3			;20250
 	DC.L	$01140000		;2025c
 	DS.L	1			;20260
 	DS.W	1			;20264
-ptr20266:
+tblMisl6H3N3V1M1S:
+; 6 Hellfire, 3 Nuclear, 3 Virus, 1 Mega, 1 Stasis
 	DS.L	1			;20266
 	DC.L	$00000600,$03000000,$03000100,$01000000 ;2026a
 	DS.W	1			;2027a
-ptr2027C:
+tblMisl3A3H3Sc1St3V:
+; 3 Area Exp., 3 Hellfire, 3 Scatter, 1 Stasis, 3 Vortex
 	DC.L	$00000300,$00000300,$00000300 ;2027c
 	DS.L	1			;20288
 	DC.L	$01000300		;2028c
 	DS.W	1			;20290
-ptr20292:
+tblMisl3H:
+; 3 Hellfire
 	DS.L	1			;20292
 	DC.L	$00000300		;20296
 	DS.L	3			;2029a
 	DS.W	1			;202a6
-ptr202A8:
+tblMisl2N4Sc4Av:
+; 2 Nuclear, 4 Scatter, 4 Antivirus
 	DS.L	2			;202a8
 	DC.L	$02000400		;202b0
 	DS.L	2			;202b4
 	DC.W	$0400			;202bc
-ptr202BE:
+tblMisl4V4V3A:
+; 3 Virus, 4 Vortex, 3 Antivirus
 	DS.L	3			;202be
 	DC.L	$03000000,$00000400	;202ca
 	DC.W	$0300			;202d2
-ptr202D4:
+tblMisl6E4A2N3Sc1M:
+; 6 Explosive, 4 Area Expl., 2 Nuclear, 3 Scatter, 1 Mega
 	DC.L	$06000400		;202d4
 	DS.L	1			;202d8
 	DC.L	$02000300,$00000100	;202dc
 	DS.L	1			;202e4
 	DS.W	1			;202e8
-ptr202EA:
-; ;----------------------------------------------------------
+tblMisl4E4St4V2A:
+; 4 Explosive, 4 Stasis, 4 Vortex, 2 Antivirus
 	DC.L	$04000000		;202ea
 	DS.L	3			;202ee
 	DC.L	$04000400		;202fa
@@ -37653,26 +37857,26 @@ ptr202EA:
 blobAlienFile4:
 ; 1928 byte file loaded from a1data4.bin.
 ; ;
-; This long, 0x20a64, is pointer to the last section, for some reason.
+; Begins with a pointer to the last section, for some reason.
 ; In all alien files it is instead 0768.
-; ---- save file ----
-; 30 bytes from this point appear in the save game file
 	DC.L	tblAlienUnk31		;20300: 00020a68
 intAlienID:
+; ---------BEGIN SAVE SECTION---------
+; 30 bytes from this point are saved in the save game file.
+; 
 ; Alien ID number 1-6.
 	DC.W	$0001			;20304
-intAlienBuildRate:
+intAlienBuildFreq:
 ; Read-only. Counter. Varies by alien:
 ; Days between alien placing new clusters of buildings.
 ; 04: 70
 ; 06: 50
-; Others/default: 60
+; Others: 60
 	DC.W	$003c			;20306
 intAlienBuildTimer:
-; Starts zero for all aliens. Default zero.
-; Increases by 1 each day. When this reaches iAlienBuildRate,
-; resets to zero and attempts to build a new cluster of buildings
-; on each asteroid.
+; Starts zero for all aliens. Increases by 1 each day.
+; When this reaches iAlienBuildRate, resets to zero and attempts
+; to build a new cluster of buildings on each asteroid.
 	DS.W	1			;20308
 intAlienScoutFreq:
 ; Pretty sure this is send out scoutship.
@@ -37715,18 +37919,19 @@ intAlienBldChance:
 ; 05: 25
 ; 06: 25
 	DC.W	$0014			;20310
-intAlienUnk7:
+intAlienMislFreq7:
 ; Can be set to 100, decremented, compared to 140
 ; 02: 200
 ; 04: 100
 ; Other/default: 0
 	DS.W	1			;20312
-intAlienUnk8:
-; Can be set to 80 or decremented.
+intAlienMislCdn:
+; Loops from 80 to 0, then resets to 80, whereupon it
+; triggers missiles. Starting value:
 ; 05: 100
 ; Other/Default: 0
 	DS.W	1			;20314
-intAlienCannon1Dmg:
+intAlienCannon5Dmg:
 ; Damage dealt by alien equivalent of laser (weapon #5)
 ; 01: 2
 ; 02: 2
@@ -37735,7 +37940,7 @@ intAlienCannon1Dmg:
 ; 05: 5
 ; 06: 0 - Swixarans don't use laser at all
 	DC.W	$0002			;20316
-intAlienCannon2Dmg:
+intAlienCannon7Dmg:
 ; Damage dealt by alien equivalent of plasma (weapon #7)
 ; 01: 4
 ; 02: 4
@@ -37744,8 +37949,10 @@ intAlienCannon2Dmg:
 ; 05: 7
 ; 06: 7
 	DC.W	$0004			;20318
-intAlienCannon3Dmg:
+intAlienCannon6Dmg:
 ; Damage dealt by alien equivalent of photon (weapon #6).
+; More powerful than weapon #7 in all cases, except Rigellians
+; who don't use it.
 ; All weapon damage appears to be read-only.
 ; 01: 6
 ; 02: 6
@@ -37754,7 +37961,7 @@ intAlienCannon3Dmg:
 ; 05: 0  - Rigellians don't use photon turrets either.
 ; 06: 11
 	DC.W	$0006			;2031a
-intAlienUnk_12:
+intAlienMisl_12:
 ; Read-only. Missile range?
 ; 01: 16
 ; 02: 16
@@ -37763,7 +37970,7 @@ intAlienUnk_12:
 ; 05: 40
 ; 06: 30
 	DC.W	$0010			;2031c
-intAlienUnk_13:
+intAlienMisl_13:
 ; Read-only.
 ; 01: 40
 ; 02: 40
@@ -37784,12 +37991,12 @@ intAlienTurretCool:
 intAlienSpec:
 ; Read-only. Bitfield determining certain alien-specific statuses
 ; see bAlienSpec
-; 06: 4 (bit 2 set)
+; 06: 4 (bit 2 set) - Swixaran asteroid cloaked
 ; Other/default: 0
-; Save data section ends.
-; ;----------------------------------------------------------
 	DS.B	1			;20321
 tblAlienBldg:
+; ---------END SAVE SECTION---------
+; 
 ; Alien building data. Varies by alien.
 ; 0: W  Name string
 ; 2: W  Description (unused)
@@ -37848,14 +38055,14 @@ tblAlienBldg:
 	DC.L	$00000100		;204a2
 	DS.L	2			;204a6
 	DC.L	$01000000		;204ae
-tblAlienUnk21:
+tblAlienBuildClusters:
 ; building IDs. varies by alien
 	DC.L	$006b0062,$0054005e,$00680050,$00670075 ;204b2
 	DC.L	$006b0065,$00600054,$0069006a,$006a0057 ;204c2
 	DC.L	$00580058,$00520054,$00670051,$00510054 ;204d2
 	DC.L	$0050006d,$00500075,$00530061,$005e005a ;204e2
 tblAlienMisslChance:
-; | Kll  | Ore  | Axz  | Tyl  | Rig  | Swi
+; |    Kll  | Ore  | Axz  | Tyl  | Rig  | Swi  | 
 ; ----------|------|------|------|------|------|------
 ; Explosive | 39%  | 32%  | 8%   | None | 30%  | 20%
 ; Area Exp. | 28%  | 22%  | 23%  | None | 24%  | 24%
@@ -37872,8 +38079,8 @@ tblAlienMisslChance:
 	DC.L	$ffff0005		;20502
 	DC.W	$ffff			;20506
 tblAlienMislYield:
-; | Kll   | Ore   | Axz   | Tyl   | Rig   | Swi
-; ;-----------|-------|-------|-------|-------|-------|----
+; |   Kll   | Ore   | Axz   | Tyl   | Rig   | Swi   |  
+; ;---------|-------|-------|-------|-------|-------|----
 ; Explosive | Low   | Low   | Other | ----  | Low   | Low
 ; Area Exp. | Med   | Med   | Med   | ----  | Med   | Med
 ; Napalm    | Med   | ----  | ----  | ----  | ----  | ----
@@ -38011,17 +38218,16 @@ tblAlienUnk30:
 	DC.L	$003c0000,$00740007,$0036001e ;20a5a
 	DS.W	1			;20a66
 tblAlienUnk31:
-; Alien file 4 ends
-; --------------------------------------------------------
 	DC.L	$00000001,$01010101,$02020303,$040405fa ;20a68
 	DC.L	$ff06fd07,$05040302,$0100fe00 ;20a78
 	DS.L	1			;20a84
-data20A88:
-; ---- save file ----
-; 55,810 bytes from this point appears in the save game file.
-; Any data from $20a88 to $23489 may represent game state.
+ptr20A88:
+; ; a1data4.bin ends
 	DS.L	1			;20a88
 tblTransporters:
+; ---- BEGIN A SAVE DATA SECTION ----
+; 55,810 bytes from this point appears in the save game file.
+; Any data from $20a8c to $2e48e may represent game state.
 	DS.L	1			;20a8c
 	DC.L	arrCargo00		;20a90: 0002e0ac
 	DS.L	1			;20a94
@@ -38041,10 +38247,12 @@ tblTransporters:
 	DS.L	1			;20acc
 	DC.L	arrCargo08		;20ad0: 0002e14c
 	DS.L	1			;20ad4
+	DC.L	arrCargo09		;20ad8: 0002e160
+tblOrePrice0Sel:
 ; Ore price charts follow
 ; ;
 ; ORE          | CURRENT |    MIN | INCRMT | FLUX | FIXED
-; ;--------------|---------|--------|--------|------|------
+; ;------------|---------|--------|--------|------|------
 ; Selenium     |      50 |     20 |      5 |   20 |     0
 ; Asteros      |      80 |     30 |      5 |   14 |     0
 ; Barium       |     150 |    100 |      5 |   20 |     0
@@ -38055,9 +38263,6 @@ tblTransporters:
 ; Dragonium    |    3500 |   3000 |     10 |  200 |     0
 ; Traxium      |   50000 |  50000 |    400 |  250 |     0
 ; Nexos        |  150000 | 100000 |   1600 |  250 |     0
-; ;
-	DC.L	arrCargo09		;20ad8: 0002e160
-tblOrePrice0Sel:
 	DC.L	$00000032,$00000014,$00000005,$00140000 ;20adc
 tblOrePrice1Ast:
 	DC.L	$00000050,$0000001e,$00000005,$000e0000 ;20aec
@@ -38077,13 +38282,36 @@ tblOrePrice8Tra:
 	DC.L	$0000c350,$0000c350,$00000190,$00fa0000 ;20b5c
 tblOrePrice9Nex:
 	DC.L	$000249f0,$000186a0,$00000640,$00fa0000 ;20b6c
-arrUnknown40:
+arrBlueButtonBldgs:
+; Keybinds for buildings built on 0 - 9
 	DC.L	$001e0001,$000f0009,$001b0005,$00020007 ;20b7c
 	DC.L	$001a0019		;20b8c
-arrBtns41:
+arrButton0:
+; Extracted buttons list. 6 bytes per button for 15 buttons,
+; followed by FFFF. Structure appears to be two bytes each
+; for button ID, X coord, and Y coord.
+; 
+; 9 288 x 174
+; 0 288 x  91
+; 0 288 x  74
+; 0 288 x  57
+; 0 288 x  40
+; 0 288 x  23
+; 0 288 x   6
+; 0 252 x 174
+; 0 216 x 174
+; 0 180 x 174
+; 0 144 x 174
+; 0 108 x 174
+; 0  72 x 174
+; 0  36 x 174
+; 0   0 x 174
+; 
+; Button 9 is the blue building button in the bottom-right.
 	DC.L	$00090120		;20b90
 	DC.W	$00ae			;20b94
-arrUnknown42:
+arrButton1:
+; First extracted button.
 	DC.L	$00000120,$005b0000,$0120004a,$00000120 ;20b96
 	DC.L	$00390000,$01200028,$00000120,$00170000 ;20ba6
 	DC.L	$01200006,$000000fc,$00ae0000,$00d800ae ;20bb6
@@ -38092,9 +38320,9 @@ arrUnknown42:
 	DC.L	$000000ae		;20be6
 	DC.W	$ffff			;20bea
 tblAsteroidMaps:
-; Map area is 53,856 bytes: 24 asteroids of 34x33 two-byte words.
-; Values used are 0000-000d, 002d-003c, 0100, 0105, 0109, 010c.
-; 
+; Map area is 53,856 bytes: 24 asteroids of 34x33 two-byte tiles.
+; First byte of each tile is unknown.
+; Second byte of each is the sprite number.
 	DS.L	58			;20bec
 	DC.L	$000a002e,$0007002f,$0003002f ;20cd4
 	DS.L	13			;20ce0
@@ -40169,24 +40397,27 @@ tblAsteroidMaps:
 	DS.L	9			;2de1c
 	DC.L	$00040000		;2de40
 	DS.L	2			;2de44
-lUnkAst51:
+ptrAsteroids2de4c:
 	DS.L	1			;2de4c
-lUnknown52:
+lAstUnknown52:
 	DS.L	1			;2de50
 lUnknown53:
 	DS.L	1			;2de54
 ptrCurrentAst:
+; Very important pointer: holds the address of the currently
+; selected asteroid stats table. Frequently referenced by
+; offset.
 	DS.L	1			;2de58
-lUnknown54:
+lUnknownSat54:
 	DS.L	1			;2de5c
 ptrEnemyHome:
 	DS.L	1			;2de60
-lUnknown56:
+ptrHomeAst:
 	DS.L	1			;2de64
 intCashGeneral:
-; Default starting cash. Begins around 54,284 bytes (0xd40c) into the
-; save game file. Edit it from $0003d090 to,say, $00987654 to have
-; 9,991,764 credits. Maxes out at 9,999,999.
+; Default starting cash. Begins around 54,284 bytes (0xd40c)
+; into the save game file. Edit it from $0003d090 to,say,
+; $00987654 to have 9,991,764 credits. Maxes out at 9,999,999.
 	DC.L	$0003d090		;2de68
 intCashBuilding:
 	DS.L	1			;2de6c
@@ -40196,13 +40427,14 @@ intCashIntel:
 	DS.L	1			;2de74
 intCashMissiles:
 	DS.L	1			;2de78
-ptr2DE7C:
+ptrAstTarget:
 	DS.L	1			;2de7c
-ptr2DE80:
+ptrAst2DE80:
 	DS.L	1			;2de80
 ptrImpTransport:
 	DS.L	1			;2de84
 arrHotkeys:
+; Pointers to asteroids bound to F1-F10
 	DS.L	10			;2de88
 ptr2DEB0:
 	DS.L	1			;2deb0
@@ -40214,7 +40446,7 @@ data2DEBC:
 	DS.L	1			;2debc
 data2DEC0:
 	DS.L	1			;2dec0
-ptr2DEC4:
+ptrFleet_2DEC4:
 	DS.L	1			;2dec4
 ptr2DEC8:
 	DS.L	1			;2dec8
@@ -40234,11 +40466,11 @@ ptr2DEE4:
 	DS.L	1			;2dee4
 ptr2DEE8:
 	DS.L	1			;2dee8
-ptr2DEEC:
+ptrAstMap_2DEEC:
 	DS.L	1			;2deec
-ptr2DEF0:
+ptrAstBldg_2DEF0:
 	DS.L	1			;2def0
-ptr2DEF4:
+ptrBldCount_2DEF4:
 	DS.L	1			;2def4
 ptr2DEF8:
 	DS.L	1			;2def8
@@ -40250,39 +40482,39 @@ intCurrentAlienID:
 	DS.W	1			;2df02
 flgUnknown61:
 	DS.B	1			;2df04
-flgUnknown62:
+intAlienColonies:
 	DS.B	1			;2df05
 ptr2DF06:
 	DS.L	64			;2df06
 ptr2E006:
 	DS.L	1			;2e006
-data2E00A:
+astCount:
 	DS.W	1			;2e00a
-flgUnknown63:
+intAstUnknown63:
 	DC.B	$18			;2e00c
 flgUnknown64:
 	DS.B	1			;2e00d
 flg2E00E:
 	DS.B	1			;2e00e
-alien_2E00F:
+info_display:
 ; A bitfield.
-; Bit 0: Set by Tylaran.
+; Bit 0: Show asteroid direction. Enabled by default with Tylarans since you start with Asteroid Tracker blueprint.
 ; Bit 1: Unused.
-; Bit 2: 
-; Bit 3: 
+; Bit 2: Display crosshair.
+; Bit 3: Display mouse pointer.
 ; Bit 4: 
-; Bit 5: 
+; Bit 5: Display PAFW. Enabled by default.
 ; Bit 6: 
-; Bit 7: Set by Tylaran.
+; Bit 7: Show asteroid speed. Enabled on Tylaran.
 	DC.B	$20			;2e00f
 	DS.W	1			;2e010
 ptr2E012:
 	DS.L	16			;2e012
-data2E052:
+intOurAstsKnown:
 	DS.W	1			;2e052
-data2E054:
+intOurAstsKnownUnused:
 	DS.W	1			;2e054
-intAst2E056:
+intAlienAstCount:
 	DS.W	1			;2e056
 intImpTransport:
 	DC.W	$0096			;2e058
@@ -40290,7 +40522,7 @@ intImpLeaveTimer:
 	DS.W	1			;2e05a
 ptr2E05C:
 	DS.L	11			;2e05c
-data2E088:
+currBlueBuild:
 	DS.W	1			;2e088
 data2E08A:
 	DS.W	1			;2e08a
@@ -40298,7 +40530,7 @@ data2E08C:
 	DS.W	1			;2e08c
 data2E08E:
 	DC.W	$0064			;2e08e
-data2E090:
+dataAst2E090:
 	DC.L	$00190000		;2e090
 	DS.W	1			;2e094
 intCometHoriz:
@@ -40315,7 +40547,7 @@ flg2E09D:
 	DS.B	1			;2e09d
 flg2E09E:
 	DS.B	1			;2e09e
-flg2E09F:
+flgScreen2E09F:
 	DS.B	1			;2e09f
 flg2E0A0:
 	DS.B	1			;2e0a0
@@ -40327,11 +40559,14 @@ data2E0A4:
 	DS.W	1			;2e0a4
 data2E0A6:
 	DS.W	1			;2e0a6
-data2E0A8:
+screenFlashColor:
 	DC.W	$0fff			;2e0a8
 intTotalCommandCen:
+; Number of command centers you own.
 	DS.W	1			;2e0aa
 arrCargo00:
+; Amount of each of ten ores in each Transporter's cargo.
+; You can only have ten Transporters.
 	DS.L	5			;2e0ac
 arrCargo01:
 	DS.L	5			;2e0c0
@@ -40352,10 +40587,11 @@ arrCargo08:
 arrCargo09:
 	DS.L	5			;2e160
 arrCargoImp:
+; Ore stored in the cargo hold of the Imperial Transporter.
 	DS.L	5			;2e174
-flg2E188:
+flgAst2E188:
 	DS.B	1			;2e188
-flg2E189:
+flgAst2E189:
 	DS.B	1			;2e189
 tblShipyards:
 	DS.L	160			;2e18a
@@ -40368,10 +40604,9 @@ ptr2E40B:
 flg2E42D:
 	DC.B	$ff			;2e42d
 flgBP2GMine:
-; Start of list of blueprints. One byte per blueprint determines which
-; blueprints you have. The WIDGET cheat toggles all of them. Blueprints
-; without labels attached are buildings and missiles which have no
-; entry in the code to check it.
+; Start of list of blueprints. One byte per blueprint
+; determines which blueprints you have. The WIDGET cheat
+; toggles all of them.
 	DS.B	1			;2e42e
 flgBP2GDeepMine:
 	DS.B	1			;2e42f
@@ -40404,7 +40639,7 @@ flgBPShield40:
 	DS.B	1			;2e447
 flgBPShield50:
 	DS.W	1			;2e448
-flgBPStasis:
+flgBPStaticInducer:
 	DS.W	1			;2e44a
 flgBPTerminator:
 	DS.B	1			;2e44c
@@ -40413,7 +40648,7 @@ flgBPTurretOpt:
 	DS.B	1			;2e44e
 flgBPWarpGen:
 	DS.B	1			;2e44f
-flgSound:
+flgSoundEnabled:
 	DC.B	$ff			;2e450
 flgVoice:
 	DC.B	$ff			;2e451
@@ -40423,18 +40658,27 @@ intNextEvent:
 	DC.B	$01			;2e453
 intMagStorm:
 	DS.B	1			;2e454
-flg2E455:
+int2E455:
 	DC.B	$fe			;2e455
-flg2E456:
+intMeteorCountd:
 	DS.B	1			;2e456
-pop2E457:
+popWarnTimer:
 ; Perhaps delay to PAFW warning message repeats
 	DS.B	1			;2e457
 flgPaused:
 	DS.B	1			;2e458
 flg2E459:
 	DS.B	1			;2e459
-data2E45A:
+bFrameRule:
+; A bitfield which seems to exist to prevent every
+; check from happening on every day, partly for
+; performance reasons
+; bit 0: Set on performing daily events
+; bit 1: Set on new year
+; bit 2: 
+; bit 3: 
+; bit 4: 
+; bit 5: Check for ship movement, win condition, etc
 	DS.B	1			;2e45a
 intDay:
 	DC.B	$01			;2e45b
@@ -40446,7 +40690,7 @@ strClock:
 	DC.B	"E2.380.0"
 ptr2E466:
 	DC.W	$3100			;2e466
-flg2E468:
+flgShowGfx:
 	DS.B	1			;2e468
 flg2E469:
 	DS.B	1			;2e469
@@ -40456,27 +40700,27 @@ flg2E46B:
 	DS.B	1			;2e46b
 flg2E46C:
 	DS.B	1			;2e46c
-flg2E46D:
+flgShipActive_2E46D:
 	DS.B	1			;2e46d
-flg2E46E:
+flgDSound1:
 	DS.B	1			;2e46e
-flg2E46F:
+flgDSound2:
 	DS.B	1			;2e46f
-flg2E470:
+int2E470:
 	DS.B	1			;2e470
-flg2E471:
+int2E471:
 	DS.B	1			;2e471
-flg2E472:
+int2E472:
 	DS.B	1			;2e472
-flg2E473:
+int2E473:
 	DS.B	1			;2e473
 flgStatic2E474:
 	DS.B	1			;2e474
 flg2E475:
 	DS.B	1			;2e475
-data2E476:
+textcolor:
 	DC.B	$0c			;2e476
-data2E477:
+tmpTextcolor:
 	DC.B	$0c			;2e477
 flg2E478:
 	DS.B	1			;2e478
@@ -40502,7 +40746,7 @@ flg2E482:
 	DS.B	1			;2e482
 flg2E483:
 	DC.B	$ff			;2e483
-data2E484:
+intAsteroidFacing:
 	DS.W	1			;2e484
 intScreen:
 ; Integer. Appears to define which screen the player is on.
@@ -40521,11 +40765,11 @@ intScreen:
 ; Screen modified:
 ; 0cf5e, 0cfbe, 01e92, 01f10, 05c4e, 05c60, 1179a
 	DS.B	1			;2e486
-intScrn2:
+intPrevScreen:
 ; Only referenced by code which copies the previous variable into this one
 ; Possibly a prev screen buffer
 	DS.B	1			;2e487
-intScrn3:
+intNewScreen:
 ; Pressing certain buttons (e.g. scitek) literally does nothing
 ; but set this variable
 ; ;
@@ -40543,28 +40787,28 @@ intScrn3:
 	DS.B	1			;2e488
 flg2E489:
 	DS.B	1			;2e489
-flg2E48A:
+flgShowUI:
+; Appears to enable/disable buttons and date/cash readout
 	DC.B	$ff			;2e48a
-flg2E48B:
+flgRedraw:
 	DS.B	1			;2e48b
 intPointer:
-; 00: probably default
+; 00: default
 ; 01: detonate
 ; 02: ship arrow
 	DS.B	1			;2e48c
-bAlienSpec:
+bAlienSpecial:
 ; Bit 2: Set: By default on Swixaran only
 ; Cleared: When both orbital cloaks are down
 ; Bit 1: Set: When Axz loses a colony to housing destruction
 ; Cleared: ?
 ; Bit 0: Set: When Axz is first hit by a Virus missile
 ; Cleared: Never
-; ---- save file ends ----
-; RTS
-; ;--------------------------------------------------------------------
 	DS.B	1			;2e48d
 	DC.W	$4e71			;2e48e
 data2E490:
+; -------SAVE DATA SECTION ENDS---------
+; Window data follows. Button and window layouts.
 	DC.L	$002300e8,$00950024,$00e800a5,$000a00e8 ;2e490
 	DC.L	$00b5ffff		;2e4a0
 data2E4A4:
@@ -40637,17 +40881,18 @@ data2E628:
 data2E64E:
 	DC.L	$00290096,$00a2000a,$00b800a2,$00280096 ;2e64e
 	DC.L	$00800022,$00b80080,$001f0096,$0091ffff ;2e65e
-data2E66E:
+winHotkeys:
 	DC.L	$00290097,$008d000a,$00b9008d,$001f0097 ;2e66e
 	DC.L	$007c0022,$00b9007c	;2e67e
 	DC.W	$ffff			;2e686
-data2E688:
+Win2E688:
 	DC.L	$0022004a,$00890034,$00070045,$00350007 ;2e688
 	DC.L	$00650036,$004a0045,$0037004a,$00650024 ;2e698
 	DC.L	$00070089,$00230028,$0089000f,$006a0089 ;2e6a8
 	DC.L	$00290007,$009a0018,$0028009a,$000a006a ;2e6b8
 	DC.L	$009affff		;2e6c8
-ptr2E6CC:
+winEngineering:
+; Window layouts
 	DC.L	$00080001,$00120012	;2e6cc
 	DC.L	ptr2FEB6		;2e6d4: 0002feb6
 	DC.L	$00020004,$001c0010	;2e6d8
@@ -40656,7 +40901,7 @@ ptr2E6CC:
 	DC.W	$0006			;2e6e8
 	DC.L	data2FEEF		;2e6ea: 0002feef
 	DC.L	data2E490		;2e6ee: 0002e490
-ptr2E6F2:
+winSatConstruction:
 	DC.L	$00080002,$01db0012	;2e6f2
 	DC.L	ptr2FEB6		;2e6fa: 0002feb6
 	DC.L	$00060006,$00160006	;2e6fe
@@ -40665,7 +40910,7 @@ ptr2E6F2:
 	DC.W	$0006			;2e70e
 	DC.L	data2FF37		;2e710: 0002ff37
 	DC.L	data2E4A4		;2e714: 0002e4a4
-ptr2E718:
+winWeaponeering:
 	DC.L	$00080000,$004d0012	;2e718
 	DC.L	ptr2FEB6		;2e720: 0002feb6
 	DC.L	$00020003,$001c0010	;2e724
@@ -40674,7 +40919,7 @@ ptr2E718:
 	DC.W	$0006			;2e734
 	DC.L	data2FF37		;2e736: 0002ff37
 	DC.L	data2E4C4		;2e73a: 0002e4c4
-ptr2E73E:
+winMissileControl:
 	DC.L	$00060001,$00650012	;2e73e
 	DC.L	ptr2FEB6		;2e746: 0002feb6
 	DC.L	$00020004,$001c0015	;2e74a
@@ -40683,7 +40928,7 @@ ptr2E73E:
 	DC.W	$0006			;2e75a
 	DC.L	data2FF1C		;2e75c: 0002ff1c
 	DC.L	data2E4E4		;2e760: 0002e4e4
-ptr2E764:
+winGeoSurvey:
 	DC.L	$00060001,$0075000e	;2e764
 	DC.L	data2FEA1		;2e76c: 0002fea1
 	DC.L	$00020004,$001a0014	;2e770
@@ -40692,7 +40937,7 @@ ptr2E764:
 	DC.W	$0006			;2e780
 	DC.L	data2FECF		;2e782: 0002fecf
 	DC.L	data2E53E		;2e786: 0002e53e
-ptr2E78A:
+winScoutSpy:
 	DC.L	$00060001,$01d80012	;2e78a
 	DC.L	ptr2FEB6		;2e792: 0002feb6
 	DC.L	$00020004,$001a0014	;2e796
@@ -40701,7 +40946,7 @@ ptr2E78A:
 	DC.W	$0006			;2e7a6
 	DC.L	data2FECF		;2e7a8: 0002fecf
 	DC.L	data2E53E		;2e7ac: 0002e53e
-ptr2E7B0:
+winStorageFacil:
 	DC.L	$000a0001,$0003000e	;2e7b0
 	DC.L	data2FEA1		;2e7b8: 0002fea1
 	DC.L	$00080004,$00120013	;2e7bc
@@ -40710,7 +40955,7 @@ ptr2E7B0:
 	DC.W	$0006			;2e7cc
 	DC.L	data2FECF		;2e7ce: 0002fecf
 	DC.L	data2E53E		;2e7d2: 0002e53e
-ptr2E7D6:
+winCommandCentre:
 	DC.L	$00080000,$00190012	;2e7d6
 	DC.L	ptr2FEB6		;2e7de: 0002feb6
 	DC.L	$00080004,$00120013	;2e7e2
@@ -40719,7 +40964,7 @@ ptr2E7D6:
 	DC.W	$0006			;2e7f2
 	DC.L	data2FECF		;2e7f4: 0002fecf
 	DC.L	data2E53E		;2e7f8: 0002e53e
-ptr2E7FC:
+winDemolish:
 	DC.L	$00060001,$00e0000e	;2e7fc
 	DC.L	ptr2FEB6		;2e804: 0002feb6
 	DC.L	$00040005,$00140009	;2e808
@@ -40728,7 +40973,7 @@ ptr2E7FC:
 	DC.W	$0006			;2e818
 	DC.L	data2FEDB		;2e81a: 0002fedb
 	DC.L	data2E546		;2e81e: 0002e546
-ptr2E822:
+winGravityNull:
 	DC.L	$000a0001,$000d000e	;2e822
 	DC.L	data2FEA1		;2e82a: 0002fea1
 	DC.L	$00020004,$001c0010	;2e82e
@@ -40737,7 +40982,7 @@ ptr2E822:
 	DC.W	$0006			;2e83e
 	DC.L	data2FEDB		;2e840: 0002fedb
 	DC.L	data2E592		;2e844: 0002e592
-ptr2E848:
+winAstEngine:
 	DC.L	$00080001,$00170012	;2e848
 	DC.L	ptr2FEB6		;2e850: 0002feb6
 	DC.L	$00020004,$001c0010	;2e854
@@ -40746,7 +40991,7 @@ ptr2E848:
 	DC.W	$0006			;2e864
 	DC.L	data2FEEF		;2e866: 0002feef
 	DC.L	data2E490		;2e86a: 0002e490
-ptr2E86E:
+winGeoSurvey2:
 	DC.L	$ffff0001,$0075000e	;2e86e
 	DC.L	data2FEA1		;2e876: 0002fea1
 	DS.L	1			;2e87a
@@ -40756,7 +41001,7 @@ ptr2E86E:
 	DC.W	$0006			;2e88a
 	DC.L	data2FF76		;2e88c: 0002ff76
 	DC.L	data2E5A0		;2e890: 0002e5a0
-ptr2E894:
+winGeoSurvey3:
 	DC.L	$ffff0001,$0075000e	;2e894
 	DC.L	data2FEA1		;2e89c: 0002fea1
 	DS.L	1			;2e8a0
@@ -40766,7 +41011,7 @@ ptr2E894:
 	DC.W	$0004			;2e8b0
 	DC.L	data2FECF		;2e8b2: 0002fecf
 	DC.L	data2E5C6		;2e8b6: 0002e5c6
-ptr2E8BA:
+winColonyAnalysis:
 	DC.L	$00080001,$009f000e	;2e8ba
 	DC.L	data2FEA1		;2e8c2: 0002fea1
 	DC.L	$00000004,$00280011	;2e8c6
@@ -40775,7 +41020,7 @@ ptr2E8BA:
 	DC.W	$0006			;2e8d6
 	DC.L	data2FECF		;2e8d8: 0002fecf
 	DC.L	data2E5CE		;2e8dc: 0002e5ce
-ptr2E8E0:
+winPowerFail:
 	DC.L	$00080001,$00cf000e	;2e8e0
 	DC.L	data2FEA1		;2e8e8: 0002fea1
 	DC.L	$00000004,$00280011	;2e8ec
@@ -40784,7 +41029,7 @@ ptr2E8E0:
 	DC.W	$0006			;2e8fc
 	DC.L	data2FECF		;2e8fe: 0002fecf
 	DC.L	data2E5CE		;2e902: 0002e5ce
-ptr2E906:
+winBlueprints:
 	DC.L	$00080001,$019f000e	;2e906
 	DC.L	data2FEA1		;2e90e: 0002fea1
 	DC.L	$00000004,$00280011	;2e912
@@ -40793,7 +41038,7 @@ ptr2E906:
 	DC.W	$0006			;2e922
 	DC.L	data2FF61		;2e924: 0002ff61
 	DC.L	data2E5D6		;2e928: 0002e5d6
-ptr2E92C:
+winBldgCounts:
 	DC.L	$00080001,$01d3000e	;2e92c
 	DC.L	data2FEA1		;2e934: 0002fea1
 	DC.L	$00000004,$00280011	;2e938
@@ -40822,7 +41067,7 @@ ptr2E978:
 	DC.W	$0006			;2e994
 	DC.L	data2FECF		;2e996: 0002fecf
 	DC.L	data2E58A		;2e99a: 0002e58a
-ptr2E99E:
+winQuickSel:
 	DC.L	$00080001,$0097000e	;2e99e
 	DC.L	data2FEA1		;2e9a6: 0002fea1
 	DC.L	$00060005,$00160008	;2e9aa
@@ -40831,7 +41076,7 @@ ptr2E99E:
 	DC.W	$0006			;2e9ba
 	DC.L	data2FECF		;2e9bc: 0002fecf
 	DC.L	data2E53E		;2e9c0: 0002e53e
-ptr2E9C4:
+winInformation:
 	DC.L	$00060001,$0120000e	;2e9c4
 	DC.L	data2FEA1		;2e9cc: 0002fea1
 	DC.L	$00040005,$00140009	;2e9d0
@@ -40840,7 +41085,7 @@ ptr2E9C4:
 	DC.W	$0006			;2e9e0
 	DC.L	data2FECF		;2e9e2: 0002fecf
 	DC.L	data2E53E		;2e9e6: 0002e53e
-ptr2E9EA:
+winDiskOperation:
 	DC.L	$00060001,$0165000e	;2e9ea
 	DC.L	data2FEA1		;2e9f2: 0002fea1
 	DC.L	$00040005,$00140009	;2e9f6
@@ -40848,7 +41093,7 @@ ptr2E9EA:
 	DC.L	$ffff0000		;2ea02
 	DS.L	2			;2ea06
 	DS.W	1			;2ea0e
-ptr2EA10:
+winSecurityReport:
 	DC.L	$000a0000,$015b0012	;2ea10
 	DC.L	ptr2FEB6		;2ea18: 0002feb6
 	DC.L	$00000004,$00280011	;2ea1c
@@ -40857,7 +41102,7 @@ ptr2EA10:
 	DC.W	$0006			;2ea2c
 	DC.L	data2FECF		;2ea2e: 0002fecf
 	DC.L	data2E528		;2ea32: 0002e528
-ptr2EA36:
+winShipInvent:
 	DC.L	$000a0000,$00ab000e	;2ea36
 	DC.L	data2FEA1		;2ea3e: 0002fea1
 	DC.L	$00000004,$001e0012	;2ea42
@@ -40866,7 +41111,7 @@ ptr2EA36:
 	DC.W	$0006			;2ea52
 	DC.L	data2FF61		;2ea54: 0002ff61
 	DC.L	data2E4FE		;2ea58: 0002e4fe
-ptr2EA5C:
+winOreTransp:
 	DC.L	$000a0000,$0118000e	;2ea5c
 	DC.L	data2FEA1		;2ea64: 0002fea1
 	DC.L	$00000004,$001e0011	;2ea68
@@ -40875,7 +41120,7 @@ ptr2EA5C:
 	DC.W	$0006			;2ea78
 	DC.L	data2FECF		;2ea7a: 0002fecf
 	DC.L	data2E520		;2ea7e: 0002e520
-ptr2EA82:
+winOreTeleporter:
 	DC.L	$000a0000,$000c000e	;2ea82
 	DC.L	data2FEA1		;2ea8a: 0002fea1
 	DC.L	$00000004,$001e0011	;2ea8e
@@ -40884,7 +41129,7 @@ ptr2EA82:
 	DC.W	$0006			;2ea9e
 	DC.L	data2FEDB		;2eaa0: 0002fedb
 	DC.L	data2E530		;2eaa4: 0002e530
-ptr2EAA8:
+winColonySummary:
 	DC.L	$000a0001,$00cc000e	;2eaa8
 	DC.L	data2FEA1		;2eab0: 0002fea1
 	DC.L	$00020004,$001a0014	;2eab4
@@ -40893,7 +41138,7 @@ ptr2EAA8:
 	DC.W	$0008			;2eac4
 	DC.L	data2FEEF		;2eac6: 0002feef
 	DC.L	data2E576		;2eaca: 0002e576
-ptr2EACE:
+win2EACE:
 	DC.L	$ffff0000,$0000000e	;2eace
 	DC.L	data2FEA1		;2ead6: 0002fea1
 	DS.L	1			;2eada
@@ -40902,7 +41147,7 @@ ptr2EACE:
 	DC.L	$00000008		;2eae6
 	DC.W	$0028			;2eaea
 	DC.L	data302D4		;2eaec: 000302d4
-	DC.L	data2E688		;2eaf0: 0002e688
+	DC.L	Win2E688		;2eaf0: 0002e688
 tblManualCodes:
 	DC.L	$11171834,$28202020,$2020000b,$00010004 ;2eaf4
 	DC.L	$34133715,$14132020,$2020000b,$00050002 ;2eb04
@@ -41227,6 +41472,7 @@ data2FEA1:
 	DC.L	$03030303,$0302fe07,$fd0508fe,$05040404 ;2fea2
 	DC.L	$040406ff		;2feb2
 ptr2FEB6:
+; window layouts
 	DC.L	$01030303,$03030303,$02fe07fd,$0708fe05 ;2feb6
 	DC.L	$04040404,$04040406	;2fec6
 	DC.B	$ff			;2fece
@@ -41894,28 +42140,28 @@ ptr30DA6:
 	DC.L	data1D506		;30e5c: 0001d506
 	DC.L	$fd061802		;30e60
 	DC.W	$0004			;30e64
-	DC.L	ptr1D54E		;30e66: 0001d54e
+	DC.L	flgIntelHonest		;30e66: 0001d54e
 	DC.L	$fd061803		;30e6a
 	DC.W	$0004			;30e6e
-	DC.L	data1D550		;30e70: 0001d550
+	DC.L	LAB_1161		;30e70: 0001d550
 	DC.L	$fd061804		;30e74
 	DC.W	$0004			;30e78
-	DC.L	data1D552		;30e7a: 0001d552
+	DC.L	LAB_1162		;30e7a: 0001d552
 	DC.L	$fd061805		;30e7e
 	DC.W	$0004			;30e82
-	DC.L	data1D554		;30e84: 0001d554
+	DC.L	LAB_1163		;30e84: 0001d554
 	DC.L	$fd061806		;30e88
 	DC.W	$0004			;30e8c
-	DC.L	data1D556		;30e8e: 0001d556
+	DC.L	LAB_1164		;30e8e: 0001d556
 	DC.L	$fd061807		;30e92
 	DC.W	$0004			;30e96
-	DC.L	data1D558		;30e98: 0001d558
+	DC.L	LAB_1165		;30e98: 0001d558
 	DC.L	$fd061808		;30e9c
 	DC.W	$0004			;30ea0
-	DC.L	data1D55A		;30ea2: 0001d55a
+	DC.L	LAB_1166		;30ea2: 0001d55a
 	DC.L	$fd061809		;30ea6
 	DC.W	$0004			;30eaa
-	DC.L	data1D55C		;30eac: 0001d55c
+	DC.L	LAB_1167		;30eac: 0001d55c
 	DC.L	$fd06180a		;30eb0
 	DC.W	$0004			;30eb4
 	DC.L	data1D55E		;30eb6: 0001d55e
@@ -41993,28 +42239,28 @@ ptr30F3A:
 	DC.L	data1D506		;30ff2: 0001d506
 	DC.L	$fd061803		;30ff6
 	DC.W	$0004			;30ffa
-	DC.L	ptr1D54E		;30ffc: 0001d54e
+	DC.L	flgIntelHonest		;30ffc: 0001d54e
 	DC.L	$fd061804		;31000
 	DC.W	$0004			;31004
-	DC.L	data1D550		;31006: 0001d550
+	DC.L	LAB_1161		;31006: 0001d550
 	DC.L	$fd061805		;3100a
 	DC.W	$0004			;3100e
-	DC.L	data1D552		;31010: 0001d552
+	DC.L	LAB_1162		;31010: 0001d552
 	DC.L	$fd061806		;31014
 	DC.W	$0004			;31018
-	DC.L	data1D554		;3101a: 0001d554
+	DC.L	LAB_1163		;3101a: 0001d554
 	DC.L	$fd061807		;3101e
 	DC.W	$0004			;31022
-	DC.L	data1D556		;31024: 0001d556
+	DC.L	LAB_1164		;31024: 0001d556
 	DC.L	$fd061808		;31028
 	DC.W	$0004			;3102c
-	DC.L	data1D558		;3102e: 0001d558
+	DC.L	LAB_1165		;3102e: 0001d558
 	DC.L	$fd061809		;31032
 	DC.W	$0004			;31036
-	DC.L	data1D55A		;31038: 0001d55a
+	DC.L	LAB_1166		;31038: 0001d55a
 	DC.L	$fd06180a		;3103c
 	DC.W	$0004			;31040
-	DC.L	data1D55C		;31042: 0001d55c
+	DC.L	LAB_1167		;31042: 0001d55c
 	DC.L	$fd06180b		;31046
 	DC.W	$0004			;3104a
 	DC.L	data1D55E		;3104c: 0001d55e
@@ -42159,37 +42405,37 @@ ptr312F4:
 	DC.L	intCashIntel		;31308: 0002de74
 	DC.L	$f9002213		;3130c
 	DC.W	$01e1			;31310
-ptr31312:
+tblIntel31312:
 	DC.L	$f2000016,$f9000604,$01e2fd00,$1e040005 ;31312
-	DC.L	ptr1B248		;31322: 0001b248
+	DC.L	intelPricePop		;31322: 0001b248
 	DC.L	$f9002304,$01e3f200,$0016f900,$060501e4 ;31326
 	DC.L	$fd001e05		;31336
 	DC.W	$0005			;3133a
-	DC.L	data1B24A		;3133c: 0001b24a
+	DC.L	intelPriceMislInv	;3133c: 0001b24a
 	DC.L	$f9002305,$01e3f200,$0016f900,$060601e6 ;31340
 	DC.L	$fd001e06		;31350
 	DC.W	$0005			;31354
-	DC.L	data1B24C		;31356: 0001b24c
+	DC.L	intelPriceEnemyAsts	;31356: 0001b24c
 	DC.L	$f9002306,$01e3f200,$0016f900,$060701e7 ;3135a
 	DC.L	$fd001e07		;3136a
 	DC.W	$0005			;3136e
-	DC.L	data1B24E		;31370: 0001b24e
+	DC.L	intelPriceOurAsts	;31370: 0001b24e
 	DC.L	$f9002307,$01e3f200,$0016f900,$060801e8 ;31374
 	DC.L	$fd001e08		;31384
 	DC.W	$0005			;31388
-	DC.L	data1B250		;3138a: 0001b250
+	DC.L	intelPriceBldgInv	;3138a: 0001b250
 	DC.L	$f9002308,$01e3f200,$0016f900,$060901e9 ;3138e
 	DC.L	$fd001e09		;3139e
 	DC.W	$0005			;313a2
-	DC.L	data1B252		;313a4: 0001b252
+	DC.L	intelPriceFleetMakeup	;313a4: 0001b252
 	DC.L	$f9002309,$01e3f200,$0016f900,$060a01ea ;313a8
 	DC.L	$fd001e0a		;313b8
 	DC.W	$0005			;313bc
-	DC.L	data1B254		;313be: 0001b254
+	DC.L	intelPriceFleetDest	;313be: 0001b254
 	DC.L	$f900230a,$01e3f200,$0016f900,$060b01eb ;313c2
 	DC.L	$fd001e0b		;313d2
 	DC.W	$0005			;313d6
-	DC.L	data1B256		;313d8: 0001b256
+	DC.L	intelPriceMislDest	;313d8: 0001b256
 	DC.L	$f900230b,$01e38000	;313dc
 ptr313E4:
 	DC.L	$00100088,$00e00028,$fa000014,$f9000201 ;313e4
@@ -42256,7 +42502,7 @@ ptr314DC:
 ptr314F8:
 	DC.L	$00100088,$00e00028,$fa000014,$f9000200 ;314f8
 	DC.L	$01f18000		;31508
-ptr3150C:
+ptrMislTarget3150C:
 	DC.L	$00100088,$00e00028,$fa000014,$f9000200 ;3150c
 	DC.L	$01f2f500		;3151c
 	DC.W	$1500			;31520
@@ -42292,17 +42538,17 @@ flg315CC:
 	DS.B	1			;315cc
 flg315CD:
 	DS.B	1			;315cd
-flg315CE:
+flgSound0:
 	DS.B	1			;315ce
-flg315CF:
+flgSound315CF:
 	DS.B	1			;315cf
-data315D0:
+sound315D0:
 	DS.W	1			;315d0
-data315D2:
+sound315D2:
 	DS.W	1			;315d2
-data315D4:
+soundID0:
 	DS.W	1			;315d4
-flg315D6:
+flgSound1:
 	DS.B	1			;315d6
 flg315D7:
 	DS.B	1			;315d7
@@ -42310,9 +42556,9 @@ data315D8:
 	DS.W	1			;315d8
 data315DA:
 	DS.W	1			;315da
-data315DC:
+soundID1:
 	DS.W	1			;315dc
-flg315DE:
+flgSound2:
 	DS.B	1			;315de
 flg315DF:
 	DS.B	1			;315df
@@ -42320,207 +42566,208 @@ data315E0:
 	DS.W	1			;315e0
 data315E2:
 	DS.W	1			;315e2
-data315E4:
+soundID2:
 	DS.W	1			;315e4
-flg315E6:
+flgSound3:
 	DS.B	1			;315e6
 flg315E7:
 	DS.B	1			;315e7
-data315E8:
+sndAUD3PER:
 	DS.W	1			;315e8
-data315EA:
+sndAUD3VOL:
 	DS.W	1			;315ea
-data315EC:
+soundID3:
 	DS.W	1			;315ec
-data315EE:
+currentVoice:
 	DC.W	$ffff			;315ee
-flg315F0:
+flgDidGroundHit:
 	DS.W	1			;315f0
-ptr315F2:
-; Message window template, probably
-	DC.L	chip5171C		;315f2: 0005171c
+arSoundList:
+; Sound
+	DC.L	sndBeep			;315f2: 0005171c
 	DC.L	$021501fc,$00400002	;315f6
 	DS.L	1			;315fe
-	DC.L	chip51B46		;31602: 00051b46
+	DC.L	sndTick			;31602: 00051b46
 	DC.L	$019c00d6,$00400002	;31606
 	DS.L	1			;3160e
-	DC.L	chip51B46		;31612: 00051b46
+	DC.L	sndTick			;31612: 00051b46
 	DC.L	$019c00d6,$00400002	;31616
 	DS.L	1			;3161e
-	DC.L	chip51E7E		;31622: 00051e7e
+	DC.L	sndPip			;31622: 00051e7e
 	DC.L	$009f00be,$00200002	;31626
 	DS.L	1			;3162e
-	DC.L	chip51FBC		;31632: 00051fbc
+	DC.L	sndKlaxon		;31632: 00051fbc
 	DC.L	$067a0358		;31636
 	DC.W	$0040			;3163a
 mw3163C:
 ; 20->100 if message window d3 = 5
 	DC.L	$00140000		;3163c
 	DS.W	1			;31640
-	DC.L	chip52CB0		;31642: 00052cb0
+	DC.L	sndMissileAlarm		;31642: 00052cb0
 	DC.L	$032a01c5		;31646
 	DC.W	$0040			;3164a
 mw3164C:
 ; 30->100 if message window d3 = 5
 	DC.L	$001e0000		;3164c
 	DS.W	1			;31650
-	DC.L	chip53304		;31652: 00053304
+	DC.L	sndMissileLaunch	;31652: 00053304
 	DC.L	$1eec0280,$00400002	;31656
 	DS.L	1			;3165e
-	DC.L	chip570DC		;31662: 000570dc
+	DC.L	sndSmallExplosion	;31662: 000570dc
 	DC.L	$10750358,$00400002	;31666
 	DS.L	1			;3166e
-	DC.L	chip591C6		;31672: 000591c6
+	DC.L	sndLargeExplosion	;31672: 000591c6
 	DC.L	$15ef0358,$00400002	;31676
 	DS.L	1			;3167e
-	DC.L	chip5BDA4		;31682: 0005bda4
+	DC.L	sndMedExplosion		;31682: 0005bda4
 	DC.L	$09270358,$00400002	;31686
 	DS.L	1			;3168e
-	DC.L	chip5CFF2		;31692: 0005cff2
+	DC.L	sndQuietRumble		;31692: 0005cff2
 	DC.L	$0ef601c5,$00400004	;31696
 	DS.L	1			;3169e
-	DC.L	chip5EDDE		;316a2: 0005edde
+	DC.L	sndCannonFire		;316a2: 0005edde
 	DC.L	$08e200fe,$00400002	;316a6
 	DS.L	1			;316ae
-	DC.L	chip5FFA2		;316b2: 0005ffa2
+	DC.L	sndCannonMiss		;316b2: 0005ffa2
 	DC.L	$049e01c5,$00400002	;316b6
 	DS.L	1			;316be
-	DC.L	chip608DE		;316c2: 000608de
+	DC.L	sndVortexWalk		;316c2: 000608de
 	DC.L	$143a0358,$00400006	;316c6
 	DS.L	1			;316ce
-	DC.L	chip63152		;316d2: 00063152
+	DC.L	sndComet		;316d2: 00063152
 	DC.L	$0a91017d,$00400014	;316d6
 	DS.L	1			;316de
-	DC.L	chip64674		;316e2: 00064674
+	DC.L	sndAlienWhoosh		;316e2: 00064674
 	DC.L	$179701c5,$00400002	;316e6
 	DS.L	1			;316ee
-	DC.L	chip675A2		;316f2: 000675a2
+	DC.L	sndErrorBoop		;316f2: 000675a2
 	DC.L	$024201fc,$00400002	;316f6
 	DS.L	1			;316fe
-	DC.L	chip67A26		;31702: 00067a26
+	DC.L	sndStaticInducer	;31702: 00067a26
 	DC.L	$0e4c00d6,$00400002	;31706
 	DS.L	1			;3170e
-	DC.L	chip5BDA4		;31712: 0005bda4
+	DC.L	sndMedExplosion		;31712: 0005bda4
 	DC.L	$092701ac,$00400002	;31716
 	DS.L	1			;3171e
-	DC.L	chip67A26		;31722: 00067a26
+	DC.L	sndStaticInducer	;31722: 00067a26
 	DC.L	$0e4c0358,$00400002	;31726
 	DS.L	1			;3172e
-	DC.L	chip696BE		;31732: 000696be
+	DC.L	sndHangarOpen		;31732: 000696be
 	DC.L	$097c0358,$00400002	;31736
 	DS.L	1			;3173e
-	DC.L	chip6A9B6		;31742: 0006a9b6
+	DC.L	sndHangarClank		;31742: 0006a9b6
 	DC.L	$02d401fc,$00400002	;31746
 	DS.L	1			;3174e
-	DC.L	chip6AF5E		;31752: 0006af5e
+	DC.L	sndSatelliteLaunch	;31752: 0006af5e
 	DC.L	$063a0358,$00400002	;31756
 	DS.L	1			;3175e
-ptr31762:
+ptrSoundVoice:
+; Sound data for voice samples
 	DS.L	1			;31762
 	DC.L	$0000010d,$00400002	;31766
 	DS.L	1			;3176e
 arrSpeechFilenames:
-	DC.L	data317C6		;31772: 000317c6
-	DC.L	data317EA		;31776: 000317ea
-	DC.L	data3180A		;3177a: 0003180a
-	DC.L	data3182C		;3177e: 0003182c
-	DC.L	data31850		;31782: 00031850
-	DC.L	data31872		;31786: 00031872
-	DC.L	data31894		;3178a: 00031894
-	DC.L	data318B8		;3178e: 000318b8
-	DC.L	data318DA		;31792: 000318da
-	DC.L	data318FC		;31796: 000318fc
-	DC.L	data3191E		;3179a: 0003191e
-	DC.L	data31942		;3179e: 00031942
-	DC.L	data31966		;317a2: 00031966
-	DC.L	data31988		;317a6: 00031988
-	DC.L	data319AC		;317aa: 000319ac
-	DC.L	data319D0		;317ae: 000319d0
-	DC.L	data319F2		;317b2: 000319f2
-	DC.L	data31A14		;317b6: 00031a14
-	DC.L	data31A36		;317ba: 00031a36
-	DC.L	data31A58		;317be: 00031a58
-	DC.L	data31A7A		;317c2: 00031a7a
-data317C6:
+	DC.L	strSpAttention		;31772: 000317c6
+	DC.L	strSpAlert		;31776: 000317ea
+	DC.L	strSpFleetReport	;3177a: 0003180a
+	DC.L	strSpScoutReport	;3177e: 0003182c
+	DC.L	strSpCReport		;31782: 00031850
+	DC.L	strSpGReport		;31786: 00031872
+	DC.L	strSpCollision		;3178a: 00031894
+	DC.L	strSpInbound		;3178e: 000318b8
+	DC.L	strSpHostileFlt		;31792: 000318da
+	DC.L	strSpAsteroidDisc	;31796: 000318fc
+	DC.L	strSpResourceDef	;3179a: 0003191e
+	DC.L	strSpMagstorm		;3179e: 00031942
+	DC.L	strSpRadWarn		;317a2: 00031966
+	DC.L	strSpEquipMalf		;317a6: 00031988
+	DC.L	strSpEquipMal2		;317aa: 000319ac
+	DC.L	strSpSecurityRep	;317ae: 000319d0
+	DC.L	strSpMeteorStorm	;317b2: 000319f2
+	DC.L	strSpFleetArrive	;317b6: 00031a14
+	DC.L	strSpWelcome		;317ba: 00031a36
+	DC.L	strSpMissileLaunch	;317be: 00031a58
+	DC.L	strSpFleetDeploy	;317c2: 00031a7a
+strSpAttention:
 	DC.L	$00003410,$00002aec,$6b323430,$5f333a73 ;317c6
 	DC.L	$70656563,$682f6174,$74656e74,$696f2e6d ;317d6
 	DC.L	$676c0000		;317e6
-data317EA:
+strSpAlert:
 	DC.L	$000028ac,$00002350,$6b323430,$5f333a73 ;317ea
 	DC.L	$70656563,$682f616c,$6572742e,$6d676c00 ;317fa
-data3180A:
+strSpFleetReport:
 	DC.L	$00003de6,$00003291,$6b323430,$5f333a73 ;3180a
 	DC.L	$70656563,$682f6672,$65706f72,$742e6d67 ;3181a
 	DC.W	$6c00			;3182a
-data3182C:
+strSpScoutReport:
 	DC.L	$000052d8,$00003f48,$6b323430,$5f333a73 ;3182c
 	DC.L	$70656563,$682f7363,$7265706f,$72742e6d ;3183c
 	DC.L	$676c0000		;3184c
-data31850:
+strSpCReport:
 	DC.L	$00005814,$00004aab,$6b323430,$5f333a73 ;31850
 	DC.L	$70656563,$682f6372,$65706f72,$742e6d67 ;31860
 	DC.W	$6c00			;31870
-data31872:
+strSpGReport:
 	DC.L	$000050e2,$00004305,$6b323430,$5f333a73 ;31872
 	DC.L	$70656563,$682f6772,$65706f72,$742e6d67 ;31882
 	DC.W	$6c00			;31892
-data31894:
+strSpCollision:
 	DC.L	$000046e2,$00003b37,$6b323430,$5f333a73 ;31894
 	DC.L	$70656563,$682f636f,$6c6c6973,$696f2e6d ;318a4
 	DC.L	$676c0000		;318b4
-data318B8:
+strSpInbound:
 	DC.L	$00004ad8,$00003d35,$6b323430,$5f333a73 ;318b8
 	DC.L	$70656563,$682f696e,$626f756e,$642e6d67 ;318c8
 	DC.W	$6c00			;318d8
-data318DA:
+strSpHostileFlt:
 	DC.L	$00006262,$000052a6,$6b323430,$5f333a73 ;318da
 	DC.L	$70656563,$682f686f,$73666c74,$2e6d676c ;318ea
 	DS.W	1			;318fa
-data318FC:
+strSpAsteroidDisc:
 	DC.L	$00005ffa,$000055c1,$6b323430,$5f333a73 ;318fc
 	DC.L	$70656563,$682f6173,$74646573,$632e6d67 ;3190c
 	DC.W	$6c00			;3191c
-data3191E:
+strSpResourceDef:
 	DC.L	$00006e08,$00005e72,$6b323430,$5f333a73 ;3191e
 	DC.L	$70656563,$682f7265,$736f7572,$63652e6d ;3192e
 	DC.L	$676c0000		;3193e
-data31942:
+strSpMagstorm:
 	DC.L	$00004d56,$000042a9,$6b323430,$5f333a73 ;31942
 	DC.L	$70656563,$682f6d61,$6773746f,$726d2e6d ;31952
 	DC.L	$676c0000		;31962
-data31966:
+strSpRadWarn:
 	DC.L	$00004388,$000036bc,$6b323430,$5f333a73 ;31966
 	DC.L	$70656563,$682f7261,$64776172,$6e2e6d67 ;31976
 	DC.W	$6c00			;31986
-data31988:
+strSpEquipMalf:
 	DC.L	$00006bb4,$00005a39,$6b323430,$5f333a73 ;31988
 	DC.L	$70656563,$682f6571,$7569706d,$616c2e6d ;31998
 	DC.L	$676c0000		;319a8
-data319AC:
+strSpEquipMal2:
 	DC.L	$00006bb4,$00005a39,$6b323430,$5f333a73 ;319ac
 	DC.L	$70656563,$682f6571,$7569706d,$616c2e6d ;319bc
 	DC.L	$676c0000		;319cc
-data319D0:
+strSpSecurityRep:
 	DC.L	$0000561a,$0000423a,$6b323430,$5f333a73 ;319d0
 	DC.L	$70656563,$682f7365,$63726570,$2e6d676c ;319e0
 	DS.W	1			;319f0
-data319F2:
+strSpMeteorStorm:
 	DC.L	$0000492a,$00003887,$6b323430,$5f333a73 ;319f2
 	DC.L	$70656563,$682f6d65,$74656f72,$2e6d676c ;31a02
 	DS.W	1			;31a12
-data31A14:
+strSpFleetArrive:
 	DC.L	$00004458,$00003b97,$6b323430,$5f333a73 ;31a14
 	DC.L	$70656563,$682f6661,$72726976,$652e6d67 ;31a24
 	DC.W	$6c00			;31a34
-data31A36:
+strSpWelcome:
 	DC.L	$00005b66,$00004988,$6b323430,$5f333a73 ;31a36
 	DC.L	$70656563,$682f7765,$6c636f6d,$652e6d67 ;31a46
 	DC.W	$6c00			;31a56
-data31A58:
+strSpMissileLaunch:
 	DC.L	$000061dc,$000053c0,$6b323430,$5f333a73 ;31a58
 	DC.L	$70656563,$682f6d6c,$61756e63,$682e6d67 ;31a68
 	DC.W	$6c00			;31a78
-data31A7A:
+strSpFleetDeploy:
 	DC.L	$0000728a,$00005e3a,$6b323430,$5f333a73 ;31a7a
 	DC.L	$70656563,$682f6664,$65706c6f,$792e6d67 ;31a8a
 	DC.W	$6c00			;31a9a
@@ -42529,6 +42776,9 @@ data31A7A:
 	SECTION S_2,DATA,CHIP
 
 SECSTRT_2:
+; This section is marked as CHIP, suggesting that it
+; contains graphics and/or sound. All the sprites will
+; be in this section.
 	DC.L	$01040009,$01020000	;31a9c
 	DC.W	$0100			;31aa4
 chip31AA6:
@@ -42569,12 +42819,7 @@ ptr31B7C:
 ptrMousePtrs:
 ; 2 sets of 2x72 bytes
 ; Mouse pointers: default, detonate, ship arrow
-; "CTR1"
-; "CTR2"
-; "CTR1"
-; "CTR2"
-; "CTR1"
-; "CTR2"
+; "CTR1"CTR2"CTR1"CTR2"CTR1"CTR2"
 	DC.L	$43545231,$20002000,$18001800,$8d808580 ;31b80
 	DC.L	$42604260,$21102010,$30982008,$5a585008 ;31b90
 	DC.L	$a8188808,$830c8004,$43e60002,$07320002 ;31ba0
@@ -42614,12 +42859,14 @@ textarea:
 ; 1200 byte text buffer for putting text on screen
 	DS.L	300			;31d30
 chip321E0:
+; 64 bytes of 1
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;321e0
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;321f0
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;32200
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;32210
-ptr32220:
-; Sprites.
+sprSensorSmall:
+; 1-bit representation of the sensor range mask
+; 64x43
 	DC.L	$0000001f,$f0000000,$000000ff,$fe000000 ;32220
 	DC.L	$000007ff,$ffc00000,$00000fff,$ffe00000 ;32230
 	DC.L	$00003fff,$fff80000,$00007fff,$fffc0000 ;32240
@@ -42642,7 +42889,9 @@ ptr32220:
 	DC.L	$00003fff,$fff80000,$00000fff,$ffe00000 ;32350
 	DC.L	$000007ff,$ffc00000,$000000ff,$fe000000 ;32360
 	DC.L	$0000001f,$f0000000	;32370
-ptr32378:
+sprSensorLarge:
+; large sensor range mask
+; 96x87
 	DS.L	1			;32378
 	DC.L	$007ffc00		;3237c
 	DS.L	2			;32380
@@ -42718,39 +42967,40 @@ ptr32378:
 	DS.L	2			;3277c
 	DC.L	$007ffc00		;32784
 	DS.L	1			;32788
-chip3278C:
+sprTile:
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0 ;3278c
 	DC.W	$03c0			;32798
-ptr3279A:
+sprTile2:
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0,$03c00000 ;3279a
 	DS.L	10			;327aa
-ptr327D2:
+sprTile3:
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0,$03c003c0 ;327d2
 	DC.L	$0ff03ffc,$ffff3ffc,$0ff003c0 ;327e2
 	DS.L	7			;327ee
-ptr3280A:
+sprTile4:
 	DS.L	7			;3280a
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0,$03c00000 ;32826
 	DS.L	3			;32836
-ptr32842:
+sprTile5:
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0,$03c00000 ;32842
 	DS.L	6			;32852
 	DC.L	$000003c0,$0ff03ffc,$ffff3ffc,$0ff003c0 ;3286a
-ptr3287A:
+sprTile6:
 	DS.L	3			;3287a
 	DC.L	$000003c0,$0ff03ffc,$ffff3ffc,$0ff003c0 ;32886
 	DS.L	3			;32896
 	DC.L	$000003c0,$0ff03ffc,$ffff3ffc,$0ff003c0 ;328a2
-ptr328B2:
+sprTile7:
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0,$03c00000 ;328b2
 	DS.L	3			;328c2
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0,$03c00000 ;328ce
 	DS.L	3			;328de
-ptr328EA:
+sprTile8:
 	DS.L	7			;328ea
 	DC.L	$03c00ff0,$3ffcffff,$3ffc0ff0,$03c003c0 ;32906
 	DC.L	$0ff03ffc,$ffff3ffc,$0ff003c0 ;32916
-ptr32922:
+sprFrames:
+; Window frame outline graphics
 	DS.L	4			;32922
 	DC.L	$000007ff,$080017ff,$28005000,$50005000 ;32932
 	DS.L	1			;32942
@@ -42943,16 +43193,16 @@ ptr32922:
 	DS.L	16			;33222
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;33262
 	DS.L	4			;33272
-ptr33282:
+sprDot:
 	DC.L	$7000f800,$f800f800,$70000000 ;33282
 	DS.L	4			;3328e
 	DC.L	$00007000,$f800f800,$f8007000 ;3329e
-ptr332AA:
+sprBox:
 	DC.L	$0000f000,$f000f000,$f0000000,$f000f000 ;332aa
 	DC.L	$f000f000		;332ba
 	DS.L	3			;332be
 	DC.L	$f000f000,$f000f000	;332ca
-ptr332D2:
+sprFltIcons:
 	DS.L	8			;332d2
 	DC.L	$18003c00,$7e00ff00,$ff007e00,$3c001800 ;332f2
 	DS.L	12			;33302
@@ -42964,11 +43214,23 @@ ptr332D2:
 	DS.L	12			;333c2
 	DC.L	$3c001800,$8100c300,$c3008100,$18003c00 ;333f2
 	DS.L	4			;33402
-ptr33412:
+sprAliFltIcons:
 	DC.L	$6600a500,$db002400,$2400db00,$a5006600 ;33412
 	DS.L	8			;33422
 	DC.L	$6600a500,$db002400,$2400db00,$a5006600 ;33442
-ptr33452:
+arrBuildingSpriteList:
+; SPRITE LIST
+; 4 bytes: Pointer to start of sprite data in buffer
+; 4 bytes: Pointer to end of sprite data in buffer
+; 2 bytes: Sprite height (length of buffer / 8 )
+; K240 sprites are variable height, which makes them difficult
+; to rip with Maptapper.
+; 
+; These 79 sprites are:
+; $00 - $27: Terran buildings
+; $28 - $2b: Scaffold, height 1 - 4
+; $2c - $4e: Asteroid square graphics and
+; asteroid undercarriage graphics
 	DS.L	1			;33452
 	DC.L	$00000080,$00100000,$00a00000,$01680019 ;33456
 	DC.L	$0000019a,$0000026a,$001a0000,$029e0000 ;33466
@@ -43026,10 +43288,14 @@ tblAlienFile3_0:
 ; File a1data3. 4240 to 8450 bytes per alien.
 ; Contains building data
 	DS.L	100			;33768
-blobAlienFile3_1:
+sprAlienBuildings:
+; Second part of the file a1data3, a2data3, etc.
 ; Contains alien building sprites.
 	DS.L	4150			;338f8
-chip379D0:
+spr_TerranBuildings_44:
+; Start of Terran building sprite data.
+; Stored upside-down for some reason.
+; 40 buildings, 4 building scaffold.
 	DC.L	$03c00df0,$07bccfef,$e5fbe5ff,$c7bfceef ;379d0
 	DC.L	$ebfbe7ff,$fc3ff30f,$cf03300c,$0c3003c0 ;379e0
 	DS.L	1			;379f0
@@ -43968,7 +44234,8 @@ chip379D0:
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;3b03c
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;3b04c
 	DC.L	$ffffffff,$ffffffff,$7ffe3ffc,$0ff003c0 ;3b05c
-chip3B06C:
+spr_Terrain_x35:
+; Tiles used to build asteroids.
 	DC.L	$01c00230,$00bce04f,$3db00e30,$03c003c0 ;3b06c
 	DC.L	$0ff03ffc,$ffff3ffc,$0ff003c0 ;3b07c
 	DS.L	7			;3b088
@@ -44179,7 +44446,8 @@ chip3B06C:
 	DC.L	$03c00ff0,$3ffcffff,$7ffe1ffe,$07fe03fe ;3bf9c
 	DC.L	$01fc00f8		;3bfac
 	DC.W	$0010			;3bfb0
-chip3BFB2:
+spr_OSD_x1:
+; Orbital space dock sprite.
 	DS.L	1			;3bfb2
 	DC.L	$00000300		;3bfb6
 	DS.L	3			;3bfba
@@ -44650,7 +44918,8 @@ chip3BFB2:
 	DC.L	$00000300		;3d39e
 	DS.L	1			;3d3a2
 	DS.W	1			;3d3a6
-chip3D3A8:
+spr_ShipScaffold_x4:
+; Ship scaffold sprite.
 	DC.L	$fffff7ef,$ffffffff,$bffdffff,$ffffffff ;3d3a8
 	DC.L	$ffffffff,$ffffbffd,$ffffffff,$f7efffff ;3d3b8
 	DC.L	$b66d0810,$b5adb5ad,$4002b5ad,$0000b5ad ;3d3c8
@@ -44691,7 +44960,8 @@ chip3D3A8:
 	DC.L	$0000a005,$08109429,$08100240,$00000990 ;3d5f8
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;3d608
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;3d618
-chip3D628:
+spr_Ships_x32:
+; 32 sprites for small ships.
 	DC.L	$0fc01770,$35fc77fe,$7ffcbf90,$7ea00fc0 ;3d628
 	DC.L	$03000000,$0fc01030,$300c4002,$700cbc10 ;3d638
 	DC.L	$7c200cc0,$03000000	;3d648
@@ -45030,7 +45300,7 @@ chip3D628:
 	DS.L	1			;3e420
 	DC.L	$03e007f0,$0ff81ffc,$1ffc1ffc,$1ffc0be8 ;3e424
 	DS.L	1			;3e434
-chip3E438:
+spr_Asteroids_x28:
 	DC.L	$0001e000,$000fe000,$003ff000,$007ffc00 ;3e438
 	DC.L	$00fffe00,$00fffe00,$007ffe00,$003ff800 ;3e448
 	DC.L	$00078000		;3e458
@@ -45642,7 +45912,7 @@ chip3E438:
 	DS.L	1			;40c70
 	DC.L	$00100000,$00101000,$00000080,$00080000 ;40c74
 	DC.L	$02000000		;40c84
-chip40C88:
+spr_Missiles_x11:
 	DC.L	$00800180,$01800380,$03000120,$00e000e0 ;40c88
 	DC.L	$00e000e0,$00e00060,$00e00060,$047004f0 ;40c98
 	DC.L	$04f004f0,$04700d78,$0e580868,$08680848 ;40ca8
@@ -45825,7 +46095,7 @@ chip40C88:
 	DC.L	$1ffc1ffc,$1ffc1ffc,$1ffc0ff8,$07f007f0 ;41710
 	DC.L	$07f007f0,$07f007f0,$0ff80ff8,$0ff80ff8 ;41720
 	DC.W	$0dd8			;41730
-chip41732:
+spr_BuildingAnim_x45:
 	DC.L	$02800280,$00000100	;41732
 	DS.L	1			;4173a
 	DC.L	$00000280,$00000100	;4173e
@@ -46235,7 +46505,7 @@ chip41732:
 	DC.L	$00400080,$01000200,$04000800,$000a001c ;42be2
 	DC.L	$003e007c,$00780070,$00800100,$02000400 ;42bf2
 	DC.W	$0800			;42c02
-chip42C04:
+spr_Explosions_x27:
 	DC.L	$00020000,$00014000,$0009c000,$00492800 ;42c04
 	DC.L	$004a1d00,$00bc3e00,$0c5489c0,$00200580 ;42c14
 	DC.L	$00e00680,$06c00040,$00a007c0,$00000400 ;42c24
@@ -47217,7 +47487,7 @@ chip42C04:
 	DC.L	$03ffd000,$03ffe000,$00ffc000,$08ffc000 ;46c38
 	DC.L	$01bf0000,$000e4000,$00020000 ;46c48
 	DS.L	4			;46c54
-chip46C64:
+spr_Vortex_x6:
 	DC.L	$00200150,$028802d0,$02a00540,$05400ba0 ;46c64
 	DC.L	$0ba00ba0,$139017d0,$2d685ab4,$2c6816d0 ;46c74
 	DC.L	$12900aa0,$09a009a0,$097c1142,$101412d6 ;46c84
@@ -47453,7 +47723,7 @@ chip46C64:
 	DC.L	$19fc03f8,$03fc07fe,$07ff07ff,$0ff60ff0 ;47a14
 	DC.L	$0ff80ffc,$07b803d0	;47a24
 	DC.W	$0080			;47a2c
-chip47A2E:
+spr_Destroyer_x8:
 	DC.L	$00030000,$000e8000,$003bc000,$00f3f000 ;47a2e
 	DC.L	$03ffd800,$07ff2cc0,$03fcf3a0,$00fffbc0 ;47a3e
 	DC.L	$001fff00,$000ffc00,$0003f000,$0000c000 ;47a4e
@@ -47626,7 +47896,7 @@ chip47A2E:
 	DC.L	$00ffffe0,$00ffffe0,$00ffffe0,$00ffffe0 ;482ce
 	DC.L	$00ffffe0,$0061f0c0	;482de
 	DS.L	2			;482e6
-chip482EE:
+spr_Terminator_x8:
 	DC.L	$00001f80,$00007fe0,$003ffff8,$007f7ff4 ;482ee
 	DC.L	$007cffe2,$0073ff83,$00cffe07,$01fff81e ;482fe
 	DC.L	$07ffe07c,$1fff81f8,$3ffe01f0,$1ffc03c0 ;4830e
@@ -47835,7 +48105,8 @@ chip482EE:
 	DC.L	$00fffe00,$00fffe00,$00fffe00,$01ffff00 ;491ee
 	DC.L	$03ffff80,$07ffffc0,$07ffffc0,$020fe080 ;491fe
 	DS.L	7			;4920e
-chip4922A:
+spr_LargeShips_x2:
+; Sprites for the Transporter and Battleship
 	DC.L	$e0000000		;4922a
 	DS.L	1			;4922e
 	DC.L	$0000df00		;49232
@@ -48154,7 +48425,7 @@ chip4922A:
 	DS.L	1			;4a0ea
 	DC.L	$7fffffff,$80000000,$00003fff,$ffff0000 ;4a0ee
 	DS.L	1			;4a0fe
-chip4A102:
+spr_Hardpoints_x16:
 	DC.L	$00100000,$00280000,$00e60000,$01650000 ;4a102
 	DC.L	$01750000,$01750000,$00b20000,$01370000 ;4a112
 	DC.L	$03368000,$02378000,$02b58000,$02a58000 ;4a122
@@ -48607,59 +48878,61 @@ chip4A102:
 	DC.L	$0fffe000,$07ffc000,$07ffc000,$0fffe000 ;4ba6a
 	DC.L	$07ffc000,$0fffe000,$07ffc000,$017d0000 ;4ba7a
 	DS.L	1			;4ba8a
-chip4BA8E:
+spr_ShipFire0:
+; Sprites for gunfire
 	DC.L	$07f00008,$06e80450,$03a00040,$00000ff0 ;4ba8e
 	DC.L	$0ef00460,$03c00180,$00000ff0,$0ff007e0 ;4ba9e
 	DC.L	$03c00180,$07f00008,$01080390,$00200040 ;4baae
-chip4BABE:
+spr_ShipFire0Mask:
 	DC.L	$07f00ff8,$0ff807f0,$03e001c0 ;4babe
-chip4BACA:
+spr_ShipFire1:
 	DC.L	$01800260,$07900068,$07900260,$01800000 ;4baca
 	DC.L	$018003e0,$007003e0,$01800000,$00000180 ;4bada
 	DC.L	$03e003f0,$03e00180,$00000180,$02600410 ;4baea
 	DC.L	$03880410,$02600180	;4bafa
-chip4BB02:
+spr_ShipFire1Mask:
 	DC.L	$018003e0,$07f003f8,$07f003e0 ;4bb02
 	DC.W	$0180			;4bb0e
-chip4BB10:
+spr_ShipFire2:
 	DC.L	$00800740,$08a00dd0,$00100fe0,$03000780 ;4bb10
 	DC.L	$08c01de0,$1fe00000,$03000780,$0fc01fe0 ;4bb20
 	DC.L	$1fe00000,$00800040,$07200210,$00100fe0 ;4bb30
-chip4BB40:
+spr_ShipFire2Mask:
 	DC.L	$038007c0,$0fe01ff0,$1ff00fe0 ;4bb40
-chip4BB4C:
+spr_ShipFire3:
 	DC.L	$02200550,$02a002a0,$01400080,$00000360 ;4bb4c
 	DC.L	$01c001c0,$00800000,$014003e0,$01c001c0 ;4bb5c
 	DC.L	$00800000,$03600490,$02200220,$01400080 ;4bb6c
-chip4BB7C:
+spr_ShipFire3Mask:
 	DC.L	$036007f0,$03e003e0,$01c00080 ;4bb7c
-chip4BB88:
+spr_ShipFire4:
 	DC.L	$010002e0,$05100bb0,$080007f0,$00c001e0 ;4bb88
 	DC.L	$031007b8,$07f80000,$00c001e0,$03f007f8 ;4bb98
 	DC.L	$07f80000,$01000200,$04e00840,$080007f0 ;4bba8
-chip4BBB8:
+spr_ShipFire4Mask:
 	DC.L	$01c003e0,$07f00ff8,$0ff807f0 ;4bbb8
-chip4BBC4:
+spr_ShipFire5:
 	DC.L	$00c00320,$04f00b00,$04f00320,$00c00000 ;4bbc4
 	DC.L	$00c003e0,$070003e0,$00c00000,$000000c0 ;4bbd4
 	DC.L	$03e007e0,$03e000c0,$000000c0,$03200410 ;4bbe4
 	DC.L	$08e00410,$032000c0	;4bbf4
-chip4BBFC:
+spr_ShipFire5Mask:
 	DC.L	$00c003e0,$07f00fe0,$07f003e0 ;4bbfc
 	DC.W	$00c0			;4bc08
-chip4BC0A:
+spr_ShipFire6:
 	DC.L	$07f00800,$0bb00510,$02e00100,$000007f8 ;4bc0a
 	DC.L	$07b80310,$01e000c0,$000007f8,$07f803f0 ;4bc1a
 	DC.L	$01e000c0,$07f00800,$084004e0,$02000100 ;4bc2a
-chip4BC3A:
+spr_ShipFire6Mask:
 	DC.L	$07f00ff8,$0ff807f0,$03e001c0 ;4bc3a
-chip4BC46:
+spr_ShipFire7:
 	DC.L	$00800140,$02a002a0,$05500220,$00000080 ;4bc46
 	DC.L	$01c001c0,$03600000,$00000080,$01c001c0 ;4bc56
 	DC.L	$03e00140,$00800140,$02200220,$04900360 ;4bc66
-chip4BC76:
+spr_ShipFire7Mask:
 	DC.L	$008001c0,$03e003e0,$07f00360 ;4bc76
-chip4BC82:
+spr_Meteors_x20:
+; Meteor storm sprites
 	DC.L	$00000680,$00001240,$037c02cc,$17620ab8 ;4bc82
 	DC.L	$013c0361,$030000b1,$0068003c ;4bc92
 	DS.L	3			;4bc9e
@@ -48897,7 +49170,7 @@ chip4BC82:
 	DC.L	$7fff7fff,$7ffeffff,$ffffffff,$ffffffff ;4c96a
 	DC.L	$ffffffff,$3ffc0ff0	;4c97a
 	DC.W	$03c0			;4c982
-chip4C984:
+spr_ImpTransporter_x1:
 	DS.L	2			;4c984
 	DC.L	$0c000000		;4c98c
 	DS.L	1			;4c990
@@ -49102,7 +49375,7 @@ chip4C984:
 	DC.L	$ffffffff,$ffffffff,$fe00ffff,$ffffffff ;4d190
 	DC.L	$fffffc00,$ffffffff,$ffffffff,$f8007fff ;4d1a0
 	DC.L	$ffffffff,$fffff000	;4d1b0
-chip4D1B8:
+spr_Satellite_x8:
 	DC.L	$01800240,$04200420,$02400180,$02400000 ;4d1b8
 	DC.L	$02400000		;4d1c8
 	DS.L	2			;4d1cc
@@ -49167,7 +49440,7 @@ chip4D1B8:
 	DC.L	$03c00660,$0c300990,$09900c30,$066003c0 ;4d458
 	DS.L	4			;4d468
 	DC.L	$03c00660,$0c300990,$09900c30,$066003c0 ;4d478
-chip4D488:
+spr_IntelIcons_x3:
 	DC.L	$00082000,$00082000	;4d488
 	DS.L	3			;4d490
 	DC.L	$01800300,$00060000,$00070000,$00042000 ;4d49c
@@ -49221,6 +49494,8 @@ chip4D488:
 	DC.L	$084ac6a0,$08aaa8a0,$08eaa8e0,$06a4a6a0 ;4d760
 	DC.L	$08eaeea0,$08aaa8e0,$08eaa8e0,$0eaeaea0 ;4d770
 ptr4D780:
+; -------------------------------
+; alien files
 	DS.L	1			;4d780
 	DC.L	$00000ec4,$00002314,$00000e10,$000004ec ;4d784
 	DC.L	$00000fb4		;4d794
@@ -49239,12 +49514,13 @@ ptr4D780:
 	DS.L	1			;4d7f8
 	DC.L	$00000de8,$00002440,$00000dac,$00000974 ;4d7fc
 	DC.L	$00000fb4		;4d80c
-ptr4D810:
+sprButtonMask:
+; -----------------------
 	DC.L	$3ffffffc,$7ffffffe,$ffffffff,$ffffffff ;4d810
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;4d820
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;4d830
 	DC.L	$ffffffff,$7ffffffe,$3ffffffc ;4d840
-ptr4D84C:
+sprButtonBlank:
 	DC.L	$3fffffff,$fffffffc,$7fffffff,$fffffffe ;4d84c
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;4d85c
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;4d86c
@@ -49260,7 +49536,8 @@ ptr4D84C:
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;4d90c
 	DC.L	$ffffffff,$ffffffff,$ffffffff,$ffffffff ;4d91c
 	DC.L	$7fffffff,$fffffffe,$3fffffff,$fffffffc ;4d92c
-ptr4D93C:
+sprButtons:
+; 32x15, 50 buttons with no mask
 	DS.L	2			;4d93c
 	DC.L	$08000000,$101ffc00,$101ffc00,$101ffc00 ;4d944
 	DC.L	$101ffc00,$101ffc00,$101ffc00,$101ffc00 ;4d954
@@ -50338,7 +50615,11 @@ ptr4D93C:
 	DC.L	$7fffffff,$fffffffe,$7fffffff,$fffffffe ;516f4
 	DC.L	$7fffffff,$fffffffe,$3fffffff,$fffffffc ;51704
 	DS.L	2			;51714
-chip5171C:
+sndBeep:
+; Graphics ends here.
+; ------------------------------------------
+; Sound data begins here and continues for
+; the rest of the file.
 	DC.L	$0000f315,$f5fdfd1d,$1d4234db,$dfad1a22 ;5171c
 	DC.L	$4355e2f3,$eecd4d41,$2b5cc2d3,$cfa2193d ;5172c
 	DC.L	$4b6f37fa,$f0cdba29,$193252d8,$fbddb54c ;5173c
@@ -50407,7 +50688,8 @@ chip5171C:
 	DC.L	$0c10120f,$0e0b0607,$080b1514,$100f0807 ;51b2c
 	DC.L	$06080c11,$0d0d0a07	;51b3c
 	DC.W	$0b00			;51b44
-chip51B46:
+sndTick:
+; Both tick sounds use this same sound.
 	DC.L	$00000a09,$0116f80e,$f40514ff,$15fa0cf8 ;51b46
 	DC.L	$0217fa14,$f90b0001,$16f8102c,$04f312db ;51b56
 	DC.L	$25f0300a,$dd1add21,$f61f0fd9,$24e526f9 ;51b66
@@ -50460,7 +50742,7 @@ chip51B46:
 	DC.L	$000a0505,$08010905,$0308020a,$05010802 ;51e56
 	DC.L	$0a06000a,$03090701,$09040407,$02090501 ;51e66
 	DC.L	$09030907,$01090504	;51e76
-chip51E7E:
+sndPip:
 	DC.L	$00000703,$0f7f7f7f,$756bd1c1,$c3cdd17f ;51e7e
 	DC.L	$7f635e50,$339faeaf,$bbc14c5c,$4a443a80 ;51e8e
 	DC.L	$99aeb0bc,$f1525248,$4038a09d,$b2b6c17f ;51e9e
@@ -50482,7 +50764,7 @@ chip51E7E:
 	DC.L	$0808090a,$14151414,$13030709,$09090a0b ;51f9e
 	DC.L	$0b0c0c0c,$0d0d0d0d,$0e0e0e0e ;51fae
 	DC.W	$0e00			;51fba
-chip51FBC:
+sndKlaxon:
 	DC.L	$00000cf2,$1d040610,$0904120e,$021210ff ;51fbc
 	DC.L	$1c01160b,$0a0b0c12,$00170506,$1a021805 ;51fcc
 	DC.L	$0e100411,$0c100714,$050c18fb,$090c0412 ;51fdc
@@ -50691,7 +50973,7 @@ chip51FBC:
 	DC.L	$0c0c080b,$0a0c070d,$0b070d09,$0c070f0b ;52c8c
 	DC.L	$0b0d0d0a,$0d0b090f,$090c0c08,$0c0d060d ;52c9c
 	DC.L	$0c0d080f		;52cac
-chip52CB0:
+sndMissileAlarm:
 	DC.L	$00003343,$3804fa17,$fac4c6ea,$e7c0b5cf ;52cb0
 	DC.L	$fb333414,$1d495740,$3b565d1e,$f80ef8c3 ;52cc0
 	DC.L	$c0e0e0c3,$de0e06e3,$e9164d4d,$2c231810 ;52cd0
@@ -50794,7 +51076,7 @@ chip52CB0:
 	DC.L	$3d4e47e6,$a1d109e4,$a2aee0e9,$e0eb2640 ;532e0
 	DC.L	$25183a59,$4b300f0c,$24260eee,$c4c4ea10 ;532f0
 	DC.L	$00e1ed0e		;53300
-chip53304:
+sndMissileLaunch:
 	DC.L	$00000101,$01ff0001,$fe010000,$00fe0000 ;53304
 	DC.L	$fd000003,$fd010300,$05030500,$01000303 ;53314
 	DC.L	$0101ff01,$00fe0000,$0103fd00,$050000ff ;53324
@@ -51786,7 +52068,7 @@ chip53304:
 	DC.L	$fdfc0600,$09000b02,$0009000c,$fd020701 ;570b0
 	DC.L	$000000fd,$00fffcfb,$06f6fe01,$040106f9 ;570c0
 	DC.L	$0001000a,$f8030000,$0300fa00 ;570d0
-chip570DC:
+sndSmallExplosion:
 	DC.L	$0000515d,$685f605f,$4b332a10,$e9e81d1b ;570dc
 	DC.L	$d7b9a79c,$818090a4,$82808080,$80808080 ;570ec
 	DC.L	$80808080,$a5cee5e8,$0a3e3760,$61401605 ;570fc
@@ -52315,7 +52597,7 @@ chip570DC:
 	DC.L	$02020202,$02030303,$03040404,$05050707 ;591ac
 	DC.L	$08080707,$06060505	;591bc
 	DC.W	$0505			;591c4
-chip591C6:
+sndLargeExplosion:
 	DC.L	$00000a0b,$0b0b0b0b,$0b0a0a0a,$0a0a0a0a ;591c6
 	DC.L	$0b0a0b0b,$0b0b0b0b,$0b0b0a0a,$0a0a0a0a ;591d6
 	DC.L	$0b0b0b0b,$0b0b0b0b,$0b0b0b0b,$0b0b0b0b ;591e6
@@ -53020,7 +53302,9 @@ chip591C6:
 	DC.L	$06030203,$03000001,$05060403,$02040707 ;5bd82
 	DC.L	$05050809,$03fffe00,$04050607,$06050405 ;5bd92
 	DC.W	$0707			;5bda2
-chip5BDA4:
+sndMedExplosion:
+; Medium explosion sound also used for turret fire
+; at different bitrate
 	DC.L	$00000b0b,$0b0b0b0b,$0b0b0b0b,$0b0b0b0b ;5bda4
 	DC.L	$0b0b0b0b,$0b0b0b09,$ed806d59,$7fd28080 ;5bdb4
 	DC.L	$1c7f7f05,$f3809409,$177f7f80,$807f7fdb ;5bdc4
@@ -53315,7 +53599,7 @@ chip5BDA4:
 	DC.L	$1013090b,$0e0d0508,$0a040609,$06021203 ;5cfd4
 	DC.L	$050a0607,$100c0e0b,$110d0d0a ;5cfe4
 	DC.W	$0600			;5cff0
-chip5CFF2:
+sndQuietRumble:
 	DC.L	$0000f6f8,$f9fdfe00,$02040709,$0c0f1216 ;5cff2
 	DC.L	$191c1f21,$2527282c,$2e303234,$3637373a ;5d002
 	DC.L	$3a3c3c3c,$3c3c3a3a,$39373634,$33302d2c ;5d012
@@ -53795,7 +54079,7 @@ chip5CFF2:
 	DC.L	$25211c19,$15100e09,$07030200,$fefdfcfc ;5edb2
 	DC.L	$f8f8f8f8,$f8f8f8f8,$f9f9f9fc,$fdfefeff ;5edc2
 	DC.L	$00000101,$02020303,$03030404 ;5edd2
-chip5EDDE:
+sndCannonFire:
 	DC.L	$000005f6,$ea300541,$3739fc45,$d1e21a04 ;5edde
 	DC.L	$fc635a43,$45170555,$c6b33630,$ef0f234d ;5edee
 	DC.L	$4c112f48,$fbb33511,$f6212716,$23fe110d ;5edfe
@@ -54081,7 +54365,7 @@ chip5EDDE:
 	DC.L	$16201714,$1a1a1b1b,$0b0b0d0a,$04030a0b ;5ff7e
 	DC.L	$050b040b,$0a0b0a05,$0b0a171e,$1a20201b ;5ff8e
 	DC.L	$231e1e00		;5ff9e
-chip5FFA2:
+sndCannonMiss:
 	DC.L	$00003627,$c01538c0,$2621c041,$bf41bf41 ;5ffa2
 	DC.L	$bf41cd04,$3abf273e,$bf0041f1,$bffa4141 ;5ffb2
 	DC.L	$07bfbfbf,$ee1e4041,$41414141,$4141411f ;5ffc2
@@ -54234,7 +54518,7 @@ chip5FFA2:
 	DC.L	$02020202,$02020101,$01010101,$01010101 ;608c6
 	DC.L	$01010000		;608d6
 	DS.L	1			;608da
-chip608DE:
+sndVortexWalk:
 	DC.L	$0000130c,$0e0d050a,$0d0a0c0b,$101b0c0d ;608de
 	DC.L	$08fe0a04,$060d0d13,$0e150e0b,$0b02fefa ;608ee
 	DC.L	$fcf80509,$f709fdfe,$1100fe05,$0b191315 ;608fe
@@ -54883,7 +55167,7 @@ chip608DE:
 	DC.L	$ee242be5,$f917090b,$fdfe0523,$20fe0f0d ;6312e
 	DC.L	$dc0e0be4,$0925f3ff,$27fce3fa,$2520f709 ;6313e
 	DC.L	$00e41b04		;6314e
-chip63152:
+sndComet:
 	DC.L	$0000feff,$fefefdfc,$fcfbfbfc,$fd000307 ;63152
 	DC.L	$0b0f1418,$1b1d1f20,$20201f1f,$1e1d1d1b ;63162
 	DC.L	$1b1a1918,$18161513,$110e0b08,$0401fffe ;63172
@@ -55225,7 +55509,7 @@ chip63152:
 	DC.L	$020100ff,$ffff0103,$06090c0f,$11121212 ;6465e
 	DC.L	$110e0c09		;6466e
 	DC.W	$0700			;64672
-chip64674:
+sndAlienWhoosh:
 	DC.L	$00002112,$07f5f5f0,$e6e8dfc2,$bfcac2ca ;64674
 	DC.L	$d9d6e8e6,$f5050a21,$1d233836,$36433a43 ;64684
 	DC.L	$56546766,$61676659,$545d5447,$302e3334 ;64694
@@ -55990,7 +56274,7 @@ chip64674:
 	DC.L	$07070507,$05050507,$05050202,$01000000 ;6758c
 	DC.L	$00ff0000		;6759c
 	DC.W	$ffff			;675a0
-chip675A2:
+sndErrorBoop:
 	DC.L	$0000ae89,$80808080,$8099c5ef,$1e4c787f ;675a2
 	DC.L	$7f7f7f7f,$75481ef1,$ccac9183,$81869cbe ;675b2
 	DC.L	$ea072b47,$65767b6c,$573b1e09,$e7d0c7b6 ;675c2
@@ -56064,7 +56348,9 @@ chip675A2:
 	DC.L	$7f7f7f3e,$f6b78d80,$80808080,$808ab9f1 ;67a02
 	DC.L	$2b5c7f7f,$7f7f7f7f,$7f5e27f0,$bc948080 ;67a12
 	DC.L	$80808000		;67a22
-chip67A26:
+sndStaticInducer:
+; Imperial Transporter warp also uses the Static Inducer sound
+; at a diffrent bitrate
 	DC.L	$0000eac5,$f2ddcef4,$0be1a9cc,$dbd7e4b0 ;67a26
 	DC.L	$a9a5d5e6,$ce0400ce,$f121192e,$3925e319 ;67a36
 	DC.L	$48231a0e,$1905e7e1,$ff23424e,$2915343e ;67a46
@@ -56524,7 +56810,7 @@ chip67A26:
 	DS.L	1			;696a6
 	DC.L	$00000304,$02030502,$01010201,$01010103 ;696aa
 	DC.L	$05060605		;696ba
-chip696BE:
+sndHangarOpen:
 	DC.L	$00000a09,$09070606,$05050606,$06060505 ;696be
 	DC.L	$05050606,$06060505,$04040404,$05050506 ;696ce
 	DC.L	$07090909,$0a0a0b0c,$0d0e0f11,$11111111 ;696de
@@ -56829,7 +57115,7 @@ chip696BE:
 	DC.L	$a6a19e9c,$9999999a,$9a9c9ea1,$a2a3a5a6 ;6a98e
 	DC.L	$abb1b6bb,$bdc2c7cf,$d5dee9f2,$fc06121d ;6a99e
 	DC.L	$27333c45,$4d53575b	;6a9ae
-chip6A9B6:
+sndHangarClank:
 	DC.L	$00000c0e,$09fa000e,$1515fcea,$efeefa0c ;6a9b6
 	DC.L	$1602f2eb,$f4f5f0f2,$081c1c06,$f1001b1c ;6a9c6
 	DC.L	$19160af7,$f903160c,$eae4ef00,$0af704fb ;6a9d6
@@ -56927,7 +57213,7 @@ chip6A9B6:
 	DS.L	1			;6af3a
 	DC.L	$04060706,$06040000,$0000fefe,$fefbf9f9 ;6af3e
 	DC.L	$fbfdff00,$01030402,$03060708,$08060404 ;6af4e
-chip6AF5E:
+sndSatelliteLaunch:
 	DC.L	$00000510,$05100806,$0f0e0d0b,$0b07100b ;6af5e
 	DC.L	$0c110309,$070c0c14,$0a040e07,$0d0d0e11 ;6af6e
 	DC.L	$11010a08,$080d0c10,$0b0a0f11,$000c150c ;6af7e
