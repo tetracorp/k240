@@ -11,7 +11,6 @@ game published by Gremlin Graphics for the Commodore Amiga.
 {:toc}
 
 ### Background
-
 #### Origins
 
 K240 is fundamentally a sequel to _Utopia: The Creation of a Nation_, a
@@ -179,6 +178,13 @@ a test of the dialog box system, an older version of the starfield background, a
 familiar asteroid layout, and buildings recognizable as the Protected Solar
 Matrix, Solar Generator, Plasma Turret, a Command Centre, an alien Ore Eaters'
 Civilian Dome, and scaffolding.
+
+According to [a 2014 interview](https://archive.org/details/RetroGamer_134/page/16/mode/1up?q=k240)
+with artist Pete Daniels in RetroGamer issue 134, all of the game's art was
+created on an Amiga 500 in Deluxe Paint. He describes K240 as being developed on
+an Amiga and taking only six months to develop, although this may be referring
+to the graphics only, since the finished game evidently took significantly
+longer.
 
 #### 1993
 
@@ -393,17 +399,26 @@ release did not include an option to load an optional scenario disk.
 ### Legacy
 
 K240 received a remake/sequel, _Fragile Allegiance_, released for MS-DOS and
-Windows 95 in December 1996. This game was written by a completely different
-team of designers and programmers, but keeps most of K240's basic mechanics and
-even maintains continuity with its lore. For example,
+Windows 95 in December 1996. Development of _Fragile Allegiance_ may have taken
+up to two and a half years, assuming it began as soon as the Amiga version of
+_K240_ was finished.
+
+This game was written by a completely different team of designers and
+programmers, but keeps most of K240's basic mechanics and even maintains
+continuity with its lore. For example,
 [the intro video](https://www.youtube.com/watch?v=7ZCJ_16r8Sc)
 cites Tetracorp's founding in the year 2221, consistent with
 [the K240 manual](https://www.lemonamiga.com/games/docs.php?id=904),
 which cites this as the year Tetracorp was founded to manufacture scoutships and
 sensors for the Imperial Fleet.
 
-Assuming development on _Fragile Allegiance_ started in mid-1994, it would have
-taken two and a half years.
+According to an
+[internal memo](https://www.gremlinarchive.com/index.php/2019/08/06/gremlin-product-meeting-memo-april-1995/),
+a meeting about K240 was held on 11 April 1995 at 3:30 pm. Based on the date, it
+seems more likely that this was discussing _Fragile Allegiance_. It would
+suggest that the PC remake was internally known as _K240_ early in development,
+and was given the name _Fragile Allegiance_ later, perhaps named for its
+diplomacy aspects.
 
 Graeme Ing, sole programmer on _K240_, went on to work on a number of other
 titles, including _Newman/Haas IndyCar featuring Nigel Mansell_ for Sega Mega
@@ -412,7 +427,8 @@ _Everquest II_ (2004), and the _Star Wars: Galaxies_ series.
 
 Pete Daniels, K240's artist and co-designer, went on to work on games including
 _World Championship Snooker 2004_ (2004), _Kinect Sports: Rivals_, and _Sea of
-Thieves_ (2018).
+Thieves_ (2018). In a 2014 interview with RetroGamer magazine, he spoke highly
+of K240 and expressed a wish to work a sequel with Graeme Ing one day.
 
 Gremlin Interactive retained numerous floppy disks and backup CDs, although
 whether any of those still exist, who might have them, and whether any of
@@ -478,6 +494,9 @@ them contain K240 data, is a mystery.
 
 #### 1995 onward
 
+- __11 April 1995__: According to an
+[internal memo](https://www.gremlinarchive.com/index.php/2019/08/06/gremlin-product-meeting-memo-april-1995/),
+a meeting about K240 was held at 3:30 pm, perhaps to discuss the sequel.
 - __Dec 1996__: PC sequel Fragile Allegiance released.
 - __3 Sep 1997__: Someone creates a zip file of K240 which would later be
   uploaded to Gremlin Graphics World as an authorized download.
