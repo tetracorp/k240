@@ -11,7 +11,7 @@ game published by Gremlin Graphics for the Commodore Amiga.
 {:toc}
 
 ### Background
-#### Origins
+#### Origins: K240's predecessor Utopia
 
 K240 is fundamentally a sequel to _Utopia: The Creation of a Nation_, a
 planetary colony management sim released around September 1991. We would today
@@ -143,7 +143,7 @@ Among the scenarios in the _Utopia_ data disk was a set of islands requring the
 player to build spaceships to cross between them, which would become a core
 mechanic of K240.
 
-### Development
+### Development of K240
 #### 1992
 
 Insight into K240's early development comes primarily from four magazine
@@ -326,7 +326,7 @@ The final retail build of K240, version 1.886, was completed on Friday 20 May
 
 Due to how close it was to the deadline, Mark Glossop had to personally deliver
 the master floppies to the disk duplication company in Burnley or thereabouts
-(some 65 miles or so from Sheffield), signing off on the game as bug free.  A
+(some 65 miles or so from Sheffield), signing off on the game as bug free. A
 run of 30,000 copies was produced. (It is uncertain whether Glossop is referring
 to the v1.886 release or the v2.000 release here.)
 
@@ -345,7 +345,8 @@ the [fleet bug](../game-mechanics/bugs.html),
 a random crash which sometimes occurred when moving fleets.
 
 Patrick Phelan is credited with providing the game's music. However, K240 has no
-music. This is a mystery.
+music. [Leave a reply](https://github.com/tetracorp/k240/issues/5)
+if you know the answer to this mystery.
 
 ### Reception
 
@@ -396,12 +397,20 @@ making this a rare artifact, perhaps a lost one.
 Unlike _Utopia_, K240 did not receive an expansion disk, and the finished
 release did not include an option to load an optional scenario disk.
 
-### Legacy
+### Miscellaneous
+#### Sequel: Fragile Allegiance
 
-K240 received a remake/sequel, _Fragile Allegiance_, released for MS-DOS and
-Windows 95 in December 1996. Development of _Fragile Allegiance_ may have taken
-up to two and a half years, assuming it began as soon as the Amiga version of
-_K240_ was finished.
+According to an
+[internal memo](https://www.gremlinarchive.com/index.php/2019/08/06/gremlin-product-meeting-memo-april-1995/),
+a meeting about K240 was held on 11 April 1995 at 3:30 pm. The
+[July 1995 issue](https://archive.org/details/pc_power-issue_019-1995_07/page/n34/mode/1up)
+of PC Power magazine announced that Gremlin was working on a PC remake of K240.
+The game's final title of _Fragile Allegiance_ had evidently not been coined yet,
+but would begin to appear in the gaming press following the 1996
+European Computer Trade Show (ECTS) held on 14–16 April 1996.
+
+![PC Power July 1995 preview of Fragile Allegiance](../images/misc/pcpower-1995-07-p35-k240.jpg "PC Power July 1995 preview of Fragile Allegiance")<br>Promotional render for the K240 PC port in PC Power, July 1995.
+{:.center}
 
 This game was written by a completely different team of designers and
 programmers, but keeps most of K240's basic mechanics and even maintains
@@ -412,13 +421,11 @@ cites Tetracorp's founding in the year 2221, consistent with
 which cites this as the year Tetracorp was founded to manufacture scoutships and
 sensors for the Imperial Fleet.
 
-According to an
-[internal memo](https://www.gremlinarchive.com/index.php/2019/08/06/gremlin-product-meeting-memo-april-1995/),
-a meeting about K240 was held on 11 April 1995 at 3:30 pm. Based on the date, it
-seems more likely that this was discussing _Fragile Allegiance_. It would
-suggest that the PC remake was internally known as _K240_ early in development,
-and was given the name _Fragile Allegiance_ later, perhaps named for its
-diplomacy aspects.
+_Fragile Allegiance_ was released for MS-DOS and Windows 95 in December 1996.
+Development of _Fragile Allegiance_ may have taken up to two and a half years,
+assuming it began as soon as the Amiga version of _K240_ was finished.
+
+#### Gremlin Interactive
 
 Graeme Ing, sole programmer on _K240_, went on to work on a number of other
 titles, including _Newman/Haas IndyCar featuring Nigel Mansell_ for Sega Mega
@@ -496,7 +503,8 @@ them contain K240 data, is a mystery.
 
 - __11 April 1995__: According to an
 [internal memo](https://www.gremlinarchive.com/index.php/2019/08/06/gremlin-product-meeting-memo-april-1995/),
-a meeting about K240 was held at 3:30 pm, perhaps to discuss the sequel.
+a meeting about K240 was held at 3:30 pm, to discuss the PC sequel. PC Power
+magazine subsequently posts an announcement.
 - __Dec 1996__: PC sequel Fragile Allegiance released.
 - __3 Sep 1997__: Someone creates a zip file of K240 which would later be
   uploaded to Gremlin Graphics World as an authorized download.
