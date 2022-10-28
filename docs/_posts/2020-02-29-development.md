@@ -404,7 +404,9 @@ According to an
 [internal memo](https://www.gremlinarchive.com/index.php/2019/08/06/gremlin-product-meeting-memo-april-1995/),
 a meeting about K240 was held on 11 April 1995 at 3:30 pm. The
 [July 1995 issue](https://archive.org/details/pc_power-issue_019-1995_07/page/n34/mode/1up)
-of PC Power magazine announced that Gremlin was working on a PC remake of K240.
+of PC Power magazine announced that Gremlin was working on a PC remake of K240,
+as did the [May 1995 issue](https://archive.org/details/pcgames-10/page/n31/mode/1up)
+of PC Games magazine.
 The game's final title of _Fragile Allegiance_ had evidently not been coined yet,
 but would begin to appear in the gaming press following the 1996
 European Computer Trade Show (ECTS) held on 14–16 April 1996.
