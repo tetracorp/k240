@@ -24,9 +24,8 @@ decreases to -7, whereupon it resets to 16.
 
 Ships fire all their hardpoints at one time, selecting random targets.
 
-Ship damage is repaired only when there is a Repair Facility at the colony, only
-if the ship is landed in a hangar, and only up to the base value without
-shields.
+Ship damage is repaired only when there is a Repair Facility at the colony, and
+only if the ship is landed in a hangar.
 
 ### Ion Cannon
 
@@ -164,8 +163,13 @@ down. Deflector is applied before Warp Generator.
 ![Shield x50](../images/hardpoints/shield_x50.png "Shield x50")
 {:.left}
 
-Simply raises the ship's maximum Armour (i.e. hit points). However, Repair
-Facility will only repair a ship up to the maximum without shields.
+Simply raises the ship's maximum Armour (i.e. hit points).
+
+Due to a bug with Repair Facility, ships whose shields are depleted will only
+repair to the ship's base maximum Armor, while ships with shields intact can
+actually increase above their maximum. See [bugs](../game-mechanics/bugs.html)
+and
+[Repair Facility](../game-mechanics/building-behaviour.html#repair-facility).
 
 Alien ships don't use shields, but only have the standard Armour value of their
 ship class. There are entries for the five shields in the alien hardpoint list,

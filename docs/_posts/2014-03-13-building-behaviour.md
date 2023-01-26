@@ -120,10 +120,17 @@ If the blueprint Building Armour is available, all buildings' maximum hit points
 are increased by 10. A Repair Facility will retroactively apply the new maximum
 to buildings constructed before the Building Armour blueprint was purchased.
 
-Small ships in hangars are repaired at the same rate of one point per Repair Facility
-every eight days, to a maximum of the ship's base armour without shields. Contrary
-to the manual, ships in orbit are never repaired, and ships in hangars only repair if
-the colony has a Repair Facility.
+Small ships in hangars are repaired at the same rate of one point per Repair
+Facility every eight days. Contrary to the manual, ships in orbit are never
+repaired, and ships in hangars only repair if the colony has a Repair Facility.
+
+Due to a bug, shields are not properly taken into account when repairing ships
+(see [bugs](../game-mechanics/bugs.html)). Repair Facility increases a ship's
+Armour unless it has either 0 Armour, or the maximum base Armour for its type.
+This means a ship with below its base Armour will only repair up to its base
+Armour, while a ship with more than base Armour due to shields will increase
+above its maximum up to 255 Armour. At 256 Armour it loops back to 0 and is
+effectively destroyed.
 
 ### Laser, Plasma and Photon Turret
 
