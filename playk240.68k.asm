@@ -105,7 +105,6 @@ SECSTRT_0:
 ; 
 ; Reassemble from the source code:
 ; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.asm
-;
 	SF	intErr			;00000: 51f90001aad6
 	SUBA.L	A1,A1			;00006: 93c9
 	MOVEA.L	ABSEXECBASE.W,A6	;00008: 2c780004
@@ -603,13 +602,13 @@ _006D8:
 	MOVE.W	(6,A0),D0		;006d8: 30280006
 ; $e8: Left mouseup
 	CMPI.B	#$e8,D0			;006dc: 0c0000e8
-	BEQ.S	_006FC			;006e0: 676a
+	BEQ.S	_0074C			;006e0: 676a
 ; $e9: Right mouseup
 	CMPI.B	#$e9,D0			;006e2: 0c0000e9
-	BEQ.S	_006FC			;006e6: 676e
+	BEQ.S	_00756			;006e6: 676e
 ; $68: Left mousedown
 	CMPI.B	#$68,D0			;006e8: 0c000068
-	BEQ.S	_006FC			;006ec: 674e
+	BEQ.S	_0073C			;006ec: 674e
 ; $69: Right mousedown
 	CMPI.B	#$69,D0			;006ee: 0c000069
 	BNE.S	_006FC			;006f2: 6608
@@ -639,14 +638,14 @@ _00728:
 _00732:
 	MOVE.W	D0,intMouseY		;00732: 33c000000762
 	BRA.W	_00680			;00738: 6000ff46
-_006FC:
+_0073C:
 	BSET	#0,MouseBtn		;0073c: 08f9000000000766
 	ST	flgClicked		;00744: 50f900000767
 	BRA.S	_006FC			;0074a: 60b0
-_006FC:
+_0074C:
 	BCLR	#0,MouseBtn		;0074c: 08b9000000000766
 	BRA.S	_006FC			;00754: 60a6
-_006FC:
+_00756:
 	BCLR	#1,MouseBtn		;00756: 08b9000100000766
 	BRA.S	_006FC			;0075e: 609c
 intMouseX:
@@ -2957,7 +2956,7 @@ _01F7E:
 _01F8C:
 	CMPI.B	#$03,D0			;01f8c: 0c000003
 	BNE.W	_SurfaceView		;01f90: 6600ff16
-	JSR	_OrbitView		;01f94: 4eb900011834
+	JSR	_OrbitView2		;01f94: 4eb900011834
 	BRA.W	_ScreenSwitch		;01f9a: 6000ff6c
 ret01F9E:
 	RTS				;01f9e: 4e75
@@ -7975,12 +7974,12 @@ _MouseWait_05FEE:
 _05FFA:
 ; F1-F10
 	CMPI.B	#$50,D0			;05ffa: 0c000050
-	BMI.S	_05C88			;05ffe: 6b10
+	BMI.S	_06010			;05ffe: 6b10
 	CMPI.B	#$5a,D0			;06000: 0c00005a
-	BPL.S	_05C88			;06004: 6a0a
+	BPL.S	_06010			;06004: 6a0a
 	JSR	_Hotkeys_02590		;06006: 4eb900002590
 	BRA.W	_05C88			;0600c: 6000fc7a
-_05C88:
+_06010:
 	BRA.W	_05C88			;06010: 6000fc76
 	RTS				;06014: 4e75
 strVersion:
@@ -15517,10 +15516,10 @@ _0C1A4:
 	BNE.W	_0C1D0			;0c1a8: 66000026
 	MOVE.W	unk0C2E4,D0		;0c1ac: 30390000c2e4
 	CMP.W	unk0C2E6,D0		;0c1b2: b0790000c2e6
-	BNE.S	_0BDCC			;0c1b8: 660c
+	BNE.S	_0C1C6			;0c1b8: 660c
 	MOVE.W	#$0001,unk0C2E4		;0c1ba: 33fc00010000c2e4
 	BRA.W	_0BDCC			;0c1c2: 6000fc08
-_0BDCC:
+_0C1C6:
 	ADDQ.W	#1,unk0C2E4		;0c1c6: 52790000c2e4
 	BRA.W	_0BDCC			;0c1cc: 6000fbfe
 _0C1D0:
@@ -22535,17 +22534,17 @@ _MilitaryButton:
 ; Probably ship-related
 	MOVEA.L	ptrCurrentAst,A0	;11202: 20790002de58
 	TST.B	(89,A0)			;11208: 4a280059
-	BMI.S	_StasisErr		;1120c: 6b0c
+	BMI.S	_StasisErr2		;1120c: 6b0c
 ; Non Stasis:
 	LEA	ptr1F0F6,A0		;1120e: 41f90001f0f6
 	BSR.W	_Button3_110E0		;11214: 6100feca
 	RTS				;11218: 4e75
-_StasisErr:
+_StasisErr2:
 	JMP	_StasisErr		;1121a: 4ef9000069c2
 _InformationButton:
 	MOVEA.L	ptrCurrentAst,A0	;11220: 20790002de58
 	TST.B	(89,A0)			;11226: 4a280059
-	BMI.S	_StasisErr		;1122a: 6bee
+	BMI.S	_StasisErr2		;1122a: 6bee
 	LEA	ptr1F186,A0		;1122c: 41f90001f186
 	BSR.W	_Button3_110E0		;11232: 6100feac
 	RTS				;11236: 4e75
@@ -23058,7 +23057,7 @@ _11820:
 	ST	flgRedraw		;11826: 50f90002e48b
 	SF	flg1F0B4		;1182c: 51f90001f0b4
 	RTS				;11832: 4e75
-_OrbitView:
+_OrbitView2:
 	MOVE.W	intAsteroidFacing,-(A7)	;11834: 3f390002e484
 	CLR.W	intAsteroidFacing	;1183a: 42790002e484
 _11840:
@@ -23239,12 +23238,12 @@ _11AE6:
 _11AF4:
 ; 50-59 = F1-F10 (hotkeys)
 	CMPI.B	#$50,D0			;11af4: 0c000050
-	BMI.S	_11864			;11af8: 6b10
+	BMI.S	_11B0A			;11af8: 6b10
 	CMPI.B	#$5a,D0			;11afa: 0c00005a
-	BPL.S	_11864			;11afe: 6a0a
+	BPL.S	_11B0A			;11afe: 6a0a
 	JSR	_Hotkeys_02590		;11b00: 4eb900002590
 	BRA.W	_11864			;11b06: 6000fd5c
-_11864:
+_11B0A:
 	BRA.W	_11864			;11b0a: 6000fd58
 _11B0E:
 	MOVE.W	(A7)+,intAsteroidFacing	;11b0e: 33df0002e484
@@ -23507,12 +23506,12 @@ _11EC4:
 	SF	InKey			;11ece: 51f900000764
 ; hotkeys f1-f10
 	CMPI.B	#$50,D0			;11ed4: 0c000050
-	BMI.S	_11BCC			;11ed8: 6b10
+	BMI.S	_11EEA			;11ed8: 6b10
 	CMPI.B	#$5a,D0			;11eda: 0c00005a
-	BPL.S	_11BCC			;11ede: 6a0a
+	BPL.S	_11EEA			;11ede: 6a0a
 	JSR	_Hotkeys_02590		;11ee0: 4eb900002590
 	BRA.W	_11BCC			;11ee6: 6000fce4
-_11BCC:
+_11EEA:
 	BRA.W	_11BCC			;11eea: 6000fce0
 _11EEE:
 	MOVE.B	#$0c,textcolor		;11eee: 13fc000c0002e476
@@ -25323,7 +25322,7 @@ _134AC:
 	ADD.B	D1,D0			;134c4: d001
 	CMPI.B	#$08,D0			;134c6: 0c000008
 	BMI.S	_134E8			;134ca: 6b1c
-_134E8:
+_134CC:
 	SUBQ.B	#8,D0			;134cc: 5100
 	BRA.S	_134E8			;134ce: 6018
 _134D0:
@@ -25332,11 +25331,11 @@ _134D0:
 	ADD.B	D1,D0			;134d6: d001
 	CMPI.B	#$10,D0			;134d8: 0c000010
 	BMI.S	_134E8			;134dc: 6b0a
-	BRA.S	_134E8			;134de: 60ec
+	BRA.S	_134CC			;134de: 60ec
 _134E0:
 	ADD.B	D1,D0			;134e0: d001
 	CMPI.B	#$18,D0			;134e2: 0c000018
-	BPL.S	_134E8			;134e6: 6ae4
+	BPL.S	_134CC			;134e6: 6ae4
 _134E8:
 	MULU	#$000a,D0		;134e8: c0fc000a
 	ADDA.W	D0,A0			;134ec: d0c0
@@ -31026,7 +31025,7 @@ _CountAliShips:
 	MOVE.L	D0,(8,A2)		;17656: 25400008
 	MOVE.L	D0,(12,A2)		;1765a: 2540000c
 	MOVE.L	(8,A0),D1		;1765e: 22280008
-	BEQ.S	_ret-1_17698		;17662: 6734
+	BEQ.S	_17698			;17662: 6734
 	MOVEA.L	D1,A6			;17664: 2c41
 loop_17666:
 	MOVE.B	(8,A6),D1		;17666: 122e0008
@@ -31042,13 +31041,13 @@ loop_17666:
 	ADDQ.W	#1,D0			;17684: 5240
 	MOVE.L	A6,(A1)+		;17686: 22ce
 	CMPI.W	#$0027,D0		;17688: 0c400027
-	BEQ.S	_ret-1_17698		;1768c: 670a
+	BEQ.S	_17698			;1768c: 670a
 _1768E:
 	MOVE.L	(0,A6),D1		;1768e: 222e0000
-	BEQ.S	_ret-1_17698		;17692: 6704
+	BEQ.S	_17698			;17692: 6704
 	MOVEA.L	D1,A6			;17694: 2c41
 	BRA.S	loop_17666		;17696: 60ce
-_ret-1_17698:
+_17698:
 	MOVEQ	#-1,D1			;17698: 72ff
 	MOVE.L	D1,(A1)			;1769a: 2281
 	RTS				;1769c: 4e75
