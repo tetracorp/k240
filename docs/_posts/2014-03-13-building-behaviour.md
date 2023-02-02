@@ -182,7 +182,10 @@ buildings appear to have been all added around the same time).
 A [random event](random-events.html) can cause a Powerplant to explode,
 increasing the colony's radiation level by 10%.
 
-See the article on why [powerplant is the worst building](../fun/powerplant-sucks).
+[Issue #12](https://github.com/tetracorp/k240/issues/12) suggests a bugfix to
+the Powerplant code.
+
+See the article on why [powerplant is the worst building](../fun/powerplant-sucks.html).
 
 ### Command Centre
 
