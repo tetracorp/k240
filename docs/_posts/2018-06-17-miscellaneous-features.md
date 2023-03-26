@@ -48,9 +48,9 @@ way Powerplant functions.
 
 ### Ax'Zilanth viral resistance
 
-When fighting against the Ax'Zilanth, the second Virus missile you fire against
-an asteroid has no effect. That alien appears to adapt after the first missile.
-This applies even if you fire a second Virus at yourself.
+The [Ax'Zilanths](../alien/3-ax-zilanths.html) have the ability to adapt to the
+Virus missile. After the first Virus missile, every subsequent Virus missile you
+fire has no effect.
 
 ### Where are my 5,000,000 credits?
 
@@ -65,10 +65,12 @@ the last one. The game doesn't keep track of which aliens you beat anywhere.
 
 These are documented in the manual, but some players may not be aware of them.
 
-* Press _spacebar_ to toggle between building view and flat view
+* Press _spacebar_ to toggle between building view and flat view. This also
+  refreshes the view, which makes the extracted buttons visible after using the
+  PANEL cheat.
 * Press _S_ to enable the Ship cursor for clicking on ships.
   Press again to return to the standard cursor.
 * Press _D_ to enable to Demolish cursor (green bomb) for
   demolishing buildings. Press again to return to the standard cursor.
-* Press the left and right cursor keys to rotate the asteroid. Useful for making
-  the icons visible after a PANEL cheat.
+* Press the left and right cursor keys to rotate the asteroid. Also refreshes
+  the view to make extracted buttons visible after the PANEL cheat.

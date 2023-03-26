@@ -26,7 +26,7 @@ right are as follows:
 
 | Image                                                                     | Weapon | Cost |
 |---------------------------------------------------------------------------|--------|------|
-| ![Laser cannon](../images/hardpoints/laser_cannon.png "Laser cannon"")    | Laser  | 1000 |
+| ![Laser](../images/hardpoints/laser.png "Laser"")                         | Laser  | 1000 |
 | ![Photon cannon](../images/hardpoints/photon_cannon.png "Photon cannon"") | Photon | 4500 |
 | ![Plasma cannon](../images/hardpoints/plasma_cannon.png "Plasma cannon"") | Plasma | 9000 |
 
