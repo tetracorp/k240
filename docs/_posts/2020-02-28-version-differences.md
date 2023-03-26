@@ -153,12 +153,14 @@ within six days of being finished, or four working days, including printing and
 shipping the disks. The cracktro credits the supplier of the original disk to
 "Troops & Troll".
 
-One hypothesis was that v1.886 was an early build for magazine reviewers, as
-there is a rumour that staff at one of the Amiga magazines leaked review copies
-to pirate, leading some games to be pirated even before street date. However, on
-further analysis I believe it to be the retail version, since magazines with
-reviews would have already been published before the v1.886 build date
+My original hypothesis had been that v1.886 was an early build for magazine
+reviewers, as there is a rumour that a staff member at one of the Amiga
+magazines often leaked review copies to pirate groups, leading some games to be
+pirated even before street date. However, on further analysis I believe it to be
+the retail version, since magazines with reviews would have already been
+published before the v1.886 build date
 (see [development and release history](../history/development.html)).
+The review build likely had an earlier version number.
 
 Many files are dated 01-Feb-78, which looks like a default Amiga file date for
 computers with no real-time clock. Notably, however, not all files are. Various
@@ -166,7 +168,7 @@ files are dated 20 Sept 1991, 2 Sept 1992, 2 Mar 1994, and 16 May 1994. It's
 possible that many of the game's graphical assets were already in place in
 September 1991; however, I suspect that these are default dates from an Amiga
 with a hard disk but no real-time clock, which would therefore take its time
-from the hard disk's OS install date.
+from the hard disk's OS install date on boot-up.
 
 ### Directory comparison of the CU Amiga demo
 
@@ -224,7 +226,7 @@ same as the CU Amiga dates.
 (May 1994) not only reviewed K240, devoted the following page to a mail-order
 offer of 300 playable demos of K240 to give away. It's unknown what exactly this
 demo contains. There's a chance it is just an identical copy of the CU Amiga
-demo.
+demo. However, it could plausibly be a unique build with French language.
 
 If you have a copy, it would be a great help if you can respond to
 [this ticket](https://github.com/tetracorp/k240/issues/8) in the project's issue
@@ -245,7 +247,12 @@ disks are v2.000.
 The Polish release of the game was published by a separate company, Licomp, and
 had its own unique [box art](https://hol.abime.net/2543/boxscan) as a result,
 which is largely a recreation of the English box art. Likewise with the manual.
-Data-wise, the Polish disk contents are the same as the regular English release.
+The game itself is probably identical to the English build, and not a Polish
+translation. Polish magazine
+[Świat Gier Komputerowych, Jul/Aug 1994](https://archive.org/details/SwiatGierKomputerowych07081994/page/n29/mode/2up),
+which featured an original render of K240 for its cover, shows only English in
+screenshots, and the game came with a list of the English manual protection
+codes.
 
 ### Elusive Amiga magazine review copies
 
@@ -266,7 +273,8 @@ What we do know about the review build is as follows:
   sprites in the CU Amiga demo.
 - The hard disk installer is included. This suggests a date of no earlier than 2
   March 1994, which is when the HD installer was added in the final release.
-- It is English-only. [A review](https://www.abandonware-magazines.org/affiche_mag.php?mag=30&num=599&album=oui)
+- It is English-only.
+  [A review](https://www.abandonware-magazines.org/affiche_mag.php?mag=30&num=599&album=oui)
   in French magazine Joystick issue 49 (May 1994) shows only English-language
   screenshots (as do other French magazines' May 1994 reviews of K240), but
   promises that the final release will have a French translation.
@@ -280,3 +288,5 @@ What we do know about the review build is as follows:
   received a review copy. These included Amiga Action, Amiga Computing, Amiga
   Concept, Amiga Dream, Amiga Format, Amiga Power, CU Amiga, Joystick, and
   The One Amiga.
+  If you have any disks which survived the closure of those magazines,
+  please [let us know](https://github.com/tetracorp/k240/issues/4).
