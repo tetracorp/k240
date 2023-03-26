@@ -42,12 +42,13 @@ Intro sequence executable for K240. Only 20,720 bytes.
 ### k240\_1:s/startup-sequence
 
 Typical Amiga startup-sequence which loads the intro, then runs the game from
-disk 2.
+disk 2. You can ignore disk 1 entirely and boot from disk 2.
 
 ```
 k240_1:intro >nil: <nil:
 k240_2:playk240 >nil: <nil:
 ```
+
 ### k240\_2:aliens/a1data1 - a6data1
 
 Always 610 bytes. Sprite metadata table, consisting of 61 entries of 10 bytes
@@ -130,15 +131,17 @@ values which appear in each alien file.
 ### k240\_2:english.mgl, french.mgl, german.mgl
 
 Text strings in each language, compressed in MGL format. Anyone creating an
-unofficial translation for the game would need to modify one of these, then
-find a way to re-pack it into MGL format.
+unofficial translation for the game would need to modify one of these, then find
+a way to re-pack it into MGL format. Alternatively, you could mod the game to
+bypass the MGL loader and use uncompressed language files.
 
 The first 1,210 bytes of each when uncompressed consists of 605 two-byte word
 offsets for the beginning of each string in the file.
 
 The rest of the file consists of 7-bit ASCII text strings, terminated by null
-bytes. Newlines are represented by LF only, as is standard on Amiga. The file
-ends with `00 0a`. Non-English letters are represented by the following values:
+bytes. Newlines are usually represented by LF only on Amiga, but in this file
+they are instead represented by `0xFF`. The file ends with `00 0a`. Non-English
+letters are represented by the following values:
 
 | Value |Char| 
 |-------|----|
@@ -172,7 +175,7 @@ It's not copied by the HD installer, so by checking for `idfile` the game can
 tell if it's installed to hard disk or running from floppy disks. The main
 reason you might want to do this is to determine whether the game must save to
 floppy disk (in which case it saves to `DF0:` or to hard disk (in which case it
-saves to `k240_2:`).
+saves to `k240_2:`, which is assigned to the HD install location).
 
 ### k240\_2:playk240
 
@@ -312,11 +315,11 @@ Speech audio files. Compressed in MGL format.
 
 ### Save game format
 
-(Not yet fully documented)
-
 Save games are stored in files `k240.1`, `k240.2`, `k240.3`, and `k240.4`. These
 are stored in `DF0:` if playing from floppy disk or `k240_2:` (nominally disk 2,
 but actually the game's directory on the hard disk) if playing from hard disk.
+
+For a full description, see [save game format](save-game-format.html).
 
 Eight chunks of the game's memory are saved:
 
@@ -333,4 +336,3 @@ Eight chunks of the game's memory are saved:
 | 149,514 |  2,336 | Alien fleets.  |
 |         |151,850 | TOTAL |
 
-A more detailed description of the save game format is planned.
