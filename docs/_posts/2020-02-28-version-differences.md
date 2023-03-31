@@ -285,8 +285,9 @@ What we do know about the review build is as follows:
   disks.
 - The finished manual appears to have been distributed with the review copy.
 - Magazines which reviewed K240 for their May 1994 issue are assumed to have
-  received a review copy. These included Amiga Action, Amiga Computing, Amiga
-  Concept, Amiga Dream, Amiga Format, Amiga Power, CU Amiga, Joystick, and
-  The One Amiga.
+  received an advance review copy. These included
+  the English-language magazines Amiga Action, Amiga Computing, Amiga Format,
+  Amiga Power, CU Amiga, and The One Amiga; and the French-language magazines
+  Amiga Concept, Amiga Dream, and Joystick.
   If you have any disks which survived the closure of those magazines,
   please [let us know](https://github.com/tetracorp/k240/issues/4).

@@ -36,6 +36,8 @@ Nothing happens.
 
 All ships cannot move for 40-198 days.
 
+This also affects missiles and spy satellites in transit.
+
 ### Scout Breakup
 
 Goes through all ships until it finds a Scout, then scraps it.
