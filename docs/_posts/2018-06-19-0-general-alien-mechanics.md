@@ -23,7 +23,7 @@ unaffected by how much ore is in the asteroid.
 Aliens cannot acquire blueprints, nor can they otherwise research or acquire new
 tech, although they can start with tech that is considered a blueprint to the
 player (for example, all aliens possess a direct counterpart to the Screen
-Generator)
+Generator).
 
 Aliens do not have an equivalent to the player's Intel system. No alien builds a
 Satellite Silo.
@@ -80,6 +80,11 @@ those colonists from the origin colony (perhaps to avoid reducing the colony to
 zero), although the Kll'Kp'Qua uniquely store surplus colonists in the
 Hibernation Hive and all colony ships draw population from there.
 
+The initial alien colony does not become active until 80 days from game start.
+Becoming active means that it can place buildings beyond the initial group,
+construct ships, fire missiles, send scouts, and so on. New colonies become
+active 40 days after they are initially established.
+
 ### Survival
 
 Each alien has its own rules for what buildings it needs to survive, what
@@ -92,22 +97,44 @@ suffer no ill-effects from radiation, while others are highly tolerant.
 ### Ships
 
 All aliens possess eight classes of ship, and each class has a fixed loadout.
+Some additionally have an Orbital Space Dock or equivalent. Some ships appear to
+be dummied out.
 
 All aliens have one Scoutship with low Armour and one ship cannon as its
 hardpoint; one Transporter; and one six-hardpoint battleship. The other five
 ship loadouts can vary considerably by alien.
 
-Various aliens have unique ship hardpoints.
+Alien ships have three classes of cannon like Terran ships, but which deal
+different damage, usually higher, and some species use only two cannons.  None
+have shields; instead, they have fixed Armour values, although at least one has
+a Deflector which effectively doubles that. Various aliens have unique ship
+hardpoints.
 
-The circumstances under which aliens build ships vary by alien.
+The circumstances under which aliens build ships vary by alien. Each time the
+aliens build a ship, the ship they build is random. There is a random percentage
+chance to build each class of ship, and each has its own build time. Orbital
+Space Docks are not randomly built, and some species have one ship dummied out
+so that they never build it randomly.
+
+### Fleets
+
+Aliens always arrange ships in fleets, except for scout ships and transporters.
+They don't send individual ships to attack your colonies, since it would unfair
+to prevent your fleets from intercepting them. Of course, the player can send
+individual ships without fear of interception.
+
+Each alien has its own logic for how fleets are formed and used. They generally
+have a minimum fleet size, and are based around a certain asteroid where the
+ships were built. They generally select their targets at random from the list of
+our asteroids known to the enemy.
 
 ### Missiles
 
 Each alien has a selection of as many as nine different missiles, with the
-exception of the Tylarans, who never build any missiles.
+exception of the Tylarans, who never build or fire any missiles.
 
 Most alien missiles are functionally identical to their Terran counterparts, but
-all missile-using aliens possess several unique missiles which replace the
+all missile-using aliens possess a number of unique missiles which replace the
 standard missile in their slot.
 
 Each asteroid builds one missile every 25-35 days depending on alien. Building a
@@ -119,4 +146,12 @@ Up to 5 of each type of missile may be built. If the colony "rolls" a missile
 which has already hit the maximum, no missile is built. No ore is required to
 build missiles.
 
-The circumstances under which missiles are fired varies by alien.
+Aliens usually select their missile targets randomly from the Terran colonies
+known to them. The timing and circumstances under which missiles are fired
+varies by alien. Many aliens will intentionally fire a Mega missile against an
+incoming terran asteroid to prevent a collision.
+
+The selection of missiles varies. Some will fire a random selection of missiles,
+while other aliens have specific sets of missiles which are fired in certain
+circumstances. It is often the case that aliens will launch missile strikes in
+retaliation as soon as they detect your missiles on their radar.

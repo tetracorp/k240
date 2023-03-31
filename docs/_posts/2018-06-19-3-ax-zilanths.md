@@ -241,57 +241,65 @@ Stabilising Platform, and Engineering Plant. It also requires at least one Ore
 Extractor or Resource Podule. They also require at least one Spacecraft Dock,
 and produce proportionally faster with up to a maximum of four docks.
 
-Each ship an armor value, speed, number of hardpoints (sometimes erroneous),
-ID number in the game code, and up to six hardpoints. The names here are
-arbitrary and do not appear in the code.
+Each ship an Armour value, speed, number of hardpoints (sometimes erroneous), ID
+number in the game code, chance to build, build time, and up to six hardpoints.
+The names here are arbitrary and do not appear in the code.
 
-Name                  | Armor | S | H | ID | HP1| HP2| HP3| HP4| HP5| HP6|
-----------------------|------:|--:|--:|:---|----|----|----|----|----|----|
-"Fighter"             |    30 | 2 | 2 | 3c | 06 | 09 |    |    |    |    |
-"Light Cruiser"       |    40 | 2 | 3 | 3d | 07 | 09 | 01 |    |    |    |
-"Heavy Cruiser"       |    40 | 1 | 2 | 3e | 06 | 05 | 00 | 02 |    |    |
-"Scoutship"           |    15 | 1 | 1 | 3f | 06 |    |    |    |    |    |
-"Light Bomber"        |    50 | 1 | 4 | 40 | 09 | 07 | 03 | 01 |    |    |
-"Heavy Bomber"        |    60 | 1 | 5 | 41 | 09 | 07 | 03 | 01 | 04 |    |
-"Transporter"         |    35 | 0 | 2 | 42 | 06 | 06 |    |    |    |    |
-"Battleship"          |    90 | 0 | 6 | 43 | 07 | 06 | 03 | 01 | 07 | 03 |
+Name                  | Armour| S | H | ID | Bld%    | Days     | HP1| HP2| HP3| HP4| HP5| HP6|
+----------------------|------:|--:|--:|:---|--------:|---------:|----|----|----|----|----|----|
+"Fighter"             |    30 | 2 | 2 | 3c | 20%     | 30       | 06 | 09 |    |    |    |    |
+"Light Cruiser"       |    40 | 2 | 3 | 3d | 20%     | 35       | 07 | 09 | 01 |    |    |    |
+"Heavy Cruiser"       |    40 | 1 | 2 | 3e | &mdash; | &mdash;  | 06 | 05 | 00 | 02 |    |    |
+"Scoutship"           |    15 | 1 | 1 | 3f | 10%     | 10       | 06 |    |    |    |    |    |
+"Light Bomber"        |    50 | 1 | 4 | 40 | 20%     | 40       | 09 | 07 | 03 | 01 |    |    |
+"Heavy Bomber"        |    60 | 1 | 5 | 41 | 20%     | 50       | 09 | 07 | 03 | 01 | 04 |    |
+"Transporter"         |    35 | 0 | 2 | 42 |  3%     | 60       | 06 | 06 |    |    |    |    |
+"Battleship"          |    90 | 0 | 6 | 43 |  7%     | 90       | 07 | 06 | 03 | 01 | 07 | 03 |
+"Orbital Space Dock"  |   200 | 0 | 4 | 4b | ..      | ..       | 06 | 06 | 07 | 0a |    |    |
 
 Ship $3c "Fighter"
-: A fast 30 Armor ship with a Photon Cannon (8 damage) and Warp Generator.
+: A fast 30 Armour ship with a Photon Cannon (8 damage) and Warp Generator.
 Warp Generator phases ship out for three days and back in for two. Due to a bug,
 however, being phased out has no effect.
 
 Ship $3d "Light Cruiser"
-: A fast 40 Armor ship with a a Plasma Cannon (5 damage), Warp Generator, and
+: A fast 40 Armour ship with a a Plasma Cannon (5 damage), Warp Generator, and
 Disruptor.
 
 Ship $3e "Heavy Cruiser"
-: A slower 40 Armor ship with a Photon Cannon (8 damage), Warp Generator, Ion
+: A slower 40 Armour ship with a Photon Cannon (8 damage), Warp Generator, Ion
 Cannon and Disruptor. Listed in the game code has having two hardpoints,
-although it has four.
+although it has four. Never built randomly.
 
 Ship $3f "Scoutship"
-: A slower 15 Armor ship with a Photon Cannon (8 damage). The weakest ship. The
+: A slower 15 Armour ship with a Photon Cannon (8 damage). The weakest ship. The
 Ax'Zilanths and Rigellians are the only two species with a slow scout ship like
 this. The only small Ax'Zilanth ship without a Warp Generator.
 Each colony sends a scoutship every 130 days, the slowest of any alien.
 
 Ship $40 "Light Bomber"
-: A slower 50 Armor ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
+: A slower 50 Armour ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
 Bomb and Disruptor.
 
 Ship $41 "Heavy Bomber"
-: A slower 60 Armor ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
+: A slower 60 Armour ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
 Bomb, Disruptor and Vortex Mine. Identical to the previous ship except for
-higher Armor and a Vortex Mine.
+higher Armour and a Vortex Mine.
 
 Ship $42 "Transporter"
-: A slow 35 Armor ship with two Photon Cannons (8 damage). A typical
+: A slow 35 Armour ship with two Photon Cannons (8 damage). A typical
 Transporter.
 
 Ship $43 "Battleship"
-: A slow 90 Armor ship with six hardpoints: two Plasma Cannons (5 damage),
+: A slow 90 Armour ship with six hardpoints: two Plasma Cannons (5 damage),
 two Chaos Bombs, a Photon Cannon (8 damage) and a Disruptor.
+
+Ship $4b "Orbital Space Dock"
+: The first time the colony attempts to spawn a Transporter or Battleship, it
+instead creates an Orbital Space Dock. As a result, it effectively has a 10%
+build chance and either a 60 or 90 day build time. It is especially strong
+compared to other species' OSDs, having 200 Armour instead of 100, plus a
+Deflector which effectively doubles that to 400.
 
 ### Starting resources
 
@@ -315,8 +323,9 @@ They start with the following ships:
 
 ### Colonization strategy
 
-Each Ax'Zilanth colony considers starting a new colony every 35 days.
-The colonization countdown freezes if there is no Strategy Control.
+Each Ax'Zilanth colony considers starting a new colony every 35 days. The
+colonization countdown freezes if there is no Strategy Control. The initial
+colony takes 80 days to activate, and each new colony takes 40 days to activate.
 
 A colony ship carries 100 population, altough this does not decrease the
 population on the asteroid.
@@ -334,3 +343,67 @@ depletes two units of a random ore each time. They can mine all ten ores types.
 Building additional Ore Extractors has no effect, although they will build as
 many as six before hitting the soft cap. The amount of ore mined is not stored
 anywhere.
+
+### Population
+
+Population increases by 1 per day, provided that radiation is 40% or lower, and
+the colony has at least one Nutrient Podule and Atmospheric Regulator. Radiation
+above this amount does not decrease population. Each Personnel Podule has
+capacity for 100 population. If there are no Personnel Podules, the colony is
+destroyed.
+
+Population decreases by 3 per day without an Atmospheric Regulator, and 1 per
+day without a Nutrient Podule. If both are missing, it only loses 1 per day. If
+either are missing, it reacts by building an Atmospheric Regulator, Personnel
+Podule, Reactor, and Nutrient Podule.
+
+### Spying
+
+Each colony has a daily chance to spot one Terran spy satellite in orbit and
+shoot it down. The chance begins at 1% and increases by 1% per 16 days. Once
+they shoot a satellite down, the chance drops to 6%.
+
+The daily chance is increased by 1% per 16 days for each Sensory Matrix and
+Subspace Detectors.
+
+### Scouting
+
+Every 130 days, each colony sends a scout ship to explore a random sector of
+space. This is substantially slower than the others.
+
+### Tactical
+
+The Ax'Zilanths have a very specific military strategy. They have a massive 80
+pixel sensor range for detecting incoming missiles (compared to 16 for the Ore
+Eaters, for example), but only 30 pixels for detecting incoming fleets.
+
+Every 16th day of the year (days ending in 00, 16, 32, 48, 64, 80, or 96), each
+colony measures the damage done to it and retaliates with a missile strike
+depending on the amount of damage done since the last check:
+
+- If at least 220 damage, it fires 1-6 Hellfire, 1-3 Nuclear, 1-3 Virus,
+  1 Mega, and 1 Stasis
+- If at least 150 damage, it fires 1-3 Area Explosive, 1-3 Hellfire,
+  1-3 Scatter, 1 Stasis, and 3 Vortex
+- If at least 50 damage, it fires 1-3 Hellfire.
+
+Every 8th day that isn't a missile day (days ending in 08, 24, 40, 56, 72,
+or 88), it fires a single Static Inducer missile at a random Terran asteroid.
+
+On all other days, there is a 1% chance to trigger the Mass Displacement Podule,
+the asteroid teleporter, on a random asteroid. If there is no Mass Displacement
+Podule built yet or it doesn't fire, there is a 10 daycolony cycle of proximity
+checks for asteroids at risk of collision, where it will immediately attempted
+to trigger a teleport. If this isn't possible, its backup plan is to fire one
+Mega missile.
+
+If none of these occur, every 8 days divided by number of colonies, it checks
+for Terran missiles or spy satellites within sensor range, which is a massive 80
+pixel radius; for comparison, that's one quarter of the game screen. It
+retaliates by firing 1-4 of a unique missile which deflects incoming missiles.
+
+Failing that, they resort to fleets, but will only use fleets once they have
+lost one colony to building destruction (i.e. Terran attack, not asteroid
+collision). They need at least 10 ships present to form a fleet, and form fleets
+of 0 to 15 ships. The retreat chance is set at 100%; i.e. they will never
+retreat until destroyed.

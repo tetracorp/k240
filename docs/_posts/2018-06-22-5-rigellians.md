@@ -72,8 +72,9 @@ At least one Community of either type must must exist or the colony is
 destroyed.
 
 Deep Space Probes
-: A long-range sensor which triggers every 100 days. May trigger a Mega missile
-to be fired. Further research is necessary.
+: A long-range sensor which triggers every 100 days divided by the number of
+colonies. Automatically detects a Terran asteroid, then launches a missile
+strike.
 
 Defence Battery
 : Anti-missile pod. Has a 21% chance to shoot down incoming missiles. Each
@@ -221,53 +222,53 @@ They require at least one Extractor of either type. Shipbuilding requires at
 least one Ground Dock, with progress increasing faster for each additional
 Ground Dock, to a maximum of four.
 
-Each ship an armor value, speed, number of hardpoints (sometimes erroneous),
-ID number in the game code, and up to six hardpoints. The names here are
+Each ship an Armour value, speed, number of hardpoints (sometimes erroneous),
+ID number in the game code, chance to build, build time, and up to six hardpoints. The names here are
 arbitrary and do not appear in the code.
 
-Name                 | Armor | S | H | ID | HP1| HP2| HP3| HP4| HP5| HP6|
----------------------|------:|--:|--:|:---|----|----|----|----|----|----|
-"Destroyer"          |    20 | 2 | 2 | 3c | 07 | 00 |    |    |    |    |
-"Fighter"            |    20 | 2 | 2 | 3d | 11 | 07 |    |    |    |    |
-"Heavy Cruiser"      |    40 | 1 | 2 | 3e | 06 | 05 | 00 | 02 |    |    |
-"Scoutship"          |    15 | 2 | 1 | 3f | 05 |    |    |    |    |    |
-"Stealth Bomber"     |    60 | 1 | 4 | 40 | 09 | 07 | 01 | 01 |    |    |
-"Vampire"            |    50 | 1 | 4 | 41 | 09 | 07 | 05 | 0d |    |    |
-"Transporter"        |    30 | 0 | 2 | 42 | 05 | 05 |    |    |    |    |
-"Battleship"         |   100 | 0 | 6 | 43 | 07 | 07 | 00 | 01 | 01 | 05 |
+Name                 | Armour| S | H | ID | Bld%    | Days     | HP1| HP2| HP3| HP4| HP5| HP6|
+---------------------|------:|--:|--:|:---|--------:|---------:|----|----|----|----|----|----|
+"Destroyer"          |    20 | 2 | 2 | 3c | 25%     | 25       | 07 | 00 |    |    |    |    |
+"Fighter"            |    20 | 2 | 2 | 3d | 25%     | 40       | 11 | 07 |    |    |    |    |
+"Heavy Cruiser"      |    40 | 1 | 2 | 3e | &mdash; | &mdash;  | 06 | 05 | 00 | 02 |    |    |
+"Scoutship"          |    15 | 2 | 1 | 3f | 10%     | 10       | 05 |    |    |    |    |    |
+"Stealth Bomber"     |    60 | 1 | 4 | 40 | 20%     | 60       | 09 | 07 | 01 | 01 |    |    |
+"Vampire"            |    50 | 1 | 4 | 41 | 10%     | 80       | 09 | 07 | 05 | 0d |    |    |
+"Transporter"        |    30 | 0 | 2 | 42 |  5%     | 70       | 05 | 05 |    |    |    |    |
+"Battleship"         |   100 | 0 | 6 | 43 |  7%     | 100      | 07 | 07 | 00 | 01 | 01 | 05 |
 
 Ship $3c "Destroyer"
-: A fast 20 Armor ship with a Plasma Cannon (7 damage) and an Ion Cannon.
+: A fast 20 Armour ship with a Plasma Cannon (7 damage) and an Ion Cannon.
 
 Ship $3d "Fighter"
-: A fast 20 Armor ship with what appears to be non-functioning hardpoint slot
+: A fast 20 Armour ship with what appears to be non-functioning hardpoint slot
 reserved for Shield x20. Also has a Plasma Cannon (7 damage).
 
 Ship $3e "Heavy Cruiser"
-: A slower 40 Armor ship with four hardpoints: a Laser Cannon (5 damage), an
+: A slower 40 Armour ship with four hardpoints: a Laser Cannon (5 damage), an
 Ion Cannon, a Napalm Orb, and what appears to be a non-functional Photon Cannon
 that deals zero damage because the Rigellians are hardcoded to have no photon
-technology.
+technology. Never built randomly.
 
 Ship $3f "Scoutship"
-: A fast 15 Armor scoutship with a Laser Cannon (5 damage).
+: A fast 15 Armour scoutship with a Laser Cannon (5 damage).
 Each colony sends out a scoutship every 50 days, which is quite slow.
 
 Ship $40 "Stealth Bomber"
-: A slower 60 Armor ship with four hardpoints: Warp Generator, Plasma Cannon (7
+: A slower 60 Armour ship with four hardpoints: Warp Generator, Plasma Cannon (7
 damage), and two Disruptors. Due to a bug, Warp Generator does nothing but
 make vampires sparkle.
 
 Ship $41 "Vampire"
-: A slower 50 Armor ship with four hardpoints: Warp Generator, Plasma Cannon (7
+: A slower 50 Armour ship with four hardpoints: Warp Generator, Plasma Cannon (7
 damage), Laser Cannon (5 damage) and a unique power drain hardpoint which halves
 an enemy colony's power production.
 
 Ship $42 "Transporter"
-: A typical slow transporter with 30 Armor and two Laser Cannons.
+: A typical slow transporter with 30 Armour and two Laser Cannons.
 
 Ship $43 "Battleship"
-: A slow 100 Armor ship with six hardpoints: Two Plasma Cannons (7 damage), two
+: A slow 100 Armour ship with six hardpoints: Two Plasma Cannons (7 damage), two
 Disruptors, an Ion Cannon, and a Laser Cannon (5 damage).
 
 ### Starting resources
@@ -290,7 +291,8 @@ They start with the following ships:
 ### Colonization strategy
 
 The Rigellians attempt to start a new colony every 35 days. If they have a
-colony ship, they will send it to colonize the asteroid.
+colony ship, they will send it to colonize the asteroid. The initial colony
+takes 80 days to activate, and each new colony takes 40 days to activate.
 
 A new colony places the following buildings to start:
 
@@ -309,3 +311,53 @@ by half, to a minimum of zero.
 In addition, perhaps due to an off-by-one error, the Rigellians also mine one of
 the first ores and two units of one of the second ores, even if they have no
 mines or Strategic Bunker.
+
+### Population
+
+Population increases by 2 per day, as long as the colony has at least one Farm
+and radiation is 40% or lower. Radiation higher than this does not decrease
+population. The maximum is 100 per short Community and 200 per tall Community.
+The colony must have at least one Community of either type or be destroyed.
+
+### Spying
+
+Each colony has a daily chance to spot one Terran spy satellite in orbit and
+shoot it down. The chance begins at 1% and increases by 1% per 16 days. Once
+they shoot a satellite down, the chance drops to 6%.
+
+The daily chance is increased by 1% per 16 days for each Probes.
+
+### Scouting
+
+Every 50 days, each colony sends a scout ship to explore a random sector of space.
+
+### Tactical
+
+The Rigellians detect Terran missiles at a range of 40 pixels (above average),
+and fleets at a range of 30 (slightly below average).
+
+A timer counts every 100 days divided by the number of Rigellian colonies. When
+it triggers at a colony with Deep Space Probes, it automatically detects an
+alien asteroid and fires 1-2 Nuclear, 1-4 Scatter, and 1-4 power drain missiles
+at a random asteroid.
+
+Otherwise, there's a 10 daycolony cycle which checks for asteroid collisions. If
+it does, it fires a single Mega missile at the incoming asteroid. If it has no
+Mega missiles or Missile Launcher building, and there is no Gravitic Convertor
+(Gravity Nullifier) active, then as a last ditch effort they will evacuate the
+asteroid on ships.
+
+Otherwise, every day divisible by four (and on every other day at an asteroid if
+the missile frequency counter is at least 140 or asteroid byte 91 bit 3 is set),
+there is an 80 daycolony counter, which triggers a 30% chance to launch a
+missile strike of 1-3 Virus, 1-4 bioweapon (kill 20 colonist and immediate viral
+outbreak), and 1-3 unique powerdrain missile.
+
+The other 70% of the time, there is a 12 day cycle with a huge missile strike of
+6 Explosive, 4 Area Explosive, 2 Nuclear, 3 Scatter, and 1 Mega. In both cases
+the target is chosen at random from our asteroids known to the enemy.
+
+On the three out of days when it's not using missiles or fleets, it appears to
+check for a Transporter and build one if it can't find one. There's code which
+appears to make an "Alert" voice line here that I've never seen trigger, maybe
+some leftover debug code.
