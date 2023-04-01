@@ -2,7 +2,7 @@
 ; novim: list listchars=tab\:\ ░:
 
 ; Config file for using ira to disassemble K240 disk 2 "playk240" v2.000.
-; Last updated 2022-07-15 to incorporate data added from Ghidra disassembly.
+; Last updated 2023-03-31 to incorporate data added from Ghidra disassembly.
 
 COMMENT	$00000000	|          _  ______  _  _    ___                |
 COMMENT	$00000000	|         | |/ /___ \| || |  / _ \               |
@@ -13,16 +13,16 @@ COMMENT	$00000000	|  __| (_)___ __ _ ______ ___ _ __ | |__| |_  _  |
 COMMENT	$00000000	| / _` | (_-</ _` (_-<_-</ -_) '  \| '_ \ | || | |
 COMMENT	$00000000	| \__,_|_/__/\__,_/__/__/\___|_|_|_|_.__/_|\_, | |
 COMMENT	$00000000	|    <https://tetracorp.github.io/k240/>   |__/  |
-COMMENT	$00000000	 
+COMMENT	$00000000	
 COMMENT	$00000000	K240 is copyright 1994 Gremlin Graphics.
 COMMENT	$00000000	This annotated disassembly is believed to constitute fair use
 COMMENT	$00000000	for the purpose of analysis and commentary.
-COMMENT	$00000000	 
+COMMENT	$00000000	
 COMMENT	$00000000	Disassemble using this config file:
 COMMENT	$00000000	ira -A -keepzh -newstyle -compat=bi -config playk240
-COMMENT	$00000000	 
+COMMENT	$00000000	
 COMMENT	$00000000	Reassemble from the source code:
-COMMENT	$00000000	vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.asm
+COMMENT	$00000000	vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.68k.asm
 
 MACHINE	68000
 ENTRY	$00000000
@@ -236,7 +236,12 @@ COMMENT	$00000b5e	screen 1, 2, 3 or 5
 COMMENT	$00000b8c	;72
 COMMENT	$00000bde	Wait for mouse click, then return.
 COMMENT	$00000bf4	What's interesting about this is that it seeds RNG from the position of the CRT scan beam.
-COMMENT	$00000c0c	Random number generator. Important function used by many game mechanics. Takes D0 as input, generating a number between 0 and D0 minus 1, and storing the result in D0. This behaviour has been tested to work. e.g. if d0 is 100, this function generates a number from 0 to 99. Often used this way to calculate percentage chances.
+COMMENT	$00000c0c	Random number generator. Important function used by many game
+COMMENT	$00000c0c	mechanics. Takes D0 as input, generating a number between 0
+COMMENT	$00000c0c	and D0 minus 1, and storing the result in D0. This behaviour
+COMMENT	$00000c0c	has been tested to work. e.g. if d0 is 100, this function
+COMMENT	$00000c0c	generates a number from 0 to 99. Often used this way to
+COMMENT	$00000c0c	calculate percentage chances.
 COMMENT	$00000c42	A modulo operation divides the random 16-bit seed by the input
 COMMENT	$00000c42	number and returns the remainder.
 COMMENT	$00000c8e	open
@@ -256,8 +261,8 @@ COMMENT	$00000e56	which have their own loader and appear to be uncompressed,
 COMMENT	$00000e56	and save game files.
 COMMENT	$00001e3c	-------End MGL file reading code-------
 COMMENT	$00001e3c	
-COMMENT	$00001e3c	Checks for presence of ID file which determines whether or not
-COMMENT	$00001e3c	the game is running from HD / prevents you from saving on disk 2
+COMMENT	$00001e3c	Checks for presence of ID file which determines whether
+COMMENT	$00001e3c	or not the game is running from HD
 COMMENT	$00001e50	lock
 COMMENT	$00001ea8	Attempting to look at an asteroid
 COMMENT	$00001eba	Checks if you can see the asteroid
@@ -267,6 +272,11 @@ COMMENT	$00001f08	"E", or 69
 COMMENT	$00001f2e	view 4
 COMMENT	$00001f62	win screen
 COMMENT	$0000207e	Init player's asteroid
+COMMENT	$0000208c	Loop over every square in the asteroid map
+COMMENT	$0000208c	Clear non-default values in the first two bytes
+COMMENT	$0000208c	of each square (01 first byte, 00-0f second byte)
+COMMENT	$00002094	Negative value for third byte? (00 by default)
+COMMENT	$00002094	Sets a random terrain sprite 2d to 2f
 COMMENT	$000020b6	d0 = random 22-38
 COMMENT	$00002100	Bit 0: Asteroid occupied
 COMMENT	$00002100	Bit 1: Asteroid viewable by player
@@ -770,6 +780,7 @@ COMMENT	$0000d658	if asteroid doesn't exist:
 COMMENT	$0000d66c	coords?
 COMMENT	$0000d6da	every 8 days
 COMMENT	$0000d6f6	Swixaran-specific
+COMMENT	$0000d760	Pick a random ground target?
 COMMENT	$0000d796	random coords?
 COMMENT	$0000d816	random position?
 COMMENT	$0000d834	Movement?
@@ -787,9 +798,9 @@ COMMENT	$0000dc9a	Missiles and vortex storms also appear to be ships.
 COMMENT	$0000dc9a	d2 = ship type
 COMMENT	$0000dd28	random facing
 COMMENT	$0000dd40	large ships, transporter size and up
-COMMENT	$0000e1fa	missile? is fire also a ship?
 COMMENT	$0000e1fa	Tyl Energiser: d0=50, d1=$88, d5=0
 COMMENT	$0000e28a	Applies to the Kll triangular ship which rotates
+COMMENT	$0000e2d4	Burning fire, e.g. napalm, hellfire sprite.
 COMMENT	$0000e324	Sound G: Missile launch
 COMMENT	$0000e324	Missile launch sound
 COMMENT	$0000e38e	Fire deals double damage to Swixaran
@@ -797,8 +808,8 @@ COMMENT	$0000e38e	2 instead of 1
 COMMENT	$0000e3ee	Missile
 COMMENT	$0000e4de	10 damage
 COMMENT	$0000e4e0	Deflector
-COMMENT	$0000e4ea	Apply damage to ship. If damage reduces armor to zero or lower:
-COMMENT	$0000e4f0	explode
+COMMENT	$0000e4ea	Deflector reduces damage to half rounded down, minimum zero
+COMMENT	$0000e4f0	order ship to explode if it is below 1hp
 COMMENT	$0000e5ac	Destroy small/medium ships
 COMMENT	$0000e5e6	Destroy large ships (transporter/battleship size)
 COMMENT	$0000e6e4	more ship destroy
@@ -960,7 +971,7 @@ COMMENT	$0000f428	Virus main effect.
 COMMENT	$0000f448	Virus instantly destroys the building it hits
 COMMENT	$0000f448	Enough damage to destroy building with detonation
 COMMENT	$0000f452	make flat tiles (2d, 2e, 2f) green
-COMMENT	$0000f482	Triggers every 5 days, although certain things affect the timer
+COMMENT	$0000f482	Triggers every 6 days
 COMMENT	$0000f4a6	Once per asteroid
 COMMENT	$0000f4c0	Spread virus
 COMMENT	$0000f530	Ore-Eater specific effect:
@@ -1021,7 +1032,11 @@ COMMENT	$0000fbee	Rigellian nuke. Deals more damage.
 COMMENT	$0000fc00	Not in space view
 COMMENT	$0000fc34	Rigellian nuke deals 10 damage per building instead of 7.
 COMMENT	$0000fc9c	Not in space view
-COMMENT	$0000fe58	10 damage.
+COMMENT	$0000fe32	Copy incoming missile data
+COMMENT	$0000fe32	27 words = one missile
+COMMENT	$0000fe42	Strike at each of four squares based on blast pattern.
+COMMENT	$0000fe42	Blast patterns are not square.
+COMMENT	$0000fe58	Ground hit for 10 damage.
 COMMENT	$0000fe72	Meteors deal 30 damage. Really powerful.
 COMMENT	$0000fe74	Hit a building for d7 damage.
 COMMENT	$0000ffc2	10 damage
@@ -1072,20 +1087,30 @@ COMMENT	$00010aac	Weapon 05.
 COMMENT	$00010aac	Notably, alien laser ranges from 2 to 5 depending on alien.
 COMMENT	$00010aac	Swixarans don't user laser.
 COMMENT	$00010ab0	Weapon 06. Confirmed by memory edit that 06 is called Photon.
-COMMENT	$00010ab0	Interesting bug: Plasma costs twice as much, despite being weaker.
-COMMENT	$00010ab0	The damage values are consistent with the ground turrets.
-COMMENT	$00010ab0	The bug is that plasma is incorrectly presented and priced as if
-COMMENT	$00010ab0	it was strongest.
-COMMENT	$00010ab0	Photon is also the strongest for aliens, ranging from 6 to 100
-COMMENT	$00010ab0	depending on alien. Rigellians don't use photon tech at all.
+COMMENT	$00010ab0	Interesting bug: Plasma costs twice as much, despite being
+COMMENT	$00010ab0	weaker. The damage values are consistent with the ground
+COMMENT	$00010ab0	turrets.
+COMMENT	$00010ab0	The bug is that plasma is incorrectly presented and priced
+COMMENT	$00010ab0	as if it was strongest.
+COMMENT	$00010ab0	Photon is also the strongest for aliens, ranging from
+COMMENT	$00010ab0	6 to 10 depending on alien. Rigellians don't use photon
+COMMENT	$00010ab0	tech at all.
 COMMENT	$00010ab4	Weapon 07. Memory edit confirms that hardpoint 07 is called Plasma.
 COMMENT	$00010ab4	Alien plasma is 4 to 7 depending on alien.
 COMMENT	$00010ac4	30% chance
 COMMENT	$00010ade	Sound L: Pew (ship cannon)
 COMMENT	$00010ade	Ship pew
+COMMENT	$00010b02	Note on chance generation:
+COMMENT	$00010b02	_RandInt generates a number between 0 and d0 minus 1
+COMMENT	$00010b02	i.e. here it's 0-9
+COMMENT	$00010b02	CMPI subtracts the first from the second
+COMMENT	$00010b02	i.e. d0 minus 5
+COMMENT	$00010b02	BPL is used if the number is not negative
+COMMENT	$00010b02	so here, the code continues 50% of the time.
 COMMENT	$00010b38	5 damage.
 COMMENT	$00010b4c	Sound M: Zap (ion cannon miss)
 COMMENT	$00010b4c	Ground zap
+COMMENT	$00010b74	20% chance
 COMMENT	$00010bdc	5 damage.
 COMMENT	$00010bf6	Sound M: Zap (ion cannon miss)
 COMMENT	$00010bf6	Ground zap
@@ -1108,6 +1133,7 @@ COMMENT	$00010e6e	Note a complete lack of Warp Generator code here.
 COMMENT	$00010e6e	Suggests that warp generators used by aliens do nothing.
 COMMENT	$00010e84	Add shields from hardpoints to ship hit points
 COMMENT	$00010ea8	50: armour
+COMMENT	$00010f22	count 8
 COMMENT	$00010fe0	buttons
 COMMENT	$00010ff8	50, 31 unique including return
 COMMENT	$000110c2	7200
@@ -1172,12 +1198,38 @@ COMMENT	$00012a9c	Must be move asteroids since it checks for iceman cheat
 COMMENT	$00012a9c	This is the only code which checks it
 COMMENT	$00012aa6	move asteroids
 COMMENT	$00012b4e	probably create or establish asteroid
-COMMENT	$00012b90	probably init asteroids
+COMMENT	$00012b54	d0 = random 22-38
+COMMENT	$00012b54	x16 = [352, 368, 384, 400, 416, 432, 448, 464,
+COMMENT	$00012b54	 480, 496, 512, 528, 544, 560, 576, 592, 608]
+COMMENT	$00012b6a	Coords (d1 d2 d3 d4) randomly chosen from:
+COMMENT	$00012b6a	40,40 to 80,80
+COMMENT	$00012b6a	80,40 to 120,80
+COMMENT	$00012b6a	120,40 to 160,80
+COMMENT	$00012b6a	160,40 to 200,80
+COMMENT	$00012b6a	200,40 to 240,80
+COMMENT	$00012b6a	240,40 to 280,80
+COMMENT	$00012b6a	40,80 to 80,120
+COMMENT	$00012b6a	80,80 to 120,120
+COMMENT	$00012b6a	120,80 to 160,120
+COMMENT	$00012b6a	160,80 to 200,120
+COMMENT	$00012b6a	200,80 to 240,120
+COMMENT	$00012b6a	240,80 to 280,120
+COMMENT	$00012b6a	40,120 to 80,160
+COMMENT	$00012b6a	80,120 to 120,160
+COMMENT	$00012b6a	120,120 to 160,160
+COMMENT	$00012b6a	160,120 to 200,160
+COMMENT	$00012b6a	200,120 to 240,160
+COMMENT	$00012b72	Init asteroid if asteroid doesn't exist,
+COMMENT	$00012b72	topleft x/y coord is  below d5, or
+COMMENT	$00012b72	bottomright x/y coord is below d6
+COMMENT	$00012b90	Init an asteroid
 COMMENT	$00012bb2	374
 COMMENT	$00012bc2	random number between -8 and +7. Direction?
 COMMENT	$00012bd2	320, maximum width
 COMMENT	$00012bd8	319, maximum horizontal coordinate
+COMMENT	$00012bf6	set direction
 COMMENT	$00012c2c	Random speed 0-4 chance: 1 (6/16), 2 (5/16), 3 (3/6), 4 (2/16)
+COMMENT	$00012c5c	Clear status bits
 COMMENT	$00012c7e	Generate asteroid name.
 COMMENT	$00012c7e	"AST: "
 COMMENT	$00012cf0	Init ore new asteroid
@@ -1207,6 +1259,7 @@ COMMENT	$00012e62	If occupied and viewable to player
 COMMENT	$00012e62	tell them a colony asteroid has been destroyed
 COMMENT	$00012eae	if asteroid known to player:
 COMMENT	$0001302e	asteroid explosion?
+COMMENT	$000131c0	check whose asteroid it is
 COMMENT	$000131ce	100 times. Demolish all buildings
 COMMENT	$000131ec	Enough damage to destroy building with detonation
 COMMENT	$00013274	WELL DONE!
@@ -1375,7 +1428,9 @@ COMMENT	$00014960	Number of medical centres. Medical centres don't work
 COMMENT	$00014960	on radiation unless you got power!
 COMMENT	$0001496e	Each medical centre counters the effects of 10% radiation.
 COMMENT	$00014986	Radiation is a lookup table, so the lethality isn't linear.
-COMMENT	$00014986	However, since it branches on negative, it's off-by-one because of the zero. At 0% radiation, you still have a 1% chance to lose a colonist to radiation.
+COMMENT	$00014986	However, since it branches on negative, it's off-by-one
+COMMENT	$00014986	because of the zero. At 0% radiation, you still have a 1%
+COMMENT	$00014986	chance to lose a colonist to radiation.
 COMMENT	$00014986	The difference between 10% and 60% is only 10%.
 COMMENT	$00014986	;
 COMMENT	$00014986	Display | Lethality | Actual
@@ -1547,13 +1602,38 @@ COMMENT	$00015ece	Base chance of next satellite reset to 5. The next
 COMMENT	$00015ece	satellite detection attempt has a base chance of 7%.
 COMMENT	$00015f4e	alien missile
 COMMENT	$00015f6e	Missiles in transit, other than spy satellites
-COMMENT	$00015fb6	Fleet
-COMMENT	$00016006	Missile firing
+COMMENT	$00015f6e	However, in testing, it also detects satellites
+COMMENT	$00015fb6	Loop over 8 players' fleets
+COMMENT	$00015fb6	Return d0 as 0 if detected, -1 otherwise
+COMMENT	$00015fce	coords
+COMMENT	$00016006	Missiles and fleets
+COMMENT	$00016006	Runs once per established enemy asteroid per day
+COMMENT	$0001600a	Returns:
+COMMENT	$0001600a	d1 = Our asteroids known to enemy
+COMMENT	$0001600a	d2 = Alien asteroid count
+COMMENT	$0001600a	d3 = Our asteroid count
+COMMENT	$0001603a	Kll-Kp-Qua daily chance to use fleet/missiles
+COMMENT	$0001603a	It occurs once per established alien colony
+COMMENT	$00016040	Begin retaliation.
+COMMENT	$00016040	Don't begin to retaliate again for 12 days.
+COMMENT	$00016048	In testing, this countdown resets to 12 whenever the player
+COMMENT	$00016048	attacks the alien with missiles. It counts down daily to 0.
+COMMENT	$00016048	Multiple colonies progress the countdown at increased rate.
+COMMENT	$00016048	Satellites are counted as missiles, but ships and aren't.
+COMMENT	$00016048	Fleets aren't either.
+COMMENT	$00016048	Alien retaliates at the start of the countdown.
+COMMENT	$0001605c	random alien asteroid
+COMMENT	$0001607e	Incoming Terran fleet detected
+COMMENT	$0001607e	Only respond once per 16 days
+COMMENT	$000160f0	No nearby enemies detected? Go on the offensive
+COMMENT	$000160f0	20% chance, maybe to stop it having to run every turn
+COMMENT	$000160f0	for efficiency
+COMMENT	$00016136	randomly pick a Terran asteroid as a target
 COMMENT	$000161a2	ore eaters
 COMMENT	$000161bc	1 Virus
-COMMENT	$000161bc	Listed as 01 14 for some reason
+COMMENT	$000161bc	Listed as 01 14 - 20% (off-by-one, 21%) chance of second
 COMMENT	$000161e4	target non-alien colony
-COMMENT	$000161f8	If there is at least one Terran Missile Silo:
+COMMENT	$000161f8	If there is at least one Rocket Battery (missile silo):
 COMMENT	$000161fe	Fire a Mega missile
 COMMENT	$0001620a	Missile target
 COMMENT	$0001623a	30% chance
@@ -1572,6 +1652,7 @@ COMMENT	$00016404	Fire them
 COMMENT	$00016420	1% chance:
 COMMENT	$0001643c	No missile silos
 COMMENT	$0001643c	Axz Mass Displacement Podule
+COMMENT	$0001646a	established colony
 COMMENT	$0001647e	If there are missile silos:
 COMMENT	$000164b0	If missile silos:
 COMMENT	$000164b6	If interceptor missiles in store:
@@ -1584,7 +1665,7 @@ COMMENT	$000164dc	No missile silos/interceptor missiles:
 COMMENT	$00016524	If Axz had previously lost a colony to building destruction:
 COMMENT	$0001655c	tyl
 COMMENT	$0001656e	If Seismic Atomiser:
-COMMENT	$00016576	Mine 8 of each ore per Seismic Atomiser
+COMMENT	$00016576	Mine 8 of first available ore per Seismic Atomiser
 COMMENT	$00016584	Disable asteroid engine
 COMMENT	$00016596	If asteroid engines exist:
 COMMENT	$000165a0	and at least one Power Collector or Power Generator:
@@ -1597,7 +1678,7 @@ COMMENT	$000165f8	If Energiser:
 COMMENT	$0001660a	Activate every 60 days.
 COMMENT	$0001661a	Trigger every Energiser ($74):
 COMMENT	$0001661e	coords
-COMMENT	$00016646	??
+COMMENT	$00016646	pew
 COMMENT	$0001665a	Sound R: Static Inducer
 COMMENT	$0001665a	Static Inducer noise if player is currently viewing this asteroid
 COMMENT	$000166ac	20% chance
@@ -1613,7 +1694,9 @@ COMMENT	$000167b6	check for mega missiles
 COMMENT	$000167bc	launch one mega at A1
 COMMENT	$000167e8	140
 COMMENT	$00016802	missile target
-COMMENT	$00016822	transporter
+COMMENT	$00016808	fix transporter shortage
+COMMENT	$00016822	transporter - build transporter
+COMMENT	$00016850	"Alert, alert"
 COMMENT	$00016864	Cycle counts down from 80 to 0. If it hits -1
 COMMENT	$00016864	it resets to 80 and has a 30% chance to fire.
 COMMENT	$00016882	3 Virus, 4 Vortex, 3 Antivirus
@@ -1628,12 +1711,16 @@ COMMENT	$00016906	30% chance
 COMMENT	$00016928	10% chance
 COMMENT	$00016966	20% chance
 COMMENT	$00016a0e	ghost fleet
-COMMENT	$00016a3e	Intentionally target the most populated colony
-COMMENT	$00016a44	30,000
+COMMENT	$00016a3e	Swixarans intentionally target the most populated colony
+COMMENT	$00016a44	30,000 - larger than practical maximum population of 6,600
 COMMENT	$00016a50	population
 COMMENT	$00016aa6	Missiles
 COMMENT	$00016ade	skip alien transporter and space dock
 COMMENT	$00016af4	Cooldown timer
+COMMENT	$00016c5a	Count ships except Transporter/"Terminator".
+COMMENT	$00016c7c	battleships
+COMMENT	$00016c90	battleships
+COMMENT	$00016ca0	take the larger of the two values
 COMMENT	$00016cf4	Per-alien effects for an asteroid, probably when their
 COMMENT	$00016cf4	colony is destroyed. Includes the ore eater ability to
 COMMENT	$00016cf4	boobytrap an asteroid so that it explodes when you
@@ -1648,6 +1735,7 @@ COMMENT	$00016df6	Presumably rig asteroid to explode when
 COMMENT	$00016df6	colonized by terran player
 COMMENT	$00016e12	Only if there's a colony left
 COMMENT	$00016e18	founded by small transporter?
+COMMENT	$00016e18	Colonies for asteroid ramming
 COMMENT	$00016eb2	Triggers when Rigellians lose a colony
 COMMENT	$00016ebe	only if there's a colony left
 COMMENT	$00016ec4	gravity nullifier active?
@@ -1655,6 +1743,7 @@ COMMENT	$00016ee0	population
 COMMENT	$00016f40	last colony
 COMMENT	$00016f72	ships
 COMMENT	$00016ff6	Missiles
+COMMENT	$00017000	count missiles in silo
 COMMENT	$00017078	Try to launch 100 random non-Mega missiles
 COMMENT	$000170a6	If missiles launching, pick a random target
 COMMENT	$000170bc	requires at least one missile silo
@@ -1708,6 +1797,7 @@ COMMENT	$000174d8	Sound P: Alien whoosh
 COMMENT	$000174e2	High yield.
 COMMENT	$000174e2	Loops over every building.
 COMMENT	$00017504	14 damage to every building
+COMMENT	$00017598	80% chance
 COMMENT	$000176a8	$6b: Alien equivalent to laser turret.
 COMMENT	$000176b4	$61: Alien equivalent to plasma turret. Medium damage.
 COMMENT	$000176c0	$62: Alien equivalent to photon turret. Most damage.
@@ -1735,7 +1825,8 @@ COMMENT	$000177de	2: Sensory Matrix, Repulse Generator, Energy Accumulator, Mass
 COMMENT	$000177e4	SHIPS: $3f (scout), 2x $42 (Transporter?), $43 (Battleship?), 5x $3d small ship
 COMMENT	$0001780e	1: Civilian Dome, Command Bunker, Turbine Array, Environment Processor
 COMMENT	$00017814	0: Robotic Mining Drill, Robotic Mining Drill, Ore Depot, Advanced Mining Drill
-COMMENT	$0001781a	SHIPS: One $3f scoutship, one $42 transporter, 6x $3d small ship, 4x $3e
+COMMENT	$0001781a	SHIPS: One $3f scoutship, one $42 transporter,
+COMMENT	$0001781a	6x $3d small ship, 4x $3e
 COMMENT	$00017846	Event: Reinforcements
 COMMENT	$0001784e	60 days before manual code request
 COMMENT	$00017856	300,000 credits
@@ -1809,12 +1900,13 @@ COMMENT	$00017fa6	building is not under construction
 COMMENT	$00017fa6	Seems to trigger turrets on building 94
 COMMENT	$00017fa6	but there are only 80 buildings
 COMMENT	$00017fa6	in this case, missile silo would never trigger here
-COMMENT	$00017fc4	CPU-style resource generation degrades by 1 per day
+COMMENT	$00017fc4	Delay while colony is becoming established
 COMMENT	$00017fec	iAlienBuildTimer: Cycle varies by alien: 60 60 60 70 60 50
 COMMENT	$00017ff4	Build a fixed cluster based on ast[720] priority
 COMMENT	$00017ffa	If no priority (0), build a random alien building cluster
 COMMENT	$00018006	daily things per asteroid
-COMMENT	$0001801a	can't happen if ast[89] bit 6 (alien colony) is unset
+COMMENT	$0001801a	The next lines require
+COMMENT	$0001801a	ast[89] bit 6 (alien colony established) set
 COMMENT	$00018038	Ast[91] bit 1 is set by Tylaran ship 40
 COMMENT	$00018038	Does it designate a military outpost?
 COMMENT	$00018038	Does not mine, build missiles, or build ships
@@ -1832,20 +1924,24 @@ COMMENT	$00018214	Increase population by 5 per day
 COMMENT	$0001821e	If population is above Hive capacity:
 COMMENT	$0001822a	Add 2 to hibernation
 COMMENT	$0001822a	Hibernation Hives store 600 each
-COMMENT	$0001824e	Every 16 days, if there are no Power Convertors or Power Collector,
-COMMENT	$0001824e	set to build: Power Convertores, Power Store, Power Store, Power Collector
+COMMENT	$0001824e	Every 16 days, if there are no Power Convertors or
+COMMENT	$0001824e	Power Collector, set to build:
+COMMENT	$0001824e	Power Convertores, Power Store, Power Store, Power Collector
 COMMENT	$00018256	Disable asteroid engine
 COMMENT	$0001825c	speed 2
 COMMENT	$00018262	Disable gravity nullifier
 COMMENT	$00018268	Require at least one Personnel Podule or colony ends
 COMMENT	$00018284	If there's a resource deficiency (power, food, air shortage):
 COMMENT	$00018284	Every 16 days, set to build:
-COMMENT	$00018284	Atmospheric Regulator, Personnal Podule, Reactor, Nutrient Podule
-COMMENT	$00018298	Requires a Nutrient Podule. Otherwise, lose 1 population per day
-COMMENT	$000182aa	Requires an Atmospheric Regulator. Otherwise, lose 3 population per day.
-COMMENT	$000182aa	Interestingly, if a colony is missing both Atmospheric Regulator and
-COMMENT	$000182aa	Nutrient Podule, it loses population at the slower food shortage rate
-COMMENT	$000182aa	of 1/day and ignores the lack of air.
+COMMENT	$00018284	Atmospheric Regulator, Personnel Podule, Reactor,
+COMMENT	$00018284	Nutrient Podule
+COMMENT	$00018298	Requires a Nutrient Podule. Otherwise, lose 1 population
+COMMENT	$00018298	per day
+COMMENT	$000182aa	Requires an Atmospheric Regulator. Otherwise, lose 3
+COMMENT	$000182aa	population per day. Interestingly, if a colony is missing
+COMMENT	$000182aa	both Atmospheric Regulator and Nutrient Podule, it loses
+COMMENT	$000182aa	population at the slower food shortage rate of 1/day and
+COMMENT	$000182aa	ignores the lack of air.
 COMMENT	$000182bc	Note: Each Atomiser reduces radiation by 30%.
 COMMENT	$000182ca	If radiation is 40% or lower, increase population by 1,
 COMMENT	$000182ca	to a maximum of 100 per Personnel Podule.
@@ -1857,18 +1953,22 @@ COMMENT	$000182f8	Aliens tech sure is more advanced
 COMMENT	$00018300	Requires at least one Civilian Dome or colony is erased
 COMMENT	$0001831c	If there's no environment processor or power generation,
 COMMENT	$0001831c	we have a problem: every 16 days, set to build:
-COMMENT	$0001831c	Civilian Dome, Command Bunker, Turbine Array, Environment Processor
+COMMENT	$0001831c	Civilian Dome, Command Bunker, Turbine Array,
+COMMENT	$0001831c	Environment Processor
 COMMENT	$0001832a	Require at least one Environment Processor, or else
 COMMENT	$0001832a	lose 1 population per day.
 COMMENT	$00018344	If there is at least one Ore Depot, Robotic Mining Drill,
 COMMENT	$00018344	or Advanced Mining Drill, increase population by 2.
 COMMENT	$00018344	Maximum population is 100 per Civilian Dome.
-COMMENT	$00018356	Requires at least 1 Turbine Array or Capacitor, or we have a problem.
+COMMENT	$00018356	Requires at least 1 Turbine Array or Capacitor,
+COMMENT	$00018356	or we have a problem.
 COMMENT	$00018356	However, it doesn't do anything special here.
-COMMENT	$00018362	Requires at least one Control Centre or Habitat, or colony destroyed
+COMMENT	$00018362	Requires at least one Control Centre or Habitat,
+COMMENT	$00018362	or colony destroyed
 COMMENT	$00018374	If there's a power or living quarters shortage,
 COMMENT	$00018374	every 32 days (note Tylaran slow build rate)
-COMMENT	$00018374	Set to build: Habitat, Power Collector, Habitat, Control Centre
+COMMENT	$00018374	Set to build: Habitat, Power Collector, Habitat,
+COMMENT	$00018374	Control Centre
 COMMENT	$00018388	Lose 1 population per day without a Habitat.
 COMMENT	$00018388	Fits the lore that Tylarans can survive in the cold of space.
 COMMENT	$0001839a	Gain 2 population per Habitat, maximum of 200 per Habitat.
@@ -1901,16 +2001,18 @@ COMMENT	$0001848e	If there is at least one Reactor Core, Energy Gatherer, or Ene
 COMMENT	$0001848e	and ast[24] is not zero
 COMMENT	$00018494	Enable Gravity Nullifier
 COMMENT	$0001849c	Disable Gravity Nullifier
-COMMENT	$000184aa	Require at least one Tissue Organ or lose 8 population per day.
+COMMENT	$000184aa	Require at least one Tissue Organ or lose 8
+COMMENT	$000184aa	population per day.
 COMMENT	$000184c8	Every 16 days, if there's a problem
 COMMENT	$000184c8	build Tissue Organ, Stomach, Solar Cells, Brain
 COMMENT	$000184d0	Require at least one Brain, or colony is destroyed.
-COMMENT	$000184d0	The way many aliens work, it only checks for the first problem on the list
-COMMENT	$000184d0	meaning that if the Brain is destroyed, the colony can survive for a while
-COMMENT	$000184d0	as long as its Tissue Organ was already destroyed.
+COMMENT	$000184d0	The way many aliens work, it only checks for the first
+COMMENT	$000184d0	problem on the list meaning that if the Brain is destroyed,
+COMMENT	$000184d0	the colony can survive for a while as long as its
+COMMENT	$000184d0	Tissue Organ was already destroyed.
 COMMENT	$000184dc	Without a stomach, lose 2 population per day
-COMMENT	$000184e8	With a stomach, increase population by 2 per day, to a maximum of
-COMMENT	$000184e8	100 per Tissue Organ.
+COMMENT	$000184e8	With a stomach, increase population by 2 per day, to a
+COMMENT	$000184e8	maximum of 100 per Tissue Organ.
 COMMENT	$0001850c	Requires at least one Surge Generator, Solar Cells, or Power Organ
 COMMENT	$0001850c	(power buildings):
 COMMENT	$0001850c	Enable Gravity Nullifier
@@ -2021,15 +2123,18 @@ COMMENT	$00018cf0	Since cheats occur before missile building in the main game
 COMMENT	$00018cf0	loop, it's possible for a missile to be built after ICBM,
 COMMENT	$00018cf0	which would max the alien out at 5 missiles.
 COMMENT	$00018d00	Making daily progress on building ships
-COMMENT	$00018d00	Actual decision to build a new ship is elsewhere
 COMMENT	$00018d36	Requires at least one powerplant
 COMMENT	$00018d3e	Requires at least one landing pad
 COMMENT	$00018d46	Requires a weapons factory
 COMMENT	$00018d4e	Requires at least one mine or ore storage chamber
 COMMENT	$00018d68	Requires at least one shipyard
 COMMENT	$00018d68	Caps out at 4 shipyards.
-COMMENT	$00018d84	ship 41
+COMMENT	$00018d84	Special ship code like facing.
+COMMENT	$00018d84	Kll Terminator = rotaty triangle
+COMMENT	$00018e30	appears to build a space dock first
+COMMENT	$00018eaa	make progress on ship
 COMMENT	$00018eac	d1 increases for each orbital triangular ship
+COMMENT	$00018f36	Create ships
 COMMENT	$00018f64	Power Collector / Power Generator required
 COMMENT	$00018f6e	Fluxxer required
 COMMENT	$00018f74	Construction yard
@@ -2037,12 +2142,15 @@ COMMENT	$00019062	Power production for Terrans, but 694 is set to 80
 COMMENT	$00019062	by Tractor Generator, a unique Defence type building
 COMMENT	$00019068	orbital space dock
 COMMENT	$00019070	spawn space dock
+COMMENT	$000190f2	Ore eater orbital space docks
 COMMENT	$000190f4	Alien ships always have fixed hardpoints
 COMMENT	$000191c6	landing pad
 COMMENT	$00019210	no landing pads
 COMMENT	$0001928c	Azx only: 200 armour, Photon, Photon, Plasma, Deflector
 COMMENT	$000192a4	Anyone but Azx armour, 4 Photon
 COMMENT	$000192b4	Sets the last two hardpoint slots to FFFF.
+COMMENT	$000192bc	in the original file this is move.l $00003fe6
+COMMENT	$000192bc	disassembled to $09230122?
 COMMENT	$00019382	ore eaters
 COMMENT	$0001939c	ship 42
 COMMENT	$000193e2	Ax-Zilanth: Mass Displacement Podule
@@ -2078,6 +2186,7 @@ COMMENT	$0001a04a	THE ENEMY FLEET WE WERE TRACKING HAS VANISHED!
 COMMENT	$0001a080	skip check for Azx and Tyl
 COMMENT	$0001a25a	big ships
 COMMENT	$0001a276	big ships like $04
+COMMENT	$0001a2ce	Play a voice line
 COMMENT	$0001a2dc	called by bjork speech cheat
 COMMENT	$0001a326	00  $00  attentio
 COMMENT	$0001a326	01  $01  alert
@@ -2267,6 +2376,9 @@ COMMENT	$0001e7a8	How much armor each hardpoint gives.
 COMMENT	$0001ea10	Table used some missiles, including Rigellian nuke.
 COMMENT	$0001ea10	20 bytes ranging from -5 to +3.
 COMMENT	$0001ea64	Table used by Terran nuclear weapons.
+COMMENT	$0001eb82	5x5 area blast used by area explosive, napalm
+COMMENT	$0001ebb4	Blast used by Hellfire, Virus
+COMMENT	$0001ebc6	Explosive blast area
 COMMENT	$0001f1b4	Used if asteroid tracker is not enabled
 COMMENT	$0001f1ca	Used if asteroid tracker is enabled
 COMMENT	$0001f446	Asteroid locations (x/y coords)?
@@ -2438,7 +2550,7 @@ COMMENT	$0002031a	03: 8
 COMMENT	$0002031a	04: 10
 COMMENT	$0002031a	05: 0  - Rigellians don't use photon turrets either.
 COMMENT	$0002031a	06: 11
-COMMENT	$0002031c	Read-only. Missile range?
+COMMENT	$0002031c	Sensor range for detecting missiles
 COMMENT	$0002031c	01: 16
 COMMENT	$0002031c	02: 16
 COMMENT	$0002031c	03: 80 - Ax'Zilanth described as trigger happy
@@ -2475,7 +2587,7 @@ COMMENT	$00020322	7: B  Build time
 COMMENT	$00020322	8: B  Scaffold height
 COMMENT	$00020322	9: B  Type for spy reports (01 Defence, 02 Offence, 03 Power, 00 Other?)
 COMMENT	$000204b2	building IDs. varies by alien
-COMMENT	$000204f2	|    Kll  | Ore  | Axz  | Tyl  | Rig  | Swi  | 
+COMMENT	$000204f2	|    Kll  | Ore  | Axz  | Tyl  | Rig  | Swi  |
 COMMENT	$000204f2	----------|------|------|------|------|------|------
 COMMENT	$000204f2	Explosive | 39%  | 32%  | 8%   | None | 30%  | 20%
 COMMENT	$000204f2	Area Exp. | 28%  | 22%  | 23%  | None | 24%  | 24%
@@ -2488,7 +2600,7 @@ COMMENT	$000204f2	Mega      | None | 2%   | 3%   | None | 3%   | 2%
 COMMENT	$000204f2	Stasis    | None | 3%   | 5%   | None | None | 11%
 COMMENT	$000204f2	Vortex    | 5%   | 8%   | 8%   | None | 10%  | 25%
 COMMENT	$000204f2	Antivirus | None | 10%  | 15%  | None | 10%  | 5%
-COMMENT	$00020508	|   Kll   | Ore   | Axz   | Tyl   | Rig   | Swi   |  
+COMMENT	$00020508	|   Kll   | Ore   | Axz   | Tyl   | Rig   | Swi   |
 COMMENT	$00020508	;---------|-------|-------|-------|-------|-------|----
 COMMENT	$00020508	Explosive | Low   | Low   | Other | ----  | Low   | Low
 COMMENT	$00020508	Area Exp. | Med   | Med   | Med   | ----  | Med   | Med
@@ -2542,9 +2654,14 @@ COMMENT	$00020b90	0   0 x 174
 COMMENT	$00020b90	
 COMMENT	$00020b90	Button 9 is the blue building button in the bottom-right.
 COMMENT	$00020b96	First extracted button.
-COMMENT	$00020bec	Map area is 53,856 bytes: 24 asteroids of 34x33 two-byte tiles.
-COMMENT	$00020bec	First byte of each tile is unknown.
-COMMENT	$00020bec	Second byte of each is the sprite number.
+COMMENT	$00020bec	Map area is 53,856 bytes:
+COMMENT	$00020bec	24 asteroids, each 17 x 33 tiles, 4 bytes per tile
+COMMENT	$00020bec	byte 0: unknown, always 00 or 01
+COMMENT	$00020bec	byte 1: edge, always, 00 to 0d
+COMMENT	$00020bec	byte 2: always 00
+COMMENT	$00020bec	byte 3: sprite ID, 00 or 2d to 3c
+COMMENT	$0002de50	probably a bitfield for which asteroids
+COMMENT	$0002de50	are available
 COMMENT	$0002de58	Very important pointer: holds the address of the currently
 COMMENT	$0002de58	selected asteroid stats table. Frequently referenced by
 COMMENT	$0002de58	offset.
@@ -2557,9 +2674,9 @@ COMMENT	$0002e00f	Bit 0: Show asteroid direction. Enabled by default with Tylara
 COMMENT	$0002e00f	Bit 1: Unused.
 COMMENT	$0002e00f	Bit 2: Display crosshair.
 COMMENT	$0002e00f	Bit 3: Display mouse pointer.
-COMMENT	$0002e00f	Bit 4: 
+COMMENT	$0002e00f	Bit 4:
 COMMENT	$0002e00f	Bit 5: Display PAFW. Enabled by default.
-COMMENT	$0002e00f	Bit 6: 
+COMMENT	$0002e00f	Bit 6:
 COMMENT	$0002e00f	Bit 7: Show asteroid speed. Enabled on Tylaran.
 COMMENT	$0002e0aa	Number of command centers you own.
 COMMENT	$0002e0ac	Amount of each of ten ores in each Transporter's cargo.
@@ -2576,9 +2693,9 @@ COMMENT	$0002e45a	check from happening on every day, partly for
 COMMENT	$0002e45a	performance reasons
 COMMENT	$0002e45a	bit 0: Set on performing daily events
 COMMENT	$0002e45a	bit 1: Set on new year
-COMMENT	$0002e45a	bit 2: 
-COMMENT	$0002e45a	bit 3: 
-COMMENT	$0002e45a	bit 4: 
+COMMENT	$0002e45a	bit 2:
+COMMENT	$0002e45a	bit 3:
+COMMENT	$0002e45a	bit 4:
 COMMENT	$0002e45a	bit 5: Check for ship movement, win condition, etc
 COMMENT	$0002e486	Integer. Appears to define which screen the player is on.
 COMMENT	$0002e486	Screens marked "p" are ones where the pointer is non-default.
@@ -2636,7 +2753,12 @@ COMMENT	$00031a9c	contains graphics and/or sound. All the sprites will
 COMMENT	$00031a9c	be in this section.
 COMMENT	$00031b80	2 sets of 2x72 bytes
 COMMENT	$00031b80	Mouse pointers: default, detonate, ship arrow
-COMMENT	$00031b80	"CTR1"CTR2"CTR1"CTR2"CTR1"CTR2"
+COMMENT	$00031b80	"CTR1
+COMMENT	$00031b80	"CTR2
+COMMENT	$00031b80	"CTR1
+COMMENT	$00031b80	"CTR2
+COMMENT	$00031b80	"CTR1
+COMMENT	$00031b80	"CTR2"
 COMMENT	$00031d30	1200 byte text buffer for putting text on screen
 COMMENT	$000321e0	64 bytes of 1
 COMMENT	$00032220	1-bit representation of the sensor range mask
@@ -3426,7 +3548,7 @@ SYMBOL	strA1data2	$00002052
 SYMBOL	strA1data3	$00002068
 SYMBOL	_InitPlayerAst	$0000207e
 SYMBOL	loop0208C	$0000208c
-SYMBOL	_020A2	$000020a2
+SYMBOL	_next_020A2	$000020a2
 SYMBOL	loop02120	$00002120
 SYMBOL	loop021B8	$000021b8
 SYMBOL	_LoadVoice	$000021ca
@@ -3462,7 +3584,7 @@ SYMBOL	_024D6	$000024d6
 SYMBOL	_024E6	$000024e6
 SYMBOL	_024FA	$000024fa
 SYMBOL	_02518	$00002518
-SYMBOL	_0252E	$0000252e
+SYMBOL	_Ship0252E	$0000252e
 SYMBOL	_02556	$00002556
 SYMBOL	_02570	$00002570
 SYMBOL	_0257E	$0000257e
@@ -3973,7 +4095,7 @@ SYMBOL	_0592C	$0000592c
 SYMBOL	ret0596C	$0000596c
 SYMBOL	_ScreenFlash_0596E	$0000596e
 SYMBOL	loop0597E	$0000597e
-SYMBOL	unk059D0	$000059d0
+SYMBOL	unkFlash_059D0	$000059d0
 SYMBOL	_059D2	$000059d2
 SYMBOL	loop059E8	$000059e8
 SYMBOL	_05A38	$00005a38
@@ -4220,7 +4342,7 @@ SYMBOL	_07472	$00007472
 SYMBOL	_07476	$00007476
 SYMBOL	_07486	$00007486
 SYMBOL	_074A6	$000074a6
-SYMBOL	_074AA	$000074aa
+SYMBOL	_IntToASCII	$000074aa
 SYMBOL	_074BC	$000074bc
 SYMBOL	_074C4	$000074c4
 SYMBOL	_074D2	$000074d2
@@ -4921,27 +5043,27 @@ SYMBOL	switchdataD_0200c7fa	$0000c7fa
 SYMBOL	switchdataD_0200c802	$0000c802
 SYMBOL	switchdataD_0200c80a	$0000c80a
 SYMBOL	switchdataD_0200c812	$0000c812
-SYMBOL	caseD_3f	$0000c816
-SYMBOL	caseD_3d	$0000c816
-SYMBOL	caseD_3c	$0000c816
 SYMBOL	unk0C816	$0000c816
+SYMBOL	caseD_3c	$0000c816
+SYMBOL	caseD_3d	$0000c816
 SYMBOL	caseD_3e	$0000c816
+SYMBOL	caseD_3f	$0000c816
 SYMBOL	_0C830	$0000c830
 SYMBOL	_0C84A	$0000c84a
-SYMBOL	caseD_3a	$0000c85a
-SYMBOL	ret_0C85A	$0000c85a
 SYMBOL	caseD_3b	$0000c85a
-SYMBOL	unk0C860	$0000c860
-SYMBOL	caseD_41	$0000c860
+SYMBOL	ret_0C85A	$0000c85a
+SYMBOL	caseD_3a	$0000c85a
 SYMBOL	caseD_40	$0000c860
+SYMBOL	unk0C860	$0000c860
 SYMBOL	caseD_35	$0000c860
 SYMBOL	caseD_36	$0000c860
-SYMBOL	caseD_39	$0000c890
-SYMBOL	caseD_43	$0000c890
-SYMBOL	caseD_37	$0000c890
-SYMBOL	caseD_42	$0000c890
+SYMBOL	caseD_41	$0000c860
 SYMBOL	caseD_38	$0000c890
+SYMBOL	caseD_43	$0000c890
+SYMBOL	caseD_42	$0000c890
 SYMBOL	unk0C890	$0000c890
+SYMBOL	caseD_39	$0000c890
+SYMBOL	caseD_37	$0000c890
 SYMBOL	loop0C892	$0000c892
 SYMBOL	_0C8C4	$0000c8c4
 SYMBOL	_0C8D0	$0000c8d0
@@ -5231,7 +5353,7 @@ SYMBOL	_0E1EE	$0000e1ee
 SYMBOL	_ExplodeSprite_0E1FA	$0000e1fa
 SYMBOL	_0E256	$0000e256
 SYMBOL	_0E280	$0000e280
-SYMBOL	_ShipAct1f	$0000e28a
+SYMBOL	_ShipAct1f_Rotate	$0000e28a
 SYMBOL	_0E29E	$0000e29e
 SYMBOL	_ShipAct0a	$0000e2ac
 SYMBOL	_ShipAct0b_Burn	$0000e2d4
@@ -5355,11 +5477,11 @@ SYMBOL	ptr0EF88	$0000ef88
 SYMBOL	_ShipAct24_MeteorHit	$0000ef8c
 SYMBOL	_0EFA4	$0000efa4
 SYMBOL	_0EFB6	$0000efb6
-SYMBOL	_ShipAct20	$0000efc2
+SYMBOL	_ShipAct20_MissileHit	$0000efc2
 SYMBOL	_0EFEA	$0000efea
 SYMBOL	_0EFFE	$0000effe
 SYMBOL	_0F012	$0000f012
-SYMBOL	_Hit_0F01A	$0000f01a
+SYMBOL	_MissileHit_0F01A	$0000f01a
 SYMBOL	_0F02A	$0000f02a
 SYMBOL	_ShipAct0e_Misl	$0000f02e
 SYMBOL	_0F054	$0000f054
@@ -5409,7 +5531,7 @@ SYMBOL	loop0F4EA	$0000f4ea
 SYMBOL	_0F524	$0000f524
 SYMBOL	_0F54E	$0000f54e
 SYMBOL	_0F588	$0000f588
-SYMBOL	_0F58C	$0000f58c
+SYMBOL	_next0F58C	$0000f58c
 SYMBOL	_0F596	$0000f596
 SYMBOL	_0F5AA	$0000f5aa
 SYMBOL	ptr0F5D2	$0000f5d2
@@ -5663,7 +5785,7 @@ SYMBOL	_AlienVortex04	$00010d14
 SYMBOL	_VortexMine	$00010d24
 SYMBOL	_Vortex_10D32	$00010d32
 SYMBOL	ret10D84	$00010d84
-SYMBOL	_AlienHP12	$00010d86
+SYMBOL	_TylGoldVortex12	$00010d86
 SYMBOL	ret10DE8	$00010de8
 SYMBOL	_FireAtTerranShip	$00010dea
 SYMBOL	_10DFA	$00010dfa
@@ -5821,7 +5943,7 @@ SYMBOL	_11B0E	$00011b0e
 SYMBOL	_11B16	$00011b16
 SYMBOL	loop11B22	$00011b22
 SYMBOL	ret11B34	$00011b34
-SYMBOL	_11B36	$00011b36
+SYMBOL	_AstDistance11B36	$00011b36
 SYMBOL	_11B3C	$00011b3c
 SYMBOL	_11B44	$00011b44
 SYMBOL	_11B52	$00011b52
@@ -5918,7 +6040,7 @@ SYMBOL	_12764	$00012764
 SYMBOL	_12774	$00012774
 SYMBOL	_127AA	$000127aa
 SYMBOL	ret127CE	$000127ce
-SYMBOL	_127D0	$000127d0
+SYMBOL	_Direction127D0	$000127d0
 SYMBOL	_127F6	$000127f6
 SYMBOL	_127FC	$000127fc
 SYMBOL	_1280A	$0001280a
@@ -5947,7 +6069,7 @@ SYMBOL	loop129D2	$000129d2
 SYMBOL	_12A3A	$00012a3a
 SYMBOL	_12A42	$00012a42
 SYMBOL	loop12A52	$00012a52
-SYMBOL	_12A62	$00012a62
+SYMBOL	_AstProximity	$00012a62
 SYMBOL	loop12A6A	$00012a6a
 SYMBOL	next12A8C	$00012a8c
 SYMBOL	_12A98	$00012a98
@@ -5960,7 +6082,7 @@ SYMBOL	_12B1C	$00012b1c
 SYMBOL	_12B2E	$00012b2e
 SYMBOL	ret12B32	$00012b32
 SYMBOL	_PlaceEmptyAst	$00012b34
-SYMBOL	_12B4E	$00012b4e
+SYMBOL	_InitAstCoords	$00012b4e
 SYMBOL	loop12B72	$00012b72
 SYMBOL	ret12B8E	$00012b8e
 SYMBOL	_AstInit_12B90	$00012b90
@@ -6038,6 +6160,7 @@ SYMBOL	_131F6	$000131f6
 SYMBOL	loop13206	$00013206
 SYMBOL	loop1321C	$0001321c
 SYMBOL	_13228	$00013228
+SYMBOL	_13238	$00013238
 SYMBOL	_1324E	$0001324e
 SYMBOL	_13288	$00013288
 SYMBOL	_1329E	$0001329e
@@ -6049,8 +6172,8 @@ SYMBOL	_132F6	$000132f6
 SYMBOL	_1330C	$0001330c
 SYMBOL	_1331E	$0001331e
 SYMBOL	_13322	$00013322
-SYMBOL	ptr13338	$00013338
-SYMBOL	ptr1333C	$0001333c
+SYMBOL	ptrAst_13338	$00013338
+SYMBOL	ptrAst_1333C	$0001333c
 SYMBOL	flg13340	$00013340
 SYMBOL	_13342	$00013342
 SYMBOL	loop1334E	$0001334e
@@ -6112,7 +6235,7 @@ SYMBOL	_138E6	$000138e6
 SYMBOL	_1391E	$0001391e
 SYMBOL	loop1392C	$0001392c
 SYMBOL	next_13968	$00013968
-SYMBOL	_13972	$00013972
+SYMBOL	_Direction13972	$00013972
 SYMBOL	_1397C	$0001397c
 SYMBOL	ret139B4	$000139b4
 SYMBOL	_139B6	$000139b6
@@ -6512,41 +6635,41 @@ SYMBOL	loop15EF6	$00015ef6
 SYMBOL	_15F14	$00015f14
 SYMBOL	_15F22	$00015f22
 SYMBOL	_15F32	$00015f32
-SYMBOL	_DailyAli_15F3C	$00015f3c
-SYMBOL	_15F4A	$00015f4a
-SYMBOL	_15F4E	$00015f4e
+SYMBOL	_DecrementAtkDelay	$00015f3c
+SYMBOL	_ret-1_15F4A	$00015f4a
+SYMBOL	_AliRetaliate	$00015f4e
 SYMBOL	_15F5E	$00015f5e
 SYMBOL	_15F7A	$00015f7a
 SYMBOL	_15F8E	$00015f8e
 SYMBOL	_15F9A	$00015f9a
-SYMBOL	_15FA4	$00015fa4
-SYMBOL	_15FB6	$00015fb6
+SYMBOL	_DecFleetDelay	$00015fa4
+SYMBOL	_DetectFleet	$00015fb6
 SYMBOL	loop15FC4	$00015fc4
 SYMBOL	_15FDA	$00015fda
 SYMBOL	_15FEE	$00015fee
 SYMBOL	next_15FFA	$00015ffa
-SYMBOL	_DailyAliMislAtk	$00016006
+SYMBOL	_DailyAliAttack	$00016006
 SYMBOL	arrDailyAli_16022	$00016022
 SYMBOL	_DailyAli1Atk	$0001603a
-SYMBOL	_16056	$00016056
+SYMBOL	_Loop16056	$00016056
 SYMBOL	ret16074	$00016074
-SYMBOL	_DailyAli_16076	$00016076
+SYMBOL	_Ali1Fleets	$00016076
 SYMBOL	_160AA	$000160aa
 SYMBOL	loop160CC	$000160cc
 SYMBOL	_160E4	$000160e4
-SYMBOL	_160EE	$000160ee
+SYMBOL	_Ali1FleetOffensive	$000160ee
 SYMBOL	loop16170	$00016170
 SYMBOL	_16188	$00016188
 SYMBOL	_DailyAli2Atk	$000161a2
 SYMBOL	_161C8	$000161c8
 SYMBOL	_16210	$00016210
-SYMBOL	_16216	$00016216
+SYMBOL	_DailyAli2Atk	$00016216
 SYMBOL	ret16248	$00016248
-SYMBOL	_1624A	$0001624a
+SYMBOL	_Ali2Flt	$0001624a
 SYMBOL	_1626C	$0001626c
-SYMBOL	_1628E	$0001628e
+SYMBOL	_Ali2Flt	$0001628e
 SYMBOL	_162BC	$000162bc
-SYMBOL	_16304	$00016304
+SYMBOL	_TylTargetAst	$00016304
 SYMBOL	loop16342	$00016342
 SYMBOL	_1635A	$0001635a
 SYMBOL	ret16362	$00016362
@@ -6555,12 +6678,12 @@ SYMBOL	loop16376	$00016376
 SYMBOL	_DailyAli3Atk	$00016398
 SYMBOL	_163BE	$000163be
 SYMBOL	_163D0	$000163d0
-SYMBOL	_163E2	$000163e2
-SYMBOL	_16416	$00016416
+SYMBOL	_AxzNotMislDay	$000163e2
+SYMBOL	_NotMisl2Day	$00016416
 SYMBOL	_1643C	$0001643c
-SYMBOL	_1644E	$0001644e
+SYMBOL	_NoMassPod	$0001644e
 SYMBOL	ret16494	$00016494
-SYMBOL	_16496	$00016496
+SYMBOL	_DailyAli3Atk	$00016496
 SYMBOL	_164C6	$000164c6
 SYMBOL	_164DC	$000164dc
 SYMBOL	_16518	$00016518
@@ -6585,22 +6708,22 @@ SYMBOL	_16786	$00016786
 SYMBOL	_167CE	$000167ce
 SYMBOL	_167D4	$000167d4
 SYMBOL	loop16820	$00016820
-SYMBOL	_1684C	$0001684c
+SYMBOL	_Alert1684C	$0001684c
 SYMBOL	_Clr91b3	$0001685c
 SYMBOL	_Misl_16864	$00016864
-SYMBOL	_1688E	$0001688e
+SYMBOL	_DailyAli5Atk	$0001688e
 SYMBOL	ret168BC	$000168bc
 SYMBOL	_DailyAli6Atk	$000168be
-SYMBOL	_NormalAtk168E2	$000168e2
+SYMBOL	_DailyAli6Atk	$000168e2
 SYMBOL	ret1690E	$0001690e
 SYMBOL	_16910	$00016910
 SYMBOL	_16930	$00016930
-SYMBOL	_16966	$00016966
+SYMBOL	_AliFleetAttack	$00016966
 SYMBOL	loop169D2	$000169d2
 SYMBOL	_169EA	$000169ea
 SYMBOL	_16A1E	$00016a1e
 SYMBOL	_16A26	$00016a26
-SYMBOL	ptr16A3A	$00016a3a
+SYMBOL	ptrFlt_16A3A	$00016a3a
 SYMBOL	_TargetMostPop	$00016a3e
 SYMBOL	loop_16A4A	$00016a4a
 SYMBOL	retA2_16A5E	$00016a5e
@@ -6625,16 +6748,16 @@ SYMBOL	_16C08	$00016c08
 SYMBOL	_16C14	$00016c14
 SYMBOL	_16C3A	$00016c3a
 SYMBOL	_16C44	$00016c44
-SYMBOL	_16C48	$00016c48
-SYMBOL	_16C82	$00016c82
+SYMBOL	_BuildFleet	$00016c48
+SYMBOL	loop16C82	$00016c82
 SYMBOL	_16CA0	$00016ca0
 SYMBOL	_16CB4	$00016cb4
 SYMBOL	_16CC0	$00016cc0
 SYMBOL	_16CE6	$00016ce6
-SYMBOL	_16CF0	$00016cf0
-SYMBOL	_AliAstEffects	$00016cf4
+SYMBOL	_ret-1_16CF0	$00016cf0
+SYMBOL	_AliAstEvacuate	$00016cf4
 SYMBOL	arr16D22	$00016d22
-SYMBOL	_Ali123AstEffect	$00016d3a
+SYMBOL	_Ali123Evacuate	$00016d3a
 SYMBOL	_16D72	$00016d72
 SYMBOL	_16D98	$00016d98
 SYMBOL	loop16DD8	$00016dd8
@@ -6661,9 +6784,9 @@ SYMBOL	_16F90	$00016f90
 SYMBOL	loop16FD0	$00016fd0
 SYMBOL	_16FE8	$00016fe8
 SYMBOL	ret16FEC	$00016fec
-SYMBOL	_16FEE	$00016fee
+SYMBOL	_AliMissileStrike	$00016fee
 SYMBOL	loop17004	$00017004
-SYMBOL	_17018	$00017018
+SYMBOL	_PickMissiles_17018	$00017018
 SYMBOL	_17038	$00017038
 SYMBOL	_RandomMislTarget	$0001703e
 SYMBOL	ret17060	$00017060
@@ -6671,7 +6794,7 @@ SYMBOL	_Misl_No_Mega17062	$00017062
 SYMBOL	_loop_1707C	$0001707c
 SYMBOL	_Shoot170A6	$000170a6
 SYMBOL	ret170AC	$000170ac
-SYMBOL	_FireMissiles	$000170ae
+SYMBOL	_FireSetMissiles	$000170ae
 SYMBOL	loop170CC	$000170cc
 SYMBOL	_170E0	$000170e0
 SYMBOL	_170F6	$000170f6
@@ -6713,13 +6836,13 @@ SYMBOL	_17530	$00017530
 SYMBOL	_17552	$00017552
 SYMBOL	_17556	$00017556
 SYMBOL	ret1757E	$0001757e
-SYMBOL	_17580	$00017580
+SYMBOL	_Satellite17580	$00017580
 SYMBOL	_175B2	$000175b2
-SYMBOL	_175B8	$000175b8
+SYMBOL	_IntelFleetDest	$000175b8
 SYMBOL	_175EE	$000175ee
-SYMBOL	_Fleet175F4	$000175f4
+SYMBOL	_NewAliFleet	$000175f4
 SYMBOL	loop17602	$00017602
-SYMBOL	_1761A	$0001761a
+SYMBOL	_InitAliFleet	$0001761a
 SYMBOL	loop17620	$00017620
 SYMBOL	_CountAliShips	$00017642
 SYMBOL	loop_17666	$00017666
@@ -6798,7 +6921,7 @@ SYMBOL	_17F94	$00017f94
 SYMBOL	loop17F96	$00017f96
 SYMBOL	_17FA6	$00017fa6
 SYMBOL	_Turret17FB4	$00017fb4
-SYMBOL	_17FB8	$00017fb8
+SYMBOL	_AlienCycle	$00017fb8
 SYMBOL	_17FD2	$00017fd2
 SYMBOL	_18002	$00018002
 SYMBOL	_18006	$00018006
@@ -6965,34 +7088,34 @@ SYMBOL	arr18D12	$00018d12
 SYMBOL	_KllKpShipBuild	$00018d2a
 SYMBOL	_18D64	$00018d64
 SYMBOL	loop18D6C	$00018d6c
-SYMBOL	_18DA6	$00018da6
+SYMBOL	_NewBuild18DA6	$00018da6
 SYMBOL	_18DB6	$00018db6
 SYMBOL	_18DBE	$00018dbe
 SYMBOL	_18DC4	$00018dc4
-SYMBOL	_18DCE	$00018dce
+SYMBOL	_done_18DCE	$00018dce
 SYMBOL	ret18DD4	$00018dd4
 SYMBOL	_AxZilShipBuild	$00018dd6
 SYMBOL	_18E10	$00018e10
 SYMBOL	loop18E18	$00018e18
 SYMBOL	_18E3A	$00018e3a
-SYMBOL	_18E40	$00018e40
+SYMBOL	_NewShipBuildAzx	$00018e40
 SYMBOL	_18E50	$00018e50
 SYMBOL	_18E58	$00018e58
 SYMBOL	_18E5E	$00018e5e
-SYMBOL	_18E68	$00018e68
+SYMBOL	_next18E68	$00018e68
 SYMBOL	ret18E6E	$00018e6e
 SYMBOL	_OreEatrShipBuild	$00018e70
 SYMBOL	_loop_18EAC	$00018eac
 SYMBOL	_18EB6	$00018eb6
-SYMBOL	_NoShip_18EC0	$00018ec0
+SYMBOL	_OreNewShipBuild	$00018ec0
 SYMBOL	_Build_18ED8	$00018ed8
 SYMBOL	_18EE4	$00018ee4
 SYMBOL	loop18EEC	$00018eec
 SYMBOL	_18F20	$00018f20
 SYMBOL	_18F26	$00018f26
-SYMBOL	_18F30	$00018f30
-SYMBOL	_NoProgress_18F36	$00018f36
-SYMBOL	_18F40	$00018f40
+SYMBOL	_next18F30	$00018f30
+SYMBOL	_OreNoShipBldgs	$00018f36
+SYMBOL	_OreOSDOnly	$00018f40
 SYMBOL	_TylarShipBuild	$00018f58
 SYMBOL	_18F80	$00018f80
 SYMBOL	loop18F88	$00018f88
@@ -7035,7 +7158,7 @@ SYMBOL	_19242	$00019242
 SYMBOL	_19266	$00019266
 SYMBOL	_AlienOSD	$00019276
 SYMBOL	_AxzOSD	$000192b2
-SYMBOL	_AlienHP11	$000192bc
+SYMBOL	_Kll_HP11	$000192bc
 SYMBOL	ret192E6	$000192e6
 SYMBOL	_ShipAct22	$000192e8
 SYMBOL	_1937E	$0001937e
@@ -7180,7 +7303,7 @@ SYMBOL	_1A22E	$0001a22e
 SYMBOL	loop1A230	$0001a230
 SYMBOL	_1A2A0	$0001a2a0
 SYMBOL	_1A2C8	$0001a2c8
-SYMBOL	_1A2CE	$0001a2ce
+SYMBOL	_VoiceOrSound	$0001a2ce
 SYMBOL	_PlayVoice	$0001a2dc
 SYMBOL	_1A320	$0001a320
 SYMBOL	_PlaySilence	$0001a33a
@@ -7600,14 +7723,14 @@ SYMBOL	data1E9A2	$0001e9a2
 SYMBOL	ptr1E9AA	$0001e9aa
 SYMBOL	TylSmallTransp_1E9B6	$0001e9b6
 SYMBOL	ptrHardpointB	$0001e9c2
-SYMBOL	data1E9C8	$0001e9c8
-SYMBOL	data1E9D9	$0001e9d9
+SYMBOL	ship1E9C8	$0001e9c8
+SYMBOL	ship1E9D9	$0001e9d9
 SYMBOL	ptr1E9F8	$0001e9f8
 SYMBOL	ptr1E9FE	$0001e9fe
 SYMBOL	ptr1EA10	$0001ea10
 SYMBOL	ptr1EA22	$0001ea22
 SYMBOL	ptr1EA34	$0001ea34
-SYMBOL	ptr1EA46	$0001ea46
+SYMBOL	AirBurstEffect	$0001ea46
 SYMBOL	ptr1EA52	$0001ea52
 SYMBOL	ptr1EA64	$0001ea64
 SYMBOL	ptr1EA8A	$0001ea8a
@@ -7618,12 +7741,12 @@ SYMBOL	ptr1EB08	$0001eb08
 SYMBOL	ptr1EB0C	$0001eb0c
 SYMBOL	ptr1EB18	$0001eb18
 SYMBOL	ptr1EB4C	$0001eb4c
-SYMBOL	ptrNapalm_1EB82	$0001eb82
+SYMBOL	Blast5x5	$0001eb82
 SYMBOL	napalm_x	$0001eb83
 SYMBOL	napalm_y	$0001eb84
-SYMBOL	ptr1EBB4	$0001ebb4
-SYMBOL	ptr1EBC6	$0001ebc6
-SYMBOL	ptr1EBCE	$0001ebce
+SYMBOL	Blast3x3	$0001ebb4
+SYMBOL	Blast2x2	$0001ebc6
+SYMBOL	BlastBurn	$0001ebce
 SYMBOL	flg1EBD8	$0001ebd8
 SYMBOL	ptr1EBDA	$0001ebda
 SYMBOL	ptr1EBDE	$0001ebde
@@ -7633,8 +7756,8 @@ SYMBOL	firemask1EE9E	$0001ee9e
 SYMBOL	firemask1EF9E	$0001ef9e
 SYMBOL	firemask1EFC0	$0001efc0
 SYMBOL	firemask1F012	$0001f012
-SYMBOL	ptr1F044	$0001f044
-SYMBOL	unkMislHit	$0001f07a
+SYMBOL	shExplosion1F044	$0001f044
+SYMBOL	incomingMissile	$0001f07a
 SYMBOL	data1F0B0	$0001f0b0
 SYMBOL	data1F0B2	$0001f0b2
 SYMBOL	flg1F0B4	$0001f0b4
@@ -7651,9 +7774,9 @@ SYMBOL	ptr1F20E	$0001f20e
 SYMBOL	ptr1F266	$0001f266
 SYMBOL	tblInitOre	$0001f306
 SYMBOL	arrStartingOres	$0001f342
-SYMBOL	ptr1f356	$0001f356
-SYMBOL	ptr1F446	$0001f446
-SYMBOL	arrAstDirection	$0001f6c6
+SYMBOL	ptrAst_1f356	$0001f356
+SYMBOL	tblAstCoords	$0001f446
+SYMBOL	arrAstDirections	$0001f6c6
 SYMBOL	arrAstSpd	$0001f726
 SYMBOL	ptrAlienAst_1F736	$0001f736
 SYMBOL	arrPlayerAstsKnown	$0001f856
@@ -7673,14 +7796,14 @@ SYMBOL	arrPowerfailOrder	$000200ac
 SYMBOL	ptr2014C	$0002014c
 SYMBOL	arrRadiation	$0002014e
 SYMBOL	tblReinforcemt	$00020159
-SYMBOL	ptrShip2015E	$0002015e
+SYMBOL	ptrShipList	$0002015e
 SYMBOL	tblAliShipCount	$00020206
-SYMBOL	data20216	$00020216
-SYMBOL	data20218	$00020218
-SYMBOL	data2021A	$0002021a
+SYMBOL	fleet_min	$00020216
+SYMBOL	fleet_2	$00020218
+SYMBOL	fleet_3	$0002021a
 SYMBOL	data2021C	$0002021c
 SYMBOL	ptrAlienAst_2021E	$0002021e
-SYMBOL	data20222	$00020222
+SYMBOL	intCountd20222	$00020222
 SYMBOL	tblMisl4S1V4Av	$00020224
 SYMBOL	tblMisl6E4A1St	$0002023a
 SYMBOL	tblMislV0114	$00020250
@@ -7704,8 +7827,8 @@ SYMBOL	intAlienMislCdn	$00020314
 SYMBOL	intAlienCannon5Dmg	$00020316
 SYMBOL	intAlienCannon7Dmg	$00020318
 SYMBOL	intAlienCannon6Dmg	$0002031a
-SYMBOL	intAlienMisl_12	$0002031c
-SYMBOL	intAlienMisl_13	$0002031e
+SYMBOL	intSensorRange12	$0002031c
+SYMBOL	intAlienFleetRange	$0002031e
 SYMBOL	intAlienTurretCool	$00020320
 SYMBOL	intAlienSpec	$00020321
 SYMBOL	tblAlienBldg	$00020322
@@ -7739,7 +7862,7 @@ SYMBOL	arrButton2	$00020b9c
 SYMBOL	padding_20bea	$00020bea
 SYMBOL	tblAsteroidMaps	$00020bec
 SYMBOL	ptrAsteroids2de4c	$0002de4c
-SYMBOL	lAstUnknown52	$0002de50
+SYMBOL	lAstSlots	$0002de50
 SYMBOL	lUnknown53	$0002de54
 SYMBOL	ptrCurrentAst	$0002de58
 SYMBOL	lUnknownSat54	$0002de5c
@@ -7823,7 +7946,7 @@ SYMBOL	arrCargo07	$0002e138
 SYMBOL	arrCargo08	$0002e14c
 SYMBOL	arrCargo09	$0002e160
 SYMBOL	arrCargoImp	$0002e174
-SYMBOL	flgAst2E188	$0002e188
+SYMBOL	flgAstSpotted	$0002e188
 SYMBOL	flgAst2E189	$0002e189
 SYMBOL	tblShipyards	$0002e18a
 SYMBOL	ptr2E40A	$0002e40a
@@ -7880,16 +8003,16 @@ SYMBOL	strClock	$0002e45e
 SYMBOL	ptr2E466	$0002e466
 SYMBOL	flgShowGfx	$0002e468
 SYMBOL	flg2E469	$0002e469
-SYMBOL	flg2E46A	$0002e46a
+SYMBOL	flgHellfire	$0002e46a
 SYMBOL	flg2E46B	$0002e46b
 SYMBOL	flg2E46C	$0002e46c
 SYMBOL	flgShipActive_2E46D	$0002e46d
 SYMBOL	flgDSound1	$0002e46e
 SYMBOL	flgDSound2	$0002e46f
-SYMBOL	int2E470	$0002e470
-SYMBOL	int2E471	$0002e471
-SYMBOL	int2E472	$0002e472
-SYMBOL	int2E473	$0002e473
+SYMBOL	intKllSatCountd	$0002e470
+SYMBOL	intCount_2E471	$0002e471
+SYMBOL	intCount_2E472	$0002e472
+SYMBOL	fleetDelay	$0002e473
 SYMBOL	flgStatic2E474	$0002e474
 SYMBOL	flg2E475	$0002e475
 SYMBOL	textcolor	$0002e476
@@ -7901,8 +8024,8 @@ SYMBOL	flg2E47B	$0002e47b
 SYMBOL	flg2E47C	$0002e47c
 SYMBOL	flg2E47D	$0002e47d
 SYMBOL	flg2E47E	$0002e47e
-SYMBOL	flg2E47F	$0002e47f
-SYMBOL	flg2E480	$0002e480
+SYMBOL	intRetaliateDelay	$0002e47f
+SYMBOL	fleetCycle	$0002e480
 SYMBOL	flg2E481	$0002e481
 SYMBOL	flg2E482	$0002e482
 SYMBOL	flg2E483	$0002e483

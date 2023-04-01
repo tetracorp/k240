@@ -1,6 +1,26 @@
 ; IRA V2.09 (Mar  1 2020) (c)1993-1995 Tim Ruehsen
 ; (c)2009-2015 Frank Wille, (c)2014-2017 Nicolas Bastien
 
+; |          _  ______  _  _    ___                |
+; |         | |/ /___ \| || |  / _ \               |
+; |         | ' /  __) | || |_| | | |              |
+; |         | . \ / __/|__   _| |_| | v2.000       |
+; |     _ _ |_|\_\_____|  |_|  \___/  _    _       |
+; |  __| (_)___ __ _ ______ ___ _ __ | |__| |_  _  |
+; | / _` | (_-</ _` (_-<_-</ -_) '  \| '_ \ | || | |
+; | \__,_|_/__/\__,_/__/__/\___|_|_|_|_.__/_|\_, | |
+; |    <https://tetracorp.github.io/k240/>   |__/  |
+; 
+; K240 is copyright 1994 Gremlin Graphics.
+; This annotated disassembly is believed to constitute fair use
+; for the purpose of analysis and commentary.
+; 
+; Disassemble using this config file:
+; ira -A -keepzh -newstyle -compat=bi -config playk240
+; 
+; Reassemble from the source code:
+; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.68k.asm
+
 EXT_0000	EQU	$1
 ABSEXECBASE	EQU	$4
 CIAA_PRA	EQU	$BFE001
@@ -86,25 +106,6 @@ _DOSFreeSignal	EQU	-336
 	SECTION S_0,CODE
 
 SECSTRT_0:
-; |          _  ______  _  _    ___                |
-; |         | |/ /___ \| || |  / _ \               |
-; |         | ' /  __) | || |_| | | |              |
-; |         | . \ / __/|__   _| |_| | v2.000       |
-; |     _ _ |_|\_\_____|  |_|  \___/  _    _       |
-; |  __| (_)___ __ _ ______ ___ _ __ | |__| |_  _  |
-; | / _` | (_-</ _` (_-<_-</ -_) '  \| '_ \ | || | |
-; | \__,_|_/__/\__,_/__/__/\___|_|_|_|_.__/_|\_, | |
-; |    <https://tetracorp.github.io/k240/>   |__/  |
-; 
-; K240 is copyright 1994 Gremlin Graphics.
-; This annotated disassembly is believed to constitute fair use
-; for the purpose of analysis and commentary.
-; 
-; Disassemble using this config file:
-; ira -A -keepzh -newstyle -compat=bi -config playk240
-; 
-; Reassemble from the source code:
-; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.asm
 	SF	intErr			;00000: 51f90001aad6
 	SUBA.L	A1,A1			;00006: 93c9
 	MOVEA.L	ABSEXECBASE.W,A6	;00008: 2c780004
@@ -824,7 +825,7 @@ _009CE:
 	OR.W	D0,D1			;009e6: 8240
 	MOVE.W	D1,(BPLCON1_258,A0)	;009e8: 31410102
 _009EC:
-	TST.W	unk059D0		;009ec: 4a79000059d0
+	TST.W	unkFlash_059D0		;009ec: 4a79000059d0
 	BEQ.S	_00A2A			;009f2: 6736
 	MOVE.B	unk00BB3,D0		;009f4: 103900000bb3
 	ANDI.W	#$0003,D0		;009fa: 02400003
@@ -832,7 +833,7 @@ _009EC:
 	LEA	paletteFlash,A1		;00a00: 43f90001af16
 	JSR	_059D2			;00a06: 4eb9000059d2
 	LEA	HARDBASE,A0		;00a0c: 41f900dff000
-	MOVE.W	unk059D0,D0		;00a12: 3039000059d0
+	MOVE.W	unkFlash_059D0,D0	;00a12: 3039000059d0
 	ASR.B	#1,D0			;00a18: e200
 	ADDQ.B	#1,D0			;00a1a: 5200
 	BSR.W	_RandInt		;00a1c: 610001ee
@@ -880,7 +881,7 @@ _00AC0:
 	BEQ.S	_00AF0			;00ac6: 6728
 	SUBQ.B	#1,unk00BB4		;00ac8: 533900000bb4
 	BGT.S	_00AF0			;00ace: 6e20
-	TST.W	unk059D0		;00ad0: 4a79000059d0
+	TST.W	unkFlash_059D0		;00ad0: 4a79000059d0
 	BNE.S	_00AF0			;00ad6: 6618
 	MOVE.B	#$0e,unk00BB4		;00ad8: 13fc000e00000bb4
 	LEA	ptr31B36,A1		;00ae0: 43f900031b36
@@ -992,7 +993,12 @@ loop00C02:
 	DBF	D1,loop00C02		;00c06: 51c9fffa
 	RTS				;00c0a: 4e75
 _RandInt:
-; Random number generator. Important function used by many game mechanics. Takes D0 as input, generating a number between 0 and D0 minus 1, and storing the result in D0. This behaviour has been tested to work. e.g. if d0 is 100, this function generates a number from 0 to 99. Often used this way to calculate percentage chances.
+; Random number generator. Important function used by many game
+; mechanics. Takes D0 as input, generating a number between 0
+; and D0 minus 1, and storing the result in D0. This behaviour
+; has been tested to work. e.g. if d0 is 100, this function
+; generates a number from 0 to 99. Often used this way to
+; calculate percentage chances.
 	MOVEM.L	D1-D4,-(A7)		;00c0c: 48e77800
 	MOVE.B	intRNG5,D1		;00c10: 123900000c5f
 	MOVE.B	intRNG4,D2		;00c16: 143900000c5e
@@ -2846,8 +2852,8 @@ loop01E32:
 _CheckIDFile:
 ; -------End MGL file reading code-------
 ; 
-; Checks for presence of ID file which determines whether or not
-; the game is running from HD / prevents you from saving on disk 2
+; Checks for presence of ID file which determines whether
+; or not the game is running from HD
 	ST	flgIDFile		;01e3c: 50f90001af15
 	MOVE.L	#strIDfile,D1		;01e42: 223c0001ab17
 	MOVEQ	#-2,D2			;01e48: 74fe
@@ -3023,15 +3029,20 @@ _InitPlayerAst:
 	MOVE.W	#$3497,D7		;02084: 3e3c3497
 	MOVE.W	#$010f,D1		;02088: 323c010f
 loop0208C:
+; Loop over every square in the asteroid map
+; Clear non-default values in the first two bytes
+; of each square (01 first byte, 00-0f second byte)
 	AND.W	D1,(A6)+		;0208c: c35e
 	BTST	#7,(A6)			;0208e: 08160007
-	BEQ.S	_020A2			;02092: 670e
+	BEQ.S	_next_020A2		;02092: 670e
+; Negative value for third byte? (00 by default)
+; Sets a random terrain sprite 2d to 2f
 	MOVEQ	#3,D0			;02094: 7003
 	JSR	_RandInt		;02096: 4eb900000c0c
 	MOVEQ	#45,D3			;0209c: 762d
 	ADD.B	D0,D3			;0209e: d600
 	MOVE.W	D3,(A6)			;020a0: 3c83
-_020A2:
+_next_020A2:
 	ADDQ.L	#2,A6			;020a2: 548e
 	DBF	D7,loop0208C		;020a4: 51cfffe6
 	MOVEQ	#17,D0			;020a8: 7011
@@ -3039,7 +3050,7 @@ _020A2:
 	MOVE.W	D0,-(A7)		;020b0: 3f00
 	ADDI.W	#$0016,D0		;020b2: 06400016
 ; d0 = random 22-38
-	JSR	_12B4E			;020b6: 4eb900012b4e
+	JSR	_InitAstCoords		;020b6: 4eb900012b4e
 	MOVE.L	A0,ptrHomeAst		;020bc: 23c80002de64
 	MOVE.L	A0,ptrCurrentAst	;020c2: 23c80002de58
 	MOVE.L	A0,ptrThisAstStats	;020c8: 23c80002ded8
@@ -3112,7 +3123,7 @@ loop02120:
 	ADDA.L	D1,A0			;02186: d1c1
 	MOVE.W	(A0)+,D0		;02188: 3018
 	MOVE.L	A0,ptrAlienAst_2021E	;0218a: 23c80002021e
-	JSR	_12B4E			;02190: 4eb900012b4e
+	JSR	_InitAstCoords		;02190: 4eb900012b4e
 	MOVE.L	A0,ptrEnemyHome		;02196: 23c80002de60
 	MOVE.B	intAlienSpec,bAlienSpecial ;0219c: 13f9000203210002e48d
 	MOVE.W	intAlienID,intCurrentAlienID ;021a6: 33f9000203040002df02
@@ -3161,7 +3172,7 @@ loop02224:
 	ADDQ.L	#2,A0			;0222c: 5488
 	DBF	D0,loop02224		;0222e: 51c8fff4
 	MOVE.L	#spr_Asteroids_x28,D1	;02232: 223c0003e438
-	LEA	ptr1f356,A1		;02238: 43f90001f356
+	LEA	ptrAst_1f356,A1		;02238: 43f90001f356
 	MOVE.W	#$001b,D0		;0223e: 303c001b
 loop02242:
 	ADD.L	D1,(A0)			;02242: d390
@@ -3421,7 +3432,7 @@ _02518:
 	MOVEA.L	(A7)+,A2		;02528: 245f
 	MOVE.L	(A7)+,D0		;0252a: 201f
 	RTS				;0252c: 4e75
-_0252E:
+_Ship0252E:
 	CMPA.L	(0,A0),A6		;0252e: bde80000
 	BEQ.W	_02556			;02532: 67000022
 	CMPA.L	(4,A0),A6		;02536: bde80004
@@ -6955,7 +6966,7 @@ loop05312:
 	MOVE.L	A2,(A5)+		;0531c: 2aca
 	DBF	D3,loop05312		;0531e: 51cbfff2
 	DBF	D6,loop05306		;05322: 51ceffe2
-	CLR.W	unk059D0		;05326: 4279000059d0
+	CLR.W	unkFlash_059D0		;05326: 4279000059d0
 	RTS				;0532c: 4e75
 _0532E:
 	MOVE.L	D6,-(A7)		;0532e: 2f06
@@ -7546,12 +7557,12 @@ loop0597E:
 	MOVE.W	D1,(A2)+		;059be: 34c1
 	MOVE.W	D2,(A2)+		;059c0: 34c2
 	DBF	D7,loop0597E		;059c2: 51cfffba
-	MOVE.W	#$0010,unk059D0		;059c6: 33fc0010000059d0
+	MOVE.W	#$0010,unkFlash_059D0	;059c6: 33fc0010000059d0
 	RTS				;059ce: 4e75
-unk059D0:
+unkFlash_059D0:
 	DC.W	$0000			;059d0
 _059D2:
-	MOVE.W	(unk059D0,PC),D7	;059d2: 3e3afffc
+	MOVE.W	(unkFlash_059D0,PC),D7	;059d2: 3e3afffc
 	LEA	ptr1B50E,A2		;059d6: 45f90001b50e
 	LEA	ptr1B5CE,A4		;059dc: 49f90001b5ce
 	MOVEA.L	A1,A0			;059e2: 2049
@@ -7578,7 +7589,7 @@ loop059E8:
 	LEA	(6,A4),A4		;05a20: 49ec0006
 	DBF	D6,loop059E8		;05a24: 51ceffc2
 	SUBQ.W	#1,D7			;05a28: 5347
-	MOVE.W	D7,unk059D0		;05a2a: 33c7000059d0
+	MOVE.W	D7,unkFlash_059D0	;05a2a: 33c7000059d0
 	MOVEA.L	A1,A0			;05a30: 2049
 	BSR.W	_053CA			;05a32: 6100f996
 	RTS				;05a36: 4e75
@@ -8557,7 +8568,7 @@ _0669E:
 	ADDQ.L	#2,A0			;066ee: 5488
 	MOVEQ	#10,D2			;066f0: 740a
 	MOVE.L	D7,D0			;066f2: 2007
-	BSR.W	_074AA			;066f4: 61000db4
+	BSR.W	_IntToASCII		;066f4: 61000db4
 	MOVEA.L	(A7)+,A0		;066f8: 205f
 _066FA:
 	MOVEA.L	ptrBuff01,A1		;066fa: 22790000052e
@@ -8985,7 +8996,7 @@ _06BAC:
 	RTS				;06c0c: 4e75
 _ClickBuilding:
 ; the result of clicking on an asteroid square
-	TST.W	unk059D0		;06c0e: 4a79000059d0
+	TST.W	unkFlash_059D0		;06c0e: 4a79000059d0
 	BNE.S	ret06C5E		;06c14: 6648
 	MOVE.L	A3,D0			;06c16: 200b
 	BEQ.S	ret06C5E		;06c18: 6744
@@ -9763,7 +9774,7 @@ _07486:
 _074A6:
 	MOVEQ	#0,D0			;074a6: 7000
 	RTS				;074a8: 4e75
-_074AA:
+_IntToASCII:
 	MOVE.L	D3,-(A7)		;074aa: 2f03
 	MOVE.L	A2,-(A7)		;074ac: 2f0a
 	MOVEA.L	A0,A2			;074ae: 2448
@@ -10025,7 +10036,7 @@ _0771A:
 	BEQ.S	_07750			;07748: 6706
 	MOVE.L	#$000f4240,D2		;0774a: 243c000f4240
 _07750:
-	BSR.W	_074AA			;07750: 6100fd58
+	BSR.W	_IntToASCII		;07750: 6100fd58
 	SF	(A0)			;07754: 51d0
 	TST.B	flg1CB06		;07756: 4a390001cb06
 	BEQ.S	_0776E			;0775c: 6710
@@ -10165,7 +10176,7 @@ _07884:
 _078CE:
 ; 1 million
 	MOVE.L	#$000f4240,D2		;078ce: 243c000f4240
-	BSR.W	_074AA			;078d4: 6100fbd4
+	BSR.W	_IntToASCII		;078d4: 6100fbd4
 	MOVEA.L	(A7)+,A0		;078d8: 205f
 	MOVE.W	#$00fc,D0		;078da: 303c00fc
 	BRA.S	_078EA			;078de: 600a
@@ -10980,7 +10991,7 @@ _083E8:
 _08424:
 	MOVEM.W	(26,A1),D2-D3		;08424: 4ca9000c001a
 _0842A:
-	JSR	_11B36			;0842a: 4eb900011b36
+	JSR	_AstDistance11B36	;0842a: 4eb900011b36
 	CMPI.W	#$0019,D0		;08430: 0c400019
 	BPL.S	_08438			;08434: 6a02
 	MOVEQ	#25,D0			;08436: 7019
@@ -11062,12 +11073,12 @@ loop08536:
 	EXT.L	D0			;08538: 48c0
 	LEA	ptr1C8F4,A0		;0853a: 41f90001c8f4
 	MOVEQ	#100,D2			;08540: 7464
-	BSR.W	_074AA			;08542: 6100ef66
+	BSR.W	_IntToASCII		;08542: 6100ef66
 	MOVE.B	#$2f,(A0)+		;08546: 10fc002f
 	MOVE.W	(A3)+,D0		;0854a: 301b
 	EXT.L	D0			;0854c: 48c0
 	MOVEQ	#10,D2			;0854e: 740a
-	BSR.W	_074AA			;08550: 6100ef58
+	BSR.W	_IntToASCII		;08550: 6100ef58
 	SF	(A0)			;08554: 51d0
 	LEA	ptr1C8F4,A0		;08556: 41f90001c8f4
 	MOVEA.L	ptrBuff00,A1		;0855c: 22790000052a
@@ -11267,7 +11278,7 @@ _OreSurveyWin:
 _OreSurv_087DE:
 	MOVEQ	#5,D0			;087de: 7005
 	MOVEQ	#1,D1			;087e0: 7201
-	JSR	_1A2CE			;087e2: 4eb90001a2ce
+	JSR	_VoiceOrSound		;087e2: 4eb90001a2ce
 	TST.B	(25,A0)			;087e8: 4a280019
 	BPL.S	_OreSurv_087F0		;087ec: 6a02
 	MOVEQ	#-1,D7			;087ee: 7eff
@@ -11792,7 +11803,7 @@ _08EE2:
 	BNE.W	_08F72			;08eec: 66000084
 	MOVEQ	#1,D1			;08ef0: 7201
 	MOVEQ	#15,D0			;08ef2: 700f
-	JSR	_1A2CE			;08ef4: 4eb90001a2ce
+	JSR	_VoiceOrSound		;08ef4: 4eb90001a2ce
 	ST	flgPaused		;08efa: 50f90002e458
 	ST	flg2E483		;08f00: 50f90002e483
 	LEA	(40,A5),A5		;08f06: 4bed0028
@@ -11886,7 +11897,7 @@ _08FF2:
 	BNE.S	_09000			;08ff6: 6608
 	MOVE.W	#$0064,mw3163C		;08ff8: 33fc00640003163c
 _09000:
-	JSR	_1A2CE			;09000: 4eb90001a2ce
+	JSR	_VoiceOrSound		;09000: 4eb90001a2ce
 	MOVE.L	(A7)+,D1		;09006: 221f
 	MOVE.L	(A7)+,D0		;09008: 201f
 	ST	flgPaused		;0900a: 50f90002e458
@@ -12071,12 +12082,12 @@ loop0927A:
 	EXT.L	D0			;0927c: 48c0
 	LEA	ptr1C8F4,A0		;0927e: 41f90001c8f4
 	MOVEQ	#100,D2			;09284: 7464
-	BSR.W	_074AA			;09286: 6100e222
+	BSR.W	_IntToASCII		;09286: 6100e222
 	MOVE.B	#$2f,(A0)+		;0928a: 10fc002f
 	MOVE.W	(A3)+,D0		;0928e: 301b
 	EXT.L	D0			;09290: 48c0
 	MOVEQ	#10,D2			;09292: 740a
-	BSR.W	_074AA			;09294: 6100e214
+	BSR.W	_IntToASCII		;09294: 6100e214
 	SF	(A0)			;09298: 51d0
 	LEA	ptr1C8F4,A0		;0929a: 41f90001c8f4
 	MOVEA.L	ptrBuff00,A1		;092a0: 22790000052a
@@ -12507,7 +12518,7 @@ _09906:
 	MOVEA.L	ptrCurrentAst,A0	;09906: 20790002de58
 	MOVE.B	unk09974,D1		;0990c: 123900009974
 	MOVE.B	D1,(35,A0)		;09912: 11410023
-	LEA	arrAstDirection,A2	;09916: 45f90001f6c6
+	LEA	arrAstDirections,A2	;09916: 45f90001f6c6
 	ASL.W	#2,D1			;0991c: e541
 	MOVE.L	(0,A2,D1.W),(56,A0)	;0991e: 217210000038
 	CLR.L	(30,A0)			;09924: 42a8001e
@@ -12523,7 +12534,7 @@ _09942:
 	ADDI.W	#$00a6,D2		;09946: 064200a6
 	ADDI.W	#$0057,D3		;0994a: 06430057
 	MOVEM.W	intMouseX,D0-D1		;0994e: 4cb9000300000760
-	JSR	_11B36			;09956: 4eb900011b36
+	JSR	_AstDistance11B36	;09956: 4eb900011b36
 	CMP.W	D0,D6			;0995c: bc40
 	BMI.S	_09968			;0995e: 6b08
 	MOVE.W	D0,D6			;09960: 3c00
@@ -12660,7 +12671,7 @@ _09AE0:
 	EXT.L	D0			;09b22: 48c0
 	LEA	ptr1C8F4,A0		;09b24: 41f90001c8f4
 	MOVE.L	#$00002710,D2		;09b2a: 243c00002710
-	BSR.W	_074AA			;09b30: 6100d978
+	BSR.W	_IntToASCII		;09b30: 6100d978
 	SF	(A0)			;09b34: 51d0
 	LEA	ptr1C8F4,A0		;09b36: 41f90001c8f4
 	MOVE.W	#$011a,D0		;09b3c: 303c011a
@@ -12961,7 +12972,7 @@ _09EDE:
 	EXT.L	D0			;09f20: 48c0
 	LEA	ptr1C8F4,A0		;09f22: 41f90001c8f4
 	MOVE.L	#$00002710,D2		;09f28: 243c00002710
-	BSR.W	_074AA			;09f2e: 6100d57a
+	BSR.W	_IntToASCII		;09f2e: 6100d57a
 	SF	(A0)			;09f32: 51d0
 	LEA	ptr1C8F4,A0		;09f34: 41f90001c8f4
 	MOVE.W	#$011a,D0		;09f3a: 303c011a
@@ -13422,7 +13433,7 @@ _0A536:
 	EXT.L	D0			;0a578: 48c0
 	LEA	ptr1C8F4,A0		;0a57a: 41f90001c8f4
 	MOVE.L	#$00002710,D2		;0a580: 243c00002710
-	BSR.W	_074AA			;0a586: 6100cf22
+	BSR.W	_IntToASCII		;0a586: 6100cf22
 	SF	(A0)			;0a58a: 51d0
 	LEA	ptr1C8F4,A0		;0a58c: 41f90001c8f4
 	MOVE.W	#$011a,D0		;0a592: 303c011a
@@ -14201,7 +14212,7 @@ _0B012:
 	BEQ.S	_0B040			;0b01a: 6724
 	LEA	ptr1C8F4,A0		;0b01c: 41f90001c8f4
 	MOVEQ	#100,D2			;0b022: 7464
-	BSR.W	_074AA			;0b024: 6100c484
+	BSR.W	_IntToASCII		;0b024: 6100c484
 	SF	(A0)			;0b028: 51d0
 	LEA	ptr1C8F4,A0		;0b02a: 41f90001c8f4
 	MOVE.W	#$00f8,D0		;0b030: 303c00f8
@@ -14214,7 +14225,7 @@ _0B040:
 	BEQ.S	_0B06E			;0b048: 6724
 	LEA	ptr1C8F4,A0		;0b04a: 41f90001c8f4
 	MOVEQ	#10,D2			;0b050: 740a
-	BSR.W	_074AA			;0b052: 6100c456
+	BSR.W	_IntToASCII		;0b052: 6100c456
 	SF	(A0)			;0b056: 51d0
 	LEA	ptr1C8F4,A0		;0b058: 41f90001c8f4
 	MOVE.W	#$0104,D0		;0b05e: 303c0104
@@ -14966,7 +14977,7 @@ loop0BA1E:
 	MOVE.W	D0,unk0BC18		;0ba3a: 33c00000bc18
 	LEA	ptr1C8F4,A0		;0ba40: 41f90001c8f4
 	MOVEQ	#100,D2			;0ba46: 7464
-	BSR.W	_074AA			;0ba48: 6100ba60
+	BSR.W	_IntToASCII		;0ba48: 6100ba60
 	SF	(A0)			;0ba4c: 51d0
 	MOVEQ	#16,D0			;0ba4e: 7010
 	LEA	ptr1C8F4,A0		;0ba50: 41f90001c8f4
@@ -15343,7 +15354,7 @@ _0BF18:
 	MOVE.W	(50,A6),D0		;0bf36: 302e0032
 	MOVEQ	#100,D2			;0bf3a: 7464
 	LEA	ptr1C8F4,A0		;0bf3c: 41f90001c8f4
-	BSR.W	_074AA			;0bf42: 6100b566
+	BSR.W	_IntToASCII		;0bf42: 6100b566
 	SF	(A0)			;0bf46: 51d0
 	MOVE.W	D3,D0			;0bf48: 3003
 	ADDI.W	#$0064,D0		;0bf4a: 06400064
@@ -15802,7 +15813,7 @@ _Ships0C5AA:
 	MOVE.W	(0,A0,D2.W),D2		;0c5d0: 34302000
 	MOVE.B	(19,A6),D3		;0c5d4: 162e0013
 	CMPI.B	#$fb,D3			;0c5d8: 0c0300fb
-	BEQ.W	caseD_3a		;0c5dc: 6700027c
+	BEQ.W	caseD_3b		;0c5dc: 6700027c
 	TST.B	D3			;0c5e0: 4a03
 	BMI.S	_0C5E6			;0c5e2: 6b02
 	ADD.B	D3,D2			;0c5e4: d403
@@ -15936,11 +15947,11 @@ _0C740:
 	MOVE.W	(A7)+,D0		;0c748: 301f
 ; Check if ship firing
 	BTST	#6,(21,A6)		;0c74a: 082e00060015
-	BEQ.W	caseD_3a		;0c750: 67000108
+	BEQ.W	caseD_3b		;0c750: 67000108
 	BTST	#0,(22,A6)		;0c754: 082e00000016
-	BNE.W	caseD_3a		;0c75a: 660000fe
+	BNE.W	caseD_3b		;0c75a: 660000fe
 	TST.B	(20,A6)			;0c75e: 4a2e0014
-	BMI.W	caseD_3a		;0c762: 6b0000f6
+	BMI.W	caseD_3b		;0c762: 6b0000f6
 	MOVEA.L	ptrBuff00,A1		;0c766: 22790000052a
 	MOVEQ	#0,D2			;0c76c: 7400
 ; Ship ID
@@ -15951,7 +15962,7 @@ _0C740:
 	CMPI.B	#$05,D2			;0c772: 0c020005
 	BMI.W	_0C830			;0c776: 6b0000b8
 	CMPI.B	#$44,D2			;0c77a: 0c020044
-	BPL.W	caseD_3a		;0c77e: 6a0000da
+	BPL.W	caseD_3b		;0c77e: 6a0000da
 ; 0   35: Destructor
 ; 1   36: Terminator
 ; 2   37: Transporter
@@ -15959,7 +15970,7 @@ _0C740:
 ; 4   39: Orbital Spacedock
 ; 5+  3c-43: Alien ships
 	SUBI.B	#$35,D2			;0c782: 04020035
-	BMI.W	caseD_3a		;0c786: 6b0000d2
+	BMI.W	caseD_3b		;0c786: 6b0000d2
 	EXT.W	D2			;0c78a: 4882
 	ASL.W	#3,D2			;0c78c: e742
 	LEA	ptr0C79E,A3		;0c78e: 47f90000c79e
@@ -15970,50 +15981,50 @@ ptr0C79E:
 ; 30 entries = 15 pairs: 5 large terran ships and 8 alien ships
 ; Destructor
 	DC.L	firemask1ED9E		;0c79e: 0001ed9e
-	DC.L	unk0C860		;0c7a2: 0000c860
+	DC.L	caseD_40		;0c7a2: 0000c860
 ; Terminator
 	DC.L	firemask1EE9E		;0c7a6: 0001ee9e
-	DC.L	unk0C860		;0c7aa: 0000c860
+	DC.L	caseD_40		;0c7aa: 0000c860
 ; Transporter
 	DC.L	firemask1EF9E		;0c7ae: 0001ef9e
-	DC.L	caseD_39		;0c7b2: 0000c890
+	DC.L	caseD_38		;0c7b2: 0000c890
 ; Fleet Battleship
 	DC.L	firemask1EFC0		;0c7b6: 0001efc0
-	DC.L	caseD_39		;0c7ba: 0000c890
+	DC.L	caseD_38		;0c7ba: 0000c890
 ; Orbital Spacedock
 	DC.L	firemask1F012		;0c7be: 0001f012
-	DC.L	caseD_39		;0c7c2: 0000c890
+	DC.L	caseD_38		;0c7c2: 0000c890
 ; Small alien ship 3c
 	DS.L	1			;0c7c6
-	DC.L	caseD_3a		;0c7ca: 0000c85a
+	DC.L	caseD_3b		;0c7ca: 0000c85a
 ; Small alien ship 3d
 	DS.L	1			;0c7ce
-	DC.L	caseD_3a		;0c7d2: 0000c85a
+	DC.L	caseD_3b		;0c7d2: 0000c85a
 ; Alien ship 3e
 	DC.L	tblAlienShip26		;0c7d6: 000205f4
-	DC.L	caseD_3f		;0c7da: 0000c816
+	DC.L	unk0C816		;0c7da: 0000c816
 ; Alien ship 3f
 	DC.L	tblAlienShip26		;0c7de: 000205f4
-	DC.L	caseD_3f		;0c7e2: 0000c816
+	DC.L	unk0C816		;0c7e2: 0000c816
 ; Alien ship 40
 	DC.L	tblAlienShip26		;0c7e6: 000205f4
-	DC.L	caseD_3f		;0c7ea: 0000c816
+	DC.L	unk0C816		;0c7ea: 0000c816
 ; Alien ship 41
 	DC.L	tblAlienShip26		;0c7ee: 000205f4
-	DC.L	caseD_3f		;0c7f2: 0000c816
+	DC.L	unk0C816		;0c7f2: 0000c816
 ; Alien ship 42
 	DC.L	tblAlienUnk27		;0c7f6: 000207f4
-	DC.L	unk0C860		;0c7fa: 0000c860
+	DC.L	caseD_40		;0c7fa: 0000c860
 ; Alien ship 43
 	DC.L	tblAlienUnk28		;0c7fe: 000208f4
-	DC.L	unk0C860		;0c802: 0000c860
+	DC.L	caseD_40		;0c802: 0000c860
 ; Alien ship 44?
 	DC.L	tblAlienUnk29		;0c806: 000209f4
-	DC.L	caseD_39		;0c80a: 0000c890
+	DC.L	caseD_38		;0c80a: 0000c890
 ; Alien ship ??
 	DC.L	tblAlienUnk30		;0c80e: 00020a16
-	DC.L	caseD_39		;0c812: 0000c890
-caseD_3f:
+	DC.L	caseD_38		;0c812: 0000c890
+unk0C816:
 	MOVEQ	#0,D2			;0c816: 7400
 	MOVE.B	(8,A6),D2		;0c818: 142e0008
 	SUBI.B	#$3c,D2			;0c81c: 0402003c
@@ -16025,7 +16036,7 @@ caseD_3f:
 	BRA.S	_0C84A			;0c82e: 601a
 _0C830:
 	SUBQ.B	#2,D2			;0c830: 5502
-	BMI.S	caseD_3a		;0c832: 6b26
+	BMI.S	caseD_3b		;0c832: 6b26
 	EXT.W	D2			;0c834: 4882
 	ASL.W	#7,D2			;0c836: ef42
 	LEA	arrGunfireSprites,A3	;0c838: 47f90001ec1e
@@ -16041,10 +16052,10 @@ _0C84A:
 	ADD.W	(A3)+,D0		;0c852: d05b
 	ADD.W	(A3),D1			;0c854: d253
 	BSR.W	_DrawGfx_0C916		;0c856: 610000be
-caseD_3a:
+caseD_3b:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;0c85a: 4cdf7fff
 	RTS				;0c85e: 4e75
-unk0C860:
+caseD_40:
 	MOVE.W	unk0C914,D2		;0c860: 34390000c914
 	ASL.W	#5,D2			;0c866: eb42
 	ADDA.W	D2,A3			;0c868: d6c2
@@ -16064,7 +16075,7 @@ unk0C860:
 	ADDQ.L	#2,A3			;0c886: 548b
 	MOVEA.L	ptrBuff00,A1		;0c888: 22790000052a
 	BRA.S	_0C84A			;0c88e: 60ba
-caseD_39:
+caseD_38:
 	MOVE.W	(A3)+,D3		;0c890: 361b
 loop0C892:
 	MOVEA.L	(A3)+,A0		;0c892: 205b
@@ -16932,8 +16943,8 @@ arrShipActions:
 	DC.L	_ShipAct1c_Colonize	;0d264: 0000d8a6
 	DC.L	_ShipAct1d		;0d268: 0001061c
 	DC.L	_ShipAct1e		;0d26c: 00010696
-	DC.L	_ShipAct1f		;0d270: 0000e28a
-	DC.L	_ShipAct20		;0d274: 0000efc2
+	DC.L	_ShipAct1f_Rotate	;0d270: 0000e28a
+	DC.L	_ShipAct20_MissileHit	;0d274: 0000efc2
 	DC.L	_ShipAct21_Shield150	;0d278: 0000d41e
 	DC.L	_ShipAct22		;0d27c: 000192e8
 	DC.L	_ShipAct23		;0d280: 0000d86c
@@ -17380,6 +17391,7 @@ _ShipAct06:
 	MOVEQ	#-1,D0			;0d75c: 70ff
 	RTS				;0d75e: 4e75
 _0D760:
+; Pick a random ground target?
 	MOVEQ	#16,D0			;0d760: 7010
 	JSR	_RandInt		;0d762: 4eb900000c0c
 	MOVE.B	D0,(12,A6)		;0d768: 1d40000c
@@ -17833,7 +17845,7 @@ loop0DC7A:
 	LEA	(54,A6),A6		;0dc80: 4dee0036
 	DBF	D4,loop0DC7A		;0dc84: 51ccfff4
 _0DC88:
-	LEA	ptr1F044,A6		;0dc88: 4df90001f044
+	LEA	shExplosion1F044,A6	;0dc88: 4df90001f044
 	MOVE.W	(A7)+,D4		;0dc8e: 381f
 	MOVEQ	#-1,D3			;0dc90: 76ff
 	RTS				;0dc92: 4e75
@@ -17853,7 +17865,7 @@ _AddShip:
 	MOVEA.L	A1,A0			;0dca8: 2049
 	BRA.S	_0DCB6			;0dcaa: 600a
 _ret_0DCAC:
-	LEA	ptr1F044,A6		;0dcac: 4df90001f044
+	LEA	shExplosion1F044,A6	;0dcac: 4df90001f044
 	MOVEQ	#-1,D0			;0dcb2: 70ff
 	RTS				;0dcb4: 4e75
 _0DCB6:
@@ -18353,11 +18365,10 @@ _0E15E:
 	RTS				;0e1ec: 4e75
 _0E1EE:
 	MOVEA.L	(A7)+,A6		;0e1ee: 2c5f
-	LEA	ptr1F044,A0		;0e1f0: 41f90001f044
+	LEA	shExplosion1F044,A0	;0e1f0: 41f90001f044
 	MOVEQ	#-1,D0			;0e1f6: 70ff
 	RTS				;0e1f8: 4e75
 _ExplodeSprite_0E1FA:
-; missile? is fire also a ship?
 ; Tyl Energiser: d0=50, d1=$88, d5=0
 	BSR.W	_FindShipSlot		;0e1fa: 6100fa68
 	BMI.W	_0E280			;0e1fe: 6b000080
@@ -18397,10 +18408,10 @@ _0E256:
 	MOVEQ	#0,D0			;0e27c: 7000
 	RTS				;0e27e: 4e75
 _0E280:
-	LEA	ptr1F044,A0		;0e280: 41f90001f044
+	LEA	shExplosion1F044,A0	;0e280: 41f90001f044
 	MOVEQ	#-1,D0			;0e286: 70ff
 	RTS				;0e288: 4e75
-_ShipAct1f:
+_ShipAct1f_Rotate:
 ; Applies to the Kll triangular ship which rotates
 	MOVEA.L	(28,A6),A2		;0e28a: 246e001c
 	MOVEQ	#0,D0			;0e28e: 7000
@@ -18424,6 +18435,7 @@ _ShipAct0a:
 	MOVE.W	(38,A0),(38,A6)		;0e2c8: 3d6800260026
 	MOVE.B	(23,A0),(23,A6)		;0e2ce: 1d6800170017
 _ShipAct0b_Burn:
+; Burning fire, e.g. napalm, hellfire sprite.
 	MOVEA.L	(28,A6),A2		;0e2d4: 246e001c
 	MOVEQ	#0,D0			;0e2d8: 7000
 	MOVE.B	(18,A6),D0		;0e2da: 102e0012
@@ -18598,10 +18610,10 @@ _0E4DC:
 	BEQ.S	_0E4EA			;0e4e6: 6702
 	ASR.W	#1,D7			;0e4e8: e247
 _0E4EA:
-; Apply damage to ship. If damage reduces armor to zero or lower:
+; Deflector reduces damage to half rounded down, minimum zero
 	SUB.W	D7,(50,A5)		;0e4ea: 9f6d0032
 	BGT.S	_0E4F6			;0e4ee: 6e06
-; explode
+; order ship to explode if it is below 1hp
 	MOVE.W	#$0d00,(24,A5)		;0e4f0: 3b7c0d000018
 _0E4F6:
 	MOVE.L	(0,A5),D1		;0e4f6: 222d0000
@@ -18622,10 +18634,10 @@ _0E512:
 	ADDQ.B	#1,(18,A6)		;0e520: 522e0012
 	BRA.W	_ShipAct0b_Burn		;0e524: 6000fdae
 _0E528:
-	ST	flg2E46A		;0e528: 50f90002e46a
+	ST	flgHellfire		;0e528: 50f90002e46a
 	MOVE.W	(10,A6),-(A7)		;0e52e: 3f2e000a
 	ADD.W	D0,D0			;0e532: d040
-	LEA	ptr1EBCE,A0		;0e534: 41f90001ebce
+	LEA	BlastBurn,A0		;0e534: 41f90001ebce
 	ADDA.W	D0,A0			;0e53a: d0c0
 	MOVE.B	(A0)+,D0		;0e53c: 1018
 	MOVE.B	(A0)+,D1		;0e53e: 1218
@@ -18645,7 +18657,7 @@ _0E528:
 	MOVE.L	A6,-(A7)		;0e564: 2f0e
 	BSR.W	_GroundBurn		;0e566: 61001af4
 	MOVEA.L	(A7)+,A6		;0e56a: 2c5f
-	SF	flg2E46A		;0e56c: 51f90002e46a
+	SF	flgHellfire		;0e56c: 51f90002e46a
 	MOVE.W	(A7)+,(10,A6)		;0e572: 3d5f000a
 	ADDQ.B	#1,(18,A6)		;0e576: 522e0012
 	BRA.W	_ShipAct0b_Burn		;0e57a: 6000fd58
@@ -18665,7 +18677,7 @@ _ShipAct0d_Expl:
 ; Destroy small/medium ships
 	MOVE.W	(10,A6),D2		;0e5ac: 342e000a
 _0E5B0:
-	LEA	ptr1EA46,A2		;0e5b0: 45f90001ea46
+	LEA	AirBurstEffect,A2	;0e5b0: 45f90001ea46
 	MOVEQ	#51,D0			;0e5b6: 7033
 	MOVE.B	#$98,D1			;0e5b8: 123c0098
 	MOVEA.L	ptrThisAstStats,A0	;0e5bc: 20790002ded8
@@ -18791,7 +18803,7 @@ _0E748:
 	MOVE.L	A0,unk0E6D6		;0e756: 23c80000e6d6
 	TST.B	(21,A6)			;0e75c: 4a2e0015
 	BMI.W	_0E7B2			;0e760: 6b000050
-	JSR	_0252E			;0e764: 4eb90000252e
+	JSR	_Ship0252E		;0e764: 4eb90000252e
 	MOVEA.L	(A7)+,A6		;0e76a: 2c5f
 	TST.B	(20,A6)			;0e76c: 4a2e0014
 	BMI.S	_0E7AC			;0e770: 6b3a
@@ -18815,7 +18827,7 @@ _0E7AC:
 	RTS				;0e7b0: 4e75
 _0E7B2:
 	LEA	(8,A0),A0		;0e7b2: 41e80008
-	JSR	_0252E			;0e7b6: 4eb90000252e
+	JSR	_Ship0252E		;0e7b6: 4eb90000252e
 	MOVEA.L	(A7)+,A6		;0e7bc: 2c5f
 	TST.B	(20,A6)			;0e7be: 4a2e0014
 	BMI.S	_0E7FE			;0e7c2: 6b3a
@@ -18872,7 +18884,7 @@ _0E83C:
 	BMI.S	_0E88C			;0e856: 6b34
 ; Destruction of a terran ship:
 	MOVE.L	A6,-(A7)		;0e858: 2f0e
-	JSR	_0252E			;0e85a: 4eb90000252e
+	JSR	_Ship0252E		;0e85a: 4eb90000252e
 	MOVEA.L	(A7)+,A6		;0e860: 2c5f
 	MOVE.W	#$ffff,(36,A6)		;0e862: 3d7cffff0024
 	TST.B	(48,A6)			;0e868: 4a2e0030
@@ -18891,7 +18903,7 @@ _0E88C:
 ; Destruction of an alien ship:
 	LEA	ptr2DEE4,A0		;0e88c: 41f90002dee4
 	MOVE.L	A6,-(A7)		;0e892: 2f0e
-	JSR	_0252E			;0e894: 4eb90000252e
+	JSR	_Ship0252E		;0e894: 4eb90000252e
 	MOVEA.L	(A7)+,A6		;0e89a: 2c5f
 	MOVE.W	#$ffff,(36,A6)		;0e89c: 3d7cffff0024
 	TST.B	(48,A6)			;0e8a2: 4a2e0030
@@ -18920,7 +18932,7 @@ _ShipAct2c_Remove:
 	SUBQ.W	#1,intTotalShips	;0e8de: 53790002e0a2
 	MOVEA.L	ptrThisAstStats,A0	;0e8e4: 20790002ded8
 	LEA	(16,A0),A0		;0e8ea: 41e80010
-	JSR	_0252E			;0e8ee: 4eb90000252e
+	JSR	_Ship0252E		;0e8ee: 4eb90000252e
 _0E8F4:
 	MOVEM.L	(A7)+,D0/A0/A6		;0e8f4: 4cdf4101
 	MOVEQ	#0,D0			;0e8f8: 7000
@@ -18970,7 +18982,7 @@ _0E97C:
 	MOVEA.L	D2,A1			;0e97c: 2242
 	MOVEM.W	(26,A1),D2-D3		;0e97e: 4ca9000c001a
 _0E984:
-	BSR.W	_11B36			;0e984: 610031b0
+	BSR.W	_AstDistance11B36	;0e984: 610031b0
 	CMPI.W	#$0019,D0		;0e988: 0c400019
 	BPL.S	_0E990			;0e98c: 6a02
 	MOVEQ	#25,D0			;0e98e: 7019
@@ -19018,7 +19030,7 @@ _0EA0A:
 	BMI.W	_0E916			;0ea18: 6b00fefc
 	MOVE.W	(10,A6),D2		;0ea1c: 342e000a
 	MOVE.L	A6,-(A7)		;0ea20: 2f0e
-	LEA	ptr1EA46,A2		;0ea22: 45f90001ea46
+	LEA	AirBurstEffect,A2	;0ea22: 45f90001ea46
 	MOVE.B	#$98,D1			;0ea28: 123c0098
 	MOVEA.L	ptrThisAstStats,A0	;0ea2c: 20790002ded8
 	MOVEQ	#51,D0			;0ea32: 7033
@@ -19138,7 +19150,7 @@ _0EB48:
 ; missiles in transit
 	LEA	(8,A0),A0		;0eb48: 41e80008
 _0EB4C:
-	JSR	_0252E			;0eb4c: 4eb90000252e
+	JSR	_Ship0252E		;0eb4c: 4eb90000252e
 	LEA	ptr2DEE4,A0		;0eb52: 41f90002dee4
 	JSR	_024FA			;0eb58: 4eb9000024fa
 	BRA.S	_0EB7E			;0eb5e: 601e
@@ -19149,7 +19161,7 @@ _0EB60:
 ; Not in transit
 	LEA	(16,A0),A0		;0eb68: 41e80010
 _0EB6C:
-	JSR	_0252E			;0eb6c: 4eb90000252e
+	JSR	_Ship0252E		;0eb6c: 4eb90000252e
 	LEA	ptrShips_2DEDC,A0	;0eb72: 41f90002dedc
 	JSR	_024FA			;0eb78: 4eb9000024fa
 _0EB7E:
@@ -19240,9 +19252,9 @@ _0EC7E:
 ; missiles launching
 	BSET	#3,(21,A6)		;0ec86: 08ee00030015
 	ST	flgDSound1		;0ec8c: 50f90002e46e
-	TST.B	int2E471		;0ec92: 4a390002e471
+	TST.B	intCount_2E471		;0ec92: 4a390002e471
 	BNE.S	_0ECB2			;0ec98: 6618
-	MOVE.B	#$08,int2E471		;0ec9a: 13fc00080002e471
+	MOVE.B	#$08,intCount_2E471	;0ec9a: 13fc00080002e471
 	MOVEQ	#7,D0			;0eca2: 7007
 	JSR	_PlayVoice		;0eca4: 4eb90001a2dc
 	BRA.S	_0ECB2			;0ecaa: 6006
@@ -19267,7 +19279,7 @@ _0ECCE:
 	BPL.S	_0ED12			;0ecd2: 6a3e
 ; Alien missiles
 	LEA	ptr2DEE4,A0		;0ecd4: 41f90002dee4
-	JSR	_0252E			;0ecda: 4eb90000252e
+	JSR	_Ship0252E		;0ecda: 4eb90000252e
 	MOVEA.L	ptr0EF88,A0		;0ece0: 20790000ef88
 	CMPI.B	#$2b,(8,A6)		;0ece6: 0c2e002b0008
 	BNE.S	_0ED00			;0ecec: 6612
@@ -19289,7 +19301,7 @@ _0ED12:
 	BEQ.W	_0EF1E			;0ed26: 670001f6
 _0ED2A:
 	LEA	ptrShips_2DEDC,A0	;0ed2a: 41f90002dedc
-	JSR	_0252E			;0ed30: 4eb90000252e
+	JSR	_Ship0252E		;0ed30: 4eb90000252e
 	MOVEA.L	ptr0EF88,A0		;0ed36: 20790000ef88
 	CMPI.B	#$2b,(8,A6)		;0ed3c: 0c2e002b0008
 	BNE.S	_0ED52			;0ed42: 660e
@@ -19427,7 +19439,7 @@ _0EEEC:
 	RTS				;0eeee: 4e75
 _0EEF0:
 	LEA	ptrShips_2DEDC,A0	;0eef0: 41f90002dedc
-	JSR	_0252E			;0eef6: 4eb90000252e
+	JSR	_Ship0252E		;0eef6: 4eb90000252e
 	SF	(8,A6)			;0eefc: 51ee0008
 	SUBQ.W	#1,intTotalShips	;0ef00: 53790002e0a2
 	MOVE.B	(27,A6),D0		;0ef06: 102e001b
@@ -19495,9 +19507,9 @@ _0EFB6:
 	BSR.W	_WarheadMeteor		;0efba: 61000eb0
 	MOVEQ	#0,D0			;0efbe: 7000
 	RTS				;0efc0: 4e75
-_ShipAct20:
+_ShipAct20_MissileHit:
 	TST.B	flgShowGfx		;0efc2: 4a390002e468
-	BNE.S	_Hit_0F01A		;0efc8: 6650
+	BNE.S	_MissileHit_0F01A	;0efc8: 6650
 	SUBQ.B	#1,(22,A6)		;0efca: 532e0016
 	BGT.S	_0F02A			;0efce: 6e5a
 	SF	(22,A6)			;0efd0: 51ee0016
@@ -19522,7 +19534,7 @@ _0EFFE:
 _0F012:
 	CMPI.W	#$0008,(16,A6)		;0f012: 0c6e00080010
 	BPL.S	_0F02A			;0f018: 6a10
-_Hit_0F01A:
+_MissileHit_0F01A:
 	TST.B	(26,A6)			;0f01a: 4a2e001a
 	BNE.W	_ret0_0F0A2		;0f01e: 66000082
 	BSR.W	_ShipAct2c_Remove	;0f022: 6100f8ac
@@ -19573,7 +19585,7 @@ _ret0_0F0A2:
 	BNE.S	_0F0DC			;0f0a8: 6632
 	MOVE.L	A6,-(A7)		;0f0aa: 2f0e
 	MOVE.W	(10,A6),D2		;0f0ac: 342e000a
-	LEA	ptr1EA46,A2		;0f0b0: 45f90001ea46
+	LEA	AirBurstEffect,A2	;0f0b0: 45f90001ea46
 	MOVE.B	#$98,D1			;0f0b6: 123c0098
 	MOVEA.L	ptrThisAstStats,A0	;0f0ba: 20790002ded8
 	MOVEQ	#51,D0			;0f0c0: 7033
@@ -19811,7 +19823,7 @@ _WarheadScatter:
 	TST.B	flgShowGfx		;0f2a2: 4a390002e468
 	BNE.S	_0F2D2			;0f2a8: 6628
 	MOVE.W	(10,A6),D2		;0f2aa: 342e000a
-	LEA	ptr1EA46,A2		;0f2ae: 45f90001ea46
+	LEA	AirBurstEffect,A2	;0f2ae: 45f90001ea46
 	MOVE.B	#$98,D1			;0f2b4: 123c0098
 	MOVEA.L	ptrCurrentAst,A0	;0f2b8: 20790002de58
 	MOVEQ	#51,D0			;0f2be: 7033
@@ -19822,7 +19834,7 @@ _WarheadScatter:
 _0F2D2:
 	MOVEQ	#24,D0			;0f2d2: 7018
 loop0F2D4:
-	LEA	unkMislHit,A6		;0f2d4: 4df90001f07a
+	LEA	incomingMissile,A6	;0f2d4: 4df90001f07a
 	MOVE.W	D0,-(A7)		;0f2da: 3f00
 	BSR.W	_0D760			;0f2dc: 6100e482
 	MOVE.W	(12,A6),(10,A6)		;0f2e0: 3d6e000c000a
@@ -19857,7 +19869,7 @@ _0F32E:
 	TST.B	flgShowGfx		;0f32e: 4a390002e468
 	BNE.S	_0F35E			;0f334: 6628
 	MOVE.W	(10,A6),D2		;0f336: 342e000a
-	LEA	ptr1EA46,A2		;0f33a: 45f90001ea46
+	LEA	AirBurstEffect,A2	;0f33a: 45f90001ea46
 	MOVE.B	#$98,D1			;0f340: 123c0098
 	MOVEA.L	ptrCurrentAst,A0	;0f344: 20790002de58
 	MOVEQ	#51,D0			;0f34a: 7033
@@ -19950,7 +19962,7 @@ _0F428:
 	MOVE.B	D2,D0			;0f430: 1002
 	ST	flg2E469		;0f432: 50f90002e469
 	MOVEQ	#8,D2			;0f438: 7408
-	LEA	ptr1EBB4,A0		;0f43a: 41f90001ebb4
+	LEA	Blast3x3,A0		;0f43a: 41f90001ebb4
 loop0F440:
 	ADD.B	(A0)+,D0		;0f440: d018
 	ADD.B	(A0)+,D1		;0f442: d218
@@ -19975,7 +19987,7 @@ next0F466:
 	BSET	#7,(90,A0)		;0f47a: 08e80007005a
 	RTS				;0f480: 4e75
 _DailyVirus:
-; Triggers every 5 days, although certain things affect the timer
+; Triggers every 6 days
 	LEA	ptr0F5D2,A1		;0f482: 43f90000f5d2
 	MOVE.L	ptrThisAstStats,(A1)+	;0f488: 22f90002ded8
 	MOVE.L	ptrThisAstMap,(A1)+	;0f48e: 22f90002decc
@@ -20003,19 +20015,19 @@ loop0F4A8:
 	MOVE.W	#$0230,D1		;0f4e6: 323c0230
 loop0F4EA:
 	MOVE.W	(2,A6),D2		;0f4ea: 342e0002
-	BMI.W	_0F58C			;0f4ee: 6b00009c
+	BMI.W	_next0F58C		;0f4ee: 6b00009c
 	CMPI.W	#$003d,D2		;0f4f2: 0c42003d
-	BMI.W	_0F58C			;0f4f6: 6b000094
+	BMI.W	_next0F58C		;0f4f6: 6b000094
 	CMPI.W	#$0040,D2		;0f4fa: 0c420040
 	BMI.S	_0F524			;0f4fe: 6b24
 	CMPI.W	#$0043,D2		;0f500: 0c420043
-	BPL.W	_0F58C			;0f504: 6a000086
+	BPL.W	_next0F58C		;0f504: 6a000086
 	ST	flg0F5E2		;0f508: 50f90000f5e2
 	MOVEQ	#8,D0			;0f50e: 7008
 	JSR	_RandInt		;0f510: 4eb900000c0c
-	BNE.W	_0F58C			;0f516: 66000074
+	BNE.W	_next0F58C		;0f516: 66000074
 	SUBI.W	#$0013,(2,A6)		;0f51a: 046e00130002
-	BRA.W	_0F58C			;0f520: 6000006a
+	BRA.W	_next0F58C		;0f520: 6000006a
 _0F524:
 	ST	flg0F5E2		;0f524: 50f90000f5e2
 	BTST	#0,(90,A0)		;0f52a: 08280000005a
@@ -20026,11 +20038,11 @@ _0F524:
 	JSR	_RandInt		;0f538: 4eb900000c0c
 	ADD.W	D0,D0			;0f53e: d040
 	TST.W	(2,A1,D0.W)		;0f540: 4a710002
-	BEQ.S	_0F58C			;0f544: 6746
+	BEQ.S	_next0F58C		;0f544: 6746
 ; Turns random ore into Selenium?
 	SUBQ.W	#1,(2,A1,D0.W)		;0f546: 53710002
 	ADDQ.W	#1,(A1)			;0f54a: 5251
-	BRA.S	_0F58C			;0f54c: 603e
+	BRA.S	_next0F58C		;0f54c: 603e
 _0F54E:
 	MOVEQ	#4,D0			;0f54e: 7004
 	JSR	_RandInt		;0f550: 4eb900000c0c
@@ -20054,7 +20066,7 @@ _0F54E:
 _0F588:
 	MOVE.W	(A7)+,D1		;0f588: 321f
 	MOVEA.L	(A7)+,A6		;0f58a: 2c5f
-_0F58C:
+_next0F58C:
 	ADDQ.L	#4,A6			;0f58c: 588e
 	DBF	D1,loop0F4EA		;0f58e: 51c9ff5a
 	MOVE.W	(A7)+,D0		;0f592: 301f
@@ -20472,7 +20484,7 @@ _Stasis_Normal:
 	LEA	palette,A1		;0fa38: 43f90001af96
 	JSR	_ScreenFlash_0596E	;0fa3e: 4eb90000596e
 _0FA44:
-	TST.W	unk059D0		;0fa44: 4a79000059d0
+	TST.W	unkFlash_059D0		;0fa44: 4a79000059d0
 	BNE.S	_0FA44			;0fa4a: 66f8
 	LEA	paletteFlash,A0		;0fa4c: 41f90001af16
 	LEA	palette,A1		;0fa52: 43f90001af96
@@ -20682,7 +20694,7 @@ loop0FCF0:
 	MOVE.W	D1,(-2,A0)		;0fcf6: 3141fffe
 	DBF	D0,loop0FCF0		;0fcfa: 51c8fff4
 	MOVE.W	#$0019,data2E0A6	;0fcfe: 33fc00190002e0a6
-	CLR.W	unk059D0		;0fd06: 4279000059d0
+	CLR.W	unkFlash_059D0		;0fd06: 4279000059d0
 _0FD0C:
 	SF	flgWait			;0fd0c: 51f900000bb2
 _0FD12:
@@ -20775,21 +20787,25 @@ _0FD7C:
 	BSR.W	_ExplodeSprite_0E1FA	;0fe26: 6100e3d2
 	RTS				;0fe2a: 4e75
 _WarheadExplosive:
-	LEA	unkMislHit,A0		;0fe2c: 41f90001f07a
+	LEA	incomingMissile,A0	;0fe2c: 41f90001f07a
+; Copy incoming missile data
+; 27 words = one missile
 	MOVEQ	#26,D0			;0fe32: 701a
 loop0FE34:
 	MOVE.W	(A6)+,(A0)+		;0fe34: 30de
 	DBF	D0,loop0FE34		;0fe36: 51c8fffc
 	MOVEQ	#0,D0			;0fe3a: 7000
-	LEA	ptr1EBC6,A0		;0fe3c: 41f90001ebc6
+	LEA	Blast2x2,A0		;0fe3c: 41f90001ebc6
 _0FE42:
-	LEA	unkMislHit,A6		;0fe42: 4df90001f07a
+; Strike at each of four squares based on blast pattern.
+; Blast patterns are not square.
+	LEA	incomingMissile,A6	;0fe42: 4df90001f07a
 	MOVE.B	(A0)+,D1		;0fe48: 1218
 	ADD.B	D1,(10,A6)		;0fe4a: d32e000a
 	MOVE.B	(A0)+,D1		;0fe4e: 1218
 	ADD.B	D1,(11,A6)		;0fe50: d32e000b
 	MOVEM.L	D0/A0,-(A7)		;0fe54: 48e78080
-; 10 damage.
+; Ground hit for 10 damage.
 	MOVEQ	#10,D7			;0fe58: 7e0a
 	BSR.W	_GroundHit		;0fe5a: 61000018
 	MOVEM.L	(A7)+,D0/A0		;0fe5e: 4cdf0101
@@ -20846,7 +20862,7 @@ _GroundHit:
 	BMI.S	_0FF6C			;0ff04: 6b66
 	MOVE.W	D2,-(A7)		;0ff06: 3f02
 	MOVE.W	(38,A4),-(A7)		;0ff08: 3f2c0026
-	LEA	ptr1EA46,A2		;0ff0c: 45f90001ea46
+	LEA	AirBurstEffect,A2	;0ff0c: 45f90001ea46
 	MOVEQ	#51,D0			;0ff12: 7033
 	MOVE.W	(10,A4),D2		;0ff14: 342c000a
 	MOVE.B	#$98,D1			;0ff18: 123c0098
@@ -20865,7 +20881,7 @@ _0FF38:
 	MOVEQ	#46,D5			;0ff46: 7a2e
 	BSR.W	_0FD7C			;0ff48: 6100fe32
 	MOVE.W	(A7)+,D2		;0ff4c: 341f
-	LEA	ptr1EA46,A2		;0ff4e: 45f90001ea46
+	LEA	AirBurstEffect,A2	;0ff4e: 45f90001ea46
 	MOVEQ	#51,D0			;0ff54: 7033
 	MOVE.B	#$98,D1			;0ff56: 123c0098
 	MOVEA.L	ptrThisAstStats,A0	;0ff5a: 20790002ded8
@@ -20888,15 +20904,15 @@ _0FF7C:
 	BSR.W	_ExplodeSprite_0E1FA	;0ff90: 6100e268
 	RTS				;0ff94: 4e75
 _WarheadAreaExpl:
-	LEA	unkMislHit,A0		;0ff96: 41f90001f07a
+	LEA	incomingMissile,A0	;0ff96: 41f90001f07a
 	MOVEQ	#26,D0			;0ff9c: 701a
 loop0FF9E:
 	MOVE.W	(A6)+,(A0)+		;0ff9e: 30de
 	DBF	D0,loop0FF9E		;0ffa0: 51c8fffc
 	MOVEQ	#0,D0			;0ffa4: 7000
-	LEA	ptrNapalm_1EB82,A0	;0ffa6: 41f90001eb82
+	LEA	Blast5x5,A0		;0ffa6: 41f90001eb82
 _0FFAC:
-	LEA	unkMislHit,A6		;0ffac: 4df90001f07a
+	LEA	incomingMissile,A6	;0ffac: 4df90001f07a
 	MOVE.B	(A0)+,D1		;0ffb2: 1218
 	ADD.B	D1,(10,A6)		;0ffb4: d32e000a
 	MOVE.B	(A0)+,D1		;0ffb8: 1218
@@ -20911,16 +20927,16 @@ _0FFAC:
 	BNE.S	_0FFAC			;0ffd2: 66d8
 	RTS				;0ffd4: 4e75
 _WarheadHellfire:
-	ST	flg2E46A		;0ffd6: 50f90002e46a
-	LEA	unkMislHit,A0		;0ffdc: 41f90001f07a
+	ST	flgHellfire		;0ffd6: 50f90002e46a
+	LEA	incomingMissile,A0	;0ffdc: 41f90001f07a
 	MOVEQ	#26,D0			;0ffe2: 701a
 loop0FFE4:
 	MOVE.W	(A6)+,(A0)+		;0ffe4: 30de
 	DBF	D0,loop0FFE4		;0ffe6: 51c8fffc
 	MOVEQ	#0,D0			;0ffea: 7000
-	LEA	ptr1EBB4,A0		;0ffec: 41f90001ebb4
+	LEA	Blast3x3,A0		;0ffec: 41f90001ebb4
 _0FFF2:
-	LEA	unkMislHit,A6		;0fff2: 4df90001f07a
+	LEA	incomingMissile,A6	;0fff2: 4df90001f07a
 	MOVE.B	(A0)+,D1		;0fff8: 1218
 	ADD.B	D1,(10,A6)		;0fffa: d32e000a
 	MOVE.B	(A0)+,D1		;0fffe: 1218
@@ -20931,18 +20947,18 @@ _0FFF2:
 	ADDQ.B	#1,D0			;10010: 5200
 	CMPI.B	#$09,D0			;10012: 0c000009
 	BNE.S	_0FFF2			;10016: 66da
-	SF	flg2E46A		;10018: 51f90002e46a
+	SF	flgHellfire		;10018: 51f90002e46a
 	RTS				;1001e: 4e75
 _WarheadNapalm:
-	LEA	unkMislHit,A0		;10020: 41f90001f07a
+	LEA	incomingMissile,A0	;10020: 41f90001f07a
 	MOVEQ	#26,D0			;10026: 701a
 loop10028:
 	MOVE.W	(A6)+,(A0)+		;10028: 30de
 	DBF	D0,loop10028		;1002a: 51c8fffc
 	MOVEQ	#0,D0			;1002e: 7000
-	LEA	ptrNapalm_1EB82,A0	;10030: 41f90001eb82
+	LEA	Blast5x5,A0		;10030: 41f90001eb82
 _10036:
-	LEA	unkMislHit,A6		;10036: 4df90001f07a
+	LEA	incomingMissile,A6	;10036: 4df90001f07a
 	MOVE.B	(A0)+,D1		;1003c: 1218
 	ADD.B	D1,(10,A6)		;1003e: d32e000a
 	MOVE.B	(A0)+,D1		;10042: 1218
@@ -20989,7 +21005,7 @@ _GroundBurn:
 _100C4:
 	JSR	_DamageBldg		;100c4: 4eb900006d4a
 	MOVE.W	(A7)+,D1		;100ca: 321f
-	TST.B	flg2E46A		;100cc: 4a390002e46a
+	TST.B	flgHellfire		;100cc: 4a390002e46a
 	BNE.S	_100E2			;100d2: 660e
 	TST.B	flgShowGfx		;100d4: 4a390002e468
 	BNE.S	ret10134		;100da: 6658
@@ -21008,13 +21024,13 @@ _100E2:
 	BMI.S	_10136			;10100: 6b34
 	LEA	ptr1EA8A,A2		;10102: 45f90001ea8a
 	MOVEQ	#47,D5			;10108: 7a2f
-	TST.B	flg2E46A		;1010a: 4a390002e46a
+	TST.B	flgHellfire		;1010a: 4a390002e46a
 	BEQ.S	_1014C			;10110: 673a
 	LEA	ptr1EACE,A2		;10112: 45f90001eace
 	BRA.S	_1014C			;10118: 6032
 _1011A:
 	LEA	ptr1EA8A,A2		;1011a: 45f90001ea8a
-	TST.B	flg2E46A		;10120: 4a390002e46a
+	TST.B	flgHellfire		;10120: 4a390002e46a
 	BEQ.S	_1012E			;10126: 6706
 	LEA	ptr1EACE,A2		;10128: 45f90001eace
 _1012E:
@@ -21025,7 +21041,7 @@ ret10134:
 _10136:
 	LEA	ptr1EA64,A2		;10136: 45f90001ea64
 	MOVEQ	#39,D5			;1013c: 7a27
-	TST.B	flg2E46A		;1013e: 4a390002e46a
+	TST.B	flgHellfire		;1013e: 4a390002e46a
 	BEQ.S	_1014C			;10144: 6706
 	LEA	ptr1EAB0,A2		;10146: 45f90001eab0
 _1014C:
@@ -21204,7 +21220,7 @@ _102B4:
 	SUBQ.W	#1,D1			;102b8: 5341
 	RTS				;102ba: 4e75
 _102BC:
-	TST.W	unk059D0		;102bc: 4a79000059d0
+	TST.W	unkFlash_059D0		;102bc: 4a79000059d0
 	BNE.S	_1030E			;102c2: 664a
 	ST	flg2E46B		;102c4: 50f90002e46b
 	LEA	ptr1B6BE,A4		;102ca: 49f90001b6be
@@ -21253,7 +21269,7 @@ _10312:
 	MOVEQ	#0,D0			;10342: 7000
 	RTS				;10344: 4e75
 _10346:
-	LEA	ptr1F044,A6		;10346: 4df90001f044
+	LEA	shExplosion1F044,A6	;10346: 4df90001f044
 	MOVEQ	#26,D0			;1034c: 701a
 	MOVEQ	#0,D1			;1034e: 7200
 loop10350:
@@ -21295,14 +21311,14 @@ _10398:
 	BRA.S	_10398			;103a6: 60f0
 _103A8:
 	MOVEA.L	A6,A5			;103a8: 2a4e
-	LEA	ptr1F044,A6		;103aa: 4df90001f044
+	LEA	shExplosion1F044,A6	;103aa: 4df90001f044
 	MOVE.B	D0,(8,A6)		;103b0: 1d400008
 	MOVE.W	(50,A5),(50,A6)		;103b4: 3d6d00320032
 	MOVE.L	(42,A5),(42,A6)		;103ba: 2d6d002a002a
 	MOVE.W	(46,A5),(46,A6)		;103c0: 3d6d002e002e
 	BRA.S	_103FC			;103c6: 6034
 _103C8:
-	LEA	ptr1F044,A6		;103c8: 4df90001f044
+	LEA	shExplosion1F044,A6	;103c8: 4df90001f044
 	ASR.W	#1,D0			;103ce: e240
 	ADDQ.W	#2,D0			;103d0: 5440
 	MOVE.B	D0,(8,A6)		;103d2: 1d400008
@@ -21326,7 +21342,7 @@ _103FC:
 	MOVE.B	#$00,intPointer		;10416: 13fc00000002e48c
 	RTS				;1041e: 4e75
 _10420:
-	LEA	ptr1F044,A6		;10420: 4df90001f044
+	LEA	shExplosion1F044,A6	;10420: 4df90001f044
 	MOVE.L	(28,A6),D0		;10426: 202e001c
 	BEQ.W	_1050A			;1042a: 670000de
 	CMPI.L	#data1E971,D0		;1042e: 0c800001e971
@@ -21585,7 +21601,7 @@ _10722:
 	RTS				;10724: 4e75
 _10726:
 	LEA	ptrShips_2DEDC,A0	;10726: 41f90002dedc
-	JSR	_0252E			;1072c: 4eb90000252e
+	JSR	_Ship0252E		;1072c: 4eb90000252e
 	MOVEA.L	ptr107D6,A0		;10732: 2079000107d6
 	MOVEA.L	(6,A0),A0		;10738: 20680006
 	JSR	_024FA			;1073c: 4eb9000024fa
@@ -21715,8 +21731,8 @@ arrAlienShipHP:
 	DC.L	_AlienStaticInd		;108ba: 00010a10
 	DC.L	_WarpGenerator		;108be: 00010a4c
 	DC.L	_Deflector		;108c2: 00010a44
-	DC.L	_AlienHP11		;108c6: 000192bc
-	DC.L	_AlienHP12		;108ca: 00010d86
+	DC.L	_Kll_HP11		;108c6: 000192bc
+	DC.L	_TylGoldVortex12	;108ca: 00010d86
 	DC.L	_RigelPowerDrain13	;108ce: 000109a6
 	DC.L	_SwixBioWpn14		;108d2: 00010936
 	DC.L	_SwixSelfDestr15	;108d6: 000108ee
@@ -21906,12 +21922,14 @@ _LaserCannon:
 	BRA.S	_FireTerranCannon	;10aae: 6006
 _PhotonCannon:
 ; Weapon 06. Confirmed by memory edit that 06 is called Photon.
-; Interesting bug: Plasma costs twice as much, despite being weaker.
-; The damage values are consistent with the ground turrets.
-; The bug is that plasma is incorrectly presented and priced as if
-; it was strongest.
-; Photon is also the strongest for aliens, ranging from 6 to 100
-; depending on alien. Rigellians don't use photon tech at all.
+; Interesting bug: Plasma costs twice as much, despite being
+; weaker. The damage values are consistent with the ground
+; turrets.
+; The bug is that plasma is incorrectly presented and priced
+; as if it was strongest.
+; Photon is also the strongest for aliens, ranging from
+; 6 to 10 depending on alien. Rigellians don't use photon
+; tech at all.
 	MOVEQ	#8,D7			;10ab0: 7e08
 	BRA.S	_FireTerranCannon	;10ab2: 6002
 _PlasmaCannon:
@@ -21944,13 +21962,20 @@ _IonCannon:
 	ANDI.B	#$03,D0			;10afa: 02000003
 	CMP.B	D0,D6			;10afe: bc00
 	BNE.S	ret10B54		;10b00: 6652
+; Note on chance generation:
+; _RandInt generates a number between 0 and d0 minus 1
+; i.e. here it's 0-9
+; CMPI subtracts the first from the second
+; i.e. d0 minus 5
+; BPL is used if the number is not negative
+; so here, the code continues 50% of the time.
 	MOVEQ	#10,D0			;10b02: 700a
 	JSR	_RandInt		;10b04: 4eb900000c0c
 	CMPI.B	#$05,D0			;10b0a: 0c000005
 	BPL.S	ret10B54		;10b0e: 6a44
 	BSET	#6,(21,A6)		;10b10: 08ee00060015
 	BSR.W	_0F1C6			;10b16: 6100e6ae
-	LEA	ptr1F044,A6		;10b1a: 4df90001f044
+	LEA	shExplosion1F044,A6	;10b1a: 4df90001f044
 	MOVE.B	D2,(10,A6)		;10b20: 1d42000a
 	MOVE.B	D3,(11,A6)		;10b24: 1d43000b
 	MOVE.W	D4,(38,A6)		;10b28: 3d440026
@@ -21978,13 +22003,14 @@ _Disruptor:
 	ANDI.B	#$03,D0			;10b6a: 02000003
 	CMP.B	D0,D6			;10b6e: bc00
 	BNE.W	ret10BFE		;10b70: 6600008c
+; 20% chance
 	MOVEQ	#10,D0			;10b74: 700a
 	JSR	_RandInt		;10b76: 4eb900000c0c
 	CMPI.B	#$02,D0			;10b7c: 0c000002
 	BPL.S	ret10BFE		;10b80: 6a7c
 	BSET	#6,(21,A6)		;10b82: 08ee00060015
 	BSR.W	_0F1C6			;10b88: 6100e63c
-	LEA	ptr1F044,A6		;10b8c: 4df90001f044
+	LEA	shExplosion1F044,A6	;10b8c: 4df90001f044
 	MOVE.B	D2,(10,A6)		;10b92: 1d42000a
 	MOVE.B	D3,(11,A6)		;10b96: 1d43000b
 	MOVE.W	D4,(38,A6)		;10b9a: 3d440026
@@ -21992,16 +22018,16 @@ _Disruptor:
 	MOVEA.L	ptrThisAstStats,A0	;10ba0: 20790002ded8
 	ADDQ.B	#1,(172,A0)		;10ba6: 522800ac
 _10BAA:
-	LEA	unkMislHit,A0		;10baa: 41f90001f07a
+	LEA	incomingMissile,A0	;10baa: 41f90001f07a
 	MOVEQ	#26,D0			;10bb0: 701a
 loop10BB2:
 	MOVE.W	(A6)+,(A0)+		;10bb2: 30de
 	DBF	D0,loop10BB2		;10bb4: 51c8fffc
 	SF	flgDidGroundHit		;10bb8: 51f9000315f0
 	MOVEQ	#0,D0			;10bbe: 7000
-	LEA	ptr1EBC6,A0		;10bc0: 41f90001ebc6
+	LEA	Blast2x2,A0		;10bc0: 41f90001ebc6
 _10BC6:
-	LEA	unkMislHit,A6		;10bc6: 4df90001f07a
+	LEA	incomingMissile,A6	;10bc6: 4df90001f07a
 	MOVE.B	(A0)+,D1		;10bcc: 1218
 	ADD.B	D1,(10,A6)		;10bce: d32e000a
 	MOVE.B	(A0)+,D1		;10bd2: 1218
@@ -22036,7 +22062,7 @@ _NapalmOrb:
 	BPL.S	ret10C6A		;10c26: 6a42
 	BSET	#6,(21,A6)		;10c28: 08ee00060015
 	BSR.W	_0F1C6			;10c2e: 6100e596
-	LEA	ptr1F044,A6		;10c32: 4df90001f044
+	LEA	shExplosion1F044,A6	;10c32: 4df90001f044
 	MOVE.B	D2,(10,A6)		;10c38: 1d42000a
 	MOVE.B	D3,(11,A6)		;10c3c: 1d43000b
 	MOVE.W	D4,(38,A6)		;10c40: 3d440026
@@ -22067,7 +22093,7 @@ _ChaosBomb:
 	BPL.S	ret10D12		;10c96: 6a7a
 	BSET	#6,(21,A6)		;10c98: 08ee00060015
 	BSR.W	_0F1C6			;10c9e: 6100e526
-	LEA	ptr1F044,A6		;10ca2: 4df90001f044
+	LEA	shExplosion1F044,A6	;10ca2: 4df90001f044
 	MOVE.B	D2,(10,A6)		;10ca8: 1d42000a
 	MOVE.B	D3,(11,A6)		;10cac: 1d43000b
 	MOVE.W	D4,(38,A6)		;10cb0: 3d440026
@@ -22075,16 +22101,16 @@ _ChaosBomb:
 	MOVEA.L	ptrThisAstStats,A0	;10cb6: 20790002ded8
 	ADDQ.B	#1,(172,A0)		;10cbc: 522800ac
 _10CC0:
-	LEA	unkMislHit,A0		;10cc0: 41f90001f07a
+	LEA	incomingMissile,A0	;10cc0: 41f90001f07a
 	MOVEQ	#26,D0			;10cc6: 701a
 loop10CC8:
 	MOVE.W	(A6)+,(A0)+		;10cc8: 30de
 	DBF	D0,loop10CC8		;10cca: 51c8fffc
 	SF	flgDidGroundHit		;10cce: 51f9000315f0
 	MOVEQ	#0,D0			;10cd4: 7000
-	LEA	ptr1EBC6,A0		;10cd6: 41f90001ebc6
+	LEA	Blast2x2,A0		;10cd6: 41f90001ebc6
 _10CDC:
-	LEA	unkMislHit,A6		;10cdc: 4df90001f07a
+	LEA	incomingMissile,A6	;10cdc: 4df90001f07a
 	MOVE.B	(A0)+,D1		;10ce2: 1218
 	ADD.B	D1,(10,A6)		;10ce4: d32e000a
 	MOVE.B	(A0)+,D1		;10ce8: 1218
@@ -22140,7 +22166,7 @@ _Vortex_10D32:
 	CLR.W	(38,A6)			;10d80: 426e0026
 ret10D84:
 	RTS				;10d84: 4e75
-_AlienHP12:
+_TylGoldVortex12:
 	TST.B	flg2E475		;10d86: 4a390002e475
 	BNE.S	ret10DE8		;10d8c: 665a
 	MOVEA.L	ptrThisAstStats,A0	;10d8e: 20790002ded8
@@ -22313,8 +22339,9 @@ _10F00:
 	CMPI.B	#$03,D0			;10f12: 0c000003
 	BNE.W	ret10FDE		;10f16: 660000c6
 _10F1A:
-	TST.B	int2E470		;10f1a: 4a390002e470
+	TST.B	intKllSatCountd		;10f1a: 4a390002e470
 	BEQ.S	_10F4C			;10f20: 672a
+; count 8
 	MOVE.W	#$0afa,D2		;10f22: 343c0afa
 	MOVEQ	#0,D0			;10f26: 7000
 	MOVE.W	#$0096,D1		;10f28: 323c0096
@@ -22343,7 +22370,7 @@ _10F54:
 	MOVEA.L	ptrBuff00,A1		;10f72: 22790000052a
 	JSR	(_DrawGfx_0C916,PC)	;10f78: 4ebab99c
 _10F7C:
-	TST.B	int2E472		;10f7c: 4a390002e472
+	TST.B	intCount_2E472		;10f7c: 4a390002e472
 	BEQ.S	_10FAE			;10f82: 672a
 	MOVE.W	#$0afa,D2		;10f84: 343c0afa
 	MOVEQ	#28,D0			;10f88: 701c
@@ -22722,7 +22749,7 @@ _11476:
 	MOVEA.L	(A7)+,A1		;11476: 225f
 	RTS				;11478: 4e75
 _1147A:
-	TST.W	unk059D0		;1147a: 4a79000059d0
+	TST.W	unkFlash_059D0		;1147a: 4a79000059d0
 	BNE.W	_11508			;11480: 66000086
 	BSR.W	_1150C			;11484: 61000086
 	BMI.W	_11508			;11488: 6b00007e
@@ -23265,7 +23292,7 @@ loop11B22:
 	DBF	D4,loop11B22		;11b30: 51ccfff0
 ret11B34:
 	RTS				;11b34: 4e75
-_11B36:
+_AstDistance11B36:
 	SUB.W	D2,D0			;11b36: 9042
 	BPL.S	_11B3C			;11b38: 6a02
 	NEG.W	D0			;11b3a: 4440
@@ -23689,7 +23716,7 @@ _12158:
 	MOVEQ	#0,D1			;1216a: 7200
 	MOVEM.W	intMouseX,D0-D1		;1216c: 4cb9000300000760
 	MOVEM.W	(26,A0),D2-D3		;12174: 4ca8000c001a
-	BSR.W	_11B36			;1217a: 6100f9ba
+	BSR.W	_AstDistance11B36	;1217a: 6100f9ba
 	CMP.W	dataAst2E090,D0		;1217e: b0790002e090
 	BEQ.S	_12194			;12184: 670e
 	MOVE.W	D0,dataAst2E090		;12186: 33c00002e090
@@ -23797,7 +23824,7 @@ _122B4:
 	MOVE.W	D0,data2E08E		;122c8: 33c00002e08e
 	MOVEQ	#100,D2			;122ce: 7464
 	LEA	ptr1C8F4,A0		;122d0: 41f90001c8f4
-	JSR	_074AA			;122d6: 4eb9000074aa
+	JSR	_IntToASCII		;122d6: 4eb9000074aa
 	MOVE.B	#$25,(A0)+		;122dc: 10fc0025
 	SF	(A0)			;122e0: 51d0
 	MOVEQ	#6,D7			;122e2: 7e06
@@ -24138,7 +24165,7 @@ _127AA:
 	BSR.W	_DrawGfx_0C916		;127ca: 6100a14a
 ret127CE:
 	RTS				;127ce: 4e75
-_127D0:
+_Direction127D0:
 	MOVE.W	(26,A0),D0		;127d0: 3028001a
 	MOVE.W	(28,A0),D1		;127d4: 3228001c
 	MOVE.W	(26,A1),D2		;127d8: 3429001a
@@ -24304,7 +24331,7 @@ loop1294A:
 	BNE.S	_12986			;12968: 661c
 	MOVEM.W	(26,A1),D2-D3		;1296a: 4ca9000c001a
 	MOVEM.W	(26,A0),D0-D1		;12970: 4ca80003001a
-	BSR.W	_11B36			;12976: 6100f1be
+	BSR.W	_AstDistance11B36	;12976: 6100f1be
 	CMPI.W	#$002d,D0		;1297a: 0c40002d
 	BPL.S	_12986			;1297e: 6a06
 	BSET	#1,(90,A0)		;12980: 08e80001005a
@@ -24339,7 +24366,7 @@ loop129D2:
 	BEQ.S	_12A3A			;129dc: 675c
 	MOVEM.W	(26,A1),D2-D3		;129de: 4ca9000c001a
 	MOVEM.W	(26,A0),D0-D1		;129e4: 4ca80003001a
-	BSR.W	_11B36			;129ea: 6100f14a
+	BSR.W	_AstDistance11B36	;129ea: 6100f14a
 	CMPI.W	#$001a,D0		;129ee: 0c40001a
 	BPL.S	_12A3A			;129f2: 6a46
 	BTST	#2,(89,A1)		;129f4: 082900020059
@@ -24377,7 +24404,7 @@ loop12A52:
 	LEA	(750,A0),A0		;12a58: 41e802ee
 	DBF	D7,loop12A52		;12a5c: 51cffff4
 	RTS				;12a60: 4e75
-_12A62:
+_AstProximity:
 ; Maybe checking for collision
 	MOVEA.L	ptrBuff12_Asteroids,A1	;12a62: 22790000055a
 	MOVEQ	#23,D6			;12a68: 7c17
@@ -24388,7 +24415,7 @@ loop12A6A:
 	BEQ.S	next12A8C		;12a74: 6716
 	MOVEM.W	(26,A1),D2-D3		;12a76: 4ca9000c001a
 	MOVEM.W	(26,A0),D0-D1		;12a7c: 4ca80003001a
-	BSR.W	_11B36			;12a82: 6100f0b2
+	BSR.W	_AstDistance11B36	;12a82: 6100f0b2
 	CMPI.W	#$0010,D0		;12a86: 0c400010
 	BMI.S	_12A98			;12a8a: 6b0c
 next12A8C:
@@ -24454,11 +24481,14 @@ _PlaceEmptyAst:
 	MOVEQ	#22,D0			;12b3e: 7016
 	JSR	_RandInt		;12b40: 4eb900000c0c
 	TST.B	D1			;12b46: 4a01
-	BEQ.S	_12B4E			;12b48: 6704
+	BEQ.S	_InitAstCoords		;12b48: 6704
 	ADDI.W	#$0012,D0		;12b4a: 06400012
-_12B4E:
+_InitAstCoords:
 ; probably create or establish asteroid
-	LEA	ptr1F446,A1		;12b4e: 43f90001f446
+	LEA	tblAstCoords,A1		;12b4e: 43f90001f446
+; d0 = random 22-38
+; x16 = [352, 368, 384, 400, 416, 432, 448, 464,
+; 480, 496, 512, 528, 544, 560, 576, 592, 608]
 	MOVE.W	D0,D7			;12b54: 3e00
 	LSL.W	#4,D7			;12b56: e94f
 	MOVEM.W	(0,A1,D7.W),D1-D2	;12b58: 4cb100067000
@@ -24466,9 +24496,30 @@ _12B4E:
 	MOVE.W	D2,D4			;12b60: 3802
 	ADDI.W	#$0028,D3		;12b62: 06430028
 	ADDI.W	#$0028,D4		;12b66: 06440028
+; Coords (d1 d2 d3 d4) randomly chosen from:
+; 40,40 to 80,80
+; 80,40 to 120,80
+; 120,40 to 160,80
+; 160,40 to 200,80
+; 200,40 to 240,80
+; 240,40 to 280,80
+; 40,80 to 80,120
+; 80,80 to 120,120
+; 120,80 to 160,120
+; 160,80 to 200,120
+; 200,80 to 240,120
+; 240,80 to 280,120
+; 40,120 to 80,160
+; 80,120 to 120,160
+; 120,120 to 160,160
+; 160,120 to 200,160
+; 200,120 to 240,160
 	MOVEA.L	ptrBuff12_Asteroids,A0	;12b6a: 20790000055a
 	MOVEQ	#23,D0			;12b70: 7017
 loop12B72:
+; Init asteroid if asteroid doesn't exist,
+; topleft x/y coord is  below d5, or
+; bottomright x/y coord is below d6
 	TST.B	(25,A0)			;12b72: 4a280019
 	BMI.S	_AstInit_12B90		;12b76: 6b18
 	MOVEM.W	(26,A0),D5-D6		;12b78: 4ca80060001a
@@ -24483,7 +24534,7 @@ loop12B72:
 ret12B8E:
 	RTS				;12b8e: 4e75
 _AstInit_12B90:
-; probably init asteroids
+; Init an asteroid
 	LEA	(750,A0),A0		;12b90: 41e802ee
 	DBF	D0,loop12B72		;12b94: 51c8ffdc
 	MOVEA.L	ptrBuff12_Asteroids,A0	;12b98: 20790000055a
@@ -24527,6 +24578,7 @@ _12BEC:
 	BMI.S	_12BF6			;12bf0: 6b04
 	MOVE.W	#$00c7,D3		;12bf2: 363c00c7
 _12BF6:
+; set direction
 	MOVEM.W	D2-D3,(26,A0)		;12bf6: 48a8000c001a
 	MOVEQ	#8,D0			;12bfc: 7008
 	JSR	_RandInt		;12bfe: 4eb900000c0c
@@ -24535,7 +24587,7 @@ _12BF6:
 	MOVE.B	(8,A1,D7.W),D2		;12c08: 14317008
 	MOVE.B	D2,(35,A0)		;12c0c: 11420023
 	LSL.W	#2,D2			;12c10: e54a
-	LEA	arrAstDirection,A1	;12c12: 43f90001f6c6
+	LEA	arrAstDirections,A1	;12c12: 43f90001f6c6
 	MOVEM.W	(0,A1,D2.W),D0-D1	;12c18: 4cb100032000
 	MOVEM.W	D0-D1,(56,A0)		;12c1e: 48a800030038
 	MOVEQ	#16,D0			;12c24: 7010
@@ -24545,7 +24597,7 @@ _12BF6:
 	MOVE.B	(0,A1,D0.W),(24,A0)	;12c32: 117100000018
 	MOVEQ	#24,D0			;12c38: 7018
 	JSR	_RandInt		;12c3a: 4eb900000c0c
-	MOVE.L	lAstUnknown52,D2	;12c40: 24390002de50
+	MOVE.L	lAstSlots,D2		;12c40: 24390002de50
 _12C46:
 	BSET	D0,D2			;12c46: 01c2
 	BEQ.S	_NewAst_12C52		;12c48: 6708
@@ -24554,10 +24606,11 @@ _12C46:
 	MOVEQ	#23,D0			;12c4e: 7017
 	BRA.S	_12C46			;12c50: 60f4
 _NewAst_12C52:
-	MOVE.L	D2,lAstUnknown52	;12c52: 23c20002de50
+	MOVE.L	D2,lAstSlots		;12c52: 23c20002de50
 	MOVE.B	D0,(25,A0)		;12c58: 11400019
+; Clear status bits
 	SF	(89,A0)			;12c5c: 51e80059
-	LEA	ptr1f356,A1		;12c60: 43f90001f356
+	LEA	ptrAst_1f356,A1		;12c60: 43f90001f356
 	MOVE.W	D0,D1			;12c66: 3200
 	MULU	#$000a,D0		;12c68: c0fc000a
 	MOVE.W	(8,A1,D0.W),(36,A0)	;12c6c: 317100080024
@@ -24778,9 +24831,9 @@ _12E76:
 	MOVEQ	#0,D0			;12e7a: 7000
 	MOVE.B	(25,A0),D0		;12e7c: 10280019
 	MOVE.L	D0,D6			;12e80: 2c00
-	MOVE.L	lAstUnknown52,D1	;12e82: 22390002de50
+	MOVE.L	lAstSlots,D1		;12e82: 22390002de50
 	BCLR	D0,D1			;12e88: 0181
-	MOVE.L	D1,lAstUnknown52	;12e8a: 23c10002de50
+	MOVE.L	D1,lAstSlots		;12e8a: 23c10002de50
 	SUBQ.W	#1,astCount		;12e90: 53790002e00a
 	ST	flg2E00E		;12e96: 50f90002e00e
 	CMPI.B	#$04,intScreen		;12e9c: 0c3900040002e486
@@ -24963,7 +25016,7 @@ loop13084:
 	MOVEQ	#100,D6			;130c0: 7c64
 _130C2:
 	MOVE.W	D6,-(A7)		;130c2: 3f06
-	TST.W	unk059D0		;130c4: 4a79000059d0
+	TST.W	unkFlash_059D0		;130c4: 4a79000059d0
 	BNE.S	_130E0			;130ca: 6614
 	LEA	paletteFlash,A0		;130cc: 41f90001af16
 	LEA	palette,A1		;130d2: 43f90001af96
@@ -24991,7 +25044,7 @@ loop13100:
 	MOVEA.L	(A1)+,A2		;1311a: 2459
 	MOVE.W	(A1),D2			;1311c: 3411
 	MOVE.W	(6,A0),D0		;1311e: 30280006
-	LEA	arrAstDirection,A1	;13122: 43f90001f6c6
+	LEA	arrAstDirections,A1	;13122: 43f90001f6c6
 	ASL.W	#2,D0			;13128: e540
 	ADDA.W	D0,A1			;1312a: d2c0
 	MOVE.W	(A1),D0			;1312c: 3011
@@ -25037,11 +25090,12 @@ flg131A4:
 	DC.W	$0000			;131a4
 _DemolishAll:
 	MOVE.B	D0,flg13340		;131a6: 13c000013340
-	CLR.L	ptr13338		;131ac: 42b900013338
-	MOVE.L	A0,ptr1333C		;131b2: 23c80001333c
+	CLR.L	ptrAst_13338		;131ac: 42b900013338
+	MOVE.L	A0,ptrAst_1333C		;131b2: 23c80001333c
 	BTST	#6,(89,A0)		;131b8: 082800060059
 	BEQ.S	_131C6			;131be: 6706
-	MOVE.L	A0,ptr13338		;131c0: 23c800013338
+; check whose asteroid it is
+	MOVE.L	A0,ptrAst_13338		;131c0: 23c800013338
 _131C6:
 	MOVE.L	A0,-(A7)		;131c6: 2f08
 	MOVEA.L	ptrThisAstBldg,A0	;131c8: 20790002ded0
@@ -25076,13 +25130,13 @@ loop1321C:
 	MOVE.W	(2,A6),D2		;1321c: 342e0002
 	BMI.S	_13228			;13220: 6b06
 	CMPI.W	#$003d,D2		;13222: 0c42003d
-	BMI.S	LAB_0BB3		;13226: 6b10
+	BMI.S	_13238			;13226: 6b10
 _13228:
 	MOVEQ	#3,D0			;13228: 7003
 	JSR	_RandInt		;1322a: 4eb900000c0c
 	ADDI.W	#$002d,D0		;13230: 0640002d
 	MOVE.W	D0,(2,A6)		;13234: 3d400002
-LAB_0BB3:
+_13238:
 	AND.L	D1,(A6)+		;13238: c39e
 	DBF	D7,loop1321C		;1323a: 51cfffe0
 	MOVEA.L	(A7)+,A0		;1323e: 205f
@@ -25095,7 +25149,7 @@ _1324E:
 	MOVE.B	D0,(89,A0)		;13256: 11400059
 	BSR.W	_13342			;1325a: 610000e6
 	BSR.W	_121DA			;1325e: 6100ef7a
-	MOVE.L	ptr13338,D1		;13262: 223900013338
+	MOVE.L	ptrAst_13338,D1		;13262: 223900013338
 	BEQ.W	_132F6			;13268: 6700008c
 	TST.B	flg13340		;1326c: 4a3900013340
 	BNE.S	_13288			;13272: 6614
@@ -25108,7 +25162,7 @@ _1324E:
 	MOVEQ	#0,D4			;13280: 7800
 	JSR	_Message_08F7E		;13282: 4eb900008f7e
 _13288:
-	MOVEA.L	ptr1333C,A0		;13288: 20790001333c
+	MOVEA.L	ptrAst_1333C,A0		;13288: 20790001333c
 	BTST	#4,(90,A0)		;1328e: 08280004005a
 	BEQ.S	_132B4			;13294: 671e
 	MOVE.L	(8,A0),D0		;13296: 20280008
@@ -25125,10 +25179,10 @@ _1329E:
 _132B0:
 	BSR.W	_ShipAct0d_Expl		;132b0: 6100b2cc
 _132B4:
-	MOVEA.L	ptr13338,A0		;132b4: 207900013338
-	BSR.W	_AliAstEffects		;132ba: 61003a38
+	MOVEA.L	ptrAst_13338,A0		;132b4: 207900013338
+	BSR.W	_AliAstEvacuate		;132ba: 61003a38
 _132BE:
-	MOVEA.L	ptr1333C,A0		;132be: 20790001333c
+	MOVEA.L	ptrAst_1333C,A0		;132be: 20790001333c
 	MOVE.B	(89,A0),D2		;132c4: 14280059
 	MOVE.B	(90,A0),D3		;132c8: 1628005a
 	LEA	(82,A0),A1		;132cc: 43e80052
@@ -25146,7 +25200,7 @@ loop132D6:
 	RTS				;132f4: 4e75
 _132F6:
 ; blow up the spacedock at destroyed colony
-	MOVEA.L	ptr1333C,A0		;132f6: 20790001333c
+	MOVEA.L	ptrAst_1333C,A0		;132f6: 20790001333c
 	BTST	#4,(90,A0)		;132fc: 08280004005a
 	BEQ.S	_13322			;13302: 671e
 ; Orbital spacedock:
@@ -25165,14 +25219,14 @@ _1331E:
 ; Blow up the spacedock
 	BSR.W	_ShipAct0d_Expl		;1331e: 6100b25e
 _13322:
-	MOVEA.L	ptr1333C,A2		;13322: 24790001333c
+	MOVEA.L	ptrAst_1333C,A2		;13322: 24790001333c
 	BSR.W	_19382			;13328: 61006058
-	MOVEA.L	ptr1333C,A0		;1332c: 20790001333c
-	BSR.W	_AliAstEffects		;13332: 610039c0
+	MOVEA.L	ptrAst_1333C,A0		;1332c: 20790001333c
+	BSR.W	_AliAstEvacuate		;13332: 610039c0
 	BRA.S	_132BE			;13336: 6086
-ptr13338:
+ptrAst_13338:
 	DS.L	1			;13338
-ptr1333C:
+ptrAst_1333C:
 	DS.L	1			;1333c
 flg13340:
 	DS.W	1			;13340
@@ -25303,7 +25357,7 @@ _next13480:
 	DBF	D7,loop133FC		;13484: 51cfff76
 	RTS				;13488: 4e75
 _1348A:
-	LEA	ptr1f356,A0		;1348a: 41f90001f356
+	LEA	ptrAst_1f356,A0		;1348a: 41f90001f356
 	MOVEQ	#0,D0			;13490: 7000
 	MOVE.B	(25,A2),D0		;13492: 102a0019
 	BMI.W	ret13618		;13496: 6b000180
@@ -25712,7 +25766,7 @@ loop1392C:
 	MOVE.W	(28,A0),D1		;1394c: 3228001c
 	MOVE.W	(26,A3),D2		;13950: 342b001a
 	MOVE.W	(28,A3),D3		;13954: 362b001c
-	BSR.W	_11B36			;13958: 6100e1dc
+	BSR.W	_AstDistance11B36	;13958: 6100e1dc
 	CMP.W	D0,D6			;1395c: bc40
 	BMI.S	next_13968		;1395e: 6b08
 	MOVE.W	D6,D5			;13960: 3a06
@@ -25723,7 +25777,7 @@ next_13968:
 	LEA	(750,A3),A3		;13968: 47eb02ee
 	DBF	D7,loop1392C		;1396c: 51cfffbe
 	RTS				;13970: 4e75
-_13972:
+_Direction13972:
 	LEA	arrPlayerAstsKnown,A4	;13972: 49f90001f856
 	MOVE.W	#$0100,D6		;13978: 3c3c0100
 _1397C:
@@ -25740,7 +25794,7 @@ _1397C:
 	MOVE.W	(28,A0),D1		;1399a: 3228001c
 	MOVE.W	(26,A3),D2		;1399e: 342b001a
 	MOVE.W	(28,A3),D3		;139a2: 362b001c
-	BSR.W	_11B36			;139a6: 6100e18e
+	BSR.W	_AstDistance11B36	;139a6: 6100e18e
 	CMP.W	D0,D6			;139aa: bc40
 	BMI.S	_1397C			;139ac: 6bce
 	MOVE.W	D0,D6			;139ae: 3c00
@@ -25952,21 +26006,21 @@ _13C30:
 	BEQ.S	_13C72			;13c6a: 6706
 	SUBQ.B	#1,popWarnTimer		;13c6c: 53390002e457
 _13C72:
-	TST.B	int2E470		;13c72: 4a390002e470
+	TST.B	intKllSatCountd		;13c72: 4a390002e470
 	BEQ.S	_13C80			;13c78: 6706
-	SUBQ.B	#1,int2E470		;13c7a: 53390002e470
+	SUBQ.B	#1,intKllSatCountd	;13c7a: 53390002e470
 _13C80:
-	TST.B	int2E473		;13c80: 4a390002e473
+	TST.B	fleetDelay		;13c80: 4a390002e473
 	BEQ.S	_13C8E			;13c86: 6706
-	SUBQ.B	#1,int2E473		;13c88: 53390002e473
+	SUBQ.B	#1,fleetDelay		;13c88: 53390002e473
 _13C8E:
-	TST.B	int2E471		;13c8e: 4a390002e471
+	TST.B	intCount_2E471		;13c8e: 4a390002e471
 	BEQ.S	_13C9C			;13c94: 6706
-	SUBQ.B	#1,int2E471		;13c96: 53390002e471
+	SUBQ.B	#1,intCount_2E471	;13c96: 53390002e471
 _13C9C:
-	TST.B	int2E472		;13c9c: 4a390002e472
+	TST.B	intCount_2E472		;13c9c: 4a390002e472
 	BEQ.S	_13CAA			;13ca2: 6706
-	SUBQ.B	#1,int2E472		;13ca4: 53390002e472
+	SUBQ.B	#1,intCount_2E472	;13ca4: 53390002e472
 _13CAA:
 	SUBQ.B	#1,intVirusCounter	;13caa: 533900013daa
 	BPL.S	_13CBE			;13cb0: 6a0c
@@ -27165,7 +27219,9 @@ _14976:
 	CMP.B	D0,D1			;14982: b200
 	BMI.S	_14988			;14984: 6b02
 ; Radiation is a lookup table, so the lethality isn't linear.
-; However, since it branches on negative, it's off-by-one because of the zero. At 0% radiation, you still have a 1% chance to lose a colonist to radiation.
+; However, since it branches on negative, it's off-by-one
+; because of the zero. At 0% radiation, you still have a 1%
+; chance to lose a colonist to radiation.
 ; The difference between 10% and 60% is only 10%.
 ; ;
 ; Display | Lethality | Actual
@@ -27871,7 +27927,7 @@ _AddIncome:
 	MOVE.L	A0,ptrThisAstBldg	;1510c: 23c80002ded0
 	MOVE.L	A4,ptrThisAstBldgCount	;15112: 23cc0002ded4
 	MOVE.L	A6,ptrThisAstMap	;15118: 23ce0002decc
-	LEA	ptr1F044,A6		;1511e: 4df90001f044
+	LEA	shExplosion1F044,A6	;1511e: 4df90001f044
 	JSR	_ShipAct23		;15124: 4eb90000d86c
 	MOVEQ	#0,D0			;1512a: 7000
 	MOVEQ	#0,D1			;1512c: 7200
@@ -28537,7 +28593,7 @@ loop15822:
 	JSR	_RandInt		;15824: 4eb900000c0c
 	MOVE.B	D0,(35,A0)		;1582a: 11400023
 	LSL.W	#2,D0			;1582e: e548
-	LEA	arrAstDirection,A1	;15830: 43f90001f6c6
+	LEA	arrAstDirections,A1	;15830: 43f90001f6c6
 	MOVEM.W	(0,A1,D0.W),D0-D1	;15836: 4cb100030000
 	MOVEM.W	D0-D1,(56,A0)		;1583c: 48a800030038
 	MOVEQ	#16,D0			;15842: 7010
@@ -28918,7 +28974,7 @@ _CreateImpTransport:
 ; This allows time for the cool warp effect.
 	MOVE.W	#$0032,intImpLeaveTimer	;15ce8: 33fc00320002e05a
 _15CF0:
-	TST.W	unk059D0		;15cf0: 4a79000059d0
+	TST.W	unkFlash_059D0		;15cf0: 4a79000059d0
 	BNE.S	_15CF0			;15cf6: 66f8
 	JSR	_03E38			;15cf8: 4eb900003e38
 	RTS				;15cfe: 4e75
@@ -29131,22 +29187,22 @@ _15F22:
 	CMP.W	D4,D1			;15f22: b244
 	BPL.S	_15F32			;15f24: 6a0c
 	BSET	#3,(90,A0)		;15f26: 08e80003005a
-	ST	flgAst2E188		;15f2c: 50f90002e188
+	ST	flgAstSpotted		;15f2c: 50f90002e188
 _15F32:
 	LEA	(750,A0),A0		;15f32: 41e802ee
 	DBF	D0,loop15EF6		;15f36: 51c8ffbe
 	RTS				;15f3a: 4e75
-_DailyAli_15F3C:
-	TST.B	flg2E47F		;15f3c: 4a390002e47f
-	BEQ.S	_15F4E			;15f42: 670a
-	SUBQ.B	#1,flg2E47F		;15f44: 53390002e47f
-_15F4A:
+_DecrementAtkDelay:
+	TST.B	intRetaliateDelay	;15f3c: 4a390002e47f
+	BEQ.S	_AliRetaliate		;15f42: 670a
+	SUBQ.B	#1,intRetaliateDelay	;15f44: 53390002e47f
+_ret-1_15F4A:
 	MOVEQ	#-1,D0			;15f4a: 70ff
 	RTS				;15f4c: 4e75
-_15F4E:
+_AliRetaliate:
 ; alien missile
 	MOVE.L	ptrShips_2DEDC,D0	;15f4e: 20390002dedc
-	BEQ.S	_15F4A			;15f54: 67f4
+	BEQ.S	_ret-1_15F4A		;15f54: 67f4
 	MOVEA.L	D0,A0			;15f56: 2040
 	MOVEA.L	ptrThisAstStats,A5	;15f58: 2a790002ded8
 _15F5E:
@@ -29155,54 +29211,57 @@ _15F5E:
 	CMPI.B	#$55,(27,A6)		;15f66: 0c2e0055001b
 	BEQ.S	_15F9A			;15f6c: 672c
 ; Missiles in transit, other than spy satellites
+; However, in testing, it also detects satellites
 	MOVE.W	(26,A5),D1		;15f6e: 322d001a
 	SUB.W	(10,A0),D1		;15f72: 9268000a
 	BPL.S	_15F7A			;15f76: 6a02
 	NEG.W	D1			;15f78: 4441
 _15F7A:
-	CMP.W	intAlienMisl_12,D1	;15f7a: b2790002031c
+	CMP.W	intSensorRange12,D1	;15f7a: b2790002031c
 	BPL.S	_15F9A			;15f80: 6a18
 	MOVE.W	(28,A5),D1		;15f82: 322d001c
 	SUB.W	(12,A0),D1		;15f86: 9268000c
 	BPL.S	_15F8E			;15f8a: 6a02
 	NEG.W	D1			;15f8c: 4441
 _15F8E:
-	CMP.W	intAlienMisl_12,D1	;15f8e: b2790002031c
+	CMP.W	intSensorRange12,D1	;15f8e: b2790002031c
 	BPL.S	_15F9A			;15f94: 6a04
 	MOVEQ	#0,D0			;15f96: 7000
 	RTS				;15f98: 4e75
 _15F9A:
 	MOVE.L	(0,A0),D0		;15f9a: 20280000
-	BEQ.S	_15F4A			;15f9e: 67aa
+	BEQ.S	_ret-1_15F4A		;15f9e: 67aa
 	MOVEA.L	D0,A0			;15fa0: 2040
 	BRA.S	_15F5E			;15fa2: 60ba
-_15FA4:
-	TST.B	flg2E480		;15fa4: 4a390002e480
-	BEQ.S	_15FB6			;15faa: 670a
-	SUBQ.B	#1,flg2E480		;15fac: 53390002e480
+_DecFleetDelay:
+	TST.B	fleetCycle		;15fa4: 4a390002e480
+	BEQ.S	_DetectFleet		;15faa: 670a
+	SUBQ.B	#1,fleetCycle		;15fac: 53390002e480
 	MOVEQ	#-1,D0			;15fb2: 70ff
 	RTS				;15fb4: 4e75
-_15FB6:
-; Fleet
+_DetectFleet:
+; Loop over 8 players' fleets
+; Return d0 as 0 if detected, -1 otherwise
 	MOVEA.L	ptrBuff14_Fleet,A0	;15fb6: 207900000562
 	MOVEA.L	ptrThisAstStats,A5	;15fbc: 2a790002ded8
 	MOVEQ	#7,D7			;15fc2: 7e07
 loop15FC4:
 	CMPI.L	#$ffffffff,(6,A0)	;15fc4: 0ca8ffffffff0006
 	BNE.S	next_15FFA		;15fcc: 662c
+; coords
 	MOVE.W	(26,A5),D1		;15fce: 322d001a
 	SUB.W	(2,A0),D1		;15fd2: 92680002
 	BPL.S	_15FDA			;15fd6: 6a02
 	NEG.W	D1			;15fd8: 4441
 _15FDA:
-	CMP.W	intAlienMisl_13,D1	;15fda: b2790002031e
+	CMP.W	intAlienFleetRange,D1	;15fda: b2790002031e
 	BPL.S	next_15FFA		;15fe0: 6a18
 	MOVE.W	(28,A5),D1		;15fe2: 322d001c
 	SUB.W	(4,A0),D1		;15fe6: 92680004
 	BPL.S	_15FEE			;15fea: 6a02
 	NEG.W	D1			;15fec: 4441
 _15FEE:
-	CMP.W	intAlienMisl_13,D1	;15fee: b2790002031e
+	CMP.W	intAlienFleetRange,D1	;15fee: b2790002031e
 	BPL.S	next_15FFA		;15ff4: 6a04
 	MOVEQ	#0,D0			;15ff6: 7000
 	RTS				;15ff8: 4e75
@@ -29211,9 +29270,14 @@ next_15FFA:
 	DBF	D7,loop15FC4		;15ffe: 51cfffc4
 	MOVEQ	#-1,D0			;16002: 70ff
 	RTS				;16004: 4e75
-_DailyAliMislAtk:
-; Missile firing
+_DailyAliAttack:
+; Missiles and fleets
+; Runs once per established enemy asteroid per day
 	BSR.W	_CountAsteroids		;16006: 6100c840
+; Returns:
+; d1 = Our asteroids known to enemy
+; d2 = Alien asteroid count
+; d3 = Our asteroid count
 	MOVE.W	intCurrentAlienID,D0	;1600a: 30390002df02
 	SUBQ.W	#1,D0			;16010: 5340
 	LSL.W	#2,D0			;16012: e548
@@ -29229,38 +29293,51 @@ arrDailyAli_16022:
 	DC.L	_DailyAli5Atk		;16032: 000166e2
 	DC.L	_DailyAli6Atk		;16036: 000168be
 _DailyAli1Atk:
-	BSR.W	_DailyAli_15F3C		;1603a: 6100ff00
-	BMI.S	_DailyAli_16076		;1603e: 6b36
-	MOVE.B	#$0c,flg2E47F		;16040: 13fc000c0002e47f
+; Kll-Kp-Qua daily chance to use fleet/missiles
+; It occurs once per established alien colony
+	BSR.W	_DecrementAtkDelay	;1603a: 6100ff00
+	BMI.S	_Ali1Fleets		;1603e: 6b36
+; Begin retaliation.
+; Don't begin to retaliate again for 12 days.
+	MOVE.B	#$0c,intRetaliateDelay	;16040: 13fc000c0002e47f
+; In testing, this countdown resets to 12 whenever the player
+; attacks the alien with missiles. It counts down daily to 0.
+; Multiple colonies progress the countdown at increased rate.
+; Satellites are counted as missiles, but ships and aren't.
+; Fleets aren't either.
+; Alien retaliates at the start of the countdown.
 	TST.W	intOurAstsKnown		;16048: 4a790002e052
 	BEQ.S	ret16074		;1604e: 6724
 	LEA	arrAlienAsts,A0		;16050: 41f90001f8ba
-_16056:
+_Loop16056:
 	MOVE.L	(A0)+,D0		;16056: 2018
 	BMI.S	ret16074		;16058: 6b1a
 	MOVEA.L	D0,A5			;1605a: 2a40
+; random alien asteroid
 	MOVEQ	#100,D0			;1605c: 7064
 	JSR	_RandInt		;1605e: 4eb900000c0c
 	CMPI.B	#$19,D0			;16064: 0c000019
-	BPL.S	_16056			;16068: 6aec
+	BPL.S	_Loop16056		;16068: 6aec
 	MOVE.L	A0,-(A7)		;1606a: 2f08
-	BSR.W	_16FEE			;1606c: 61000f80
+	BSR.W	_AliMissileStrike	;1606c: 61000f80
 	MOVEA.L	(A7)+,A0		;16070: 205f
-	BRA.S	_16056			;16072: 60e2
+	BRA.S	_Loop16056		;16072: 60e2
 ret16074:
 	RTS				;16074: 4e75
-_DailyAli_16076:
-	BSR.W	_15FA4			;16076: 6100ff2c
-	BMI.W	_160EE			;1607a: 6b000072
-	MOVE.L	A0,ptr16A3A		;1607e: 23c800016a3a
-	MOVE.B	#$10,flg2E480		;16084: 13fc00100002e480
-	MOVE.W	#$0008,data20216	;1608c: 33fc000800020216
-	MOVE.W	#$0005,data20218	;16094: 33fc000500020218
-	MOVE.W	#$000f,data2021A	;1609c: 33fc000f0002021a
-	BSR.W	_16C48			;160a4: 61000ba2
+_Ali1Fleets:
+	BSR.W	_DecFleetDelay		;16076: 6100ff2c
+	BMI.W	_Ali1FleetOffensive	;1607a: 6b000072
+; Incoming Terran fleet detected
+; Only respond once per 16 days
+	MOVE.L	A0,ptrFlt_16A3A		;1607e: 23c800016a3a
+	MOVE.B	#$10,fleetCycle		;16084: 13fc00100002e480
+	MOVE.W	#$0008,fleet_min	;1608c: 33fc000800020216
+	MOVE.W	#$0005,fleet_2		;16094: 33fc000500020218
+	MOVE.W	#$000f,fleet_3		;1609c: 33fc000f0002021a
+	BSR.W	_BuildFleet		;160a4: 61000ba2
 	BMI.S	ret16074		;160a8: 6bca
 _160AA:
-	MOVEA.L	ptr16A3A,A2		;160aa: 247900016a3a
+	MOVEA.L	ptrFlt_16A3A,A2		;160aa: 247900016a3a
 	MOVE.L	A0,ptr20A88		;160b0: 23c800020a88
 	MOVE.L	A2,(18,A0)		;160b6: 214a0012
 	MOVEQ	#-1,D0			;160ba: 70ff
@@ -29278,22 +29355,26 @@ loop160CC:
 	CLR.L	(32,A6)			;160e0: 42ae0020
 _160E4:
 	DBF	D0,loop160CC		;160e4: 51c8ffe6
-	BSR.W	_175B8			;160e8: 610014ce
+	BSR.W	_IntelFleetDest		;160e8: 610014ce
 	RTS				;160ec: 4e75
-_160EE:
+_Ali1FleetOffensive:
 	MOVEQ	#5,D0			;160ee: 7005
+; No nearby enemies detected? Go on the offensive
+; 20% chance, maybe to stop it having to run every turn
+; for efficiency
 	JSR	_RandInt		;160f0: 4eb900000c0c
 	BNE.W	ret16074		;160f6: 6600ff7c
 	TST.W	intOurAstsKnown		;160fa: 4a790002e052
 	BEQ.W	ret16074		;16100: 6700ff72
-	TST.B	int2E473		;16104: 4a390002e473
+	TST.B	fleetDelay		;16104: 4a390002e473
 	BNE.W	ret16074		;1610a: 6600ff68
-	MOVE.W	#$000f,data20216	;1610e: 33fc000f00020216
-	MOVE.W	#$000a,data20218	;16116: 33fc000a00020218
-	MOVE.W	#$0014,data2021A	;1611e: 33fc00140002021a
-	MOVE.B	#$0e,int2E473		;16126: 13fc000e0002e473
-	BSR.W	_16C48			;1612e: 61000b18
+	MOVE.W	#$000f,fleet_min	;1610e: 33fc000f00020216
+	MOVE.W	#$000a,fleet_2		;16116: 33fc000a00020218
+	MOVE.W	#$0014,fleet_3		;1611e: 33fc00140002021a
+	MOVE.B	#$0e,fleetDelay		;16126: 13fc000e0002e473
+	BSR.W	_BuildFleet		;1612e: 61000b18
 	BMI.W	ret16074		;16132: 6b00ff40
+; randomly pick a Terran asteroid as a target
 	MOVEQ	#0,D0			;16136: 7000
 	MOVE.W	intOurAstsKnown,D0	;16138: 30390002e052
 	JSR	_RandInt		;1613e: 4eb900000c0c
@@ -29319,9 +29400,9 @@ loop16170:
 	CLR.L	(32,A6)			;16184: 42ae0020
 _16188:
 	DBF	D0,loop16170		;16188: 51c8ffe6
-	BSR.W	_175B8			;1618c: 6100142a
+	BSR.W	_IntelFleetDest		;1618c: 6100142a
 	MOVEA.L	ptrThisAstStats,A5	;16190: 2a790002ded8
-	BSR.W	_16FEE			;16196: 61000e56
+	BSR.W	_AliMissileStrike	;16196: 61000e56
 	MOVEA.L	(A7)+,A2		;1619a: 245f
 	MOVE.L	A2,(178,A5)		;1619c: 2b4a00b2
 	RTS				;161a0: 4e75
@@ -29334,24 +29415,24 @@ _DailyAli2Atk:
 	MOVE.W	#$0064,intAlienMislFreq7 ;161ae: 33fc006400020312
 	MOVEA.L	ptrThisAstStats,A5	;161b6: 2a790002ded8
 ; 1 Virus
-; Listed as 01 14 for some reason
+; Listed as 01 14 - 20% (off-by-one, 21%) chance of second
 	LEA	tblMislV0114,A0		;161bc: 41f900020250
-	BSR.W	_FireMissiles		;161c2: 61000eea
+	BSR.W	_FireSetMissiles	;161c2: 61000eea
 	RTS				;161c6: 4e75
 _161C8:
-	SUBQ.B	#1,data20222		;161c8: 533900020222
-	BGT.S	_16216			;161ce: 6e46
-	MOVE.B	#$0a,data20222		;161d0: 13fc000a00020222
+	SUBQ.B	#1,intCountd20222	;161c8: 533900020222
+	BGT.S	_DailyAli2Atk		;161ce: 6e46
+	MOVE.B	#$0a,intCountd20222	;161d0: 13fc000a00020222
 	MOVEA.L	ptrThisAstStats,A0	;161d8: 20790002ded8
-	BSR.W	_12A62			;161de: 6100c882
-	BEQ.S	_16216			;161e2: 6732
+	BSR.W	_AstProximity		;161de: 6100c882
+	BEQ.S	_DailyAli2Atk		;161e2: 6732
 ; target non-alien colony
 	BTST	#6,(89,A1)		;161e4: 082900060059
 	BNE.S	_16210			;161ea: 6624
 	MOVEA.L	ptrThisAstBldgCount,A2	;161ec: 24790002ded4
 	TST.W	(28,A2)			;161f2: 4a6a001c
 	BEQ.S	_16210			;161f6: 6718
-; If there is at least one Terran Missile Silo:
+; If there is at least one Rocket Battery (missile silo):
 	TST.W	(114,A0)		;161f8: 4a680072
 	BEQ.S	_16210			;161fc: 6712
 ; Fire a Mega missile
@@ -29362,12 +29443,12 @@ _161C8:
 	MOVE.L	A1,(178,A0)		;1620a: 214900b2
 	RTS				;1620e: 4e75
 _16210:
-	BSR.W	_AliAstEffects		;16210: 61000ae2
+	BSR.W	_AliAstEvacuate		;16210: 61000ae2
 	RTS				;16214: 4e75
-_16216:
-	BSR.W	_DailyAli_15F3C		;16216: 6100fd24
-	BMI.S	_1624A			;1621a: 6b2e
-	MOVE.B	#$0c,flg2E47F		;1621c: 13fc000c0002e47f
+_DailyAli2Atk:
+	BSR.W	_DecrementAtkDelay	;16216: 6100fd24
+	BMI.S	_Ali2Flt		;1621a: 6b2e
+	MOVE.B	#$0c,intRetaliateDelay	;1621c: 13fc000c0002e47f
 	TST.W	intOurAstsKnown		;16224: 4a790002e052
 	BEQ.S	ret16248		;1622a: 671c
 	MOVEQ	#100,D0			;1622c: 7064
@@ -29381,17 +29462,17 @@ _16216:
 	BSR.W	_Misl_No_Mega17062	;16244: 61000e1c
 ret16248:
 	RTS				;16248: 4e75
-_1624A:
-	BSR.W	_15FA4			;1624a: 6100fd58
+_Ali2Flt:
+	BSR.W	_DecFleetDelay		;1624a: 6100fd58
 	BMI.S	_162BC			;1624e: 6b6c
-	MOVE.L	A0,ptr16A3A		;16250: 23c800016a3a
-	MOVE.B	#$10,flg2E480		;16256: 13fc00100002e480
+	MOVE.L	A0,ptrFlt_16A3A		;16250: 23c800016a3a
+	MOVE.B	#$10,fleetCycle		;16256: 13fc00100002e480
 	TST.W	intOurAstsKnown		;1625e: 4a790002e052
-	BEQ.S	_1628E			;16264: 6728
+	BEQ.S	_Ali2Flt		;16264: 6728
 	LEA	arrAlienAsts,A0		;16266: 41f90001f8ba
 _1626C:
 	MOVE.L	(A0)+,D0		;1626c: 2018
-	BMI.W	_1628E			;1626e: 6b00001e
+	BMI.W	_Ali2Flt		;1626e: 6b00001e
 	MOVEA.L	D0,A5			;16272: 2a40
 	MOVEQ	#10,D0			;16274: 700a
 	JSR	_RandInt		;16276: 4eb900000c0c
@@ -29400,15 +29481,15 @@ _1626C:
 	MOVE.L	A0,-(A7)		;1627e: 2f08
 ; 4 Scatter, 1 Vortex, 4 Antivirus
 	LEA	tblMisl4S1V4Av,A0	;16280: 41f900020224
-	BSR.W	_FireMissiles		;16286: 61000e26
+	BSR.W	_FireSetMissiles	;16286: 61000e26
 	MOVEA.L	(A7)+,A0		;1628a: 205f
 	BRA.S	_1626C			;1628c: 60de
-_1628E:
-	MOVEA.L	ptr16A3A,A0		;1628e: 207900016a3a
-	MOVE.W	#$0014,data20216	;16294: 33fc001400020216
-	MOVE.W	#$0005,data20218	;1629c: 33fc000500020218
-	MOVE.W	#$000a,data2021A	;162a4: 33fc000a0002021a
-	BSR.W	_16C48			;162ac: 6100099a
+_Ali2Flt:
+	MOVEA.L	ptrFlt_16A3A,A0		;1628e: 207900016a3a
+	MOVE.W	#$0014,fleet_min	;16294: 33fc001400020216
+	MOVE.W	#$0005,fleet_2		;1629c: 33fc000500020218
+	MOVE.W	#$000a,fleet_3		;162a4: 33fc000a0002021a
+	BSR.W	_BuildFleet		;162ac: 6100099a
 	BMI.S	ret16248		;162b0: 6b96
 	MOVE.W	#$0032,(24,A0)		;162b2: 317c00320018
 	BRA.W	_160AA			;162b8: 6000fdf0
@@ -29418,15 +29499,15 @@ _162BC:
 	BNE.W	_16364			;162c4: 6600009e
 	TST.W	intOurAstsKnown		;162c8: 4a790002e052
 	BEQ.W	ret16248		;162ce: 6700ff78
-	TST.B	int2E473		;162d2: 4a390002e473
+	TST.B	fleetDelay		;162d2: 4a390002e473
 	BNE.W	ret16248		;162d8: 6600ff6e
-	MOVE.W	#$0019,data20216	;162dc: 33fc001900020216
-	MOVE.W	#$000a,data20218	;162e4: 33fc000a00020218
-	MOVE.W	#$0014,data2021A	;162ec: 33fc00140002021a
-	MOVE.B	#$0e,int2E473		;162f4: 13fc000e0002e473
-	BSR.W	_16C48			;162fc: 6100094a
+	MOVE.W	#$0019,fleet_min	;162dc: 33fc001900020216
+	MOVE.W	#$000a,fleet_2		;162e4: 33fc000a00020218
+	MOVE.W	#$0014,fleet_3		;162ec: 33fc00140002021a
+	MOVE.B	#$0e,fleetDelay		;162f4: 13fc000e0002e473
+	BSR.W	_BuildFleet		;162fc: 6100094a
 	BMI.W	_16364			;16300: 6b000062
-_16304:
+_TylTargetAst:
 	MOVEQ	#0,D0			;16304: 7000
 	MOVE.W	intOurAstsKnown,D0	;16306: 30390002e052
 	JSR	_RandInt		;1630c: 4eb900000c0c
@@ -29452,7 +29533,7 @@ loop16342:
 	CLR.L	(32,A6)			;16356: 42ae0020
 _1635A:
 	DBF	D0,loop16342		;1635a: 51c8ffe6
-	BSR.W	_175B8			;1635e: 61001258
+	BSR.W	_IntelFleetDest		;1635e: 61001258
 ret16362:
 	RTS				;16362: 4e75
 _16364:
@@ -29471,13 +29552,13 @@ loop16376:
 	BNE.S	ret16362		;1638a: 66d6
 ; 6 Explosive, 4 Area Exp., 1 Stasis
 	LEA	tblMisl6E4A1St,A0	;1638c: 41f90002023a
-	BSR.W	_FireMissiles		;16392: 61000d1a
+	BSR.W	_FireSetMissiles	;16392: 61000d1a
 	RTS				;16396: 4e75
 _DailyAli3Atk:
 ; Azx. Trigger only every 16th day
 	MOVE.B	intDay,D0		;16398: 10390002e45b
 	ANDI.B	#$0f,D0			;1639e: 0200000f
-	BNE.S	_163E2			;163a2: 663e
+	BNE.S	_AxzNotMislDay		;163a2: 663e
 	MOVE.W	(82,A5),D0		;163a4: 302d0052
 	CLR.W	(82,A5)			;163a8: 426d0052
 ; Received 220 damage bombardment in 16 days?
@@ -29485,33 +29566,33 @@ _DailyAli3Atk:
 	BMI.S	_163BE			;163b0: 6b0c
 ; 6 Hellfire, 3 Nuclear, 3 Virus, 1 Mega, 1 Stasis
 	LEA	tblMisl6H3N3V1M1S,A0	;163b2: 41f900020266
-	BSR.W	_FireMissiles		;163b8: 61000cf4
+	BSR.W	_FireSetMissiles	;163b8: 61000cf4
 	RTS				;163bc: 4e75
 _163BE:
 	CMPI.W	#$0096,D0		;163be: 0c400096
 	BMI.S	_163D0			;163c2: 6b0c
 ; 3 Area Exp., 3 Hellfire, 3 Scatter, 1 Stasis, 3 Vortex
 	LEA	tblMisl3A3H3Sc1St3V,A0	;163c4: 41f90002027c
-	BSR.W	_FireMissiles		;163ca: 61000ce2
+	BSR.W	_FireSetMissiles	;163ca: 61000ce2
 	RTS				;163ce: 4e75
 _163D0:
 	CMPI.W	#$0032,D0		;163d0: 0c400032
-	BMI.S	_163E2			;163d4: 6b0c
+	BMI.S	_AxzNotMislDay		;163d4: 6b0c
 ; 3 Hellfire
 	LEA	tblMisl3H,A0		;163d6: 41f900020292
-	BSR.W	_FireMissiles		;163dc: 61000cd0
+	BSR.W	_FireSetMissiles	;163dc: 61000cd0
 	RTS				;163e0: 4e75
-_163E2:
+_AxzNotMislDay:
 	MOVE.B	intDay,D0		;163e2: 10390002e45b
 	ANDI.B	#$07,D0			;163e8: 02000007
-	BNE.S	_16416			;163ec: 6628
+	BNE.S	_NotMisl2Day		;163ec: 6628
 ; Every 8th day
 	MOVEA.L	ptrThisAstBldgCount,A4	;163ee: 28790002ded4
 	TST.W	(28,A4)			;163f4: 4a6c001c
-	BEQ.S	_16416			;163f8: 671c
+	BEQ.S	_NotMisl2Day		;163f8: 671c
 ; If there are missile silos
 	TST.W	(100,A5)		;163fa: 4a6d0064
-	BEQ.S	_16416			;163fe: 6716
+	BEQ.S	_NotMisl2Day		;163fe: 6716
 ; If there are explosive missiles
 	SUBQ.W	#1,(100,A5)		;16400: 536d0064
 ; Fire them
@@ -29519,10 +29600,10 @@ _163E2:
 	ADDQ.W	#1,(166,A5)		;16408: 526d00a6
 	MOVE.L	arrPlayerAstsKnown,(178,A5) ;1640c: 2b790001f85600b2
 	RTS				;16414: 4e75
-_16416:
+_NotMisl2Day:
 	MOVEQ	#100,D0			;16416: 7064
 	JSR	_RandInt		;16418: 4eb900000c0c
-	BNE.S	_1644E			;1641e: 662e
+	BNE.S	_NoMassPod		;1641e: 662e
 ; 1% chance:
 	MOVEQ	#0,D0			;16420: 7000
 	MOVE.W	intAlienAstCount,D0	;16422: 30390002e056
@@ -29536,16 +29617,17 @@ _1643C:
 ; Axz Mass Displacement Podule
 	MOVEA.L	ptrThisAstBldgCount,A4	;1643c: 28790002ded4
 	TST.W	(76,A4)			;16442: 4a6c004c
-	BEQ.S	_1644E			;16446: 6706
+	BEQ.S	_NoMassPod		;16446: 6706
 	BSR.W	_AzxMassDisplPod	;16448: 61002f98
 	RTS				;1644c: 4e75
-_1644E:
-	SUBQ.B	#1,data20222		;1644e: 533900020222
-	BGT.S	_16496			;16454: 6e40
-	MOVE.B	#$0a,data20222		;16456: 13fc000a00020222
+_NoMassPod:
+	SUBQ.B	#1,intCountd20222	;1644e: 533900020222
+	BGT.S	_DailyAli3Atk		;16454: 6e40
+	MOVE.B	#$0a,intCountd20222	;16456: 13fc000a00020222
 	MOVEA.L	ptrThisAstStats,A0	;1645e: 20790002ded8
-	BSR.W	_12A62			;16464: 6100c5fc
-	BEQ.S	_16496			;16468: 672c
+	BSR.W	_AstProximity		;16464: 6100c5fc
+	BEQ.S	_DailyAli3Atk		;16468: 672c
+; established colony
 	BTST	#6,(89,A1)		;1646a: 082900060059
 	BNE.S	_1643C			;16470: 66ca
 	MOVEA.L	ptrThisAstBldgCount,A2	;16472: 24790002ded4
@@ -29560,10 +29642,10 @@ _1644E:
 	MOVE.L	A1,(178,A0)		;16490: 214900b2
 ret16494:
 	RTS				;16494: 4e75
-_16496:
-	BSR.W	_DailyAli_15F3C		;16496: 6100faa4
+_DailyAli3Atk:
+	BSR.W	_DecrementAtkDelay	;16496: 6100faa4
 	BMI.S	_164DC			;1649a: 6b40
-	MOVE.B	#$08,flg2E47F		;1649c: 13fc00080002e47f
+	MOVE.B	#$08,intRetaliateDelay	;1649c: 13fc00080002e47f
 	MOVEA.L	ptrThisAstBldgCount,A4	;164a4: 28790002ded4
 	TST.W	(28,A4)			;164aa: 4a6c001c
 	BEQ.S	_164DC			;164ae: 672c
@@ -29590,13 +29672,13 @@ _164C6:
 	RTS				;164da: 4e75
 _164DC:
 ; No missile silos/interceptor missiles:
-	BSR.W	_15FA4			;164dc: 6100fac6
+	BSR.W	_DecFleetDelay		;164dc: 6100fac6
 	BMI.S	_16518			;164e0: 6b36
-	MOVE.L	A0,ptr16A3A		;164e2: 23c800016a3a
-	MOVE.B	#$10,flg2E480		;164e8: 13fc00100002e480
-	MOVE.W	#$000f,data20216	;164f0: 33fc000f00020216
-	MOVE.W	#$0005,data20218	;164f8: 33fc000500020218
-	MOVE.W	#$001e,data2021A	;16500: 33fc001e0002021a
+	MOVE.L	A0,ptrFlt_16A3A		;164e2: 23c800016a3a
+	MOVE.B	#$10,fleetCycle		;164e8: 13fc00100002e480
+	MOVE.W	#$000f,fleet_min	;164f0: 33fc000f00020216
+	MOVE.W	#$0005,fleet_2		;164f8: 33fc000500020218
+	MOVE.W	#$001e,fleet_3		;16500: 33fc001e0002021a
 	BSR.W	_16A62			;16508: 61000558
 	BMI.S	ret16494		;1650c: 6b86
 	MOVE.W	#$0064,(24,A0)		;1650e: 317c00640018
@@ -29607,13 +29689,13 @@ _16518:
 ; If Axz had previously lost a colony to building destruction:
 	TST.W	intOurAstsKnown		;16524: 4a790002e052
 	BEQ.S	ret1655A		;1652a: 672e
-	MOVE.W	#$000a,data20216	;1652c: 33fc000a00020216
-	MOVE.W	#$0005,data20218	;16534: 33fc000500020218
-	MOVE.W	#$000f,data2021A	;1653c: 33fc000f0002021a
+	MOVE.W	#$000a,fleet_min	;1652c: 33fc000a00020216
+	MOVE.W	#$0005,fleet_2		;16534: 33fc000500020218
+	MOVE.W	#$000f,fleet_3		;1653c: 33fc000f0002021a
 	BSR.W	_16A62			;16544: 6100051c
 	BMI.W	ret16494		;16548: 6b00ff4a
 	MOVE.L	A0,-(A7)		;1654c: 2f08
-	BSR.W	_16304			;1654e: 6100fdb4
+	BSR.W	_TylTargetAst		;1654e: 6100fdb4
 	MOVEA.L	(A7)+,A0		;16552: 205f
 	MOVE.W	#$0064,(24,A0)		;16554: 317c00640018
 ret1655A:
@@ -29629,7 +29711,7 @@ _DailyAli4Atk:
 	LEA	(80,A0),A2		;16570: 45e80050
 	MOVEQ	#9,D2			;16574: 7409
 loop16576:
-; Mine 8 of each ore per Seismic Atomiser
+; Mine 8 of first available ore per Seismic Atomiser
 	SUB.W	D0,-(A2)		;16576: 9162
 	BPL.S	_16584			;16578: 6a0a
 	MOVE.W	(A2),D0			;1657a: 3012
@@ -29656,11 +29738,11 @@ _16584:
 	TST.W	intOurAstsKnown		;165b2: 4a790002e052
 	BEQ.S	_165EC			;165b8: 6732
 ; ;
-	BSR.W	_13972			;165ba: 6100d3b6
-	BSR.W	_127D0			;165be: 6100c210
+	BSR.W	_Direction13972		;165ba: 6100d3b6
+	BSR.W	_Direction127D0		;165be: 6100c210
 	MOVE.B	D0,(35,A0)		;165c2: 11400023
 	LSL.W	#2,D0			;165c6: e548
-	LEA	arrAstDirection,A1	;165c8: 43f90001f6c6
+	LEA	arrAstDirections,A1	;165c8: 43f90001f6c6
 	MOVEM.W	(0,A1,D0.W),D0-D1	;165ce: 4cb100030000
 	MOVEM.W	D0-D1,(56,A0)		;165d4: 48a800030038
 ; Speed actually 8
@@ -29700,7 +29782,7 @@ loop16612:
 	MOVEQ	#50,D0			;1663e: 7032
 	MOVE.B	#$88,D1			;16640: 123c0088
 	MOVEQ	#0,D5			;16644: 7a00
-; ??
+; pew
 	JSR	_ExplodeSprite_0E1FA	;16646: 4eb90000e1fa
 	MOVEA.L	ptrThisAstStats,A0	;1664c: 20790002ded8
 	CMPA.L	ptrCurrentAst,A0	;16652: b1f90002de58
@@ -29717,13 +29799,13 @@ _next16666:
 	DBF	D0,loop16612		;1666a: 51c8ffa6
 	RTS				;1666e: 4e75
 _16670:
-	SUBQ.B	#1,data20222		;16670: 533900020222
+	SUBQ.B	#1,intCountd20222	;16670: 533900020222
 	BGT.S	_16692			;16676: 6e1a
-	MOVE.B	#$0a,data20222		;16678: 13fc000a00020222
+	MOVE.B	#$0a,intCountd20222	;16678: 13fc000a00020222
 	MOVEA.L	ptrThisAstStats,A0	;16680: 20790002ded8
-	BSR.W	_12A62			;16686: 6100c3da
+	BSR.W	_AstProximity		;16686: 6100c3da
 	BEQ.S	_16692			;1668a: 6706
-	BSR.W	_AliAstEffects		;1668c: 61000666
+	BSR.W	_AliAstEvacuate		;1668c: 61000666
 	RTS				;16690: 4e75
 _16692:
 	TST.W	intOurAstsKnown		;16692: 4a790002e052
@@ -29731,17 +29813,17 @@ _16692:
 	MOVEQ	#5,D0			;1669a: 7005
 	JSR	_RandInt		;1669c: 4eb900000c0c
 	BNE.S	ret166E0		;166a2: 663c
-	TST.B	int2E473		;166a4: 4a390002e473
+	TST.B	fleetDelay		;166a4: 4a390002e473
 	BNE.S	ret166E0		;166aa: 6634
 ; 20% chance
-	MOVE.W	#$0008,data20216	;166ac: 33fc000800020216
-	MOVE.W	#$0005,data20218	;166b4: 33fc000500020218
-	MOVE.W	#$000f,data2021A	;166bc: 33fc000f0002021a
-	MOVE.B	#$0e,int2E473		;166c4: 13fc000e0002e473
+	MOVE.W	#$0008,fleet_min	;166ac: 33fc000800020216
+	MOVE.W	#$0005,fleet_2		;166b4: 33fc000500020218
+	MOVE.W	#$000f,fleet_3		;166bc: 33fc000f0002021a
+	MOVE.B	#$0e,fleetDelay		;166c4: 13fc000e0002e473
 	BSR.W	_16A62			;166cc: 61000394
 	BMI.S	ret166E0		;166d0: 6b0e
 	MOVE.L	A0,-(A7)		;166d2: 2f08
-	BSR.W	_16304			;166d4: 6100fc2e
+	BSR.W	_TylTargetAst		;166d4: 6100fc2e
 	MOVEA.L	(A7)+,A0		;166d8: 205f
 	MOVE.W	#$0064,(24,A0)		;166da: 317c00640018
 ret166E0:
@@ -29769,7 +29851,7 @@ loop16712:
 	CMPI.B	#$03,D1			;16722: 0c010003
 	BNE.S	_next16736		;16726: 660e
 	BSET	#3,(90,A0)		;16728: 08e80003005a
-	ST	flgAst2E188		;1672e: 50f90002e188
+	ST	flgAstSpotted		;1672e: 50f90002e188
 	BRA.S	_1673E			;16734: 6008
 _next16736:
 	LEA	(750,A0),A0		;16736: 41e802ee
@@ -29785,7 +29867,7 @@ _1673E:
 	CLR.L	(178,A5)		;16752: 42ad00b2
 ; 2 Nuclear, 4 Scatter, 4 Antivirus
 	LEA	tblMisl2N4Sc4Av,A0	;16756: 41f9000202a8
-	BSR.W	_FireMissiles		;1675c: 61000950
+	BSR.W	_FireSetMissiles	;1675c: 61000950
 	TST.L	(178,A5)		;16760: 4aad00b2
 	BNE.S	ret16784		;16764: 661e
 	MOVEQ	#0,D0			;16766: 7000
@@ -29799,11 +29881,11 @@ ret16784:
 	RTS				;16784: 4e75
 _16786:
 ; Fire a mega
-	SUBQ.B	#1,data20222		;16786: 533900020222
+	SUBQ.B	#1,intCountd20222	;16786: 533900020222
 	BGT.S	_167D4			;1678c: 6e46
-	MOVE.B	#$0a,data20222		;1678e: 13fc000a00020222
+	MOVE.B	#$0a,intCountd20222	;1678e: 13fc000a00020222
 	MOVEA.L	ptrThisAstStats,A0	;16796: 20790002ded8
-	BSR.W	_12A62			;1679c: 6100c2c4
+	BSR.W	_AstProximity		;1679c: 6100c2c4
 	BEQ.S	_167D4			;167a0: 6732
 	BTST	#6,(89,A1)		;167a2: 082900060059
 	BNE.S	_167CE			;167a8: 6624
@@ -29821,7 +29903,7 @@ _16786:
 	MOVE.L	A1,(178,A0)		;167c8: 214900b2
 	RTS				;167cc: 4e75
 _167CE:
-	BSR.W	_AliAstEffects		;167ce: 61000524
+	BSR.W	_AliAstEvacuate		;167ce: 61000524
 	RTS				;167d2: 4e75
 _167D4:
 	BSR.W	_CountAsteroids		;167d4: 6100c072
@@ -29837,30 +29919,32 @@ _167D4:
 ; missile target
 	TST.L	(178,A0)		;16802: 4aa800b2
 	BEQ.S	_Clr91b3		;16806: 6754
+; fix transporter shortage
 	BSR.W	_CountAliShips		;16808: 61000e38
 	CMPI.B	#$08,D0			;1680c: 0c000008
 	BMI.S	_Clr91b3		;16810: 6b4a
-	LEA	ptrShip2015E,A1		;16812: 43f90002015e
+	LEA	ptrShipList,A1		;16812: 43f90002015e
 	MOVEQ	#4,D0			;16818: 7004
 	JSR	_RandInt		;1681a: 4eb900000c0c
 loop16820:
 	MOVEA.L	(A1)+,A6		;16820: 2c59
-; transporter
+; transporter - build transporter
 	CMPI.B	#$42,(8,A6)		;16822: 0c2e00420008
-	BEQ.S	_1684C			;16828: 6722
+	BEQ.S	_Alert1684C		;16828: 6722
 	MOVEM.L	D0/A0-A1,-(A7)		;1682a: 48e780c0
 	MOVEA.L	A0,A5			;1682e: 2a48
 	LEA	(8,A0),A0		;16830: 41e80008
-	JSR	_0252E			;16834: 4eb90000252e
+	JSR	_Ship0252E		;16834: 4eb90000252e
 	MOVEA.L	(178,A5),A0		;1683a: 206d00b2
 	LEA	(8,A0),A0		;1683e: 41e80008
 	JSR	_024FA			;16842: 4eb9000024fa
 	MOVEM.L	(A7)+,D0/A0-A1		;16848: 4cdf0301
-_1684C:
+_Alert1684C:
 	DBF	D0,loop16820		;1684c: 51c8ffd2
+; "Alert, alert"
 	MOVEQ	#5,D1			;16850: 7205
 	MOVEQ	#1,D0			;16852: 7001
-	JSR	_1A2CE			;16854: 4eb90001a2ce
+	JSR	_VoiceOrSound		;16854: 4eb90001a2ce
 	RTS				;1685a: 4e75
 _Clr91b3:
 	BCLR	#3,(91,A0)		;1685c: 08a80003005b
@@ -29869,20 +29953,20 @@ _Misl_16864:
 ; Cycle counts down from 80 to 0. If it hits -1
 ; it resets to 80 and has a 30% chance to fire.
 	SUBQ.W	#1,intAlienMislCdn	;16864: 537900020314
-	BPL.S	_1688E			;1686a: 6a22
+	BPL.S	_DailyAli5Atk		;1686a: 6a22
 	MOVE.W	#$0050,intAlienMislCdn	;1686c: 33fc005000020314
 	MOVEQ	#100,D0			;16874: 7064
 	JSR	_RandInt		;16876: 4eb900000c0c
 	CMPI.B	#$1e,D0			;1687c: 0c00001e
-	BPL.S	_1688E			;16880: 6a0c
+	BPL.S	_DailyAli5Atk		;16880: 6a0c
 ; 3 Virus, 4 Vortex, 3 Antivirus
 	LEA	tblMisl4V4V3A,A0	;16882: 41f9000202be
-	BSR.W	_FireMissiles		;16888: 61000824
+	BSR.W	_FireSetMissiles	;16888: 61000824
 	RTS				;1688c: 4e75
-_1688E:
-	BSR.W	_DailyAli_15F3C		;1688e: 6100f6ac
+_DailyAli5Atk:
+	BSR.W	_DecrementAtkDelay	;1688e: 6100f6ac
 	BMI.S	ret168BC		;16892: 6b28
-	MOVE.B	#$0c,flg2E47F		;16894: 13fc000c0002e47f
+	MOVE.B	#$0c,intRetaliateDelay	;16894: 13fc000c0002e47f
 	TST.W	intOurAstsKnown		;1689c: 4a790002e052
 	BEQ.S	ret168BC		;168a2: 6718
 	MOVEQ	#100,D0			;168a4: 7064
@@ -29891,7 +29975,7 @@ _1688E:
 	BPL.S	ret168BC		;168b0: 6a0a
 ; 6 Explosive, 4 Area Expl., 2 Nuclear, 3 Scatter, 1 Mega
 	LEA	tblMisl6E4A2N3Sc1M,A0	;168b2: 41f9000202d4
-	BSR.W	_FireMissiles		;168b8: 610007f4
+	BSR.W	_FireSetMissiles	;168b8: 610007f4
 ret168BC:
 	RTS				;168bc: 4e75
 _DailyAli6Atk:
@@ -29899,21 +29983,21 @@ _DailyAli6Atk:
 ; This is the path which sets up ghost fleets (?)
 	MOVEA.L	ptrThisAstStats,A5	;168be: 2a790002ded8
 	BCLR	#4,(91,A5)		;168c4: 08ad0004005b
-	BEQ.S	_NormalAtk168E2		;168ca: 6716
+	BEQ.S	_DailyAli6Atk		;168ca: 6716
 ; This occurs if they shot down a spy satellite
 ; 4 Explosive, 4 Stasis, 4 Vortex, 2 Antivirus
 	LEA	tblMisl4E4St4V2A,A0	;168cc: 41f9000202ea
 ; Launch missile strike
-	BSR.W	_FireMissiles		;168d2: 610007da
+	BSR.W	_FireSetMissiles	;168d2: 610007da
 	BSR.W	_TargetMostPop		;168d6: 61000166
 	BEQ.S	ret1690E		;168da: 6732
 ; missile strike target
 	MOVE.L	A2,(178,A5)		;168dc: 2b4a00b2
 	RTS				;168e0: 4e75
-_NormalAtk168E2:
-	BSR.W	_DailyAli_15F3C		;168e2: 6100f658
+_DailyAli6Atk:
+	BSR.W	_DecrementAtkDelay	;168e2: 6100f658
 	BMI.S	_16910			;168e6: 6b28
-	MOVE.B	#$0c,flg2E47F		;168e8: 13fc000c0002e47f
+	MOVE.B	#$0c,intRetaliateDelay	;168e8: 13fc000c0002e47f
 	TST.W	intOurAstsKnown		;168f0: 4a790002e052
 	BEQ.S	ret1690E		;168f6: 6716
 	MOVEQ	#100,D0			;168f8: 7064
@@ -29927,9 +30011,9 @@ _NormalAtk168E2:
 ret1690E:
 	RTS				;1690e: 4e75
 _16910:
-	BSR.W	_15FA4			;16910: 6100f692
-	BMI.W	_16966			;16914: 6b000050
-	MOVE.L	A0,ptr16A3A		;16918: 23c800016a3a
+	BSR.W	_DecFleetDelay		;16910: 6100f692
+	BMI.W	_AliFleetAttack		;16914: 6b000050
+	MOVE.L	A0,ptrFlt_16A3A		;16918: 23c800016a3a
 	MOVEQ	#10,D0			;1691e: 700a
 	JSR	_RandInt		;16920: 4eb900000c0c
 	BNE.S	_16930			;16926: 6608
@@ -29938,28 +30022,28 @@ _16910:
 	MOVEQ	#8,D0			;1692a: 7008
 	BSR.W	_Misl_No_Mega17062	;1692c: 61000734
 _16930:
-	MOVEA.L	ptr16A3A,A0		;16930: 207900016a3a
-	MOVE.B	#$10,flg2E480		;16936: 13fc00100002e480
-	MOVE.W	#$0008,data20216	;1693e: 33fc000800020216
-	MOVE.W	#$0003,data20218	;16946: 33fc000300020218
-	MOVE.W	#$0008,data2021A	;1694e: 33fc00080002021a
+	MOVEA.L	ptrFlt_16A3A,A0		;16930: 207900016a3a
+	MOVE.B	#$10,fleetCycle		;16936: 13fc00100002e480
+	MOVE.W	#$0008,fleet_min	;1693e: 33fc000800020216
+	MOVE.W	#$0003,fleet_2		;16946: 33fc000300020218
+	MOVE.W	#$0008,fleet_3		;1694e: 33fc00080002021a
 	BSR.W	_16B0A			;16956: 610001b2
 	BMI.S	ret1690E		;1695a: 6bb2
 	MOVE.W	#$0032,(24,A0)		;1695c: 317c00320018
 	BRA.W	_160AA			;16962: 6000f746
-_16966:
+_AliFleetAttack:
 ; 20% chance
 	MOVEQ	#5,D0			;16966: 7005
 	JSR	_RandInt		;16968: 4eb900000c0c
 	BNE.S	ret1690E		;1696e: 669e
 	TST.W	intOurAstsKnown		;16970: 4a790002e052
 	BEQ.S	ret1690E		;16976: 6796
-	TST.B	int2E473		;16978: 4a390002e473
+	TST.B	fleetDelay		;16978: 4a390002e473
 	BNE.S	ret1690E		;1697e: 668e
-	MOVE.W	#$000f,data20216	;16980: 33fc000f00020216
-	MOVE.W	#$0008,data20218	;16988: 33fc000800020218
-	MOVE.W	#$000e,data2021A	;16990: 33fc000e0002021a
-	MOVE.B	#$0e,int2E473		;16998: 13fc000e0002e473
+	MOVE.W	#$000f,fleet_min	;16980: 33fc000f00020216
+	MOVE.W	#$0008,fleet_2		;16988: 33fc000800020218
+	MOVE.W	#$000e,fleet_3		;16990: 33fc000e0002021a
+	MOVE.B	#$0e,fleetDelay		;16998: 13fc000e0002e473
 	BSR.W	_16B7E			;169a0: 610001dc
 	BMI.W	ret1690E		;169a4: 6b00ff68
 	MOVE.L	A0,-(A7)		;169a8: 2f08
@@ -29983,11 +30067,11 @@ loop169D2:
 	CLR.L	(32,A6)			;169e6: 42ae0020
 _169EA:
 	DBF	D0,loop169D2		;169ea: 51c8ffe6
-	BSR.W	_175B8			;169ee: 61000bc8
+	BSR.W	_IntelFleetDest		;169ee: 61000bc8
 	MOVEA.L	A0,A1			;169f2: 2248
 	CMPI.W	#$0002,intOurAstsKnown	;169f4: 0c7900020002e052
 	BMI.W	ret1690E		;169fc: 6b00ff10
-	BSR.W	_Fleet175F4		;16a00: 61000bf2
+	BSR.W	_NewAliFleet		;16a00: 61000bf2
 	BEQ.W	ret1690E		;16a04: 6700ff08
 	MOVE.B	#$02,(0,A0)		;16a08: 117c00020000
 ; ghost fleet
@@ -30006,12 +30090,12 @@ _16A26:
 	MOVEQ	#-1,D0			;16a32: 70ff
 	MOVE.L	D0,(6,A0)		;16a34: 21400006
 	RTS				;16a38: 4e75
-ptr16A3A:
+ptrFlt_16A3A:
 	DS.L	1			;16a3a
 _TargetMostPop:
-; Intentionally target the most populated colony
+; Swixarans intentionally target the most populated colony
 	LEA	arrPlayerAstsKnown,A1	;16a3e: 43f90001f856
-; 30,000
+; 30,000 - larger than practical maximum population of 6,600
 	MOVE.W	#$7530,D1		;16a44: 323c7530
 	SUBA.L	A2,A2			;16a48: 95ca
 loop_16A4A:
@@ -30032,15 +30116,15 @@ _16A62:
 	MOVEA.L	ptrThisAstStats,A0	;16a62: 20790002ded8
 	BSR.W	_CountAliShips		;16a68: 61000bd8
 	SUB.W	(12,A2),D0		;16a6c: 906a000c
-	CMP.W	data20216,D0		;16a70: b07900020216
+	CMP.W	fleet_min,D0		;16a70: b07900020216
 	BMI.W	_16B06			;16a76: 6b00008e
-	BSR.W	_Fleet175F4		;16a7a: 61000b78
+	BSR.W	_NewAliFleet		;16a7a: 61000b78
 	BEQ.W	_16B06			;16a7e: 67000086
 	MOVE.W	#$0046,(24,A0)		;16a82: 317c00460018
 	LEA	(32,A0),A3		;16a88: 47e80020
 	TST.W	(14,A2)			;16a8c: 4a6a000e
 	BEQ.S	_16AB6			;16a90: 6724
-	LEA	ptrShip2015E,A1		;16a92: 43f90002015e
+	LEA	ptrShipList,A1		;16a92: 43f90002015e
 _16A98:
 	MOVE.L	(A1)+,D1		;16a98: 2219
 	BMI.S	_16AB6			;16a9a: 6b1a
@@ -30053,13 +30137,13 @@ _16A98:
 	MOVE.L	A6,(A3)+		;16aae: 26ce
 	MOVE.W	#$0001,(22,A0)		;16ab0: 317c00010016
 _16AB6:
-	MOVE.W	data20218,D0		;16ab6: 303900020218
-	CMP.W	data2021A,D0		;16abc: b0790002021a
+	MOVE.W	fleet_2,D0		;16ab6: 303900020218
+	CMP.W	fleet_3,D0		;16abc: b0790002021a
 	BMI.S	_16ACA			;16ac2: 6b06
-	MOVE.W	data2021A,D0		;16ac4: 30390002021a
+	MOVE.W	fleet_3,D0		;16ac4: 30390002021a
 _16ACA:
 	JSR	_RandInt		;16aca: 4eb900000c0c
-	LEA	ptrShip2015E,A1		;16ad0: 43f90002015e
+	LEA	ptrShipList,A1		;16ad0: 43f90002015e
 _16AD6:
 	MOVE.L	(A1)+,D1		;16ad6: 2219
 	BEQ.S	_16AD6			;16ad8: 67fc
@@ -30087,18 +30171,18 @@ _16B0A:
 	MOVEA.L	ptrThisAstStats,A0	;16b0a: 20790002ded8
 	BSR.W	_CountAliShips		;16b10: 61000b30
 	SUB.W	(10,A2),D0		;16b14: 906a000a
-	CMP.W	data20216,D0		;16b18: b07900020216
+	CMP.W	fleet_min,D0		;16b18: b07900020216
 	BMI.S	_16B7A			;16b1e: 6b5a
-	BSR.W	_Fleet175F4		;16b20: 61000ad2
+	BSR.W	_NewAliFleet		;16b20: 61000ad2
 	BEQ.S	_16B7A			;16b24: 6754
 	LEA	(32,A0),A3		;16b26: 47e80020
-	MOVE.W	data20218,D0		;16b2a: 303900020218
-	CMP.W	data2021A,D0		;16b30: b0790002021a
+	MOVE.W	fleet_2,D0		;16b2a: 303900020218
+	CMP.W	fleet_3,D0		;16b30: b0790002021a
 	BMI.S	_16B3E			;16b36: 6b06
-	MOVE.W	data2021A,D0		;16b38: 30390002021a
+	MOVE.W	fleet_3,D0		;16b38: 30390002021a
 _16B3E:
 	JSR	_RandInt		;16b3e: 4eb900000c0c
-	LEA	ptrShip2015E,A1		;16b44: 43f90002015e
+	LEA	ptrShipList,A1		;16b44: 43f90002015e
 _16B4A:
 	MOVE.L	(A1)+,D1		;16b4a: 2219
 	BEQ.S	_16B4A			;16b4c: 67fc
@@ -30124,14 +30208,14 @@ _16B7E:
 	MOVEA.L	ptrThisAstStats,A0	;16b7e: 20790002ded8
 	BSR.W	_CountAliShips		;16b84: 61000abc
 	SUB.W	(10,A2),D0		;16b88: 906a000a
-	CMP.W	data20216,D0		;16b8c: b07900020216
+	CMP.W	fleet_min,D0		;16b8c: b07900020216
 	BMI.W	_16C44			;16b92: 6b0000b0
-	BSR.W	_Fleet175F4		;16b96: 61000a5c
+	BSR.W	_NewAliFleet		;16b96: 61000a5c
 	BEQ.W	_16C44			;16b9a: 670000a8
 	LEA	(32,A0),A3		;16b9e: 47e80020
 	TST.W	(14,A2)			;16ba2: 4a6a000e
 	BEQ.S	_16BCC			;16ba6: 6724
-	LEA	ptrShip2015E,A1		;16ba8: 43f90002015e
+	LEA	ptrShipList,A1		;16ba8: 43f90002015e
 _16BAE:
 	MOVE.L	(A1)+,D1		;16bae: 2219
 	BMI.S	_16BCC			;16bb0: 6b1a
@@ -30145,7 +30229,7 @@ _16BAE:
 _16BCC:
 	TST.W	(12,A2)			;16bcc: 4a6a000c
 	BEQ.S	_16BF4			;16bd0: 6722
-	LEA	ptrShip2015E,A1		;16bd2: 43f90002015e
+	LEA	ptrShipList,A1		;16bd2: 43f90002015e
 _16BD8:
 	MOVE.L	(A1)+,D1		;16bd8: 2219
 	BMI.S	_16BF4			;16bda: 6b18
@@ -30157,13 +30241,13 @@ _16BD8:
 	MOVE.L	A6,(A3)+		;16bee: 26ce
 	ADDQ.W	#1,(22,A0)		;16bf0: 52680016
 _16BF4:
-	MOVE.W	data20218,D0		;16bf4: 303900020218
-	CMP.W	data2021A,D0		;16bfa: b0790002021a
+	MOVE.W	fleet_2,D0		;16bf4: 303900020218
+	CMP.W	fleet_3,D0		;16bfa: b0790002021a
 	BMI.S	_16C08			;16c00: 6b06
-	MOVE.W	data2021A,D0		;16c02: 30390002021a
+	MOVE.W	fleet_3,D0		;16c02: 30390002021a
 _16C08:
 	JSR	_RandInt		;16c08: 4eb900000c0c
-	LEA	ptrShip2015E,A1		;16c0e: 43f90002015e
+	LEA	ptrShipList,A1		;16c0e: 43f90002015e
 _16C14:
 	MOVE.L	(A1)+,D1		;16c14: 2219
 	BEQ.S	_16C14			;16c16: 67fc
@@ -30185,38 +30269,42 @@ _16C3A:
 _16C44:
 	MOVEQ	#-1,D0			;16c44: 70ff
 	RTS				;16c46: 4e75
-_16C48:
+_BuildFleet:
 	MOVEA.L	ptrThisAstStats,A0	;16c48: 20790002ded8
 	BSR.W	_CountAliShips		;16c4e: 610009f2
 	SUB.W	(10,A2),D0		;16c52: 906a000a
 	SUB.W	(12,A2),D0		;16c56: 906a000c
-	CMP.W	data20216,D0		;16c5a: b07900020216
-	BMI.W	_16CF0			;16c60: 6b00008e
-	BSR.W	_Fleet175F4		;16c64: 6100098e
-	BEQ.W	_16CF0			;16c68: 67000086
+; Count ships except Transporter/"Terminator".
+	CMP.W	fleet_min,D0		;16c5a: b07900020216
+	BMI.W	_ret-1_16CF0		;16c60: 6b00008e
+	BSR.W	_NewAliFleet		;16c64: 6100098e
+	BEQ.W	_ret-1_16CF0		;16c68: 67000086
 	MOVE.W	#$0046,(24,A0)		;16c6c: 317c00460018
 	LEA	(32,A0),A3		;16c72: 47e80020
 	TST.W	(14,A2)			;16c76: 4a6a000e
 	BEQ.S	_16CA0			;16c7a: 6724
-	LEA	ptrShip2015E,A1		;16c7c: 43f90002015e
-_16C82:
+; battleships
+	LEA	ptrShipList,A1		;16c7c: 43f90002015e
+loop16C82:
 	MOVE.L	(A1)+,D1		;16c82: 2219
 	BMI.S	_16CA0			;16c84: 6b1a
 	MOVEA.L	D1,A6			;16c86: 2c41
 	CMPI.B	#$43,(8,A6)		;16c88: 0c2e00430008
-	BNE.S	_16C82			;16c8e: 66f2
+	BNE.S	loop16C82		;16c8e: 66f2
+; battleships
 	CLR.L	(-4,A1)			;16c90: 42a9fffc
 	MOVE.B	D6,(48,A6)		;16c94: 1d460030
 	MOVE.L	A6,(A3)+		;16c98: 26ce
 	MOVE.W	#$0001,(22,A0)		;16c9a: 317c00010016
 _16CA0:
-	MOVE.W	data20218,D0		;16ca0: 303900020218
-	CMP.W	data2021A,D0		;16ca6: b0790002021a
+; take the larger of the two values
+	MOVE.W	fleet_2,D0		;16ca0: 303900020218
+	CMP.W	fleet_3,D0		;16ca6: b0790002021a
 	BMI.S	_16CB4			;16cac: 6b06
-	MOVE.W	data2021A,D0		;16cae: 30390002021a
+	MOVE.W	fleet_3,D0		;16cae: 30390002021a
 _16CB4:
 	JSR	_RandInt		;16cb4: 4eb900000c0c
-	LEA	ptrShip2015E,A1		;16cba: 43f90002015e
+	LEA	ptrShipList,A1		;16cba: 43f90002015e
 _16CC0:
 	MOVE.L	(A1)+,D1		;16cc0: 2219
 	BEQ.S	_16CC0			;16cc2: 67fc
@@ -30232,13 +30320,13 @@ _16CC0:
 	DBF	D0,_16CC0		;16ce2: 51c8ffdc
 _16CE6:
 	TST.W	(22,A0)			;16ce6: 4a680016
-	BEQ.S	_16CF0			;16cea: 6704
+	BEQ.S	_ret-1_16CF0		;16cea: 6704
 	MOVEQ	#0,D0			;16cec: 7000
 	RTS				;16cee: 4e75
-_16CF0:
+_ret-1_16CF0:
 	MOVEQ	#-1,D0			;16cf0: 70ff
 	RTS				;16cf2: 4e75
-_AliAstEffects:
+_AliAstEvacuate:
 ; Per-alien effects for an asteroid, probably when their
 ; colony is destroyed. Includes the ore eater ability to
 ; boobytrap an asteroid so that it explodes when you
@@ -30258,13 +30346,13 @@ _AliAstEffects:
 	MOVE.L	(A7)+,ptrThisAstStats	;16d1a: 23df0002ded8
 	RTS				;16d20: 4e75
 arr16D22:
-	DC.L	_Ali123AstEffect	;16d22: 00016d3a
+	DC.L	_Ali123Evacuate		;16d22: 00016d3a
 	DC.L	_Boobytrap		;16d26: 00016df6
-	DC.L	_Ali123AstEffect	;16d2a: 00016d3a
+	DC.L	_Ali123Evacuate		;16d2a: 00016d3a
 	DC.L	_TylarAstEffect		;16d2e: 00016e06
 	DC.L	_RigelAstEffect		;16d32: 00016eb2
 	DC.L	_SwixAstEffect		;16d36: 00016f34
-_Ali123AstEffect:
+_Ali123Evacuate:
 ; occurs when alien 1-3
 ; possibly evacuate fleet or disband fleet
 	CMPI.W	#$0002,intAlienAstCount	;16d3a: 0c7900020002e056
@@ -30274,11 +30362,11 @@ _Ali123AstEffect:
 	BSR.W	_CountAliShips		;16d4c: 610008f4
 	SUB.W	(10,A2),D0		;16d50: 906a000a
 	BLE.W	ret16DF4		;16d54: 6f00009e
-	BSR.W	_Fleet175F4		;16d58: 6100089a
+	BSR.W	_NewAliFleet		;16d58: 6100089a
 	BEQ.W	ret16DF4		;16d5c: 67000096
 	MOVE.W	#$0046,(24,A0)		;16d60: 317c00460018
 	SUBQ.W	#1,D0			;16d66: 5340
-	LEA	ptrShip2015E,A1		;16d68: 43f90002015e
+	LEA	ptrShipList,A1		;16d68: 43f90002015e
 	LEA	(32,A0),A3		;16d6e: 47e80020
 _16D72:
 	MOVE.L	(A1)+,D1		;16d72: 2219
@@ -30327,23 +30415,24 @@ _Boobytrap:
 ; colonized by terran player
 	MOVEA.L	ptrThisAstStats,A0	;16df6: 20790002ded8
 	BSET	#6,(90,A0)		;16dfc: 08e80006005a
-	BRA.W	_Ali123AstEffect	;16e02: 6000ff36
+	BRA.W	_Ali123Evacuate		;16e02: 6000ff36
 _TylarAstEffect:
 	CMPI.W	#$0002,intAlienAstCount	;16e06: 0c7900020002e056
 	BMI.W	ret16EB0		;16e0e: 6b0000a0
 ; Only if there's a colony left
 	MOVEA.L	ptrThisAstStats,A0	;16e12: 20790002ded8
 ; founded by small transporter?
+; Colonies for asteroid ramming
 	BTST	#1,(91,A0)		;16e18: 08280001005b
 	BNE.W	ret16EB0		;16e1e: 66000090
 	BSR.W	_CountAliShips		;16e22: 6100081e
 	TST.W	D0			;16e26: 4a40
 	BLE.W	ret16EB0		;16e28: 6f000086
-	BSR.W	_Fleet175F4		;16e2c: 610007c6
+	BSR.W	_NewAliFleet		;16e2c: 610007c6
 	BEQ.W	ret16EB0		;16e30: 6700007e
 	MOVE.W	#$0028,(24,A0)		;16e34: 317c00280018
 	SUBQ.W	#1,D0			;16e3a: 5340
-	LEA	ptrShip2015E,A1		;16e3c: 43f90002015e
+	LEA	ptrShipList,A1		;16e3c: 43f90002015e
 	LEA	(32,A0),A3		;16e42: 47e80020
 _16E46:
 	MOVE.L	(A1)+,D1		;16e46: 2219
@@ -30416,13 +30505,13 @@ _16EEE:
 	SUBQ.W	#1,D0			;16efa: 5340
 	BMI.S	_16F30			;16efc: 6b32
 	MOVEA.L	(A7)+,A3		;16efe: 265f
-	LEA	ptrShip2015E,A1		;16f00: 43f90002015e
+	LEA	ptrShipList,A1		;16f00: 43f90002015e
 loop16F06:
 	MOVEA.L	(A1)+,A6		;16f06: 2c59
 	MOVEM.L	D0/A1/A3,-(A7)		;16f08: 48e78050
 	MOVEA.L	ptrThisAstStats,A0	;16f0c: 20790002ded8
 	LEA	(8,A0),A0		;16f12: 41e80008
-	JSR	_0252E			;16f16: 4eb90000252e
+	JSR	_Ship0252E		;16f16: 4eb90000252e
 	LEA	(8,A3),A0		;16f1c: 41eb0008
 	JSR	_024FA			;16f20: 4eb9000024fa
 	MOVEM.L	(A7)+,D0/A1/A3		;16f26: 4cdf0a01
@@ -30440,11 +30529,11 @@ _SwixAstEffect:
 	BSR.W	_CountAliShips		;16f46: 610006fa
 	TST.W	D0			;16f4a: 4a40
 	BLE.W	ret16FEC		;16f4c: 6f00009e
-	BSR.W	_Fleet175F4		;16f50: 610006a2
+	BSR.W	_NewAliFleet		;16f50: 610006a2
 	BEQ.W	ret16FEC		;16f54: 67000096
 	MOVE.W	#$0046,(24,A0)		;16f58: 317c00460018
 	SUBQ.W	#1,D0			;16f5e: 5340
-	LEA	ptrShip2015E,A1		;16f60: 43f90002015e
+	LEA	ptrShipList,A1		;16f60: 43f90002015e
 	LEA	(32,A0),A3		;16f66: 47e80020
 _16F6A:
 	MOVE.L	(A1)+,D1		;16f6a: 2219
@@ -30489,13 +30578,14 @@ _16FE8:
 	DBF	D0,loop16FD0		;16fe8: 51c8ffe6
 ret16FEC:
 	RTS				;16fec: 4e75
-_16FEE:
+_AliMissileStrike:
 	TST.W	intOurAstsKnown		;16fee: 4a790002e052
 	BEQ.S	ret17060		;16ff4: 676a
 ; Missiles
 	LEA	(100,A5),A4		;16ff6: 49ed0064
 	LEA	(122,A5),A3		;16ffa: 47ed007a
 	MOVE.L	A4,D0			;16ffe: 200c
+; count missiles in silo
 	MOVEQ	#10,D1			;17000: 720a
 	MOVEQ	#0,D2			;17002: 7400
 loop17004:
@@ -30505,19 +30595,19 @@ loop17004:
 	ASR.W	#2,D2			;1700c: e442
 	BEQ.S	_17038			;1700e: 6728
 	CMPI.W	#$000a,D2		;17010: 0c42000a
-	BMI.S	_17018			;17014: 6b02
+	BMI.S	_PickMissiles_17018	;17014: 6b02
 	MOVEQ	#10,D2			;17016: 740a
-_17018:
+_PickMissiles_17018:
 	MOVEQ	#11,D0			;17018: 700b
 	JSR	_RandInt		;1701a: 4eb900000c0c
 	ADD.W	D0,D0			;17020: d040
 	TST.W	(0,A4,D0.W)		;17022: 4a740000
-	BEQ.S	_17018			;17026: 67f0
+	BEQ.S	_PickMissiles_17018	;17026: 67f0
 	SUBQ.W	#1,(0,A4,D0.W)		;17028: 53740000
 	ADDQ.W	#1,(0,A3,D0.W)		;1702c: 52730000
 	ADDQ.W	#1,(166,A5)		;17030: 526d00a6
 	SUBQ.W	#1,D2			;17034: 5342
-	BNE.S	_17018			;17036: 66e0
+	BNE.S	_PickMissiles_17018	;17036: 66e0
 _17038:
 	TST.W	(166,A5)		;17038: 4a6d00a6
 	BEQ.S	ret17060		;1703c: 6722
@@ -30529,7 +30619,7 @@ _RandomMislTarget:
 	ADD.W	D0,D0			;17052: d040
 	ADD.W	D0,D0			;17054: d040
 	MOVE.L	(0,A0,D0.W),(178,A5)	;17056: 2b70000000b2
-	BSR.W	_17580			;1705c: 61000522
+	BSR.W	_Satellite17580		;1705c: 61000522
 ret17060:
 	RTS				;17060: 4e75
 _Misl_No_Mega17062:
@@ -30562,7 +30652,7 @@ _Shoot170A6:
 	BNE.S	_RandomMislTarget	;170aa: 6692
 ret170AC:
 	RTS				;170ac: 4e75
-_FireMissiles:
+_FireSetMissiles:
 	TST.W	intOurAstsKnown		;170ae: 4a790002e052
 	BEQ.S	ret17116		;170b4: 6760
 	MOVEA.L	ptrThisAstBldgCount,A4	;170b6: 28790002ded4
@@ -30709,7 +30799,7 @@ _17230:
 	TST.B	flgShowGfx		;17238: 4a390002e468
 	BNE.S	ret1726C		;1723e: 662c
 	MOVE.W	(10,A6),D2		;17240: 342e000a
-	LEA	ptr1EA46,A2		;17244: 45f90001ea46
+	LEA	AirBurstEffect,A2	;17244: 45f90001ea46
 	MOVE.B	#$98,D1			;1724a: 123c0098
 	MOVEA.L	ptrCurrentAst,A0	;1724e: 20790002de58
 	MOVEQ	#51,D0			;17254: 7033
@@ -30752,7 +30842,7 @@ _WarheadSwix08:
 	TST.B	flgShowGfx		;172d2: 4a390002e468
 	BNE.S	ret17304		;172d8: 662a
 	MOVE.W	(10,A6),D2		;172da: 342e000a
-	LEA	ptr1EA46,A2		;172de: 45f90001ea46
+	LEA	AirBurstEffect,A2	;172de: 45f90001ea46
 	MOVE.B	#$98,D1			;172e4: 123c0098
 	MOVEA.L	ptrCurrentAst,A0	;172e8: 20790002de58
 	MOVEQ	#51,D0			;172ee: 7033
@@ -30894,7 +30984,7 @@ _174A6:
 	TST.B	flgShowGfx		;174ac: 4a390002e468
 	BNE.S	ret174E0		;174b2: 662c
 	MOVE.W	(10,A6),D2		;174b4: 342e000a
-	LEA	ptr1EA46,A2		;174b8: 45f90001ea46
+	LEA	AirBurstEffect,A2	;174b8: 45f90001ea46
 	MOVE.B	#$98,D1			;174be: 123c0098
 	MOVEA.L	ptrCurrentAst,A0	;174c2: 20790002de58
 	MOVEQ	#51,D0			;174c8: 7033
@@ -30951,7 +31041,7 @@ _17556:
 	MOVE.W	#$0064,data2021C	;17576: 33fc00640002021c
 ret1757E:
 	RTS				;1757e: 4e75
-_17580:
+_Satellite17580:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;17580: 48e7fffe
 	TST.B	(96,A5)			;17584: 4a2d0060
 	BEQ.S	_175B2			;17588: 6728
@@ -30959,16 +31049,17 @@ _17580:
 	JSR	_RandInt		;1758c: 4eb900000c0c
 	CMPI.B	#$50,D0			;17592: 0c000050
 	BPL.S	_175B2			;17596: 6a1a
-	MOVE.B	#$08,int2E470		;17598: 13fc00080002e470
+; 80% chance
+	MOVE.B	#$08,intKllSatCountd	;17598: 13fc00080002e470
 	MOVE.W	#$0008,(728,A5)		;175a0: 3b7c000802d8
 	ADDQ.B	#1,(97,A5)		;175a6: 522d0061
 	MOVEQ	#19,D0			;175aa: 7013
 	MOVEQ	#5,D1			;175ac: 7205
-	BSR.W	_1A2CE			;175ae: 61002d1e
+	BSR.W	_VoiceOrSound		;175ae: 61002d1e
 _175B2:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;175b2: 4cdf7fff
 	RTS				;175b6: 4e75
-_175B8:
+_IntelFleetDest:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;175b8: 48e7fffe
 	TST.B	(96,A5)			;175bc: 4a2d0060
 	BEQ.S	_175EE			;175c0: 672c
@@ -30977,16 +31068,16 @@ _175B8:
 	CMPI.B	#$50,D0			;175ca: 0c000050
 	BPL.S	_175EE			;175ce: 6a1e
 	MOVE.L	A0,(730,A5)		;175d0: 2b4802da
-	MOVE.B	#$08,int2E472		;175d4: 13fc00080002e472
+	MOVE.B	#$08,intCount_2E472	;175d4: 13fc00080002e472
 	MOVE.W	#$0008,(728,A5)		;175dc: 3b7c000802d8
 	ADDQ.B	#1,(97,A5)		;175e2: 522d0061
 	MOVEQ	#20,D0			;175e6: 7014
 	MOVEQ	#5,D1			;175e8: 7205
-	BSR.W	_1A2CE			;175ea: 61002ce2
+	BSR.W	_VoiceOrSound		;175ea: 61002ce2
 _175EE:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;175ee: 4cdf7fff
 	RTS				;175f2: 4e75
-_Fleet175F4:
+_NewAliFleet:
 	MOVE.L	D0,-(A7)		;175f4: 2f00
 	MOVE.L	A1,-(A7)		;175f6: 2f09
 	MOVEA.L	ptrBuff15_AliFleet,A0	;175f8: 207900000566
@@ -30994,7 +31085,7 @@ _Fleet175F4:
 	MOVEQ	#1,D6			;17600: 7c01
 loop17602:
 	TST.L	(6,A0)			;17602: 4aa80006
-	BEQ.S	_1761A			;17606: 6712
+	BEQ.S	_InitAliFleet		;17606: 6712
 	LEA	(292,A0),A0		;17608: 41e80124
 	ADDQ.B	#1,D6			;1760c: 5206
 	DBF	D0,loop17602		;1760e: 51c8fff2
@@ -31002,7 +31093,7 @@ loop17602:
 	MOVE.L	(A7)+,D0		;17614: 201f
 	MOVEQ	#0,D7			;17616: 7e00
 	RTS				;17618: 4e75
-_1761A:
+_InitAliFleet:
 	MOVE.W	#$0091,D0		;1761a: 303c0091
 	MOVEA.L	A0,A1			;1761e: 2248
 loop17620:
@@ -31018,7 +31109,7 @@ loop17620:
 	RTS				;17640: 4e75
 _CountAliShips:
 	MOVEQ	#0,D0			;17642: 7000
-	LEA	ptrShip2015E,A1		;17644: 43f90002015e
+	LEA	ptrShipList,A1		;17644: 43f90002015e
 	LEA	tblAliShipCount,A2	;1764a: 45f900020206
 	MOVE.L	D0,(A2)			;17650: 2480
 	MOVE.L	D0,(4,A2)		;17652: 25400004
@@ -31189,7 +31280,8 @@ _InitAstOre:
 ; 0: Robotic Mining Drill, Robotic Mining Drill, Ore Depot, Advanced Mining Drill
 	MOVEQ	#0,D0			;17814: 7000
 	BSR.W	_BuildCluster		;17816: 610002f0
-; SHIPS: One $3f scoutship, one $42 transporter, 6x $3d small ship, 4x $3e
+; SHIPS: One $3f scoutship, one $42 transporter,
+; 6x $3d small ship, 4x $3e
 	MOVEQ	#66,D2			;1781a: 7442
 	BSR.W	_SpawnAlienShip		;1781c: 610018d6
 	MOVEQ	#63,D2			;17820: 743f
@@ -31270,7 +31362,7 @@ loop178BC:
 	MOVEA.L	ptrAlienAst_2021E,A0	;178ca: 20790002021e
 	MOVE.W	(A0)+,D0		;178d0: 3018
 	MOVE.L	A0,-(A7)		;178d2: 2f08
-	JSR	_12B4E			;178d4: 4eb900012b4e
+	JSR	_InitAstCoords		;178d4: 4eb900012b4e
 	ST	(24,A0)			;178da: 50e80018
 	MOVE.B	#$45,(89,A0)		;178de: 117c00450059
 	MOVE.B	#$28,(692,A0)		;178e4: 117c002802b4
@@ -31303,7 +31395,7 @@ loop1792C:
 	BSR.W	_SpawnAlienShip		;17948: 610017aa
 	MOVEA.L	(A7)+,A0		;1794c: 205f
 	MOVE.W	(A0),D0			;1794e: 3010
-	JSR	_12B4E			;17950: 4eb900012b4e
+	JSR	_InitAstCoords		;17950: 4eb900012b4e
 	ST	(24,A0)			;17956: 50e80018
 	MOVE.B	#$45,(89,A0)		;1795a: 117c00450059
 	MOVE.B	#$28,(692,A0)		;17960: 117c002802b4
@@ -31362,11 +31454,11 @@ loop179D2:
 _17A10:
 	MOVEA.L	ptrThisAstStats,A0	;17a10: 20790002ded8
 	BSET	#3,(90,A0)		;17a16: 08e80003005a
-	ST	flgAst2E188		;17a1c: 50f90002e188
+	ST	flgAstSpotted		;17a1c: 50f90002e188
 _17A22:
 	MOVEA.L	ptrThisAstStats,A0	;17a22: 20790002ded8
 	MOVE.L	A6,-(A7)		;17a28: 2f0e
-	BSR.W	_AliAstEffects		;17a2a: 6100f2c8
+	BSR.W	_AliAstEvacuate		;17a2a: 6100f2c8
 	MOVEA.L	(A7)+,A6		;17a2e: 2c5f
 	MOVEQ	#0,D0			;17a30: 7000
 	RTS				;17a32: 4e75
@@ -31612,10 +31704,10 @@ loop17D22:
 	MOVE.W	D2,-(A7)		;17d22: 3f02
 	MOVE.L	(A0)+,ptrThisAstStats	;17d24: 23d80002ded8
 	MOVE.L	A0,-(A7)		;17d2a: 2f08
-	MOVE.W	#$000a,data20216	;17d2c: 33fc000a00020216
-	MOVE.W	#$0005,data20218	;17d34: 33fc000500020218
-	MOVE.W	#$000a,data2021A	;17d3c: 33fc000a0002021a
-	BSR.W	_16C48			;17d44: 6100ef02
+	MOVE.W	#$000a,fleet_min	;17d2c: 33fc000a00020216
+	MOVE.W	#$0005,fleet_2		;17d34: 33fc000500020218
+	MOVE.W	#$000a,fleet_3		;17d3c: 33fc000a0002021a
+	BSR.W	_BuildFleet		;17d44: 6100ef02
 	BMI.W	_17DAC			;17d48: 6b000062
 	MOVE.L	A0,ptr20A88		;17d4c: 23c800020a88
 	MOVEA.L	arrPlayerAstsKnown,A2	;17d52: 24790001f856
@@ -31638,7 +31730,7 @@ loop17D7A:
 _17D92:
 	DBF	D0,loop17D7A		;17d92: 51c8ffe6
 	MOVEA.L	ptrThisAstStats,A5	;17d96: 2a790002ded8
-	BSR.W	_175B8			;17d9c: 6100f81a
+	BSR.W	_IntelFleetDest		;17d9c: 6100f81a
 	MOVEA.L	(A7)+,A0		;17da0: 205f
 	MOVE.W	(A7)+,D2		;17da2: 341f
 _17DA4:
@@ -31702,7 +31794,7 @@ next17E28:
 ret17E4A:
 	RTS				;17e4a: 4e75
 _DailyAliBuild:
-	CMPI.W	#$ff00,flgAst2E188	;17e4c: 0c79ff000002e188
+	CMPI.W	#$ff00,flgAstSpotted	;17e4c: 0c79ff000002e188
 	BNE.S	_17E62			;17e54: 660c
 	ST	flgAst2E189		;17e56: 50f90002e189
 	BSR.W	_17C70			;17e5c: 6100fe12
@@ -31739,7 +31831,7 @@ loop17E98:
 	BMI.S	_17EFC			;17ece: 6b2c
 	SF	(172,A5)		;17ed0: 51ed00ac
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;17ed4: 48e7fffe
-	LEA	ptr1F044,A6		;17ed8: 4df90001f044
+	LEA	shExplosion1F044,A6	;17ed8: 4df90001f044
 	JSR	_ShipAct23		;17ede: 4eb90000d86c
 	MOVEQ	#0,D0			;17ee4: 7000
 	MOVEQ	#0,D1			;17ee6: 7200
@@ -31785,7 +31877,7 @@ _Jump_17F24:
 _NotAzx_17F5C:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;17f5c: 48e7fffe
 	MOVEA.L	A5,A0			;17f60: 204d
-	BSR.W	_AliAstEffects		;17f62: 6100ed90
+	BSR.W	_AliAstEvacuate		;17f62: 6100ed90
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;17f66: 4cdf7fff
 	BRA.W	next_1805E		;17f6a: 600000f2
 _NoJump_17F6E:
@@ -31807,7 +31899,7 @@ loop17F96:
 	TST.B	(2,A0)			;17f9a: 4a280002
 	BPL.S	_17FA6			;17f9e: 6a06
 	BSR.W	_AliBuildProgress	;17fa0: 610000d6
-	BRA.S	_17FB8			;17fa4: 6012
+	BRA.S	_AlienCycle		;17fa4: 6012
 _17FA6:
 ; building is not under construction
 ; Seems to trigger turrets on building 94
@@ -31816,14 +31908,14 @@ _17FA6:
 	CMPI.B	#$5e,(0,A0)		;17fa6: 0c28005e0000
 	BNE.S	_Turret17FB4		;17fac: 6606
 	BSR.W	_DailyMissileSilo	;17fae: 6100c13e
-	BRA.S	_17FB8			;17fb2: 6004
+	BRA.S	_AlienCycle		;17fb2: 6004
 _Turret17FB4:
 	BSR.W	_TriggerAlienTurret	;17fb4: 6100f6e8
-_17FB8:
+_AlienCycle:
 	MOVEM.L	(A7)+,D0/D7/A0-A1/A4-A6	;17fb8: 4cdf7381
 	LEA	(14,A0),A0		;17fbc: 41e8000e
 	DBF	D7,loop17F96		;17fc0: 51cfffd4
-; CPU-style resource generation degrades by 1 per day
+; Delay while colony is becoming established
 	TST.B	(692,A5)		;17fc4: 4a2d02b4
 	BEQ.S	_17FD2			;17fc8: 6708
 	SUBQ.B	#1,(692,A5)		;17fca: 532d02b4
@@ -31851,8 +31943,9 @@ _18006:
 	MOVEA.L	ptrThisAstStats,A0	;1800a: 20790002ded8
 	BTST	#6,(89,A0)		;18010: 082800060059
 	BEQ.W	_18044			;18016: 6700002c
-; can't happen if ast[89] bit 6 (alien colony) is unset
-	BSR.W	_DailyAliMislAtk	;1801a: 6100dfea
+; The next lines require
+; ast[89] bit 6 (alien colony established) set
+	BSR.W	_DailyAliAttack		;1801a: 6100dfea
 	BSR.W	_DailySpyDetect		;1801e: 6100de3a
 	BSR.W	_DailyAliScout		;18022: 61000558
 	BSR.W	_DailyNewColony		;18026: 610005b2
@@ -32044,8 +32137,9 @@ _18238:
 	MOVE.B	intDay,D0		;18242: 10390002e45b
 	ANDI.B	#$0f,D0			;18248: 0200000f
 	BNE.S	ret181FC		;1824c: 66ae
-; Every 16 days, if there are no Power Convertors or Power Collector,
-; set to build: Power Convertores, Power Store, Power Store, Power Collector
+; Every 16 days, if there are no Power Convertors or
+; Power Collector, set to build:
+; Power Convertores, Power Store, Power Store, Power Collector
 	MOVEQ	#5,D0			;1824e: 7005
 	MOVE.W	D0,(720,A0)		;18250: 314002d0
 	RTS				;18254: 4e75
@@ -32063,12 +32157,13 @@ _AzxClearAll:
 	MOVEQ	#0,D0			;18270: 7000
 	BSR.W	_DemolishAll		;18272: 6100af32
 	BSET	#1,bAlienSpecial	;18276: 08f900010002e48d
-	BSR.W	_AliAstEffects		;1827e: 6100ea74
+	BSR.W	_AliAstEvacuate		;1827e: 6100ea74
 	RTS				;18282: 4e75
 _AzxProblem:
 ; If there's a resource deficiency (power, food, air shortage):
 ; Every 16 days, set to build:
-; Atmospheric Regulator, Personnal Podule, Reactor, Nutrient Podule
+; Atmospheric Regulator, Personnel Podule, Reactor,
+; Nutrient Podule
 	MOVE.B	intDay,D0		;18284: 10390002e45b
 	ANDI.B	#$0f,D0			;1828a: 0200000f
 	BNE.S	ret18296		;1828e: 6606
@@ -32077,7 +32172,8 @@ _AzxProblem:
 ret18296:
 	RTS				;18296: 4e75
 _18298:
-; Requires a Nutrient Podule. Otherwise, lose 1 population per day
+; Requires a Nutrient Podule. Otherwise, lose 1 population
+; per day
 	TST.W	(74,A1)			;18298: 4a69004a
 	BNE.S	_182AA			;1829c: 660c
 	SUBQ.W	#1,(684,A0)		;1829e: 536802ac
@@ -32085,10 +32181,11 @@ _18298:
 	CLR.W	(684,A0)		;182a4: 426802ac
 	BRA.S	_AzxClearAll		;182a8: 60c6
 _182AA:
-; Requires an Atmospheric Regulator. Otherwise, lose 3 population per day.
-; Interestingly, if a colony is missing both Atmospheric Regulator and
-; Nutrient Podule, it loses population at the slower food shortage rate
-; of 1/day and ignores the lack of air.
+; Requires an Atmospheric Regulator. Otherwise, lose 3
+; population per day. Interestingly, if a colony is missing
+; both Atmospheric Regulator and Nutrient Podule, it loses
+; population at the slower food shortage rate of 1/day and
+; ignores the lack of air.
 	TST.W	(38,A1)			;182aa: 4a690026
 	BNE.S	_182BC			;182ae: 660c
 	SUBQ.W	#3,(684,A0)		;182b0: 576802ac
@@ -32139,7 +32236,8 @@ _OreEatProblem:
 	BNE.S	ret18322		;1831a: 6606
 ; If there's no environment processor or power generation,
 ; we have a problem: every 16 days, set to build:
-; Civilian Dome, Command Bunker, Turbine Array, Environment Processor
+; Civilian Dome, Command Bunker, Turbine Array,
+; Environment Processor
 	MOVEQ	#1,D0			;1831c: 7001
 	MOVE.W	D0,(720,A0)		;1831e: 314002d0
 ret18322:
@@ -32167,14 +32265,16 @@ _18336:
 	BPL.S	_18356			;18350: 6a04
 	MOVE.W	D0,(684,A0)		;18352: 314002ac
 _18356:
-; Requires at least 1 Turbine Array or Capacitor, or we have a problem.
+; Requires at least 1 Turbine Array or Capacitor,
+; or we have a problem.
 ; However, it doesn't do anything special here.
 	MOVE.W	(46,A1),D0		;18356: 3029002e
 	ADD.W	(2,A1),D0		;1835a: d0690002
 	BEQ.S	_OreEatProblem		;1835e: 67b0
 	RTS				;18360: 4e75
 _DailyTylPop:
-; Requires at least one Control Centre or Habitat, or colony destroyed
+; Requires at least one Control Centre or Habitat,
+; or colony destroyed
 	MOVE.W	(48,A1),D0		;18362: 30290030
 	ADD.W	(0,A1),D0		;18366: d0690000
 	BNE.S	_18388			;1836a: 661c
@@ -32185,7 +32285,8 @@ _TylClear:
 _TylProblem:
 ; If there's a power or living quarters shortage,
 ; every 32 days (note Tylaran slow build rate)
-; Set to build: Habitat, Power Collector, Habitat, Control Centre
+; Set to build: Habitat, Power Collector, Habitat,
+; Control Centre
 	MOVE.B	intDay,D0		;18374: 10390002e45b
 	ANDI.B	#$1f,D0			;1837a: 0200001f
 	BNE.S	_183DE			;1837e: 665e
@@ -32272,7 +32373,7 @@ _DailyRigPop:
 _RigClear:
 	MOVEQ	#0,D0			;18426: 7000
 	BSR.W	_DemolishAll		;18428: 6100ad7c
-	BSR.W	_AliAstEffects		;1842c: 6100e8c6
+	BSR.W	_AliAstEvacuate		;1842c: 6100e8c6
 	RTS				;18430: 4e75
 _RigProblem:
 	MOVE.B	intDay,D0		;18432: 10390002e45b
@@ -32325,7 +32426,8 @@ _DailySwiPop:
 	BCLR	#2,(89,A0)		;1849c: 08a800020059
 	MOVE.W	(0,A1),D0		;184a2: 30290000
 	BNE.W	_184D0			;184a6: 66000028
-; Require at least one Tissue Organ or lose 8 population per day.
+; Require at least one Tissue Organ or lose 8
+; population per day.
 	SUBQ.W	#8,(684,A0)		;184aa: 516802ac
 	BGT.S	_SwixProblem		;184ae: 6e0c
 	CLR.W	(684,A0)		;184b0: 426802ac
@@ -32345,9 +32447,10 @@ ret184CE:
 	RTS				;184ce: 4e75
 _184D0:
 ; Require at least one Brain, or colony is destroyed.
-; The way many aliens work, it only checks for the first problem on the list
-; meaning that if the Brain is destroyed, the colony can survive for a while
-; as long as its Tissue Organ was already destroyed.
+; The way many aliens work, it only checks for the first
+; problem on the list meaning that if the Brain is destroyed,
+; the colony can survive for a while as long as its
+; Tissue Organ was already destroyed.
 	TST.W	(48,A1)			;184d0: 4a690030
 	BEQ.S	_SwixClear		;184d4: 67de
 	TST.W	(74,A1)			;184d6: 4a69004a
@@ -32358,8 +32461,8 @@ _184D0:
 	CLR.W	(684,A0)		;184e2: 426802ac
 	BRA.S	_SwixClear		;184e6: 60cc
 _184E8:
-; With a stomach, increase population by 2 per day, to a maximum of
-; 100 per Tissue Organ.
+; With a stomach, increase population by 2 per day, to a
+; maximum of 100 per Tissue Organ.
 	MOVE.W	(0,A1),D0		;184e8: 30290000
 	MULU	#$0064,D0		;184ec: c0fc0064
 	ADDQ.W	#2,(684,A0)		;184f0: 546802ac
@@ -33170,7 +33273,6 @@ ret18CF8:
 _AlienShipBuild:
 	MOVE.W	intCurrentAlienID,D0	;18cfa: 30390002df02
 ; Making daily progress on building ships
-; Actual decision to build a new ship is elsewhere
 	SUBQ.W	#1,D0			;18d00: 5340
 	LSL.W	#2,D0			;18d02: e548
 	LEA	arr18D12,A0		;18d04: 41f900018d12
@@ -33212,23 +33314,24 @@ _18D64:
 	LEA	(702,A0),A2		;18d68: 45e802be
 loop18D6C:
 	SUBQ.B	#1,(1,A2)		;18d6c: 532a0001
-	BMI.S	_18DA6			;18d70: 6b34
-	BNE.S	_18DCE			;18d72: 665a
+	BMI.S	_NewBuild18DA6		;18d70: 6b34
+	BNE.S	_done_18DCE		;18d72: 665a
 	MOVEQ	#0,D2			;18d74: 7400
 	MOVE.B	(A2),D2			;18d76: 1412
 	ADDI.B	#$3b,D2			;18d78: 0602003b
 	CLR.W	(A2)			;18d7c: 4252
 	BSR.W	_SpawnAlienShip		;18d7e: 61000374
-	BMI.S	_18DCE			;18d82: 6b4a
-; ship 41
+	BMI.S	_done_18DCE		;18d82: 6b4a
+; Special ship code like facing.
+; Kll Terminator = rotaty triangle
 	CMPI.B	#$41,(8,A6)		;18d84: 0c2e00410008
-	BNE.S	_18DCE			;18d8a: 6642
+	BNE.S	_done_18DCE		;18d8a: 6642
 	MOVE.W	#$1f00,(24,A6)		;18d8c: 3d7c1f000018
-	MOVE.L	#data1E9C8,(28,A6)	;18d92: 2d7c0001e9c8001c
+	MOVE.L	#ship1E9C8,(28,A6)	;18d92: 2d7c0001e9c8001c
 	BSET	#4,(20,A6)		;18d9a: 08ee00040014
 	SF	(9,A6)			;18da0: 51ee0009
-	BRA.S	_18DCE			;18da4: 6028
-_18DA6:
+	BRA.S	_done_18DCE		;18da4: 6028
+_NewBuild18DA6:
 	MOVEQ	#100,D0			;18da6: 7064
 	JSR	_RandInt		;18da8: 4eb900000c0c
 	LEA	tblAlienShip24,A1	;18dae: 43f900020514
@@ -33246,7 +33349,7 @@ _18DC4:
 	MOVE.B	D2,(A2)			;18dc4: 1482
 	MOVE.W	(2,A1),D0		;18dc6: 30290002
 	MOVE.B	D0,(1,A2)		;18dca: 15400001
-_18DCE:
+_done_18DCE:
 	ADDQ.L	#2,A2			;18dce: 548a
 	DBF	D7,loop18D6C		;18dd0: 51cfff9a
 ret18DD4:
@@ -33273,21 +33376,22 @@ _18E10:
 	LEA	(702,A0),A2		;18e14: 45e802be
 loop18E18:
 	SUBQ.B	#1,(1,A2)		;18e18: 532a0001
-	BMI.S	_18E40			;18e1c: 6b22
-	BNE.S	_18E68			;18e1e: 6648
+	BMI.S	_NewShipBuildAzx	;18e1c: 6b22
+	BNE.S	_next18E68		;18e1e: 6648
 	MOVEQ	#0,D2			;18e20: 7400
 	MOVE.B	(A2),D2			;18e22: 1412
 	ADDI.B	#$3b,D2			;18e24: 0602003b
 	CLR.W	(A2)			;18e28: 4252
 	CMPI.B	#$41,D2			;18e2a: 0c020041
 	BMI.S	_18E3A			;18e2e: 6b0a
+; appears to build a space dock first
 	BSET	#4,(90,A0)		;18e30: 08e80004005a
 	BNE.S	_18E3A			;18e36: 6602
 	MOVEQ	#75,D2			;18e38: 744b
 _18E3A:
 	BSR.W	_SpawnAlienShip		;18e3a: 610002b8
-	BRA.S	_18E68			;18e3e: 6028
-_18E40:
+	BRA.S	_next18E68		;18e3e: 6028
+_NewShipBuildAzx:
 	MOVEQ	#100,D0			;18e40: 7064
 	JSR	_RandInt		;18e42: 4eb900000c0c
 	LEA	tblAlienShip24,A1	;18e48: 43f900020514
@@ -33305,7 +33409,7 @@ _18E5E:
 	MOVE.B	D2,(A2)			;18e5e: 1482
 	MOVE.W	(2,A1),D0		;18e60: 30290002
 	MOVE.B	D0,(1,A2)		;18e64: 15400001
-_18E68:
+_next18E68:
 	ADDQ.L	#2,A2			;18e68: 548a
 	DBF	D7,loop18E18		;18e6a: 51cfffac
 ret18E6E:
@@ -33315,16 +33419,17 @@ _OreEatrShipBuild:
 	SF	intTriangles		;18e76: 51f9000190f2
 	MOVEA.L	ptrThisAstBldgCount,A1	;18e7c: 22790002ded4
 	TST.W	(46,A1)			;18e82: 4a69002e
-	BEQ.W	_NoProgress_18F36	;18e86: 670000ae
+	BEQ.W	_OreNoShipBldgs		;18e86: 670000ae
 	TST.W	(14,A1)			;18e8a: 4a69000e
-	BEQ.W	_NoProgress_18F36	;18e8e: 670000a6
+	BEQ.W	_OreNoShipBldgs		;18e8e: 670000a6
 	MOVE.W	(16,A1),D0		;18e92: 30290010
 	ADD.W	(26,A1),D0		;18e96: d069001a
 	ADD.W	(4,A1),D0		;18e9a: d0690004
-	BEQ.W	_NoProgress_18F36	;18e9e: 67000096
+	BEQ.W	_OreNoShipBldgs		;18e9e: 67000096
 	MOVEQ	#0,D1			;18ea2: 7200
 	MOVE.L	(8,A0),D0		;18ea4: 20280008
-	BEQ.S	_NoShip_18EC0		;18ea8: 6716
+	BEQ.S	_OreNewShipBuild	;18ea8: 6716
+; make progress on ship
 	MOVEA.L	D0,A6			;18eaa: 2c40
 _loop_18EAC:
 ; d1 increases for each orbital triangular ship
@@ -33333,17 +33438,17 @@ _loop_18EAC:
 	ADDQ.B	#1,D1			;18eb4: 5201
 _18EB6:
 	MOVE.L	(0,A6),D0		;18eb6: 202e0000
-	BEQ.S	_NoShip_18EC0		;18eba: 6704
+	BEQ.S	_OreNewShipBuild	;18eba: 6704
 	MOVEA.L	D0,A6			;18ebc: 2c40
 	BRA.S	_loop_18EAC		;18ebe: 60ec
-_NoShip_18EC0:
+_OreNewShipBuild:
 	MOVE.B	D1,intTriangles		;18ec0: 13c1000190f2
 	CMPI.B	#$02,D1			;18ec6: 0c010002
 	BMI.S	_Build_18ED8		;18eca: 6b0c
 	MOVEQ	#0,D1			;18ecc: 7200
 	MOVE.L	D1,(712,A0)		;18ece: 214102c8
 	MOVE.L	D1,(716,A0)		;18ed2: 214102cc
-	BRA.S	_NoProgress_18F36	;18ed6: 605e
+	BRA.S	_OreNoShipBldgs		;18ed6: 605e
 _Build_18ED8:
 	MOVE.W	(50,A1),D7		;18ed8: 3e290032
 	CMPI.W	#$0003,D7		;18edc: 0c470003
@@ -33351,12 +33456,12 @@ _Build_18ED8:
 	MOVEQ	#2,D7			;18ee2: 7e02
 _18EE4:
 	SUBQ.W	#1,D7			;18ee4: 5347
-	BMI.S	_NoProgress_18F36	;18ee6: 6b4e
+	BMI.S	_OreNoShipBldgs		;18ee6: 6b4e
 	LEA	(712,A0),A2		;18ee8: 45e802c8
 loop18EEC:
 	SUBQ.B	#1,(1,A2)		;18eec: 532a0001
 	BMI.S	_18F26			;18ef0: 6b34
-	BNE.S	_18F30			;18ef2: 663c
+	BNE.S	_next18F30		;18ef2: 663c
 	MOVEQ	#65,D2			;18ef4: 7441
 	CLR.W	(A2)			;18ef6: 4252
 	MOVE.L	A2,-(A7)		;18ef8: 2f0a
@@ -33365,24 +33470,25 @@ loop18EEC:
 	BMI.S	_18F20			;18f00: 6b1e
 	MOVE.B	#$03,(23,A6)		;18f02: 1d7c00030017
 	MOVE.W	#$1f00,(24,A6)		;18f08: 3d7c1f000018
-	MOVE.L	#data1E9D9,(28,A6)	;18f0e: 2d7c0001e9d9001c
+	MOVE.L	#ship1E9D9,(28,A6)	;18f0e: 2d7c0001e9d9001c
 	BSET	#4,(20,A6)		;18f16: 08ee00040014
 	SF	(9,A6)			;18f1c: 51ee0009
 _18F20:
 	MOVE.W	(A7)+,D7		;18f20: 3e1f
 	MOVEA.L	(A7)+,A2		;18f22: 245f
-	BRA.S	_18F30			;18f24: 600a
+	BRA.S	_next18F30		;18f24: 600a
 _18F26:
 	MOVE.B	#$41,(A2)		;18f26: 14bc0041
 	MOVE.B	#$3c,(1,A2)		;18f2a: 157c003c0001
-_18F30:
+_next18F30:
 	ADDQ.L	#2,A2			;18f30: 548a
 	DBF	D7,loop18EEC		;18f32: 51cfffb8
-_NoProgress_18F36:
+_OreNoShipBldgs:
+; Create ships
 	TST.B	intTriangles		;18f36: 4a39000190f2
-	BNE.S	_18F40			;18f3c: 6602
+	BNE.S	_OreOSDOnly		;18f3c: 6602
 	RTS				;18f3e: 4e75
-_18F40:
+_OreOSDOnly:
 	MOVEQ	#0,D7			;18f40: 7e00
 	MOVE.B	intTriangles,D7		;18f42: 1e39000190f2
 	MOVEA.L	ptrThisAstStats,A0	;18f48: 20790002ded8
@@ -33558,6 +33664,7 @@ _190EA:
 ret190F0:
 	RTS				;190f0: 4e75
 intTriangles:
+; Ore eater orbital space docks
 	DC.W	$0000			;190f2
 _SpawnAlienShip:
 ; Alien ships always have fixed hardpoints
@@ -33686,7 +33793,9 @@ _AxzOSD:
 	MOVE.W	D0,(46,A6)		;192b4: 3d40002e
 	MOVEQ	#0,D0			;192b8: 7000
 	RTS				;192ba: 4e75
-_AlienHP11:
+_Kll_HP11:
+; in the original file this is move.l $00003fe6
+; disassembled to $09230122?
 	MOVE.L	#ptrHardpointB,D0	;192bc: 203c0001e9c2
 	CMP.L	(28,A6),D0		;192c2: b0ae001c
 	BEQ.S	ret192E6		;192c6: 671e
@@ -33783,7 +33892,7 @@ _AzxMassDisplPod:
 ; random square?
 	MOVEQ	#40,D0			;193e4: 7028
 	JSR	_RandInt		;193e6: 4eb900000c0c
-	LEA	ptr1F446,A1		;193ec: 43f90001f446
+	LEA	tblAstCoords,A1		;193ec: 43f90001f446
 loop_193F2:
 	MOVE.W	D0,D7			;193f2: 3e00
 	LSL.W	#4,D7			;193f4: e94f
@@ -34005,7 +34114,7 @@ _19612:
 	MOVEQ	#10,D2			;1964e: 740a
 	MOVEM.L	D3/A0,-(A7)		;19650: 48e71080
 	LEA	ptr1C8F4,A0		;19654: 41f90001c8f4
-	JSR	_074AA			;1965a: 4eb9000074aa
+	JSR	_IntToASCII		;1965a: 4eb9000074aa
 	SF	(A0)			;19660: 51d0
 	LEA	ptr1C8F4,A0		;19662: 41f90001c8f4
 	MOVEA.L	ptrBuff00,A1		;19668: 22790000052a
@@ -34250,7 +34359,7 @@ loop19952:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;19958: 48e7fffe
 	MOVE.L	A0,D0			;1995c: 2008
 	LEA	ptrShips_2DEDC,A0	;1995e: 41f90002dedc
-	JSR	_0252E			;19964: 4eb90000252e
+	JSR	_Ship0252E		;19964: 4eb90000252e
 	MOVEA.L	D0,A0			;1996a: 2040
 	MOVEA.L	(6,A0),A0		;1996c: 20680006
 	JSR	_024FA			;19970: 4eb9000024fa
@@ -34487,7 +34596,7 @@ loop19C52:
 	MOVE.L	A0,-(A7)		;19c60: 2f08
 	LEA	ptr2DF06,A0		;19c62: 41f90002df06
 	ADDA.L	D1,A0			;19c68: d1c1
-	JSR	_0252E			;19c6a: 4eb90000252e
+	JSR	_Ship0252E		;19c6a: 4eb90000252e
 	LEA	ptrShips_2DEDC,A0	;19c70: 41f90002dedc
 	JSR	_024FA			;19c76: 4eb9000024fa
 	MOVEA.L	(A7)+,A0		;19c7c: 205f
@@ -34568,7 +34677,7 @@ loop19D58:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;19d5e: 48e7fffe
 	MOVE.L	A0,D0			;19d62: 2008
 	LEA	ptr2DEE4,A0		;19d64: 41f90002dee4
-	JSR	_0252E			;19d6a: 4eb90000252e
+	JSR	_Ship0252E		;19d6a: 4eb90000252e
 	MOVEA.L	D0,A0			;19d70: 2040
 	MOVEA.L	(10,A0),A0		;19d72: 2068000a
 	MOVE.L	A0,-(A7)		;19d76: 2f08
@@ -34666,7 +34775,7 @@ _19E8C:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;19ea0: 48e7fffe
 	MOVEQ	#5,D1			;19ea4: 7205
 	MOVEQ	#8,D0			;19ea6: 7008
-	BSR.W	_1A2CE			;19ea8: 61000424
+	BSR.W	_VoiceOrSound		;19ea8: 61000424
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;19eac: 4cdf7fff
 _19EB0:
 	SUB.W	(26,A1),D0		;19eb0: 9069001a
@@ -34701,7 +34810,7 @@ loop19EFE:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;19f04: 48e7fffe
 	MOVE.L	A0,D0			;19f08: 2008
 	LEA	ptr2DEE4,A0		;19f0a: 41f90002dee4
-	JSR	_0252E			;19f10: 4eb90000252e
+	JSR	_Ship0252E		;19f10: 4eb90000252e
 	MOVEA.L	D0,A0			;19f16: 2040
 	MOVEA.L	(6,A0),A0		;19f18: 20680006
 	MOVE.L	A0,-(A7)		;19f1c: 2f08
@@ -34926,7 +35035,7 @@ loop1A1D4:
 	LEA	ptr2DF06,A0		;1a1e4: 41f90002df06
 	ADDA.L	D1,A0			;1a1ea: d1c1
 	LEA	(8,A0),A0		;1a1ec: 41e80008
-	JSR	_0252E			;1a1f0: 4eb90000252e
+	JSR	_Ship0252E		;1a1f0: 4eb90000252e
 	LEA	ptr2DEE4,A0		;1a1f6: 41f90002dee4
 	JSR	_024FA			;1a1fc: 4eb9000024fa
 	MOVEA.L	(A7)+,A0		;1a202: 205f
@@ -34952,7 +35061,7 @@ loop1A230:
 	BEQ.W	_1A2C8			;1a232: 67000094
 	MOVEA.L	D1,A6			;1a236: 2c41
 	MOVEA.L	A4,A0			;1a238: 204c
-	JSR	_0252E			;1a23a: 4eb90000252e
+	JSR	_Ship0252E		;1a23a: 4eb90000252e
 	MOVEA.L	A3,A0			;1a240: 204b
 	JSR	_024FA			;1a242: 4eb9000024fa
 	MOVE.L	#$00080004,(14,A6)	;1a248: 2d7c00080004000e
@@ -34992,7 +35101,8 @@ _1A2A0:
 _1A2C8:
 	DBF	D0,loop1A230		;1a2c8: 51c8ff66
 	RTS				;1a2cc: 4e75
-_1A2CE:
+_VoiceOrSound:
+; Play a voice line
 	TST.B	flgVoice		;1a2ce: 4a390002e451
 	BNE.S	_PlayVoice		;1a2d4: 6606
 	MOVE.W	D1,D0			;1a2d6: 3001
@@ -37102,10 +37212,10 @@ TylSmallTransp_1E9B6:
 ptrHardpointB:
 	DC.L	$09230122		;1e9c2
 	DC.W	$05ff			;1e9c6
-data1E9C8:
+ship1E9C8:
 	DC.L	$00000101,$02020303,$04040505,$06060707 ;1e9c8
 	DC.B	$ff			;1e9d8
-data1E9D9:
+ship1E9D9:
 	DS.B	1			;1e9d9
 	DC.L	$00010102,$02030304,$04050506,$06070706 ;1e9da
 	DC.L	$06050504,$04030302,$02010100 ;1e9ea
@@ -37127,7 +37237,7 @@ ptr1EA22:
 ptr1EA34:
 	DC.L	$0000fbfb,$fbfbfbfb,$00000101,$02020303 ;1ea34
 	DC.W	$fe00			;1ea44
-ptr1EA46:
+AirBurstEffect:
 	DC.L	$f8100000,$01010202,$0303fe00 ;1ea46
 ptr1EA52:
 	DC.L	$f810fbfb,$fbfbfbfb,$00000101,$02020303 ;1ea52
@@ -37170,17 +37280,20 @@ ptr1EB4C:
 	DC.L	$15fd05fd,$04fd0403,$fd0302fd,$0201fdfc ;1eb6c
 	DC.L	$0100fa16		;1eb7c
 	DC.W	$fe00			;1eb80
-ptrNapalm_1EB82:
+Blast5x5:
+; 5x5 area blast used by area explosive, napalm
 	DC.L	$fe020100,$01000100,$010000ff,$00ff00ff ;1eb82
 	DC.L	$00ffff00,$ff00ff00,$ff000001,$00010001 ;1eb92
 	DC.L	$01000100,$010000ff,$00ffff00,$ff000001 ;1eba2
 	DC.W	$0100			;1ebb2
-ptr1EBB4:
+Blast3x3:
+; Blast used by Hellfire, Virus
 	DC.L	$00000001,$010000ff,$00ffff00,$ff000001 ;1ebb4
 	DC.W	$0001			;1ebc4
-ptr1EBC6:
+Blast2x2:
+; Explosive blast area
 	DC.L	$00000100,$0001ff00	;1ebc6
-ptr1EBCE:
+BlastBurn:
 	DC.L	$0100ff00,$000100ff	;1ebce
 	DC.W	$0100			;1ebd6
 flg1EBD8:
@@ -37400,10 +37513,10 @@ firemask1F012:
 	DC.L	spr_ShipFire1		;1f034: 0004baca
 	DC.L	spr_ShipFire1Mask	;1f038: 0004bb02
 	DC.L	$0007006a,$001f0000	;1f03c
-ptr1F044:
+shExplosion1F044:
 	DS.L	13			;1f044
 	DS.W	1			;1f078
-unkMislHit:
+incomingMissile:
 	DS.L	13			;1f07a
 	DS.W	1			;1f0ae
 data1F0B0:
@@ -37492,7 +37605,7 @@ tblInitOre:
 arrStartingOres:
 	DC.L	$00fa012c,$012c0064,$00320032,$0019001c ;1f342
 	DS.L	1			;1f352
-ptr1f356:
+ptrAst_1f356:
 	DC.L	$00000010,$00070031,$00000001,$00100007 ;1f356
 	DC.L	$00310000,$00020010,$00070031,$00000003 ;1f366
 	DC.L	$00100006,$00240000,$00040010,$00070031 ;1f376
@@ -37508,7 +37621,7 @@ ptr1f356:
 	DC.L	$0010000a,$00640000,$00140010,$000a0064 ;1f416
 	DC.L	$00000015,$0010000a,$00640000,$00160010 ;1f426
 	DC.L	$00090051,$00000017,$0010000a,$00640000 ;1f436
-ptr1F446:
+tblAstCoords:
 ; Asteroid locations (x/y coords)?
 	DS.L	1			;1f446
 	DC.L	$00140000,$0b0a0a09,$09080807,$00280000 ;1f44a
@@ -37552,7 +37665,7 @@ ptr1F446:
 	DC.L	$00b4008c,$06060614,$05070704,$00c80078 ;1f69a
 	DC.L	$00dc008c,$06060605,$13070704,$00f00078 ;1f6aa
 	DC.L	$0104008c,$06061605,$13070704 ;1f6ba
-arrAstDirection:
+arrAstDirections:
 ; Asteroid movement
 ; +0,  -8
 ; +8, -24
@@ -37774,21 +37887,21 @@ tblReinforcemt:
 ; Assault Fighter, Combat Eagle, Scout Ship, Destructor, Terminator
 	DC.B	$02			;20159
 	DC.L	$03043536		;2015a
-ptrShip2015E:
+ptrShipList:
 	DS.L	42			;2015e
 tblAliShipCount:
 	DS.L	4			;20206
-data20216:
+fleet_min:
 	DS.W	1			;20216
-data20218:
+fleet_2:
 	DS.W	1			;20218
-data2021A:
+fleet_3:
 	DS.W	1			;2021a
 data2021C:
 	DS.W	1			;2021c
 ptrAlienAst_2021E:
 	DS.L	1			;2021e
-data20222:
+intCountd20222:
 	DS.W	1			;20222
 tblMisl4S1V4Av:
 ; Missile tables
@@ -37960,8 +38073,8 @@ intAlienCannon6Dmg:
 ; 05: 0  - Rigellians don't use photon turrets either.
 ; 06: 11
 	DC.W	$0006			;2031a
-intAlienMisl_12:
-; Read-only. Missile range?
+intSensorRange12:
+; Sensor range for detecting missiles
 ; 01: 16
 ; 02: 16
 ; 03: 80 - Ax'Zilanth described as trigger happy
@@ -37969,7 +38082,7 @@ intAlienMisl_12:
 ; 05: 40
 ; 06: 30
 	DC.W	$0010			;2031c
-intAlienMisl_13:
+intAlienFleetRange:
 ; Read-only.
 ; 01: 40
 ; 02: 40
@@ -38061,7 +38174,7 @@ tblAlienBuildClusters:
 	DC.L	$00580058,$00520054,$00670051,$00510054 ;204d2
 	DC.L	$0050006d,$00500075,$00530061,$005e005a ;204e2
 tblAlienMisslChance:
-; |    Kll  | Ore  | Axz  | Tyl  | Rig  | Swi  | 
+; |    Kll  | Ore  | Axz  | Tyl  | Rig  | Swi  |
 ; ----------|------|------|------|------|------|------
 ; Explosive | 39%  | 32%  | 8%   | None | 30%  | 20%
 ; Area Exp. | 28%  | 22%  | 23%  | None | 24%  | 24%
@@ -38078,7 +38191,7 @@ tblAlienMisslChance:
 	DC.L	$ffff0005		;20502
 	DC.W	$ffff			;20506
 tblAlienMislYield:
-; |   Kll   | Ore   | Axz   | Tyl   | Rig   | Swi   |  
+; |   Kll   | Ore   | Axz   | Tyl   | Rig   | Swi   |
 ; ;---------|-------|-------|-------|-------|-------|----
 ; Explosive | Low   | Low   | Other | ----  | Low   | Low
 ; Area Exp. | Med   | Med   | Med   | ----  | Med   | Med
@@ -38319,9 +38432,12 @@ arrButton1:
 	DC.L	$000000ae		;20be6
 	DC.W	$ffff			;20bea
 tblAsteroidMaps:
-; Map area is 53,856 bytes: 24 asteroids of 34x33 two-byte tiles.
-; First byte of each tile is unknown.
-; Second byte of each is the sprite number.
+; Map area is 53,856 bytes:
+; 24 asteroids, each 17 x 33 tiles, 4 bytes per tile
+; byte 0: unknown, always 00 or 01
+; byte 1: edge, always, 00 to 0d
+; byte 2: always 00
+; byte 3: sprite ID, 00 or 2d to 3c
 	DS.L	58			;20bec
 	DC.L	$000a002e,$0007002f,$0003002f ;20cd4
 	DS.L	13			;20ce0
@@ -40398,7 +40514,9 @@ tblAsteroidMaps:
 	DS.L	2			;2de44
 ptrAsteroids2de4c:
 	DS.L	1			;2de4c
-lAstUnknown52:
+lAstSlots:
+; probably a bitfield for which asteroids
+; are available
 	DS.L	1			;2de50
 lUnknown53:
 	DS.L	1			;2de54
@@ -40501,9 +40619,9 @@ info_display:
 ; Bit 1: Unused.
 ; Bit 2: Display crosshair.
 ; Bit 3: Display mouse pointer.
-; Bit 4: 
+; Bit 4:
 ; Bit 5: Display PAFW. Enabled by default.
-; Bit 6: 
+; Bit 6:
 ; Bit 7: Show asteroid speed. Enabled on Tylaran.
 	DC.B	$20			;2e00f
 	DS.W	1			;2e010
@@ -40588,7 +40706,7 @@ arrCargo09:
 arrCargoImp:
 ; Ore stored in the cargo hold of the Imperial Transporter.
 	DS.L	5			;2e174
-flgAst2E188:
+flgAstSpotted:
 	DS.B	1			;2e188
 flgAst2E189:
 	DS.B	1			;2e189
@@ -40674,9 +40792,9 @@ bFrameRule:
 ; performance reasons
 ; bit 0: Set on performing daily events
 ; bit 1: Set on new year
-; bit 2: 
-; bit 3: 
-; bit 4: 
+; bit 2:
+; bit 3:
+; bit 4:
 ; bit 5: Check for ship movement, win condition, etc
 	DS.B	1			;2e45a
 intDay:
@@ -40693,7 +40811,7 @@ flgShowGfx:
 	DS.B	1			;2e468
 flg2E469:
 	DS.B	1			;2e469
-flg2E46A:
+flgHellfire:
 	DS.B	1			;2e46a
 flg2E46B:
 	DS.B	1			;2e46b
@@ -40705,13 +40823,13 @@ flgDSound1:
 	DS.B	1			;2e46e
 flgDSound2:
 	DS.B	1			;2e46f
-int2E470:
+intKllSatCountd:
 	DS.B	1			;2e470
-int2E471:
+intCount_2E471:
 	DS.B	1			;2e471
-int2E472:
+intCount_2E472:
 	DS.B	1			;2e472
-int2E473:
+fleetDelay:
 	DS.B	1			;2e473
 flgStatic2E474:
 	DS.B	1			;2e474
@@ -40735,9 +40853,9 @@ flg2E47D:
 	DS.B	1			;2e47d
 flg2E47E:
 	DS.B	1			;2e47e
-flg2E47F:
+intRetaliateDelay:
 	DS.B	1			;2e47f
-flg2E480:
+fleetCycle:
 	DS.B	1			;2e480
 flg2E481:
 	DS.B	1			;2e481
@@ -42818,7 +42936,12 @@ ptr31B7C:
 ptrMousePtrs:
 ; 2 sets of 2x72 bytes
 ; Mouse pointers: default, detonate, ship arrow
-; "CTR1"CTR2"CTR1"CTR2"CTR1"CTR2"
+; "CTR1
+; "CTR2
+; "CTR1
+; "CTR2
+; "CTR1
+; "CTR2"
 	DC.L	$43545231,$20002000,$18001800,$8d808580 ;31b80
 	DC.L	$42604260,$21102010,$30982008,$5a585008 ;31b90
 	DC.L	$a8188808,$830c8004,$43e60002,$07320002 ;31ba0
