@@ -115,7 +115,8 @@ Extractor of either type. A maximum of 4 shipyards can operate at any one
 colony, although the soft cap on building is 2.
 
 Missile Launcher
-: Required to make or launch missiles.
+: ![rig_missile_silo_anim](../images/alien_ships/rig_missile_silo_anim.gif "rig_missile_silo_anim"){:.left}
+Required to make or launch missiles.
 
 Probes
 : Increases the chances of spotting Terran spy satellites. The base chance is 1%
@@ -238,37 +239,46 @@ Name                 | Armour| S | H | ID | Bld%    | Days     | HP1| HP2| HP3| 
 "Battleship"         |   100 | 0 | 6 | 43 |  7%     | 100      | 07 | 07 | 00 | 01 | 01 | 05 |
 
 Ship $3c "Destroyer"
+: ![rig_ship_small_1](../images/alien_ships/rig_ship_small_1.gif "rig_ship_small_1"){:.left}
 : A fast 20 Armour ship with a Plasma Cannon (7 damage) and an Ion Cannon.
 
 Ship $3d "Fighter"
-: A fast 20 Armour ship with what appears to be non-functioning hardpoint slot
+: ![rig_ship_small_2](../images/alien_ships/rig_ship_small_2.gif "rig_ship_small_2"){:.left}
+A fast 20 Armour ship with what appears to be non-functioning hardpoint slot
 reserved for Shield x20. Also has a Plasma Cannon (7 damage).
 
-Ship $3e "Heavy Cruiser"
-: A slower 40 Armour ship with four hardpoints: a Laser Cannon (5 damage), an
+Ship $3e ~~"Heavy Cruiser"~~
+: ![rig_ship_small_3](../images/alien_ships/rig_ship_small_3.gif "rig_ship_small_3"){:.left}
+A slower 40 Armour ship with four hardpoints: a Laser Cannon (5 damage), an
 Ion Cannon, a Napalm Orb, and what appears to be a non-functional Photon Cannon
 that deals zero damage because the Rigellians are hardcoded to have no photon
-technology. Never built randomly.
+technology. Never built randomly. It appears to be dummied out, but it still has
+a sprite.
 
 Ship $3f "Scoutship"
-: A fast 15 Armour scoutship with a Laser Cannon (5 damage).
+: ![rig_ship_small_4](../images/alien_ships/rig_ship_small_4.gif "rig_ship_small_4"){:.left}
+A fast 15 Armour scoutship with a Laser Cannon (5 damage).
 Each colony sends out a scoutship every 50 days, which is quite slow.
 
 Ship $40 "Stealth Bomber"
-: A slower 60 Armour ship with four hardpoints: Warp Generator, Plasma Cannon (7
+: ![rig_ship_med_5](../images/alien_ships/rig_ship_med_5.gif "rig_ship_med_5"){:.left}
+A slower 60 Armour ship with four hardpoints: Warp Generator, Plasma Cannon (7
 damage), and two Disruptors. Due to a bug, Warp Generator does nothing but
 make vampires sparkle.
 
 Ship $41 "Vampire"
-: A slower 50 Armour ship with four hardpoints: Warp Generator, Plasma Cannon (7
+: ![rig_ship_med_6](../images/alien_ships/rig_ship_med_6.gif "rig_ship_med_6"){:.left}
+A slower 50 Armour ship with four hardpoints: Warp Generator, Plasma Cannon (7
 damage), Laser Cannon (5 damage) and a unique power drain hardpoint which halves
 an enemy colony's power production.
 
 Ship $42 "Transporter"
-: A typical slow transporter with 30 Armour and two Laser Cannons.
+: ![rig_ship_transporter](../images/alien_ships/rig_ship_transporter.gif "rig_ship_transporter"){:.left}
+A typical slow transporter with 30 Armour and two Laser Cannons.
 
 Ship $43 "Battleship"
-: A slow 100 Armour ship with six hardpoints: Two Plasma Cannons (7 damage), two
+: ![rig_ship_battleship](../images/alien_ships/rig_ship_battleship.gif "rig_ship_battleship"){:.left}
+A slow 100 Armour ship with six hardpoints: Two Plasma Cannons (7 damage), two
 Disruptors, an Ion Cannon, and a Laser Cannon (5 damage).
 
 ### Starting resources

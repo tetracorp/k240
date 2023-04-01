@@ -102,7 +102,8 @@ nullifier effect, it may also teleport to avoid zooming off the edge of the
 screen.
 
 Missile Silo
-: Required to build or launch missiles.
+: ![axz_missile_silo_anim](../images/alien_ships/axz_missile_silo_anim.gif "axz_missile_silo_anim"){:.left}
+Required to build or launch missiles.
 
 Nutrient Podule
 : Required for life. If there is not at least one Nutrient Podule, the colony
@@ -258,40 +259,48 @@ Name                  | Armour| S | H | ID | Bld%    | Days     | HP1| HP2| HP3|
 "Orbital Space Dock"  |   200 | 0 | 4 | 4b | ..      | ..       | 06 | 06 | 07 | 0a |    |    |
 
 Ship $3c "Fighter"
-: A fast 30 Armour ship with a Photon Cannon (8 damage) and Warp Generator.
+: ![axz_ship_small_1](../images/alien_ships/axz_ship_small_1.gif "axz_ship_small_1"){:.left}
+A fast 30 Armour ship with a Photon Cannon (8 damage) and Warp Generator.
 Warp Generator phases ship out for three days and back in for two. Due to a bug,
 however, being phased out has no effect.
 
 Ship $3d "Light Cruiser"
-: A fast 40 Armour ship with a a Plasma Cannon (5 damage), Warp Generator, and
+: ![axz_ship_small_2](../images/alien_ships/axz_ship_small_2.gif "axz_ship_small_2"){:.left}
+A fast 40 Armour ship with a a Plasma Cannon (5 damage), Warp Generator, and
 Disruptor.
 
-Ship $3e "Heavy Cruiser"
-: A slower 40 Armour ship with a Photon Cannon (8 damage), Warp Generator, Ion
+Ship $3e ~~"Heavy Cruiser"~~
+: ![axz_ship_small_3](../images/alien_ships/axz_ship_small_3.gif "axz_ship_small_3"){:.left}
+A slower 40 Armour ship with a Photon Cannon (8 damage), Warp Generator, Ion
 Cannon and Disruptor. Listed in the game code has having two hardpoints,
 although it has four. Never built randomly.
 
 Ship $3f "Scoutship"
-: A slower 15 Armour ship with a Photon Cannon (8 damage). The weakest ship. The
+: ![axz_ship_small_4](../images/alien_ships/axz_ship_small_4.gif "axz_ship_small_4"){:.left}
+A slower 15 Armour ship with a Photon Cannon (8 damage). The weakest ship. The
 Ax'Zilanths and Rigellians are the only two species with a slow scout ship like
 this. The only small Ax'Zilanth ship without a Warp Generator.
 Each colony sends a scoutship every 130 days, the slowest of any alien.
 
 Ship $40 "Light Bomber"
-: A slower 50 Armour ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
+: ![axz_ship_med_5](../images/alien_ships/axz_ship_med_5.gif "axz_ship_med_5"){:.left}
+A slower 50 Armour ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
 Bomb and Disruptor.
 
 Ship $41 "Heavy Bomber"
-: A slower 60 Armour ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
+: ![axz_ship_med_6](../images/alien_ships/axz_ship_med_6.gif "axz_ship_med_6"){:.left}
+A slower 60 Armour ship with a Warp Generator, Plasma Cannon (5 damage), Chaos
 Bomb, Disruptor and Vortex Mine. Identical to the previous ship except for
 higher Armour and a Vortex Mine.
 
 Ship $42 "Transporter"
-: A slow 35 Armour ship with two Photon Cannons (8 damage). A typical
+: ![axz_ship_transporter](../images/alien_ships/axz_ship_transporter.gif "axz_ship_transporter"){:.left}
+A slow 35 Armour ship with two Photon Cannons (8 damage). A typical
 Transporter.
 
 Ship $43 "Battleship"
-: A slow 90 Armour ship with six hardpoints: two Plasma Cannons (5 damage),
+: ![axz_ship_battleship](../images/alien_ships/axz_ship_battleship.gif "axz_ship_battleship"){:.left}
+A slow 90 Armour ship with six hardpoints: two Plasma Cannons (5 damage),
 two Chaos Bombs, a Photon Cannon (8 damage) and a Disruptor.
 
 Ship $4b "Orbital Space Dock"
