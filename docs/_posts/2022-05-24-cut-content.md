@@ -108,6 +108,51 @@ overrun the buffer, which would have unpredictable results.
 
 Hex editing the game to change the second `outro1` to `outro3` works correctly.
 
+### Missing alien ships and buildings
+
+There are certain alien buildings and ships in the game code which they will
+never actually build. The four hardest aliens all have their third small ship
+class dummied out, and the easiest alien has a missing building.
+
+Kll-Kp-Qua Science Hive
+: ![Science Hive](../images/alien_bldg/kll_science_hive.gif "science hive"){:.left}
+The game code says that this operates the same as the Data Hive, which helps to
+spot spy satellites. However, none of the building clusters include it, so it
+wll never be built. One of the clusters attempts to build a non-existant
+building in the Anti-Missile Pod slot, so it may be that the Science Hive was
+meant to take that slot, although it could also be that Anti-Missile Pods were
+removed to make the first alien easier.
+
+Ax'Zilanth ship #3
+: ![axz_ship_small_3](../images/alien_ships/axz_ship_small_3.gif "axz_ship_small_3"){:.left}
+A small ship with 2 FN speed and 40 Armour. The ship's stats say it only has
+two hardpoints, but it has four listed: a Photon Cannon, Warp Generator, Ion
+Cannon, and a Disruptor.
+
+Tylaran ship #3
+: ![tyl_ship_small_3](../images/alien_ships/tyl_ship_small_3.gif "tyl_ship_small_3"){:.left}
+A small ship with 2 FN speed and 40 Armour. It has four hardpoints: Photon
+Cannon, Laser Cannon, Ion Cannon, and Napalm Orb.
+
+Rigellian ship #3
+: ![rig_ship_small_3](../images/alien_ships/rig_ship_small_3.gif "rig_ship_small_3"){:.left}
+A small ship with 2 FN speed and 40 Armour. Has four hardpoints: Laser Cannon,
+Ion Cannon, Napalm Orb, and Photon Cannon. The Photon Cannon deals 0 damage
+because the Rigellians do not have Photon technology.
+
+Swixaran ship #3
+: ![swi_ship_small_3](../images/alien_ships/swi_ship_small_3.gif "swi_ship_small_3"){:.left}
+A small ship with 2 FN speed and 40 Armour. It has 4 hardpoints: Photon Cannon,
+Ion Cannon, Napalm Orb, and Laser Cannon. The Laser Cannon deals 0 damage
+because the Swixarans do not use Laser technology. The Swixarans also do not
+normally use Napalm or any other fire-based weapons.
+
+It's worth noting that for the two species that do use ship #3, they both have
+oddities. The Kll-Kp-Qua's has 80 Armour and zero hardpoints, while the Ore
+Eaters' is listed as having two hardpoints, but it has four hardpoints listed in
+the stats. Perhaps a design change was made at some point to nerf these small
+heavy ships.
+
 ### Planned features
 
 According to [an interview](https://amr.abime.net/review_20463)

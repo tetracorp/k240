@@ -94,7 +94,7 @@ Engineering Plant
 : ![Engineering Plant](../images/alien_bldg/axz_engineering_plant.gif "engineering plant"){:.left} Required to build ships and missiles.
 
 Mass Displacement Podule
-: ![Mass Displacement Podule](../images/alien_bldg/axz_mass_displacement podule.gif "mass displacement podule"){:.left} Allows asteroid to teleport. It can teleport in response to incoming missiles,
+: ![Mass Displacement Podule](../images/alien_bldg/axz_mass_displacement_podule.gif "mass displacement podule"){:.left} Allows asteroid to teleport. It can teleport in response to incoming missiles,
 if there are no Interceptor missiles left. It also has a 1% chance to teleport
 on an occasion when it would normally fire missiles. If the asteroid gets too
 close to the edge of the screen and does not currently benefit from a gravity
