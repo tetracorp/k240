@@ -73,28 +73,28 @@ Terran building list.
 | Subspace Detectors        | Defence |  24 |  25 | 3 | 1 |    1!| ~~Security Centre~~
 
 Atmospheric Regulator
-: Required for life. If there is not at least one Atmospheric Regulator, the
+: ![Atmospheric Regulator](../images/alien_bldg/axz_atmospheric_regulator.gif "atmospheric regulator"){:.left} Required for life. If there is not at least one Atmospheric Regulator, the
 colony loses 3 population per day. However, since Nutrient Podule is checked
 first, a colony with neither of those buildings only suffers the lesser penalty
 of losing 1 per day.
 
 Atomiser
-: Reduces radiation by 30%. The colony must have no more than 40% radiation for
+: ![Atomiser](../images/alien_bldg/axz_atomiser.gif "atomiser"){:.left} Reduces radiation by 30%. The colony must have no more than 40% radiation for
 population growth, which is one per day.
 
 Defence Shield
-: A Screen Generator. Presumed to work the same as Terran Screen Generator,
+: ![Defence Shield](../images/alien_bldg/axz_defence_shield.gif "defence shield"){:.left} A Screen Generator. Presumed to work the same as Terran Screen Generator,
 which reduces damage to all covered buildings by half.
 
 Energy Accumulator
-: At least one Energy Accumulator or Reactor is needed to power Repulse
+: ![Energy Accumulator](../images/alien_bldg/axz_energy_accumulator.gif "energy accumulator"){:.left} At least one Energy Accumulator or Reactor is needed to power Repulse
 Generator, Propulsion Unit and Ore Extractor.
 
 Engineering Plant
-: Required to build ships and missiles.
+: ![Engineering Plant](../images/alien_bldg/axz_engineering_plant.gif "engineering plant"){:.left} Required to build ships and missiles.
 
 Mass Displacement Podule
-: Allows asteroid to teleport. It can teleport in response to incoming missiles,
+: ![Mass Displacement Podule](../images/alien_bldg/axz_mass_displacement podule.gif "mass displacement podule"){:.left} Allows asteroid to teleport. It can teleport in response to incoming missiles,
 if there are no Interceptor missiles left. It also has a 1% chance to teleport
 on an occasion when it would normally fire missiles. If the asteroid gets too
 close to the edge of the screen and does not currently benefit from a gravity
@@ -102,70 +102,70 @@ nullifier effect, it may also teleport to avoid zooming off the edge of the
 screen.
 
 Missile Silo
-: ![axz_missile_silo_anim](../images/alien_ships/axz_missile_silo_anim.gif "axz_missile_silo_anim"){:.left}
+: ![Missile Silo](../images/alien_bldg/axz_missile_silo.gif "missile silo"){:.left} ![axz_missile_silo_anim](../images/alien_ships/axz_missile_silo_anim.gif "axz_missile_silo_anim"){:.left}
 Required to build or launch missiles.
 
 Nutrient Podule
-: Required for life. If there is not at least one Nutrient Podule, the colony
+: ![Nutrient Podule](../images/alien_bldg/axz_nutrient_podule.gif "nutrient podule"){:.left} Required for life. If there is not at least one Nutrient Podule, the colony
 loses 1 population per day.
 
 Ore Extractor
-: Mines two units each of five randomly selected ores per day. Can mine any ore.
+: ![Ore Extractor](../images/alien_bldg/axz_ore_extractor.gif "ore extractor"){:.left} Mines two units each of five randomly selected ores per day. Can mine any ore.
 Building multiple Ore Extractors has no effect. Requires one Reactor or Energy
 Accumulator to function. At least one Ore Extractor or Resource Podule is
 necessary to build ships.
 
 Personnel Podule
-: Provides housing for up to 100 colonists. If there are no Personnel Podules,
+: ![Personnel Podule](../images/alien_bldg/axz_personnel_podule.gif "personnel podule"){:.left} Provides housing for up to 100 colonists. If there are no Personnel Podules,
 the colony is destroyed.
 
 Propulsion Unit
-: Appears in the Asteroid Engines slot, suggesting this is an Asteroid Engines.
+: ![Propulsion Unit](../images/alien_bldg/axz_propulsion_unit.gif "propulsion unit"){:.left} Appears in the Asteroid Engines slot, suggesting this is an Asteroid Engines.
 Requires at least one Reactor or Energy Accumulator to function.
 
 Reactor
-: At least one Energy Accumulator or Reactor is needed to power Repulse
+: ![Reactor](../images/alien_bldg/axz_reactor.gif "reactor"){:.left} At least one Energy Accumulator or Reactor is needed to power Repulse
 Generator, Propulsion Unit and Ore Extractor. A Reactor is required to build
 missiles.
 
 Repulse Generator
-: Appears in the Gravity Nullifier slot, suggesting that this is a Gravity
+: ![Repulse Generator](../images/alien_bldg/axz_repulse_generator.gif "repulse generator"){:.left} Appears in the Gravity Nullifier slot, suggesting that this is a Gravity
 Nullifier. Requires at least one Reactor or Energy Accumulator to function.
 
 Resource Podule
-: Equivalent to Storage Facility. At least one Ore Extractor or Resource Podule
+: ![Resource Podule](../images/alien_bldg/axz_resource_podule.gif "resource podule"){:.left} Equivalent to Storage Facility. At least one Ore Extractor or Resource Podule
 is necessary to build ships, but the game does not track mined ore.
 
 Science Podule
-: Unknown.
+: ![Science Podule](../images/alien_bldg/axz_science_podule.gif "science podule"){:.left} Unknown.
 
 Sensory Matrix
-: Increases the chances of spotting Terran spy satellites. The base chance is 1%
+: ![Sensory Matrix](../images/alien_bldg/axz_sensory_matrix.gif "sensory matrix"){:.left} Increases the chances of spotting Terran spy satellites. The base chance is 1%
 plus a cumulative 1% per day, and each additional Sensory Matrix and Subspace
 Detectors adds another chance per day, although a colony will never build more
 than one of each, for a maximum of three chances per day.
 
 Spacecraft Dock
-: Shipyard. Required to build ships, with a cap of 4 shipyards.
+: ![Spacecraft Dock](../images/alien_bldg/axz_spacecraft_dock.gif "spacecraft dock"){:.left} Shipyard. Required to build ships, with a cap of 4 shipyards.
 
 Stabilising Platform
-: Landing Pad. At least one is required to build ships.
+: ![Stabilising Platform](../images/alien_bldg/axz_stabilising_platform.gif "stabilising platform"){:.left} Landing Pad. At least one is required to build ships.
 
 Strategy Control
-: Equivalent to Command Centre. Required to start new colony.
+: ![Strategy Control](../images/alien_bldg/axz_strategy_control.gif "strategy control"){:.left} Equivalent to Command Centre. Required to start new colony.
 
 Subspace Detectors
-: Increases the chances of spotting Terran spy satellites. The base detection
+: ![Subspace Detectors](../images/alien_bldg/axz_subspace_detectors.gif "subspace detectors"){:.left} Increases the chances of spotting Terran spy satellites. The base detection
 rate is 1% plus a cumulative 1% per 16 days, and each additional Sensory Matrix
 and Subspace Detectors adds another detection attempt per day, although a colony
 will never build more than one of each, for a maximum of three chances per day.
 
 Turret
-: A plasma turret which deals 5 damage, the same as Terran plasma turrets.
+: ![Turret](../images/alien_bldg/axz_turret.gif "turret"){:.left} A plasma turret which deals 5 damage, the same as Terran plasma turrets.
 Fires on a 6-day cooldown. The Ax'Zilanths do not use Laser turrets.
 
 Turret
-: A photon turret which deals 8 damage, the same as Terran plasma turrets.
+: ![Turret](../images/alien_bldg/axz_turret2.gif "turret"){:.left} A photon turret which deals 8 damage, the same as Terran plasma turrets.
 Fires on a 6-day cooldown.
 
 ### Building strategy

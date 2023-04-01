@@ -62,96 +62,96 @@ Terran building list.
 | Farm                      | General |  16 |  24 | 3 | 1 |    4 | Hydroponics
 
 Community
-: A two-tier building which can hold up to 100 colonists.
+: ![Community](../images/alien_bldg/rig_community.gif "community"){:.left} A two-tier building which can hold up to 100 colonists.
 At least one Community of either type must must exist or the colony is
 destroyed.
 
 Community
-: A four-tier building used to store up to 200 colonists.
+: ![Community](../images/alien_bldg/rig_community2.gif "community"){:.left} A four-tier building used to store up to 200 colonists.
 At least one Community of either type must must exist or the colony is
 destroyed.
 
 Deep Space Probes
-: A long-range sensor which triggers every 100 days divided by the number of
+: ![Deep Space Probes](../images/alien_bldg/rig_deep_space_probes.gif "deep space probes"){:.left} A long-range sensor which triggers every 100 days divided by the number of
 colonies. Automatically detects a Terran asteroid, then launches a missile
 strike.
 
 Defence Battery
-: Anti-missile pod. Has a 21% chance to shoot down incoming missiles. Each
+: ![Defence Battery](../images/alien_bldg/rig_defence_battery.gif "defence battery"){:.left} Anti-missile pod. Has a 21% chance to shoot down incoming missiles. Each
 additional battery after the first adds an additional 4% chance, for a maximum
 of 71% at 14 pods, although they will only build 4 before hitting a soft cap.
 
 Energy Gatherer
-: A power building. At least one power building of any sort is required to power
+: ![Energy Gatherer](../images/alien_bldg/rig_energy_gatherer.gif "energy gatherer"){:.left} A power building. At least one power building of any sort is required to power
 Gravitic Convertor, Ground Dock, or Extractor.
 
 Energy Globe
-: A power building. At least one power building of any sort is required to power
+: ![Energy Globe](../images/alien_bldg/rig_energy_globe.gif "energy globe"){:.left} A power building. At least one power building of any sort is required to power
 Gravitic Convertor, Ground Dock, or Extractor.
 
 Extractor
-: A mine. Mines 1 randomly-chosen ore each day from the first 5 ores.
+: ![Extractor](../images/alien_bldg/rig_extractor.gif "extractor"){:.left} A mine. Mines 1 randomly-chosen ore each day from the first 5 ores.
 
 Extractor
-: A deep bore mine. Mines 2 units of a randomly-chosen ore from the last 5 ores.
+: ![Extractor](../images/alien_bldg/rig_extractor2.gif "extractor"){:.left} A deep bore mine. Mines 2 units of a randomly-chosen ore from the last 5 ores.
 
 Farm
-: Required for colony life. If there is not at least one farm, the colony loses
+: ![Farm](../images/alien_bldg/rig_farm.gif "farm"){:.left} Required for colony life. If there is not at least one farm, the colony loses
 two population per day and sets priority every 16 days to build cluster 2
 (Strategic Bunker, Community (Small), Farm and Energy Gatherer).
 
 Filtration Plant
-: A radiation filter. Reduces radiation by 30%.
+: ![Filtration Plant](../images/alien_bldg/rig_filtration_plant.gif "filtration plant"){:.left} A radiation filter. Reduces radiation by 30%.
 
 Gravitic Convertor
-: A gravity nullifier. Requires at least one Reactor Core, Energy Gatherer or
+: ![Gravitic Convertor](../images/alien_bldg/rig_gravitic_convertor.gif "gravitic convertor"){:.left} A gravity nullifier. Requires at least one Reactor Core, Energy Gatherer or
 Energy Globe to function. Does not work if the asteroid has a set speed.
 May in fact double as an Asteroid Engines.
 
 Ground Dock
-: A shipyard. Requires the colony to have at least one power building (Energy
+: ![Ground Dock](../images/alien_bldg/rig_ground_dock.gif "ground dock"){:.left} A shipyard. Requires the colony to have at least one power building (Energy
 Gatherer, Energy Globe, or Reactor Core); one Weapons Facility; and one
 Extractor of either type. A maximum of 4 shipyards can operate at any one
 colony, although the soft cap on building is 2.
 
 Missile Launcher
-: ![rig_missile_silo_anim](../images/alien_ships/rig_missile_silo_anim.gif "rig_missile_silo_anim"){:.left}
+: ![Missile Launcher](../images/alien_bldg/rig_missile_launcher.gif "missile launcher"){:.left} ![rig_missile_silo_anim](../images/alien_ships/rig_missile_silo_anim.gif "rig_missile_silo_anim"){:.left}
 Required to make or launch missiles.
 
 Probes
-: Increases the chances of spotting Terran spy satellites. The base chance is 1%
+: ![Probes](../images/alien_bldg/rig_probes.gif "probes"){:.left} Increases the chances of spotting Terran spy satellites. The base chance is 1%
 plus a cumulative 1% per day, and each Probes adds an additional chance
 per day.
 
 Reactor Core
-: A power building required to build missiles. At least one power building of
+: ![Reactor Core](../images/alien_bldg/rig_reactor_core.gif "reactor core"){:.left} A power building required to build missiles. At least one power building of
 any sort is required to power Gravitic Convertor, Ground Dock, or Extractor.
 
 Science Labs
-: Unknown.
+: ![Science Labs](../images/alien_bldg/rig_science_labs.gif "science labs"){:.left} Unknown.
 
 Shield Generator
-: A screen generator with the unique property that it covers every building on
+: ![Shield Generator](../images/alien_bldg/rig_shield_generator.gif "shield generator"){:.left} A screen generator with the unique property that it covers every building on
 the asteroid.
 
 Storage Racks
-: Storage facility. Appears to have no use.
+: ![Storage Racks](../images/alien_bldg/rig_storage_racks.gif "storage racks"){:.left} Storage facility. Appears to have no use.
 
 Strategic Bunker
-: Required to co-ordinate mining. Number of Extractors is effectively halved
+: ![Strategic Bunker](../images/alien_bldg/rig_strategic_bunker.gif "strategic bunker"){:.left} Required to co-ordinate mining. Number of Extractors is effectively halved
 without this building.
 
 Turret
-: A laser turret. Deals 5 damage, equal to a Terran plasma turret.
+: ![Turret](../images/alien_bldg/rig_turret.gif "turret"){:.left} A laser turret. Deals 5 damage, equal to a Terran plasma turret.
 Fires on a 6 day cooldown.
 
 Turret
-: A plasma turret. Deals 7 damage, 40% more than a Terran plasma turret.
+: ![Turret](../images/alien_bldg/rig_turret2.gif "turret"){:.left} A plasma turret. Deals 7 damage, 40% more than a Terran plasma turret.
 Fires on a 6 day cooldown. The Rigellians do not use photon turrets at all, and
 their photon turret/cannon damage is hardcoded to deal zero damage.
 
 Weapons Facility
-: Required to build missiles or ships.
+: ![Weapons Facility](../images/alien_bldg/rig_weapons_facility.gif "weapons facility"){:.left} Required to build missiles or ships.
 
 ### Building strategy
 

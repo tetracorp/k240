@@ -93,8 +93,6 @@ Varies from 4,240 to 8,450 bytes.
 
 ### k240\_2:aliens/a1data4.bin - a6data4.bin
 
-(Not yet fully documented)
-
 Alien statistics. Always 1,928 bytes. The first 30 bytes appear to be stored as
 part of the save game file.
 
@@ -108,22 +106,22 @@ part of the save game file.
 | word   | 2 | Colonization frequency. Varies 30-200 days. |
 | word   | 2 | Missile build frequency. Varies 25-35 days (0 for Tylarans). |
 | word   | 2 | Chance to ignore per-building softcap. Varies 10-25%. |
-| word   | 2 | unknown 7 |
-| word   | 2 | unknown 8 |
+| word   | 2 | Missile attack delay counter. |
+| word   | 2 | Missile attack delay counter. |
 | word   | 2 | Alien laser cannon (#5) damage. Varies 2-5. |
 | word   | 2 | Alien plasma cannon (#7) damage. Varies 4-7. |
 | word   | 2 | Alien photon cannon (#6) damage. Varies 6-11. |
-| word   | 2 | unknown 12 (missile range?) |
-| word   | 2 | unknown 13 (missiles?) |
+| word   | 2 | Sensor range for missiles. |
+| word   | 2 | Sensor range for fleets. |
 | word   | 2 | Turret cooldown. Varies 5-8 days. |
-| byte   | 1 | Bitfield for alien-specific things. unknown |
+| byte   | 1 | Bitfield for alien-specific things (bit 2 = Swixaran asteroid cloaked) |
 |Bldg[40]|400| 40 10-byte buildings as follows:<br>word (2) Name string<br>word (2) Description string (unused)<br>byte (1) Width<br>byte (1) Soft cap<br>byte (1) Build time (days)<br> byte (1) Height<br>byte (1) Intel type (0 General, 1 Defensive, 2 Offensive, 3 Power) |
 | word[8]<!-- -->[4]| 64 | Build clusters. |
 | word[11]| 22 | Chance to build each missile. |
 | byte[11]| 11 | Yield of each missile as it appears on Intel report. (0 Low, 1 Med, 2 High, 3 other, ff unused) |
-| unk  | 32 | unknown |
+| word[2][8] | 32 | Build chance and build time for ships. |
 | ShipB[8] | 192 | 8 24-byte ship stats as follows:<br>byte Armor<br>byte Speed<br>byte Hardpoints<br>byte Buildtime (ignored?)<br>4 bytes ore required (ignored for alien ships)<br>byte Ship ID<br>byte unknown<br>word Name (unused?)<br>word Cost (unused)<br>word Length (unused)<br>4 bytes unknown (unused?)<br>addr (4 bytes) extended data pointer. |
-| unk | ? | Remainder currently unknown. |
+| unk | ? | Remainder currently unknown. Ship-related table, other alien data. |
 
 See the individual alien descriptions from the index the main page for the
 values which appear in each alien file.
