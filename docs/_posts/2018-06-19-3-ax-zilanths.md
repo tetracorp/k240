@@ -304,7 +304,7 @@ A slow 90 Armour ship with six hardpoints: two Plasma Cannons (5 damage),
 two Chaos Bombs, a Photon Cannon (8 damage) and a Disruptor.
 
 Ship $4b "Orbital Space Dock"
-: ![azx_osd](../images/alien_ships/azx_osd.gif "azx_osd"){:.left}
+: ![axz_osd](../images/alien_ships/axz_osd.gif "axz_osd"){:.left}
 Required to build the largest three types of ship (equivalent to Terminator,
 Transporter, or Battleship). The first time the colony attempts to spawn one of
 these ships, it instead creates an Orbital Space Dock. As a result, it

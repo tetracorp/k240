@@ -72,8 +72,8 @@ Each of the six alien files relates to the equivalent alien in the list; e.g.
 
 Contains the ship and building animation sprite data referenced in `a1data1`.
 Stored as 16-color Amiga sprite format, with 4 bitplanes plus a fifth bitplane
-as a sprite mask. Additionally, a 61st sprite fills the remainder of the file
-and is for the alien Orbital Space Dock.
+as a sprite mask. The remainder of the file is the sprite for the alien Orbital
+Space Dock.
 
 Varies from 20,450 to 22,780 bytes.
 
