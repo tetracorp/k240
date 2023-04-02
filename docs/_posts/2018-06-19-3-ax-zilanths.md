@@ -313,7 +313,8 @@ days. Has two Plasma Cannons, one Photon Cannon, and one Deflector. It is
 exceptionally tough, having 200 Armour, and the Deflector effectively doubles
 that. The other aliens except Swixaran have a sprite for the OSD in the files,
 but it's just a duplicate of the Ax'Zilanth sprite and the ship is never
-instantiated for those species.
+instantiated for those species. If you were to cheat one in, it would have the
+stats of the Swixaran space dock but the sprite of the Ax'Zilanth space dock.
 
 ### Starting resources
 
