@@ -41,7 +41,7 @@ for the specific formula which causes this.
 
 All asteroids' ore count is generated when the asteroid is generated, which is
 either at the beginning of the game, or when it appears mid-game (e.g. to
-replace an ateroid destroyed in a collision). It's not determined when you
+replace an asteroid destroyed in a collision). It's not determined when you
 conduct the ore survey.
 
 ### Starting ore (home asteroid)
@@ -77,6 +77,31 @@ All asteroids spawn with a random speed between 2 and 5.
 |  5  |  4/16  | 25.00%   |
 
 The exceptions are your starting asteroid and the enemy's starting asteroid,
-which always begin at zero speed.
+which always begin at zero speed. Your asteroid also begins with a temporary
+free Gravity Nullifier effect to prevent early-game collisions.
 
 There are 24 possible directions.
+
+### Asteroid layouts
+
+There are 24 unique asteroid layouts. When a new asteroid appears, it has to
+pick one of the existing 24 asteroids which has yet to be instantiated. In other
+words, if you have 24 asteroids and destroy your original colony, its
+replacement is guaranteed to be the same shape as that asteroid.
+
+You can occasionally see multiples of the same layout, but that is because some
+of the patterns are duplicated in the list.
+
+Since the game doesn't begin with the full set of 24 asteroids, it's rare to
+actually see the higher asteroids. Some of them have really irregular shapes,
+like the asteroid with a hole in it. The later ones also have a much larger
+sprite on the space viewfield.
+
+Asteroid 13 and 15 are particularly large (although there is a limit of 100
+buildings per asteroid, but this still helps space buildings out for defensive
+purposes if you don't have Screen Generator). 14 is a duplicate of the default
+starting asteroid. 16 is oblong. 17 has a hole in the middle, which is
+remarkable. 18 is very large. 19 looks like two smaller asteroids connected in
+the middle by a bridge. 20 is kind of star-shaped, 21 is a large square shape,
+22 is a huge triangle, and finally 23 is an absolutely huge asteroid with an
+irregular outline.
