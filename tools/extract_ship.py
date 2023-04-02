@@ -7,7 +7,6 @@ import struct
 import numpy as np
 from PIL import Image,ImageOps
 
-# K240 sprite extractor
 path = "k240/aliens"
 
 palette1 = [
@@ -60,12 +59,19 @@ for alien in range(1,7):
   sprites = []
   with open(f"{path}/a{alien}data1", "rb") as f: 
     with open(f'{path}/a{alien}data2', 'rb') as f2:
-      for n in range(0,61): # all files have 61 sprites
-        row = f.read(10)
-        (st,ed,ht) = struct.unpack('>IIH',row)
-        ln = ed-st
-        wd = (ln//ht)*2
-        name = spr_names[n]
+      for n in range(0,62): # all files have 61 sprites
+        if n == 61: # osd
+          print (f2.tell())
+          (st,ed,ht) = (0,0,67)
+          ln = (67*48)
+          wd = (ln//ht)*2
+          name = "osd"
+        else:
+          row = f.read(10)
+          (st,ed,ht) = struct.unpack('>IIH',row)
+          ln = ed-st
+          wd = (ln//ht)*2
+          name = spr_names[n]
 
         data = f2.read(ln)
         mask = f2.read(ln//4)
@@ -84,6 +90,8 @@ for alien in range(1,7):
           indexed_image.putpalette(palette_image.palette)
 
           sprites.append(indexed_image)
+      a = f2.read()
+      print(len(a))
 
     sprite_sets = [
       ( "ship_small_1", sprites[0:16] ),
@@ -95,7 +103,10 @@ for alien in range(1,7):
       ( "ship_transporter", sprites[96:98] ),
       ( "ship_battleship", sprites[98:100] ),
       ( "missile_silo_anim", sprites[100:] ),
+      ( "missile_silo_anim", sprites[100:22] ),
+      ( "osd", sprites[122:] ),
     ]
+    print(len(sprites[122:]))
 
     for name,spr in sprite_sets:
       max_height = 0

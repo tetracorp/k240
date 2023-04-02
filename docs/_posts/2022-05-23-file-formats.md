@@ -14,8 +14,6 @@ The process of documenting the game's file formats is incomplete and ongoing.
 
 ### k240\_1:data1.bin, data2.bin, data3.bin
 
-(Not yet fully documented)
-
 Graphics and audio data read by the intro executable. They are compressed with
 CrunchMania, although this has been obfuscated by replacing the first four bytes
 (normally "CrM!" to denote a CrunchMania-packed file) with four spaces ("    ").
@@ -28,8 +26,6 @@ data1.bin | 217,326 | 266,744
 data2.bin | 224,060 | 291,802
 data3.bin | 377,074 | 417,270
 TOTAL     | 818,460 | 975,816
-
-The format is unknown.
 
 ### k240\_1:idfile
 
@@ -76,7 +72,8 @@ Each of the six alien files relates to the equivalent alien in the list; e.g.
 
 Contains the ship and building animation sprite data referenced in `a1data1`.
 Stored as 16-color Amiga sprite format, with 4 bitplanes plus a fifth bitplane
-as a sprite mask.
+as a sprite mask. Additionally, a 61st sprite fills the remainder of the file
+and is for the alien Orbital Space Dock.
 
 Varies from 20,450 to 22,780 bytes.
 

@@ -89,7 +89,7 @@ It is otherwise identical.
 
 ### Laser
 
-![Laser](../images/hardpoints/laser_cannon.png "Laser")
+![Laser](../images/hardpoints/laser.png "Laser")
 {:.left}
  
 Has a 30% chance to hit. Deals 2 damage.

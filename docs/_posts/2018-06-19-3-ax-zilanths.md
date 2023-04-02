@@ -304,11 +304,16 @@ A slow 90 Armour ship with six hardpoints: two Plasma Cannons (5 damage),
 two Chaos Bombs, a Photon Cannon (8 damage) and a Disruptor.
 
 Ship $4b "Orbital Space Dock"
-: The first time the colony attempts to spawn a Transporter or Battleship, it
-instead creates an Orbital Space Dock. As a result, it effectively has a 10%
-build chance and either a 60 or 90 day build time. It is especially strong
-compared to other species' OSDs, having 200 Armour instead of 100, plus a
-Deflector which effectively doubles that to 400.
+: ![azx_osd](../images/alien_ships/azx_osd.gif "azx_osd"){:.left}
+Required to build the largest three types of ship (equivalent to Terminator,
+Transporter, or Battleship). The first time the colony attempts to spawn one of
+these ships, it instead creates an Orbital Space Dock. As a result, it
+effectively has a 30% chance to be built, and a build time of 50, 60, or 90
+days. Has two Plasma Cannons, one Photon Cannon, and one Deflector. It is
+exceptionally tough, having 200 Armour, and the Deflector effectively doubles
+that. The other aliens except Swixaran have a sprite for the OSD in the files,
+but it's just a duplicate of the Ax'Zilanth sprite and the ship is never
+instantiated for those species.
 
 ### Starting resources
 
