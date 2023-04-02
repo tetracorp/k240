@@ -117,7 +117,7 @@ part of the save game file.
 | word[11]| 22 | Chance to build each missile. |
 | byte[11]| 11 | Yield of each missile as it appears on Intel report. (0 Low, 1 Med, 2 High, 3 other, ff unused) |
 | word[2][8] | 32 | Build chance and build time for ships. |
-| ShipB[8] | 192 | 8 24-byte ship stats as follows:<br>byte Armor<br>byte Speed<br>byte Hardpoints<br>byte Buildtime (ignored?)<br>4 bytes ore required (ignored for alien ships)<br>byte Ship ID<br>byte unknown<br>word Name (unused?)<br>word Cost (unused)<br>word Length (unused)<br>4 bytes unknown (unused?)<br>addr (4 bytes) extended data pointer. |
+| ShipB[8] | 192 | 8 24-byte ship stats as follows:<br>byte Armour<br>byte Speed<br>byte Hardpoints<br>byte Buildtime (ignored?)<br>4 bytes ore required (ignored for alien ships)<br>byte Ship ID<br>byte unknown<br>word Name (unused?)<br>word Cost (unused)<br>word Length (unused)<br>4 bytes unknown (unused?)<br>addr (4 bytes) extended data pointer. |
 | unk | ? | Remainder currently unknown. Ship-related table, other alien data. |
 
 See the individual alien descriptions from the index the main page for the

@@ -175,7 +175,7 @@ multiple Deflectors on one ship. Deflector is only viable on large ships.
 Simply raises the ship's maximum Armour (i.e. hit points).
 
 Due to a bug with Repair Facility, ships whose shields are depleted will only
-repair to the ship's base maximum Armor, while ships with shields intact can
+repair to the ship's base maximum Armour, while ships with shields intact can
 actually increase above their maximum. See [bugs](../game-mechanics/bugs.html)
 and
 [Repair Facility](../game-mechanics/building-behaviour.html#repair-facility).

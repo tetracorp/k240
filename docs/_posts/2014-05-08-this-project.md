@@ -13,11 +13,18 @@ primary goal is to discover K240's numerous undocumented game mechanics, many of
 which were never revealed to the player despite the game's heavy manual.
 
 This website also serves as a reference site for information on the game in
-general.
+general, such as its release history.
+
+### Project complete
+
+As of April 2023, the game has been explored and analyzed thoroughly, and all of
+the questions have been answered. Thanks to everyone who helped make this
+possible. There are still a few unknown variables, but I'm officially marking
+the project complete.
 
 ### What can we learn?
 
-The biggest questions this projects seeks to answer:
+The biggest questions this project sought to answer:
 
 1. How does ship combat work? (How do ships choose their targets, how
 much damage does each weapon deal, and what effect have hardpoints like
@@ -39,7 +46,7 @@ abandoned Ore Eater colonies explode?)
 K240 v2.000?
 
 See the [Frequently Asked Questions](../about/faq.html) list for answers to some
-of these.
+of these, and the rest of the site for answers to all of them.
 
 ### How to explore K240?
 
