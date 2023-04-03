@@ -271,9 +271,9 @@ Disruptor.
 
 Ship $3e ~~"Heavy Cruiser"~~
 : ![axz_ship_small_3](../images/alien_ships/axz_ship_small_3.gif "axz_ship_small_3"){:.left}
-A slower 40 Armour ship with a Photon Cannon (8 damage), Warp Generator, Ion
-Cannon and Disruptor. Listed in the game code has having two hardpoints,
-although it has four. Never built randomly.
+A slower 40 Armour ship with a Photon Cannon (8 damage), Laser, Ion Cannon and
+Disruptor. Listed in the game code has having two hardpoints, although it has
+four. Never built randomly.
 
 Ship $3f "Scoutship"
 : ![axz_ship_small_4](../images/alien_ships/axz_ship_small_4.gif "axz_ship_small_4"){:.left}
@@ -392,7 +392,7 @@ The Ax'Zilanths have a very specific military strategy. They have a massive 80
 pixel sensor range for detecting incoming missiles (compared to 16 for the Ore
 Eaters, for example), but only 30 pixels for detecting incoming fleets.
 
-Every 16th day of the year (days ending in 00, 16, 32, 48, 64, 80, or 96), each
+Every 16th day of the year (days ending in 16, 32, 48, 64, 80, or 96), each
 colony measures the damage done to it and retaliates with a missile strike
 depending on the amount of damage done since the last check:
 

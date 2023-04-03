@@ -22,6 +22,18 @@ the questions have been answered. Thanks to everyone who helped make this
 possible. There are still a few unknown variables, but I'm officially marking
 the project complete.
 
+Where to from here?
+[drDragonSmoke](https://github.com/tetracorp/k240/issues/created_by/drDragonSmoke)
+has actually begun fixing [bugs](../game-mechanics/bugs.html) in the game.
+Hollett Gaming is working on a K240 clone called
+[Sector53](https://www.hollettgaming.com/project/1/Sector53/), which at time of
+writing is still in development. I'll be keeping a lookout for the release of
+any historic K240-related media.
+
+In the meantime, shall we play another round of K240? These days, it pairs
+particularly well with the
+[FTL soundtrack](https://www.youtube.com/watch?v=WFkGjEut9U4).
+
 ### What can we learn?
 
 The biggest questions this project sought to answer:
