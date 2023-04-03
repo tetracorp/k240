@@ -109,6 +109,6 @@ irregular outline.
 For a list of some of the most interesting asteroid shapes, see
 [Unlikely things: Rare asteroids](../fun/unlikely-things.html#rare-asteroids).
 
-![k240_asteroid_001](../images/asteroids/k240_asteroid_01.png "k240_asteroid_01")<br>
+![k240_asteroid_001](../images/asteroids/k240_asteroid_001.png "k240_asteroid_001")<br>
 Asteroid #17, with a hole.
 {:.center width="640" height="400"}

@@ -57,37 +57,37 @@ the game never begins with more than 16 or so asteroids. This means there are
 some asteroid layouts that you will rarely see because they require a large
 number of asteroids to appear before the game will generate them.
 
-![k240_asteroid_001](../images/asteroids/k240_asteroid_01.png "k240_asteroid_01")<br>
+![k240_asteroid_001](../images/asteroids/k240_asteroid_001.png "k240_asteroid_001")<br>
 Asteroid #17, with a hole.
 {:.center width="640" height="400"}
 
-![k240_asteroid_002](../images/asteroids/k240_asteroid_02.png "k240_asteroid_02")<br>
+![k240_asteroid_002](../images/asteroids/k240_asteroid_002.png "k240_asteroid_002")<br>
 {:.center width="640" height="400"}
 
-![k240_asteroid_003](../images/asteroids/k240_asteroid_03.png "k240_asteroid_03")<br>
+![k240_asteroid_003](../images/asteroids/k240_asteroid_003.png "k240_asteroid_003")<br>
 Asteroid #19. An asteroid with two sections.
 {:.center width="640" height="400"}
 
-![k240_asteroid_004](../images/asteroids/k240_asteroid_04.png "k240_asteroid_04")<br>
+![k240_asteroid_004](../images/asteroids/k240_asteroid_004.png "k240_asteroid_004")<br>
 The asteroid used in the CU Amiga K240 demo.
 {:.center width="640" height="400"}
 
-![k240_asteroid_005](../images/asteroids/k240_asteroid_05.png "k240_asteroid_05")<br>
+![k240_asteroid_005](../images/asteroids/k240_asteroid_005.png "k240_asteroid_005")<br>
 {:.center width="640" height="400"}
 
-![k240_asteroid_006](../images/asteroids/k240_asteroid_06.png "k240_asteroid_06")<br>
+![k240_asteroid_006](../images/asteroids/k240_asteroid_006.png "k240_asteroid_006")<br>
 Asteroid 20. Asteroid that looks like a ship.
 {:.center width="640" height="400"}
 
-![k240_asteroid_007](../images/asteroids/k240_asteroid_07.png "k240_asteroid_07")<br>
+![k240_asteroid_007](../images/asteroids/k240_asteroid_007.png "k240_asteroid_007")<br>
 Square shaped.
 {:.center width="640" height="400"}
 
-![k240_asteroid_008](../images/asteroids/k240_asteroid_08.png "k240_asteroid_08")<br>
+![k240_asteroid_008](../images/asteroids/k240_asteroid_008.png "k240_asteroid_008")<br>
 Asteroid 22. Large asteroid.
 {:.center width="640" height="400"}
 
-![k240_asteroid_009](../images/asteroids/k240_asteroid_09.png "k240_asteroid_09")<br>
+![k240_asteroid_009](../images/asteroids/k240_asteroid_009.png "k240_asteroid_009")<br>
 Asteroid 23. Huge asteroid. This is the last in the list and will almost never
 be seen, since you need all 24 asteroids to appear at once.
 {:.center width="640" height="400"}
