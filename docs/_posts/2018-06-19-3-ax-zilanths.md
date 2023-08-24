@@ -4,11 +4,9 @@ title: "#3: Ax'Zilanths"
 categories: alien
 ---
 
-![planet1.mgl](../images/planet1.gif "planet1.mgl")
-{:.right width="128px" height="106px"}
+![planet1.mgl](../images/planet1.gif "planet1.mgl"){:.right width="128px" height="106px"}
 
-![alienp2.mgl](../images/alienp2.png "alienp2.mgl")
-{:width="160px" height="136px"}
+![alienp2.mgl](../images/alienp2.png "alienp2.mgl"){:width="160px" height="136px"}
 
 The Ax'Zilanths are the closest equivalent to the Terran player.
 
@@ -426,7 +424,7 @@ retreat until destroyed.
 
 ### Art inspiration
 
-![The Chalk Giants](../images/The_Chalk_Giants.jpg "The Chalk Giants")
+![The Chalk Giants](../images/The_Chalk_Giants.jpg "The Chalk Giants"){:width="180px"}
 {:.right}
 
 The art for the Ax'Zilanth appears to be heavily inspired by 
