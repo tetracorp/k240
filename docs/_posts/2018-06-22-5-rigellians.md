@@ -5,9 +5,10 @@ categories: alien
 ---
 
 ![planet4.mgl](../images/planet4.gif "planet4.mgl")
-{:.right}
+{:.right width="128px" height="74px"}
 
 ![alienp4.mgl](../images/alienp4.png "alienp4.mgl")
+{:width="224px" height="194px"}
 
 The Rigellians are one of the harder aliens in the game.
 
@@ -371,3 +372,19 @@ On the three out of days when it's not using missiles or fleets, it appears to
 check for a Transporter and build one if it can't find one. There's code which
 appears to make an "Alert" voice line here that I've never seen trigger, maybe
 some leftover debug code.
+
+### Art inspiration
+
+![The Warlock in Spite of Himself](../images/The_Warlock_in_Spite_of_Himself.jpg "The Warlock in Spite of Himself")
+{:.right}
+
+The design of the Rigellians appears to be based on
+[an artwork](https://www.isfdb.org/cgi-bin/title.cgi?534565) by science fiction
+author Peter A. Jones, which appeared as the cover art of Christopher Stasheff's
+1974 work _The Warlock in Spite of Himself_ (ISBN 0-583-12436-4).
+The art also appeared on page 16 of Jones' 1980 art anthology _Solar Wind_.
+
+Below is a comparison between the alien as it appears in the game, and the
+artwork:
+
+![Rigellian comparison](../images/Rigellian_comparison.jpg "Rigellian comparison")

@@ -5,9 +5,10 @@ categories: alien
 ---
 
 ![planet1.mgl](../images/planet1.gif "planet1.mgl")
-{:.right}
+{:.right width="128px" height="106px"}
 
 ![alienp2.mgl](../images/alienp2.png "alienp2.mgl")
+{:width="160px" height="136px"}
 
 The Ax'Zilanths are the closest equivalent to the Terran player.
 
@@ -422,3 +423,25 @@ lost one colony to building destruction (i.e. Terran attack, not asteroid
 collision). They need at least 10 ships present to form a fleet, and form fleets
 of 0 to 15 ships. The retreat chance is set at 100%; i.e. they will never
 retreat until destroyed.
+
+### Art inspiration
+
+![The Chalk Giants](../images/The_Chalk_Giants.jpg "The Chalk Giants")
+{:.right}
+
+The art for the Ax'Zilanth appears to be heavily inspired by 
+[an artwork](https://www.isfdb.org/cgi-bin/title.cgi?275531) by
+sci-fi illustrator Peter A. Jones, which appeared on the cover of the 1975
+Panther Science Fiction publication of _The Chalk Giants_ by Keith Roberts.
+The artwork's creation in 1974 is described
+[at the author's website](http://peterandrewjones.net/paintings_science_fiction/swa133.htm).
+It appeared on page 16 of Jones' 1980 art anthology, _Solar Wind_.
+
+In the original artwork, the figure is a humanoid in shape, size and skin tone,
+except for the black and white head. The game art only draws the head, while the
+manual art adapts the creature to have a tentacled lower half.
+
+Below is a comparison between the alien as it appears in the game, and the
+artwork:
+
+![Ax'Zilanth comparison](../images/Ax_comparison.jpg "Ax'Zilanth comparison")
