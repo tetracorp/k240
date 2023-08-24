@@ -6,7 +6,7 @@ categories: alien
 
 ![planet4.mgl](../images/planet4.gif "planet4.mgl"){:.right width="128px" height="74px"}
 
-![alienp4.mgl](../images/alienp4.png "alienp4.mgl"){:width="224px" height="194px"}
+![alienp4.mgl](../images/alienp4.png "alienp4.mgl"){:.right width="224px" height="194px"}
 
 The Rigellians are one of the harder aliens in the game.
 
