@@ -71,7 +71,7 @@ At least one Community of either type must must exist or the colony is
 destroyed.
 
 Deep Space Probes
-: ![Deep Space Probes](../images/alien_bldg/rig_deep_space_probes.gif "deep space probes"){:.left} A long-range sensor which triggers every 100 days divided by the number of
+: ![Deep Space Probes](../images/alien_bldg/rig_deep_space_probes_4sq.gif "deep space probes"){:.left} A long-range sensor which triggers every 100 days divided by the number of
 colonies. Automatically detects a Terran asteroid, then launches a missile
 strike.
 
@@ -108,7 +108,7 @@ Energy Globe to function. Does not work if the asteroid has a set speed.
 May in fact double as an Asteroid Engines.
 
 Ground Dock
-: ![Ground Dock](../images/alien_bldg/rig_ground_dock.gif "ground dock"){:.left} A shipyard. Requires the colony to have at least one power building (Energy
+: ![Ground Dock](../images/alien_bldg/rig_ground_dock_4sq.gif "ground dock"){:.left} A shipyard. Requires the colony to have at least one power building (Energy
 Gatherer, Energy Globe, or Reactor Core); one Weapons Facility; and one
 Extractor of either type. A maximum of 4 shipyards can operate at any one
 colony, although the soft cap on building is 2.
@@ -123,7 +123,7 @@ plus a cumulative 1% per day, and each Probes adds an additional chance
 per day.
 
 Reactor Core
-: ![Reactor Core](../images/alien_bldg/rig_reactor_core.gif "reactor core"){:.left} A power building required to build missiles. At least one power building of
+: ![Reactor Core](../images/alien_bldg/rig_reactor_core_4sq.gif "reactor core"){:.left} A power building required to build missiles. At least one power building of
 any sort is required to power Gravitic Convertor, Ground Dock, or Extractor.
 
 Science Labs
@@ -137,7 +137,7 @@ Storage Racks
 : ![Storage Racks](../images/alien_bldg/rig_storage_racks.gif "storage racks"){:.left} Storage facility. Appears to have no use.
 
 Strategic Bunker
-: ![Strategic Bunker](../images/alien_bldg/rig_strategic_bunker.gif "strategic bunker"){:.left} Required to co-ordinate mining. Number of Extractors is effectively halved
+: ![Strategic Bunker](../images/alien_bldg/rig_strategic_bunker_4sq.gif "strategic bunker"){:.left} Required to co-ordinate mining. Number of Extractors is effectively halved
 without this building.
 
 Turret

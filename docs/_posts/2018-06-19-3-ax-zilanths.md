@@ -119,11 +119,11 @@ Personnel Podule
 the colony is destroyed.
 
 Propulsion Unit
-: ![Propulsion Unit](../images/alien_bldg/axz_propulsion_unit.gif "propulsion unit"){:.left} Appears in the Asteroid Engines slot, suggesting this is an Asteroid Engines.
+: ![Propulsion Unit](../images/alien_bldg/axz_propulsion_unit_4sq.gif "propulsion unit"){:.left} Appears in the Asteroid Engines slot, suggesting this is an Asteroid Engines.
 Requires at least one Reactor or Energy Accumulator to function.
 
 Reactor
-: ![Reactor](../images/alien_bldg/axz_reactor.gif "reactor"){:.left} At least one Energy Accumulator or Reactor is needed to power Repulse
+: ![Reactor](../images/alien_bldg/axz_reactor_4sq.gif "reactor"){:.left} At least one Energy Accumulator or Reactor is needed to power Repulse
 Generator, Propulsion Unit and Ore Extractor. A Reactor is required to build
 missiles.
 
@@ -145,13 +145,13 @@ Detectors adds another chance per day, although a colony will never build more
 than one of each, for a maximum of three chances per day.
 
 Spacecraft Dock
-: ![Spacecraft Dock](../images/alien_bldg/axz_spacecraft_dock.gif "spacecraft dock"){:.left} Shipyard. Required to build ships, with a cap of 4 shipyards.
+: ![Spacecraft Dock](../images/alien_bldg/axz_spacecraft_dock_4sq.gif "spacecraft dock"){:.left} Shipyard. Required to build ships, with a cap of 4 shipyards.
 
 Stabilising Platform
 : ![Stabilising Platform](../images/alien_bldg/axz_stabilising_platform.gif "stabilising platform"){:.left} Landing Pad. At least one is required to build ships.
 
 Strategy Control
-: ![Strategy Control](../images/alien_bldg/axz_strategy_control.gif "strategy control"){:.left} Equivalent to Command Centre. Required to start new colony.
+: ![Strategy Control](../images/alien_bldg/axz_strategy_control_4sq.gif "strategy control"){:.left} Equivalent to Command Centre. Required to start new colony.
 
 Subspace Detectors
 : ![Subspace Detectors](../images/alien_bldg/axz_subspace_detectors.gif "subspace detectors"){:.left} Increases the chances of spotting Terran spy satellites. The base detection
