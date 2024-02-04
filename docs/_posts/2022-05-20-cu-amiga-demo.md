@@ -11,8 +11,8 @@ The March 1994 issue of CU Amiga Magazine came with coverdisk 77, an exclusive
 demo version of K240. It provides an insight into the state of development of
 the game as it neared completion, and has some interesting quirks.
 
-This page is work-in-progress. A full analysis of the K240 demo executable has
-yet to be made.
+A more thorough comparison between the demo version and the full release is
+intended at some point in future.
 
 1. Table of Contents
 {:toc}
@@ -200,7 +200,7 @@ Guidance System blueprint, and while you cannot build missiles, you have 20 each
 Explosive, Area Explosive, Napalm, Hellfire, Scatter, and Vortex, and 10 Virus
 missiles. You start with a large amount of money, some of which has already been
 distributed into Construction and Intelligence, although Construction is the
-only thing.
+only thing you can spend money on in the demo.
 
 You can see the enemy asteroid surface without a spy satellite.
 

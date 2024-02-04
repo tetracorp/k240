@@ -273,13 +273,19 @@ What we do know about the review build is as follows:
   sprites in the CU Amiga demo.
 - The hard disk installer is included. This suggests a date of no earlier than 2
   March 1994, which is when the HD installer was added in the final release.
+  The installer adds files by folder and wildcard, so the addition of files
+  later in the game would not have necessitated changes to the installer. Given
+  magazine deadlines, the review build would have been made in March 1994, about
+  two months before the finished v1.886 release.
 - It is English-only.
   [A review](https://www.abandonware-magazines.org/affiche_mag.php?mag=30&num=599&album=oui)
   in French magazine Joystick issue 49 (May 1994) shows only English-language
   screenshots (as do other French magazines' May 1994 reviews of K240), but
   promises that the final release will have a French translation.
 - The victory screen background uses the intel screen background as a
-  placeholder, as seen in The One issue 68.
+  placeholder, as seen in The One issue 68. Since MGL image file sizes have to
+  be defined in the executable, this means the review build executable has to be
+  different to the final build.
 - The intro disk appears to be included. Voice lines are in the game, according
   to the Joystick review. This suggests the review copy included all three
   disks.

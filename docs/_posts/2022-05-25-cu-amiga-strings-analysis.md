@@ -276,15 +276,14 @@ mentioned in the game manual.
 : Manual protection code text.
 
 554
-: "Fleet is not orbitting the current asteroid!" A rarely used text for 
+: "Fleet is not orbitting the current asteroid!" A rarely used text, presumably
+for when ordering a fleet to guard an asteroid they aren't at.
 
 561
-: First text string which does appear in memory after the text list, but is not
-indexed as such, and has equivalents in the final game.  Abbreviation for
-credits changed from "CR" to "CD". Note that the demo hardcodes the starting
-text string as 3,740,000, which is also the default starting money in the demo.
-The full game just replaces them with the letter "x", since it's changed when
-the game begins anyway.
+: Abbreviation for credits changed from "CR" to "CD". Note that the demo
+hardcodes the starting text string as 3,740,000, which is also the default
+starting money in the demo. The full game just replaces them with the letter
+"x", since it's changed when the game begins anyway.
 
 564, 565
 : Enabling and disabling speech. The string in this approximate location
@@ -331,10 +330,10 @@ Other text strings not in the text list include:
 | ENTER SFX A-Z:   | TEST: ENTER SFX A-W:    |
 |                  | TEST: ENTER SPEECH A-U: |
 
-- Copyright changed from 1993 to 1994. The game was originally intended to
-  be completed in 1993. The demo version may have been completed as late as
-  January 1993, however, without necessarily changing the date on the console
-  invocation.
+- Copyright changed from 1993 to 1994. The game was originally intended to be
+  completed in 1993. It may suggest that the demo build was made as early as
+  1993, but since the console invocation is practically never seen and has no
+  effect on gameplay, it would be easy to miss.
 - `ENTER HELP CODE` suggests that cheat codes existed at the time of the demo,
   but had been disabled. The original feature may have been to press a key
   (perhaps the Amiga's Help key) to trigger cheat code entry.

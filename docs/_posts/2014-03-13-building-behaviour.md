@@ -148,7 +148,10 @@ a miss. The turrets on "Protected" buildings operate exactly as a Laser Turret,
 including the benefit from Turret Optimizer.
 
 Alien turrets have different (usually higher) damage and different (usually
-worse) cooldown timers.
+worse) cooldown timers. See individual alien pages for details. Each alien has
+two or three types of turrets, each of which are equivalent to one of the Terran
+turret types. They are always just called "TURRET" but can be differentiated by
+appearance.
 
 ### Asteroid Engines
 

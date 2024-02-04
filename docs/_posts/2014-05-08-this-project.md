@@ -15,20 +15,25 @@ which were never revealed to the player despite the game's heavy manual.
 This website also serves as a reference site for information on the game in
 general, such as its release history.
 
-### Project complete
+### Project complete (mostly)
 
 As of April 2023, the game has been explored and analyzed thoroughly, and all of
 the questions have been answered. Thanks to everyone who helped make this
-possible. There are still a few unknown variables, but I'm officially marking
-the project complete.
+possible. There are still a few unknown variables and I could still delve a
+little deeper into the CU Amiga demo build, but I'm officially marking the
+project complete.
 
-Where to from here?
-[drDragonSmoke](https://github.com/tetracorp/k240/issues/created_by/drDragonSmoke)
-has actually begun fixing [bugs](../game-mechanics/bugs.html) in the game.
+Where to from here? Contributor drDragonSmoke has released
+[K240-Bugfix](https://github.com/drDragonSmoke/K240-Bugfix), a build which fixes 
+various [bugs](../game-mechanics/bugs.html) in the game.
 Hollett Gaming is working on a K240 clone called
 [Sector53](https://www.hollettgaming.com/project/1/Sector53/), which at time of
-writing is still in development. I'll be keeping a lookout for the release of
-any historic K240-related media.
+writing is still in development.
+
+I'll be keeping a lookout for the release of any historic K240-related media. If
+you have anything, please leave a reply at the relevant
+[materials wanted](https://github.com/tetracorp/k240/issues?q=is%3Aissue+is%3Aopen+label%3A%22materials+wanted%22)
+ticket.
 
 In the meantime, shall we play another round of K240? These days, it pairs
 particularly well with the

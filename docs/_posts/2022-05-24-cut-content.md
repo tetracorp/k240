@@ -36,8 +36,8 @@ Fighter, at `2`). It has following statistics:
 - Cost: 3,000 CD (equal to Scout Ship)
 - Length: 13 m (equal to Assault Fighter)
 
-Here's what it would look like if you could build it (note that it uses the
-Assault Fighter wireframe):
+Here's what it would look like if you could build it (ignore the Assault Fighter
+wireframe being used as a stand-in):
 
 ![Orbital shuttle](../images/orbital-shuttle.png "Orbital Shuttle")
 {:.center}
@@ -118,7 +118,7 @@ Kll-Kp-Qua Science Hive
 : ![Science Hive](../images/alien_bldg/kll_science_hive.gif "science hive"){:.left}
 The game code says that this operates the same as the Data Hive, which helps to
 spot spy satellites. However, none of the building clusters include it, so it
-wll never be built. One of the clusters attempts to build a non-existant
+wll never be built. One of the clusters attempts to build a non-existent
 building in the Anti-Missile Pod slot, so it may be that the Science Hive was
 meant to take that slot, although it could also be that Anti-Missile Pods were
 removed to make the first alien easier.
@@ -126,26 +126,26 @@ removed to make the first alien easier.
 Ax'Zilanth ship #3
 : ![axz_ship_small_3](../images/alien_ships/axz_ship_small_3.gif "axz_ship_small_3"){:.left}
 A small ship with 2 FN speed and 40 Armour. The ship's stats say it only has
-two hardpoints, but it has four listed: a Photon Cannon, Warp Generator, Ion
-Cannon, and a Disruptor.
+two hardpoints, but it has four listed: Photon Cannon, Laser, Ion Cannon, and
+Napalm Orb.
 
 Tylaran ship #3
 : ![tyl_ship_small_3](../images/alien_ships/tyl_ship_small_3.gif "tyl_ship_small_3"){:.left}
 A small ship with 2 FN speed and 40 Armour. It has four hardpoints: Photon
-Cannon, Laser Cannon, Ion Cannon, and Napalm Orb.
+Cannon, Laser, Ion Cannon, and Napalm Orb.
 
 Rigellian ship #3
 : ![rig_ship_small_3](../images/alien_ships/rig_ship_small_3.gif "rig_ship_small_3"){:.left}
-A small ship with 2 FN speed and 40 Armour. Has four hardpoints: Laser Cannon,
-Ion Cannon, Napalm Orb, and Photon Cannon. The Photon Cannon deals 0 damage
-because the Rigellians do not have Photon technology.
+A small ship with 2 FN speed and 40 Armour. Has four hardpoints: Photon Cannon,
+Laser, Ion Cannon, and Napalm Orb. The Photon Cannon deals 0 damage because the
+Rigellians do not have Photon technology.
 
 Swixaran ship #3
 : ![swi_ship_small_3](../images/alien_ships/swi_ship_small_3.gif "swi_ship_small_3"){:.left}
 A small ship with 2 FN speed and 40 Armour. It has 4 hardpoints: Photon Cannon,
-Ion Cannon, Napalm Orb, and Laser Cannon. The Laser Cannon deals 0 damage
-because the Swixarans do not use Laser technology. The Swixarans also do not
-normally use Napalm or any other fire-based weapons.
+Laser, Ion Cannon, and Napalm Orb. The Laser Cannon deals 0 damage because the
+Swixarans do not use Laser technology. The Swixarans also do not normally use
+Napalm or any other fire-based weapons.
 
 It's worth noting that for the two species that do use ship #3, they both have
 oddities. The Kll-Kp-Qua's has 80 Armour and zero hardpoints, while the Ore

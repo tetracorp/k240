@@ -8,9 +8,6 @@ The exact effect and damage values of ship hardpoints are never stated in the
 game or its manual. The following effects have been calculated by reading the
 game code and testing.
 
-I have not yet analyzed the exact area of effect and total damage values of
-the more complicated ground fire-based weapons.
-
 See also [missiles damage and effects](../game-mechanics/missiles.html).
 
 1. Table of Contents

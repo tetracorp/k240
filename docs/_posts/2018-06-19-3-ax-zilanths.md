@@ -271,7 +271,7 @@ Disruptor.
 Ship $3e ~~"Heavy Cruiser"~~
 : ![axz_ship_small_3](../images/alien_ships/axz_ship_small_3.gif "axz_ship_small_3"){:.left}
 A slower 40 Armour ship with a Photon Cannon (8 damage), Laser, Ion Cannon and
-Disruptor. Listed in the game code has having two hardpoints, although it has
+Napalm Orb. Listed in the game code has having two hardpoints, although it has
 four. Never built randomly.
 
 Ship $3f "Scoutship"
