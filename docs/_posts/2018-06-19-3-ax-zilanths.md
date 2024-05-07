@@ -93,12 +93,12 @@ Engineering Plant
 : ![Engineering Plant](../images/alien_bldg/axz_engineering_plant.gif "engineering plant"){:.left} Required to build ships and missiles.
 
 Mass Displacement Podule
-: ![Mass Displacement Podule](../images/alien_bldg/axz_mass_displacement_podule.gif "mass displacement podule"){:.left} Allows asteroid to teleport. It can teleport in response to incoming missiles,
-if there are no Interceptor missiles left. It also has a 1% chance to teleport
-on an occasion when it would normally fire missiles. If the asteroid gets too
-close to the edge of the screen and does not currently benefit from a gravity
-nullifier effect, it may also teleport to avoid zooming off the edge of the
-screen.
+: ![Mass Displacement Podule](../images/alien_bldg/axz_mass_displacement_podule.gif "mass displacement podule"){:.left} Allows asteroids to teleport.
+Asteroids can teleport randomly to avoid going off the edge of the screen, or to
+avoid collisions with other asteroids. They also have a 1% chance per day to
+teleport randomly, and even asteroids without a Mass Displacement Podule can be
+teleported this way (probably a bug). Teleport location is random.
+See [Tactical](#tactical) for more information.
 
 Missile Silo
 : ![Missile Silo](../images/alien_bldg/axz_missile_silo.gif "missile silo"){:.left} ![axz_missile_silo_anim](../images/alien_ships/axz_missile_silo_anim.gif "axz_missile_silo_anim"){:.left}
@@ -405,11 +405,11 @@ Every 8th day that isn't a missile day (days ending in 08, 24, 40, 56, 72,
 or 88), it fires a single Static Inducer missile at a random Terran asteroid.
 
 On all other days, there is a 1% chance to trigger the Mass Displacement Podule,
-the asteroid teleporter, on a random asteroid. If there is no Mass Displacement
-Podule built yet or it doesn't fire, there is a 10 daycolony cycle of proximity
-checks for asteroids at risk of collision, where it will immediately attempted
-to trigger a teleport. If this isn't possible, its backup plan is to fire one
-Mega missile.
+the asteroid teleporter, on each asteroid. However, the asteroid to be
+teleported is randomly selected from all alien colonies, even ones with no Mass
+Displacement Podule, since the building count references the currently indexed
+asteroid, not the randomly selected asteroid being teleported. This may be a
+bug.
 
 If none of these occur, every 8 days divided by number of colonies, it checks
 for Terran missiles or spy satellites within sensor range, which is a massive 80
@@ -421,6 +421,15 @@ lost one colony to building destruction (i.e. Terran attack, not asteroid
 collision). They need at least 10 ships present to form a fleet, and form fleets
 of 0 to 15 ships. The retreat chance is set at 100%; i.e. they will never
 retreat until destroyed.
+
+The Mass Displacement Podule can also trigger automatically in two specific
+instances. If an asteroid is about to move off the edge of the screen, and it is
+not affected by a gravity nullifier effect, it will teleport. It will also
+teleport to avoid an asteroid collision, if necessary; however, only if it
+cannot resolve the collision by firing a Mega missile (i.e. it has no Mega, no
+missile silos, or the colliding asteroid is an Ax'zilant colony). A Mass
+Displacement Podule is required on the teleporting asteroid in these
+circumstances.
 
 ### Art inspiration
 
