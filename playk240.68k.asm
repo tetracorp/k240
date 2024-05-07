@@ -1,6 +1,6 @@
 ; IRA V2.09 (Mar  1 2020) (c)1993-1995 Tim Ruehsen
 ; (c)2009-2015 Frank Wille, (c)2014-2017 Nicolas Bastien
-
+;
 ; |          _  ______  _  _    ___                |
 ; |         | |/ /___ \| || |  / _ \               |
 ; |         | ' /  __) | || |_| | | |              |
@@ -15813,7 +15813,7 @@ _Ships0C5AA:
 	MOVE.W	(0,A0,D2.W),D2		;0c5d0: 34302000
 	MOVE.B	(19,A6),D3		;0c5d4: 162e0013
 	CMPI.B	#$fb,D3			;0c5d8: 0c0300fb
-	BEQ.W	caseD_3b		;0c5dc: 6700027c
+	BEQ.W	ret_0C85A		;0c5dc: 6700027c
 	TST.B	D3			;0c5e0: 4a03
 	BMI.S	_0C5E6			;0c5e2: 6b02
 	ADD.B	D3,D2			;0c5e4: d403
@@ -15947,11 +15947,11 @@ _0C740:
 	MOVE.W	(A7)+,D0		;0c748: 301f
 ; Check if ship firing
 	BTST	#6,(21,A6)		;0c74a: 082e00060015
-	BEQ.W	caseD_3b		;0c750: 67000108
+	BEQ.W	ret_0C85A		;0c750: 67000108
 	BTST	#0,(22,A6)		;0c754: 082e00000016
-	BNE.W	caseD_3b		;0c75a: 660000fe
+	BNE.W	ret_0C85A		;0c75a: 660000fe
 	TST.B	(20,A6)			;0c75e: 4a2e0014
-	BMI.W	caseD_3b		;0c762: 6b0000f6
+	BMI.W	ret_0C85A		;0c762: 6b0000f6
 	MOVEA.L	ptrBuff00,A1		;0c766: 22790000052a
 	MOVEQ	#0,D2			;0c76c: 7400
 ; Ship ID
@@ -15962,7 +15962,7 @@ _0C740:
 	CMPI.B	#$05,D2			;0c772: 0c020005
 	BMI.W	_0C830			;0c776: 6b0000b8
 	CMPI.B	#$44,D2			;0c77a: 0c020044
-	BPL.W	caseD_3b		;0c77e: 6a0000da
+	BPL.W	ret_0C85A		;0c77e: 6a0000da
 ; 0   35: Destructor
 ; 1   36: Terminator
 ; 2   37: Transporter
@@ -15970,7 +15970,7 @@ _0C740:
 ; 4   39: Orbital Spacedock
 ; 5+  3c-43: Alien ships
 	SUBI.B	#$35,D2			;0c782: 04020035
-	BMI.W	caseD_3b		;0c786: 6b0000d2
+	BMI.W	ret_0C85A		;0c786: 6b0000d2
 	EXT.W	D2			;0c78a: 4882
 	ASL.W	#3,D2			;0c78c: e742
 	LEA	ptr0C79E,A3		;0c78e: 47f90000c79e
@@ -15996,22 +15996,22 @@ ptr0C79E:
 	DC.L	caseD_38		;0c7c2: 0000c890
 ; Small alien ship 3c
 	DS.L	1			;0c7c6
-	DC.L	caseD_3b		;0c7ca: 0000c85a
+	DC.L	ret_0C85A		;0c7ca: 0000c85a
 ; Small alien ship 3d
 	DS.L	1			;0c7ce
-	DC.L	caseD_3b		;0c7d2: 0000c85a
+	DC.L	ret_0C85A		;0c7d2: 0000c85a
 ; Alien ship 3e
 	DC.L	tblAlienShip26		;0c7d6: 000205f4
-	DC.L	unk0C816		;0c7da: 0000c816
+	DC.L	caseD_3c		;0c7da: 0000c816
 ; Alien ship 3f
 	DC.L	tblAlienShip26		;0c7de: 000205f4
-	DC.L	unk0C816		;0c7e2: 0000c816
+	DC.L	caseD_3c		;0c7e2: 0000c816
 ; Alien ship 40
 	DC.L	tblAlienShip26		;0c7e6: 000205f4
-	DC.L	unk0C816		;0c7ea: 0000c816
+	DC.L	caseD_3c		;0c7ea: 0000c816
 ; Alien ship 41
 	DC.L	tblAlienShip26		;0c7ee: 000205f4
-	DC.L	unk0C816		;0c7f2: 0000c816
+	DC.L	caseD_3c		;0c7f2: 0000c816
 ; Alien ship 42
 	DC.L	tblAlienUnk27		;0c7f6: 000207f4
 	DC.L	caseD_40		;0c7fa: 0000c860
@@ -16024,7 +16024,7 @@ ptr0C79E:
 ; Alien ship ??
 	DC.L	tblAlienUnk30		;0c80e: 00020a16
 	DC.L	caseD_38		;0c812: 0000c890
-unk0C816:
+caseD_3c:
 	MOVEQ	#0,D2			;0c816: 7400
 	MOVE.B	(8,A6),D2		;0c818: 142e0008
 	SUBI.B	#$3c,D2			;0c81c: 0402003c
@@ -16036,7 +16036,7 @@ unk0C816:
 	BRA.S	_0C84A			;0c82e: 601a
 _0C830:
 	SUBQ.B	#2,D2			;0c830: 5502
-	BMI.S	caseD_3b		;0c832: 6b26
+	BMI.S	ret_0C85A		;0c832: 6b26
 	EXT.W	D2			;0c834: 4882
 	ASL.W	#7,D2			;0c836: ef42
 	LEA	arrGunfireSprites,A3	;0c838: 47f90001ec1e
@@ -16052,7 +16052,7 @@ _0C84A:
 	ADD.W	(A3)+,D0		;0c852: d05b
 	ADD.W	(A3),D1			;0c854: d253
 	BSR.W	_DrawGfx_0C916		;0c856: 610000be
-caseD_3b:
+ret_0C85A:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;0c85a: 4cdf7fff
 	RTS				;0c85e: 4e75
 caseD_40:
@@ -29196,13 +29196,13 @@ _DecrementAtkDelay:
 	TST.B	intRetaliateDelay	;15f3c: 4a390002e47f
 	BEQ.S	_AliRetaliate		;15f42: 670a
 	SUBQ.B	#1,intRetaliateDelay	;15f44: 53390002e47f
-_ret-1_15F4A:
+_ret1_15F4A:
 	MOVEQ	#-1,D0			;15f4a: 70ff
 	RTS				;15f4c: 4e75
 _AliRetaliate:
 ; alien missile
 	MOVE.L	ptrShips_2DEDC,D0	;15f4e: 20390002dedc
-	BEQ.S	_ret-1_15F4A		;15f54: 67f4
+	BEQ.S	_ret1_15F4A		;15f54: 67f4
 	MOVEA.L	D0,A0			;15f56: 2040
 	MOVEA.L	ptrThisAstStats,A5	;15f58: 2a790002ded8
 _15F5E:
@@ -29230,7 +29230,7 @@ _15F8E:
 	RTS				;15f98: 4e75
 _15F9A:
 	MOVE.L	(0,A0),D0		;15f9a: 20280000
-	BEQ.S	_ret-1_15F4A		;15f9e: 67aa
+	BEQ.S	_ret1_15F4A		;15f9e: 67aa
 	MOVEA.L	D0,A0			;15fa0: 2040
 	BRA.S	_15F5E			;15fa2: 60ba
 _DecFleetDelay:
@@ -29355,7 +29355,7 @@ loop160CC:
 	CLR.L	(32,A6)			;160e0: 42ae0020
 _160E4:
 	DBF	D0,loop160CC		;160e4: 51c8ffe6
-	BSR.W	_IntelFleetDest		;160e8: 610014ce
+	BSR.W	_IntelFleetDst		;160e8: 610014ce
 	RTS				;160ec: 4e75
 _Ali1FleetOffensive:
 	MOVEQ	#5,D0			;160ee: 7005
@@ -29400,7 +29400,7 @@ loop16170:
 	CLR.L	(32,A6)			;16184: 42ae0020
 _16188:
 	DBF	D0,loop16170		;16188: 51c8ffe6
-	BSR.W	_IntelFleetDest		;1618c: 6100142a
+	BSR.W	_IntelFleetDst		;1618c: 6100142a
 	MOVEA.L	ptrThisAstStats,A5	;16190: 2a790002ded8
 	BSR.W	_AliMissileStrike	;16196: 61000e56
 	MOVEA.L	(A7)+,A2		;1619a: 245f
@@ -29421,11 +29421,11 @@ _DailyAli2Atk:
 	RTS				;161c6: 4e75
 _161C8:
 	SUBQ.B	#1,intCountd20222	;161c8: 533900020222
-	BGT.S	_DailyAli2Atk		;161ce: 6e46
+	BGT.S	_DailyAli2Attk		;161ce: 6e46
 	MOVE.B	#$0a,intCountd20222	;161d0: 13fc000a00020222
 	MOVEA.L	ptrThisAstStats,A0	;161d8: 20790002ded8
 	BSR.W	_AstProximity		;161de: 6100c882
-	BEQ.S	_DailyAli2Atk		;161e2: 6732
+	BEQ.S	_DailyAli2Attk		;161e2: 6732
 ; target non-alien colony
 	BTST	#6,(89,A1)		;161e4: 082900060059
 	BNE.S	_16210			;161ea: 6624
@@ -29445,7 +29445,7 @@ _161C8:
 _16210:
 	BSR.W	_AliAstEvacuate		;16210: 61000ae2
 	RTS				;16214: 4e75
-_DailyAli2Atk:
+_DailyAli2Attk:
 	BSR.W	_DecrementAtkDelay	;16216: 6100fd24
 	BMI.S	_Ali2Flt		;1621a: 6b2e
 	MOVE.B	#$0c,intRetaliateDelay	;1621c: 13fc000c0002e47f
@@ -29468,11 +29468,11 @@ _Ali2Flt:
 	MOVE.L	A0,ptrFlt_16A3A		;16250: 23c800016a3a
 	MOVE.B	#$10,fleetCycle		;16256: 13fc00100002e480
 	TST.W	intOurAstsKnown		;1625e: 4a790002e052
-	BEQ.S	_Ali2Flt		;16264: 6728
+	BEQ.S	_Ali2Fleet		;16264: 6728
 	LEA	arrAlienAsts,A0		;16266: 41f90001f8ba
 _1626C:
 	MOVE.L	(A0)+,D0		;1626c: 2018
-	BMI.W	_Ali2Flt		;1626e: 6b00001e
+	BMI.W	_Ali2Fleet		;1626e: 6b00001e
 	MOVEA.L	D0,A5			;16272: 2a40
 	MOVEQ	#10,D0			;16274: 700a
 	JSR	_RandInt		;16276: 4eb900000c0c
@@ -29484,7 +29484,7 @@ _1626C:
 	BSR.W	_FireSetMissiles	;16286: 61000e26
 	MOVEA.L	(A7)+,A0		;1628a: 205f
 	BRA.S	_1626C			;1628c: 60de
-_Ali2Flt:
+_Ali2Fleet:
 	MOVEA.L	ptrFlt_16A3A,A0		;1628e: 207900016a3a
 	MOVE.W	#$0014,fleet_min	;16294: 33fc001400020216
 	MOVE.W	#$0005,fleet_2		;1629c: 33fc000500020218
@@ -29533,7 +29533,7 @@ loop16342:
 	CLR.L	(32,A6)			;16356: 42ae0020
 _1635A:
 	DBF	D0,loop16342		;1635a: 51c8ffe6
-	BSR.W	_IntelFleetDest		;1635e: 61001258
+	BSR.W	_IntelFleetDst		;1635e: 61001258
 ret16362:
 	RTS				;16362: 4e75
 _16364:
@@ -29622,11 +29622,11 @@ _1643C:
 	RTS				;1644c: 4e75
 _NoMassPod:
 	SUBQ.B	#1,intCountd20222	;1644e: 533900020222
-	BGT.S	_DailyAli3Atk		;16454: 6e40
+	BGT.S	_DailyAli3Attk		;16454: 6e40
 	MOVE.B	#$0a,intCountd20222	;16456: 13fc000a00020222
 	MOVEA.L	ptrThisAstStats,A0	;1645e: 20790002ded8
 	BSR.W	_AstProximity		;16464: 6100c5fc
-	BEQ.S	_DailyAli3Atk		;16468: 672c
+	BEQ.S	_DailyAli3Attk		;16468: 672c
 ; established colony
 	BTST	#6,(89,A1)		;1646a: 082900060059
 	BNE.S	_1643C			;16470: 66ca
@@ -29642,7 +29642,7 @@ _NoMassPod:
 	MOVE.L	A1,(178,A0)		;16490: 214900b2
 ret16494:
 	RTS				;16494: 4e75
-_DailyAli3Atk:
+_DailyAli3Attk:
 	BSR.W	_DecrementAtkDelay	;16496: 6100faa4
 	BMI.S	_164DC			;1649a: 6b40
 	MOVE.B	#$08,intRetaliateDelay	;1649c: 13fc00080002e47f
@@ -29953,17 +29953,17 @@ _Misl_16864:
 ; Cycle counts down from 80 to 0. If it hits -1
 ; it resets to 80 and has a 30% chance to fire.
 	SUBQ.W	#1,intAlienMislCdn	;16864: 537900020314
-	BPL.S	_DailyAli5Atk		;1686a: 6a22
+	BPL.S	_DailyAli5Attk		;1686a: 6a22
 	MOVE.W	#$0050,intAlienMislCdn	;1686c: 33fc005000020314
 	MOVEQ	#100,D0			;16874: 7064
 	JSR	_RandInt		;16876: 4eb900000c0c
 	CMPI.B	#$1e,D0			;1687c: 0c00001e
-	BPL.S	_DailyAli5Atk		;16880: 6a0c
+	BPL.S	_DailyAli5Attk		;16880: 6a0c
 ; 3 Virus, 4 Vortex, 3 Antivirus
 	LEA	tblMisl4V4V3A,A0	;16882: 41f9000202be
 	BSR.W	_FireSetMissiles	;16888: 61000824
 	RTS				;1688c: 4e75
-_DailyAli5Atk:
+_DailyAli5Attk:
 	BSR.W	_DecrementAtkDelay	;1688e: 6100f6ac
 	BMI.S	ret168BC		;16892: 6b28
 	MOVE.B	#$0c,intRetaliateDelay	;16894: 13fc000c0002e47f
@@ -29983,7 +29983,7 @@ _DailyAli6Atk:
 ; This is the path which sets up ghost fleets (?)
 	MOVEA.L	ptrThisAstStats,A5	;168be: 2a790002ded8
 	BCLR	#4,(91,A5)		;168c4: 08ad0004005b
-	BEQ.S	_DailyAli6Atk		;168ca: 6716
+	BEQ.S	_DailyAli6Attk		;168ca: 6716
 ; This occurs if they shot down a spy satellite
 ; 4 Explosive, 4 Stasis, 4 Vortex, 2 Antivirus
 	LEA	tblMisl4E4St4V2A,A0	;168cc: 41f9000202ea
@@ -29994,7 +29994,7 @@ _DailyAli6Atk:
 ; missile strike target
 	MOVE.L	A2,(178,A5)		;168dc: 2b4a00b2
 	RTS				;168e0: 4e75
-_DailyAli6Atk:
+_DailyAli6Attk:
 	BSR.W	_DecrementAtkDelay	;168e2: 6100f658
 	BMI.S	_16910			;168e6: 6b28
 	MOVE.B	#$0c,intRetaliateDelay	;168e8: 13fc000c0002e47f
@@ -30067,7 +30067,7 @@ loop169D2:
 	CLR.L	(32,A6)			;169e6: 42ae0020
 _169EA:
 	DBF	D0,loop169D2		;169ea: 51c8ffe6
-	BSR.W	_IntelFleetDest		;169ee: 61000bc8
+	BSR.W	_IntelFleetDst		;169ee: 61000bc8
 	MOVEA.L	A0,A1			;169f2: 2248
 	CMPI.W	#$0002,intOurAstsKnown	;169f4: 0c7900020002e052
 	BMI.W	ret1690E		;169fc: 6b00ff10
@@ -30276,9 +30276,9 @@ _BuildFleet:
 	SUB.W	(12,A2),D0		;16c56: 906a000c
 ; Count ships except Transporter/"Terminator".
 	CMP.W	fleet_min,D0		;16c5a: b07900020216
-	BMI.W	_ret-1_16CF0		;16c60: 6b00008e
+	BMI.W	_ret1_16CF0		;16c60: 6b00008e
 	BSR.W	_NewAliFleet		;16c64: 6100098e
-	BEQ.W	_ret-1_16CF0		;16c68: 67000086
+	BEQ.W	_ret1_16CF0		;16c68: 67000086
 	MOVE.W	#$0046,(24,A0)		;16c6c: 317c00460018
 	LEA	(32,A0),A3		;16c72: 47e80020
 	TST.W	(14,A2)			;16c76: 4a6a000e
@@ -30320,10 +30320,10 @@ _16CC0:
 	DBF	D0,_16CC0		;16ce2: 51c8ffdc
 _16CE6:
 	TST.W	(22,A0)			;16ce6: 4a680016
-	BEQ.S	_ret-1_16CF0		;16cea: 6704
+	BEQ.S	_ret1_16CF0		;16cea: 6704
 	MOVEQ	#0,D0			;16cec: 7000
 	RTS				;16cee: 4e75
-_ret-1_16CF0:
+_ret1_16CF0:
 	MOVEQ	#-1,D0			;16cf0: 70ff
 	RTS				;16cf2: 4e75
 _AliAstEvacuate:
@@ -31059,7 +31059,7 @@ _Satellite17580:
 _175B2:
 	MOVEM.L	(A7)+,D0-D7/A0-A6	;175b2: 4cdf7fff
 	RTS				;175b6: 4e75
-_IntelFleetDest:
+_IntelFleetDst:
 	MOVEM.L	D0-D7/A0-A6,-(A7)	;175b8: 48e7fffe
 	TST.B	(96,A5)			;175bc: 4a2d0060
 	BEQ.S	_175EE			;175c0: 672c
@@ -31730,7 +31730,7 @@ loop17D7A:
 _17D92:
 	DBF	D0,loop17D7A		;17d92: 51c8ffe6
 	MOVEA.L	ptrThisAstStats,A5	;17d96: 2a790002ded8
-	BSR.W	_IntelFleetDest		;17d9c: 6100f81a
+	BSR.W	_IntelFleetDst		;17d9c: 6100f81a
 	MOVEA.L	(A7)+,A0		;17da0: 205f
 	MOVE.W	(A7)+,D2		;17da2: 341f
 _17DA4:

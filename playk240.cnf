@@ -2,7 +2,7 @@
 ; novim: list listchars=tab\:\ ░:
 
 ; Config file for using ira to disassemble K240 disk 2 "playk240" v2.000.
-; Last updated 2023-03-31 to incorporate data added from Ghidra disassembly.
+; Updated 2024-05-06 to fix duplicate and erroneous symbol names.
 
 COMMENT	$00000000	|          _  ______  _  _    ___                |
 COMMENT	$00000000	|         | |/ /___ \| || |  / _ \               |
@@ -2808,6 +2808,9 @@ COMMENT	$00067a26	Imperial Transporter warp also uses the Static Inducer sound
 COMMENT	$00067a26	at a diffrent bitrate
 COMMENT	$0006bbd2	nop
 
+; Some of these are duplicate labels but it doesn't matter
+; because they're commented out
+;
 ; SYMBOL	EXECBASE	$00000004
 ; SYMBOL	PRA	$00bfd000
 ; SYMBOL	PRB	$00bfd100
@@ -3123,9 +3126,9 @@ COMMENT	$0006bbd2	nop
 ; Some will fail to appear since the SYMBOL directive only applies to
 ; labels recognized by ira due to being referenced elsewhere. The LABEL
 ; directive would correctly identify those missing. 
-; There are also 15 missing from this version which will end up being
-; named with the prefix LAB_, but this is not critical.
-SYMBOL	start	$00000000
+; There are also 14 missing from this version which will end up being
+; named with the default prefix LAB_, but this is not critical.
+;SYMBOL	start	$00000000
 SYMBOL	SECSTRT_0	$00000000
 SYMBOL	_00024	$00000024
 SYMBOL	_00042	$00000042
@@ -5043,27 +5046,27 @@ SYMBOL	switchdataD_0200c7fa	$0000c7fa
 SYMBOL	switchdataD_0200c802	$0000c802
 SYMBOL	switchdataD_0200c80a	$0000c80a
 SYMBOL	switchdataD_0200c812	$0000c812
-SYMBOL	unk0C816	$0000c816
+;SYMBOL	unk0C816	$0000c816
 SYMBOL	caseD_3c	$0000c816
-SYMBOL	caseD_3d	$0000c816
-SYMBOL	caseD_3e	$0000c816
-SYMBOL	caseD_3f	$0000c816
+;SYMBOL	caseD_3d	$0000c816
+;SYMBOL	caseD_3e	$0000c816
+;SYMBOL	caseD_3f	$0000c816
 SYMBOL	_0C830	$0000c830
 SYMBOL	_0C84A	$0000c84a
-SYMBOL	caseD_3b	$0000c85a
+;SYMBOL	caseD_3b	$0000c85a
 SYMBOL	ret_0C85A	$0000c85a
-SYMBOL	caseD_3a	$0000c85a
+;SYMBOL	caseD_3a	$0000c85a
 SYMBOL	caseD_40	$0000c860
-SYMBOL	unk0C860	$0000c860
-SYMBOL	caseD_35	$0000c860
-SYMBOL	caseD_36	$0000c860
-SYMBOL	caseD_41	$0000c860
+;SYMBOL	unk0C860	$0000c860
+;SYMBOL	caseD_35	$0000c860
+;SYMBOL	caseD_36	$0000c860
+;SYMBOL	caseD_41	$0000c860
 SYMBOL	caseD_38	$0000c890
-SYMBOL	caseD_43	$0000c890
-SYMBOL	caseD_42	$0000c890
-SYMBOL	unk0C890	$0000c890
-SYMBOL	caseD_39	$0000c890
-SYMBOL	caseD_37	$0000c890
+;SYMBOL	caseD_43	$0000c890
+;SYMBOL	caseD_42	$0000c890
+;SYMBOL	unk0C890	$0000c890
+;SYMBOL	caseD_39	$0000c890
+;SYMBOL	caseD_37	$0000c890
 SYMBOL	loop0C892	$0000c892
 SYMBOL	_0C8C4	$0000c8c4
 SYMBOL	_0C8D0	$0000c8d0
@@ -6636,7 +6639,7 @@ SYMBOL	_15F14	$00015f14
 SYMBOL	_15F22	$00015f22
 SYMBOL	_15F32	$00015f32
 SYMBOL	_DecrementAtkDelay	$00015f3c
-SYMBOL	_ret-1_15F4A	$00015f4a
+SYMBOL	_ret1_15F4A	$00015f4a
 SYMBOL	_AliRetaliate	$00015f4e
 SYMBOL	_15F5E	$00015f5e
 SYMBOL	_15F7A	$00015f7a
@@ -6663,11 +6666,11 @@ SYMBOL	_16188	$00016188
 SYMBOL	_DailyAli2Atk	$000161a2
 SYMBOL	_161C8	$000161c8
 SYMBOL	_16210	$00016210
-SYMBOL	_DailyAli2Atk	$00016216
+SYMBOL	_DailyAli2Attk	$00016216
 SYMBOL	ret16248	$00016248
 SYMBOL	_Ali2Flt	$0001624a
 SYMBOL	_1626C	$0001626c
-SYMBOL	_Ali2Flt	$0001628e
+SYMBOL	_Ali2Fleet	$0001628e
 SYMBOL	_162BC	$000162bc
 SYMBOL	_TylTargetAst	$00016304
 SYMBOL	loop16342	$00016342
@@ -6683,7 +6686,7 @@ SYMBOL	_NotMisl2Day	$00016416
 SYMBOL	_1643C	$0001643c
 SYMBOL	_NoMassPod	$0001644e
 SYMBOL	ret16494	$00016494
-SYMBOL	_DailyAli3Atk	$00016496
+SYMBOL	_DailyAli3Attk	$00016496
 SYMBOL	_164C6	$000164c6
 SYMBOL	_164DC	$000164dc
 SYMBOL	_16518	$00016518
@@ -6711,10 +6714,10 @@ SYMBOL	loop16820	$00016820
 SYMBOL	_Alert1684C	$0001684c
 SYMBOL	_Clr91b3	$0001685c
 SYMBOL	_Misl_16864	$00016864
-SYMBOL	_DailyAli5Atk	$0001688e
+SYMBOL	_DailyAli5Attk	$0001688e
 SYMBOL	ret168BC	$000168bc
 SYMBOL	_DailyAli6Atk	$000168be
-SYMBOL	_DailyAli6Atk	$000168e2
+SYMBOL	_DailyAli6Attk	$000168e2
 SYMBOL	ret1690E	$0001690e
 SYMBOL	_16910	$00016910
 SYMBOL	_16930	$00016930
@@ -6754,7 +6757,7 @@ SYMBOL	_16CA0	$00016ca0
 SYMBOL	_16CB4	$00016cb4
 SYMBOL	_16CC0	$00016cc0
 SYMBOL	_16CE6	$00016ce6
-SYMBOL	_ret-1_16CF0	$00016cf0
+SYMBOL	_ret1_16CF0	$00016cf0
 SYMBOL	_AliAstEvacuate	$00016cf4
 SYMBOL	arr16D22	$00016d22
 SYMBOL	_Ali123Evacuate	$00016d3a
@@ -6838,7 +6841,7 @@ SYMBOL	_17556	$00017556
 SYMBOL	ret1757E	$0001757e
 SYMBOL	_Satellite17580	$00017580
 SYMBOL	_175B2	$000175b2
-SYMBOL	_IntelFleetDest	$000175b8
+SYMBOL	_IntelFleetDst	$000175b8
 SYMBOL	_175EE	$000175ee
 SYMBOL	_NewAliFleet	$000175f4
 SYMBOL	loop17602	$00017602
