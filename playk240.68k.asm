@@ -1,25 +1,5 @@
 ; IRA V2.09 (Mar  1 2020) (c)1993-1995 Tim Ruehsen
 ; (c)2009-2015 Frank Wille, (c)2014-2017 Nicolas Bastien
-;
-; |          _  ______  _  _    ___                |
-; |         | |/ /___ \| || |  / _ \               |
-; |         | ' /  __) | || |_| | | |              |
-; |         | . \ / __/|__   _| |_| | v2.000       |
-; |     _ _ |_|\_\_____|  |_|  \___/  _    _       |
-; |  __| (_)___ __ _ ______ ___ _ __ | |__| |_  _  |
-; | / _` | (_-</ _` (_-<_-</ -_) '  \| '_ \ | || | |
-; | \__,_|_/__/\__,_/__/__/\___|_|_|_|_.__/_|\_, | |
-; |    <https://tetracorp.github.io/k240/>   |__/  |
-; 
-; K240 is copyright 1994 Gremlin Graphics.
-; This annotated disassembly is believed to constitute fair use
-; for the purpose of analysis and commentary.
-; 
-; Disassemble using this config file:
-; ira -A -keepzh -newstyle -compat=bi -config playk240
-; 
-; Reassemble from the source code:
-; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.68k.asm
 
 EXT_0000	EQU	$1
 ABSEXECBASE	EQU	$4
@@ -106,6 +86,25 @@ _DOSFreeSignal	EQU	-336
 	SECTION S_0,CODE
 
 SECSTRT_0:
+; |          _  ______  _  _    ___                |
+; |         | |/ /___ \| || |  / _ \               |
+; |         | ' /  __) | || |_| | | |              |
+; |         | . \ / __/|__   _| |_| | v2.000       |
+; |     _ _ |_|\_\_____|  |_|  \___/  _    _       |
+; |  __| (_)___ __ _ ______ ___ _ __ | |__| |_  _  |
+; | / _` | (_-</ _` (_-<_-</ -_) '  \| '_ \ | || | |
+; | \__,_|_/__/\__,_/__/__/\___|_|_|_|_.__/_|\_, | |
+; |    <https://tetracorp.github.io/k240/>   |__/  |
+; 
+; K240 is copyright 1994 Gremlin Graphics.
+; This annotated disassembly is believed to constitute fair use
+; for the purpose of analysis and commentary.
+; 
+; Disassemble using this config file:
+; ira -A -keepzh -newstyle -compat=bi -config playk240
+; 
+; Reassemble from the source code:
+; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.68k.asm
 	SF	intErr			;00000: 51f90001aad6
 	SUBA.L	A1,A1			;00006: 93c9
 	MOVEA.L	ABSEXECBASE.W,A6	;00008: 2c780004
@@ -35805,26 +35804,40 @@ ptr1AB26:
 	DS.L	4			;1ab26
 	DS.W	1			;1ab36
 strWireplanMGL:
-	DC.L	$00005a00,$0000274a,$6b323430,$5f333a77 ;1ab38
-	DC.L	$69726570,$6c616e2e,$6d676c00 ;1ab48
+	DC.L	$00005a00,$0000274a	;1ab38
+	;1ab40
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$77,$69,$72,$65,$70,$6c,$61,$6e,$2e
+	;DC.B	$6d,$67,$6c,$00
+	DC.B	"k240_3:wireplan.mgl",0
 strScitekMGL:
-	DC.L	$00006506,$00004673,$6b323430,$5f333a73 ;1ab54
-	DC.L	$63697465,$6b2e6d67	;1ab64
-	DC.W	$6c00			;1ab6c
+	DC.L	$00006506,$00004673	;1ab54
+	;1ab5c
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$63,$69,$74,$65,$6b,$2e,$6d,$67
+	;DC.B	$6c,$00
+	DC.B	"k240_3:scitek.mgl",0
 strTetraMGL:
-	DC.L	$0000524c,$00003d37,$6b323430,$5f323a74 ;1ab6e
-	DC.L	$65747261,$2e6d676c	;1ab7e
-	DS.W	1			;1ab86
+	DC.L	$0000524c,$00003d37	;1ab6e
+	;1ab76
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$74,$65,$74,$72,$61,$2e,$6d,$67,$6c
+	;DC.B	$00,$00
+	DC.B	"k240_2:tetra.mgl",0,0
 strHologramMGL:
-	DC.L	$0000408a,$00003319,$6b323430,$5f323a68 ;1ab88
-	DC.L	$6f6c6f67,$72616d2e,$6d676c00 ;1ab98
+	DC.L	$0000408a,$00003319	;1ab88
+	;1ab90
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$68,$6f,$6c,$6f,$67,$72,$61,$6d,$2e
+	;DC.B	$6d,$67,$6c,$00
+	DC.B	"k240_2:hologram.mgl",0
 strSatpicMGL:
-	DC.L	$00004a54,$00003846,$6b323430,$5f333a73 ;1aba4
-	DC.L	$61747069,$632e6d67	;1abb4
-	DC.W	$6c00			;1abbc
+	DC.L	$00004a54,$00003846	;1aba4
+	;1abac
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$61,$74,$70,$69,$63,$2e,$6d,$67
+	;DC.B	$6c,$00
+	DC.B	"k240_3:satpic.mgl",0
 strLangMGL:
-	DC.L	$000012f8,$000005e3,$6b323430,$5f323a6c ;1abbe
-	DC.L	$616e672e,$6d676c00	;1abce
+	DC.L	$000012f8,$000005e3	;1abbe
+	;1abc6
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$6c,$61,$6e,$67,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:lang.mgl",0
 arrShopMGL:
 	DC.L	strShop1MGL		;1abd6: 0001abee
 	DC.L	strShop2MGL		;1abda: 0001ac08
@@ -35833,29 +35846,41 @@ arrShopMGL:
 	DC.L	strShop5MGL		;1abe6: 0001ac56
 	DC.L	strShop6MGL		;1abea: 0001ac70
 strShop1MGL:
-	DC.L	$00005100,$0000289c,$6b323430,$5f333a73 ;1abee
-	DC.L	$686f7031,$2e6d676c	;1abfe
-	DS.W	1			;1ac06
+	DC.L	$00005100,$0000289c	;1abee
+	;1abf6
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$68,$6f,$70,$31,$2e,$6d,$67,$6c
+	;DC.B	$00,$00
+	DC.B	"k240_3:shop1.mgl",0,0
 strShop2MGL:
-	DC.L	$00005100,$00002655,$6b323430,$5f333a73 ;1ac08
-	DC.L	$686f7032,$2e6d676c	;1ac18
-	DS.W	1			;1ac20
+	DC.L	$00005100,$00002655	;1ac08
+	;1ac10
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$68,$6f,$70,$32,$2e,$6d,$67,$6c
+	;DC.B	$00,$00
+	DC.B	"k240_3:shop2.mgl",0,0
 strShop3MGL:
-	DC.L	$00005100,$00002765,$6b323430,$5f333a73 ;1ac22
-	DC.L	$686f7033,$2e6d676c	;1ac32
-	DS.W	1			;1ac3a
+	DC.L	$00005100,$00002765	;1ac22
+	;1ac2a
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$68,$6f,$70,$33,$2e,$6d,$67,$6c
+	;DC.B	$00,$00
+	DC.B	"k240_3:shop3.mgl",0,0
 strShop4MGL:
-	DC.L	$00005100,$000024ca,$6b323430,$5f333a73 ;1ac3c
-	DC.L	$686f7034,$2e6d676c	;1ac4c
-	DS.W	1			;1ac54
+	DC.L	$00005100,$000024ca	;1ac3c
+	;1ac44
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$68,$6f,$70,$34,$2e,$6d,$67,$6c
+	;DC.B	$00,$00
+	DC.B	"k240_3:shop4.mgl",0,0
 strShop5MGL:
-	DC.L	$00005100,$0000204f,$6b323430,$5f333a73 ;1ac56
-	DC.L	$686f7035,$2e6d676c	;1ac66
-	DS.W	1			;1ac6e
+	DC.L	$00005100,$0000204f	;1ac56
+	;1ac5e
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$68,$6f,$70,$35,$2e,$6d,$67,$6c
+	;DC.B	$00,$00
+	DC.B	"k240_3:shop5.mgl",0,0
 strShop6MGL:
-	DC.L	$00003600,$0000183e,$6b323430,$5f333a73 ;1ac70
-	DC.L	$686f7036,$2e6d676c	;1ac80
-	DS.W	1			;1ac88
+	DC.L	$00003600,$0000183e	;1ac70
+	;1ac78
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$73,$68,$6f,$70,$36,$2e,$6d,$67,$6c
+	;DC.B	$00,$00
+	DC.B	"k240_3:shop6.mgl",0,0
 arrPlanetMGL:
 ; Note that the planets are not in expected order; e.g. alien 1
 ; loads planet3.mgl
@@ -35866,29 +35891,41 @@ arrPlanetMGL:
 	DC.L	strPlanet4MGL		;1ac9a: 0001ad32
 	DC.L	strPlanet2MGL		;1ac9e: 0001ad56
 strPlanet3MGL:
-	DC.L	$00002a00,$00001c7b,$6b323430,$5f323a73 ;1aca2
-	DC.L	$63656e61,$72696f2f,$706c616e,$6574332e ;1acb2
-	DC.L	$6d676c00		;1acc2
+	DC.L	$00002a00,$00001c7b	;1aca2
+	;1acaa
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$70,$6c,$61,$6e,$65,$74,$33,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/planet3.mgl",0
 strPlanet5MGL:
-	DC.L	$00005700,$0000279e,$6b323430,$5f323a73 ;1acc6
-	DC.L	$63656e61,$72696f2f,$706c616e,$6574352e ;1acd6
-	DC.L	$6d676c00		;1ace6
+	DC.L	$00005700,$0000279e	;1acc6
+	;1acce
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$70,$6c,$61,$6e,$65,$74,$35,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/planet5.mgl",0
 strPlanet1MGL:
-	DC.L	$00004f80,$0000282a,$6b323430,$5f323a73 ;1acea
-	DC.L	$63656e61,$72696f2f,$706c616e,$6574312e ;1acfa
-	DC.L	$6d676c00		;1ad0a
+	DC.L	$00004f80,$0000282a	;1acea
+	;1acf2
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$70,$6c,$61,$6e,$65,$74,$31,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/planet1.mgl",0
 strPlanet6MGL:
-	DC.L	$00005e80,$00002553,$6b323430,$5f323a73 ;1ad0e
-	DC.L	$63656e61,$72696f2f,$706c616e,$6574362e ;1ad1e
-	DC.L	$6d676c00		;1ad2e
+	DC.L	$00005e80,$00002553	;1ad0e
+	;1ad16
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$70,$6c,$61,$6e,$65,$74,$36,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/planet6.mgl",0
 strPlanet4MGL:
-	DC.L	$00003780,$0000193e,$6b323430,$5f323a73 ;1ad32
-	DC.L	$63656e61,$72696f2f,$706c616e,$6574342e ;1ad42
-	DC.L	$6d676c00		;1ad52
+	DC.L	$00003780,$0000193e	;1ad32
+	;1ad3a
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$70,$6c,$61,$6e,$65,$74,$34,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/planet4.mgl",0
 strPlanet2MGL:
-	DC.L	$00005b80,$00002a1f,$6b323430,$5f323a73 ;1ad56
-	DC.L	$63656e61,$72696f2f,$706c616e,$6574322e ;1ad66
-	DC.L	$6d676c00		;1ad76
+	DC.L	$00005b80,$00002a1f	;1ad56
+	;1ad5e
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$70,$6c,$61,$6e,$65,$74,$32,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/planet2.mgl",0
 arrAlienPMGL:
 ; k240:scenario/alienp5.mgl
 	DC.L	strAlienP5MGL		;1ad7a: 0001ad92
@@ -35898,57 +35935,82 @@ arrAlienPMGL:
 	DC.L	strAlienP4MGL		;1ad8a: 0001ae22
 	DC.L	strAlienP1MGL		;1ad8e: 0001ae46
 strAlienP5MGL:
-	DC.L	$00001068,$00000859,$6b323430,$5f323a73 ;1ad92
-	DC.L	$63656e61,$72696f2f,$616c6965,$6e70352e ;1ada2
-	DC.L	$6d676c00		;1adb2
+	DC.L	$00001068,$00000859	;1ad92
+	;1ad9a
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$61,$6c,$69,$65,$6e,$70,$35,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/alienp5.mgl",0
 strAlienP3MGL:
-	DC.L	$00001488,$00000abd,$6b323430,$5f323a73 ;1adb6
-	DC.L	$63656e61,$72696f2f,$616c6965,$6e70332e ;1adc6
-	DC.L	$6d676c00		;1add6
+	DC.L	$00001488,$00000abd	;1adb6
+	;1adbe
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$61,$6c,$69,$65,$6e,$70,$33,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/alienp3.mgl",0
 strAlienP2MGL:
-	DC.L	$00000aa0,$0000069b,$6b323430,$5f323a73 ;1adda
-	DC.L	$63656e61,$72696f2f,$616c6965,$6e70322e ;1adea
-	DC.L	$6d676c00		;1adfa
+	DC.L	$00000aa0,$0000069b	;1adda
+	;1ade2
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$61,$6c,$69,$65,$6e,$70,$32,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/alienp2.mgl",0
 strAlienP6MGL:
-	DC.L	$00000b80,$00000852,$6b323430,$5f323a73 ;1adfe
-	DC.L	$63656e61,$72696f2f,$616c6965,$6e70362e ;1ae0e
-	DC.L	$6d676c00		;1ae1e
+	DC.L	$00000b80,$00000852	;1adfe
+	;1ae06
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$61,$6c,$69,$65,$6e,$70,$36,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/alienp6.mgl",0
 strAlienP4MGL:
-	DC.L	$00001538,$0000095f,$6b323430,$5f323a73 ;1ae22
-	DC.L	$63656e61,$72696f2f,$616c6965,$6e70342e ;1ae32
-	DC.L	$6d676c00		;1ae42
+	DC.L	$00001538,$0000095f	;1ae22
+	;1ae2a
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$61,$6c,$69,$65,$6e,$70,$34,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/alienp4.mgl",0
 strAlienP1MGL:
-	DC.L	$00001ca8,$00000de8,$6b323430,$5f323a73 ;1ae46
-	DC.L	$63656e61,$72696f2f,$616c6965,$6e70312e ;1ae56
-	DC.L	$6d676c00		;1ae66
+	DC.L	$00001ca8,$00000de8	;1ae46
+	;1ae4e
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$73,$63,$65,$6e,$61,$72,$69,$6f,$2f
+	;DC.B	$61,$6c,$69,$65,$6e,$70,$31,$2e,$6d,$67,$6c,$00
+	DC.B	"k240_2:scenario/alienp1.mgl",0
 strOutro1MGL:
 ; Win screen
-	DC.L	$00006848,$000061f5,$6b323430,$5f333a6f ;1ae6a
-	DC.L	$7574726f,$312e6d67	;1ae7a
-	DC.W	$6c00			;1ae82
+	DC.L	$00006848,$000061f5	;1ae6a
+	;1ae72
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$6f,$75,$74,$72,$6f,$31,$2e,$6d,$67
+	;DC.B	$6c,$00
+	DC.B	"k240_3:outro1.mgl",0
 strOutro2MGL:
 ; Defeat screen
-	DC.L	$000074e2,$00006a4f,$6b323430,$5f333a6f ;1ae84
-	DC.L	$7574726f,$322e6d67	;1ae94
-	DC.W	$6c00			;1ae9c
+	DC.L	$000074e2,$00006a4f	;1ae84
+	;1ae8c
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$6f,$75,$74,$72,$6f,$32,$2e,$6d,$67
+	;DC.B	$6c,$00
+	DC.B	"k240_3:outro2.mgl",0
 strOutro3MGL:
 ; Swixaran win screen.
 ; Interesting: The filename here is actually outro1.mgl, the default win screen. There is an outro3 on the disk, and it matches the file size here;
 ; if you rename outro3.mgl to outro1.mgl and defeat the Swixarans, you can see the intended win screen.
-	DC.L	$000084b8,$0000798e,$6b323430,$5f333a6f ;1ae9e
-	DC.L	$7574726f,$312e6d67	;1aeae
-	DC.W	$6c00			;1aeb6
+	DC.L	$000084b8,$0000798e	;1ae9e
+	;1aea6
+	;DC.B	$6b,$32,$34,$30,$5f,$33,$3a,$6f,$75,$74,$72,$6f,$31,$2e,$6d,$67
+	;DC.B	$6c,$00
+	DC.B	"k240_3:outro1.mgl",0
 strEnglishMGL:
-	DC.L	$000063c4,$00003a07,$6b323430,$5f323a65 ;1aeb8
-	DC.L	$6e676c69,$73682e6d,$676c0000 ;1aec8
+	DC.L	$000063c4,$00003a07	;1aeb8
+	;1aec0
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$65,$6e,$67,$6c,$69,$73,$68,$2e,$6d
+	;DC.B	$67,$6c,$00,$00
+	DC.B	"k240_2:english.mgl",0,0
 strFrenchMGL:
-	DC.L	$000064ec,$00003b7a,$6b323430,$5f323a66 ;1aed4
-	DC.L	$72656e63,$682e6d67	;1aee4
-	DC.W	$6c00			;1aeec
+	DC.L	$000064ec,$00003b7a	;1aed4
+	;1aedc
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$66,$72,$65,$6e,$63,$68,$2e,$6d,$67
+	;DC.B	$6c,$00
+	DC.B	"k240_2:french.mgl",0
 strGermanMGL:
-	DC.L	$00006922,$00004230,$6b323430,$5f323a67 ;1aeee
-	DC.L	$65726d61,$6e2e6d67	;1aefe
-	DC.W	$6c00			;1af06
+	DC.L	$00006922,$00004230	;1aeee
+	;1aef6
+	;DC.B	$6b,$32,$34,$30,$5f,$32,$3a,$67,$65,$72,$6d,$61,$6e,$2e,$6d,$67
+	;DC.B	$6c,$00
+	DC.B	"k240_2:german.mgl",0
 ptr1AF08:
 	DS.L	1			;1af08
 ptr1AF0C:
@@ -36595,8 +36657,11 @@ flgTelescope:
 flgIceman:
 	DS.B	1			;1d4b7
 	DS.L	2			;1d4b8
-	DC.L	$00003031,$32333435,$36373839,$41424344 ;1d4c0
-	DC.L	$45460000		;1d4d0
+	DS.W	1			;1d4c0
+	;1d4c2
+	;DC.B	$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$41,$42,$43,$44,$45,$46
+	DC.B	"0123456789ABCDEF"
+	DS.W	1			;1d4d2
 ptr1D4D4:
 	DS.L	2			;1d4d4
 ptr1D4DC:

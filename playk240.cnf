@@ -19,7 +19,7 @@ COMMENT	$00000000	This annotated disassembly is believed to constitute fair use
 COMMENT	$00000000	for the purpose of analysis and commentary.
 COMMENT	$00000000	
 COMMENT	$00000000	Disassemble using this config file:
-COMMENT	$00000000	ira -A -keepzh -newstyle -compat=bi -config playk240
+COMMENT	$00000000	ira -A -keepzh -newstyle -compat=bi -config playk240 playk240.68k.asm
 COMMENT	$00000000	
 COMMENT	$00000000	Reassemble from the source code:
 COMMENT	$00000000	vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.68k.asm
@@ -48,7 +48,8 @@ CODE	$00004196 - $00004a34
 CODE	$00004a3c - $00004b0e
 CODE	$00004b12 - $00004bd8
 CODE	$00004bdc - $00005364
-CODE	$00005378 - $00006016
+CODE	$00005378 - $00005C48
+CODE	$00005C4E - $00006016
 CODE	$0000605A - $00006836
 CODE	$00006840 - $000070be
 CODE	$000070c4 - $000088fe
@@ -84,6 +85,39 @@ CODE	$00019736 - $0001A9DC
 
 ; version string
 TEXT	$00006016 - $0000605a
+; filename strings
+TEXT	$0001AB40 - $0001AB54
+TEXT	$0001AB5C - $0001AB6E
+TEXT	$0001AB76 - $0001AB88
+TEXT	$0001AB90 - $0001ABA4
+TEXT	$0001ABAC - $0001ABBE
+TEXT	$0001ABC6 - $0001ABD6
+TEXT	$0001ABF6 - $0001AC08
+TEXT	$0001AC10 - $0001AC22
+TEXT	$0001AC2A - $0001AC3C
+TEXT	$0001AC44 - $0001AC56
+TEXT	$0001AC5E - $0001AC70
+TEXT	$0001AC78 - $0001AC8A
+TEXT	$0001ACAA - $0001ACC6
+TEXT	$0001ACCE - $0001ACEA
+TEXT	$0001ACF2 - $0001AD0E
+TEXT	$0001AD16 - $0001AD32
+TEXT	$0001AD3A - $0001AD56
+TEXT	$0001AD5E - $0001AD7A
+TEXT	$0001AD9A - $0001ADB6
+TEXT	$0001ADBE - $0001ADDA
+TEXT	$0001ADE2 - $0001ADFE
+TEXT	$0001AE06 - $0001AE22
+TEXT	$0001AE2A - $0001AE46
+TEXT	$0001AE4E - $0001AE6A
+TEXT	$0001AE72 - $0001AE84
+TEXT	$0001AE8C - $0001AE9E
+TEXT	$0001AEA6 - $0001AEB8
+TEXT	$0001AEC0 - $0001AED4
+TEXT	$0001AEDC - $0001AEEE
+TEXT	$0001AEF6 - $0001AF08
+; other strings
+TEXT	$0001D4C2 - $0001D4D2
 
 ; the rest are added later
 EQU	DMACONR_2	$00000204.W
@@ -854,7 +888,12 @@ COMMENT	$0000ec0a	misl
 COMMENT	$0000ec18	Terran missile:
 COMMENT	$0000ec22	Terran missile, non-Tylaran alien:
 COMMENT	$0000ec28	Terran missile, non-Tylaran alien, not known to player
-COMMENT	$0000ec2c	Fired by alien, or vs Tylaran, or known to player. In other words, the player cannot fire missiles against an enemy asteroid that he has not formally discovered (usually happens when you can see an asteroid with Telescope cheat, but haven't officially sent a scout ship to find it yet). HOWEVER, Tylaran are exempt, and you can fire missiles at undiscovered Tylaran asteroids all you like.
+COMMENT	$0000ec2c	Fired by alien, or vs Tylaran, or known to player.
+COMMENT	$0000ec2c	In other words, the player cannot fire missiles against an enemy
+COMMENT	$0000ec2c	asteroid that he has not formally discovered (usually happens when
+COMMENT	$0000ec2c	you can see an asteroid with Telescope cheat, but haven't officially
+COMMENT	$0000ec2c	sent a scout ship to find it yet). HOWEVER, Tylaran are exempt, and
+COMMENT	$0000ec2c	you can fire missiles at undiscovered Tylaran asteroids all you like.
 COMMENT	$0000ec86	missiles launching
 COMMENT	$0000ecd4	Alien missiles
 COMMENT	$0000ed12	Terran missiles

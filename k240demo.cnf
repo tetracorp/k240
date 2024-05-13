@@ -1,4 +1,5 @@
-MACHINE 68000 ENTRY $00000000
+MACHINE 68000
+ENTRY $00000000
 OFFSET $00000000
 CODE $00000000 - $000000F2
 CODE $000001EC - $0000022A
@@ -24,7 +25,7 @@ CODE $00003A8C - $00003BF0
 CODE $00003C90 - $00003DF4
 CODE $00003DF8 - $00004AF2
 CODE $00004AF4 - $000052BC
-CODE $000052BC - $00005DE8
+CODE $000052BE - $00005DE8
 CODE $00005DEC - $0000615A
 CODE $0000615E - $00006856
 CODE $0000685A - $00006A6A
@@ -80,10 +81,31 @@ TEXT $00029B57 - $00029BB8
 TEXT $00029BB8 - $00029C52
 CODE $0006958C - $0006958C
 
-TEXT $00012330 - $000123DA
-TEXT $000123F2 - $0001249A
-TEXT $000124B2 - $00012566
-TEXT $0001257E - $00012630
+TEXT $00012338 - $0001234E
+TEXT $00012356 - $0001236A
+TEXT $00012372 - $00012386
+TEXT $0001238E - $000123A4
+TEXT $000123AC - $000123C0
+TEXT $000123C8 - $000123DA
+TEXT $000123FA - $0001240E
+TEXT $00012416 - $0001242A
+TEXT $00012432 - $00012446
+TEXT $0001244E - $00012462
+TEXT $0001246A - $0001247E
+TEXT $00012486 - $0001249A
+TEXT $000124BA - $000124D0
+TEXT $000124D8 - $000124EE
+TEXT $000124F6 - $0001250C
+TEXT $00012514 - $0001252A
+TEXT $00012532 - $00012548
+TEXT $00012550 - $00012566
+TEXT $00012586 - $0001259C
+TEXT $000125A4 - $000125BA
+TEXT $000125C2 - $000125D8
+TEXT $000125E0 - $000125F6
+TEXT $000125FE - $00012614
+TEXT $0001261C - $00012632
+TEXT $00012B54 - $00012B58
 
 SYMBOL	tblBufferList	$000004a6
 COMMENT	$00000000	K240 CU Amiga Demo disassembly
@@ -94,7 +116,11 @@ COMMENT	$00000000	This annotated disassembly is believed to constitute fair use
 COMMENT	$00000000	for the purpose of analysis and commentary.
 COMMENT	$00000000	
 COMMENT	$00000000	See the main playk240.68k.asm file for annotations of the main game.
-COMMENT	$00000000	This file will mainly comment the differences in the demo.
+COMMENT	$00000000	This file will mainly comment the differences between demo and final.
+
+COMMENT	$00000320	Write to CON:
+COMMENT	$00000320	Only DOS write in demo. No save file writing code.
+COMMENT	$00000326	Different year and coords
 COMMENT	$000004A6	Buffer list 
 COMMENT	$000004A6	Buffer 00  40,000 chip    Screen buffer 320x200x5 bitplanes
 COMMENT	$000004A6	Buffer 01  40,000 chip    Screen buffer
@@ -124,10 +150,10 @@ COMMENT	$000006F4	Final sets a clicked flag here
 COMMENT	$00000690	Final puts cheat code here
 SYMBOL	_WaitKey	$0000071a
 SYMBOL	bFrameRule	$0002493E
-SYMBOL	flgpaused	$0002493C
+SYMBOL	flgPaused	$0002493C
 SYMBOL	textarea	$00045890
 SYMBOL	_SetMousePtr	$00000B44
-SYMBOL	intScreen	$00024970
+SYMBOL	intPointer	$00024970
 COMMENT	$00000b52	Final changes pointer here based on screen
 SYMBOL	flgWait	$00000ba6
 SYMBOL	_SeedRNG	$00000BE8
@@ -137,7 +163,289 @@ SYMBOL	_LoadFile	$00000C52
 COMMENT	$00000CD6	356: PLEASE INSERT K240 GAME DISK x IN ANY DRIVE...
 SYMBOL	_GetStringA0	$00004248
 SYMBOL	_DiskReq	$0000488e
-COMMENT	$00000CB4	In demo, 
-COMMENT	$00000CB4	
+COMMENT	$00000CB4	Will always load disk 1
+COMMENT	$00000CB4	char 3 of filename is the 0 in k240
+SYMBOL	_InitAstCoords	$0000DAFE
+COMMENT	$00012330	Final has k240_2:idfile here
+COMMENT	$0001234E	scitek.mgl has a lighter palette in demo, different compressed filesize
+COMMENT	$0001234E	18,052 instead of 18,035 bytes for final
+COMMENT	$000123A4	demo.mgl/demo2.mgl replace satpic.mgl/lang.mgl
+COMMENT	$000124B2	Demo last two aliens are in opposite order to final
+COMMENT	$00012614	Outro and language MGL file entries missing from demo
+COMMENT	$00012614	Some variables added in final e.g. language and manual code status
+SYMBOL	palette	$000126B2
+SYMBOL	palette_standard	$000126F2
+SYMBOL	palette_dark	$00012732
+COMMENT	$000127DA	Alien 5 and 6 swapped in demo
+COMMENT	$0001294A	Demo differs
+COMMENT	$0001295E	Intel prices would go here
+COMMENT	$00012AFA	DF0: save games but no HD save game names
+COMMENT	$00012AFA	
+SYMBOL	strDF0K2401	$00012afa
+SYMBOL	strDF0K2402	$00012b06
+SYMBOL	strDF0K2403	$00012b12
+SYMBOL	strDF0K2404	$00012b1e
+COMMENT	$00012AFA	final has 16 extra blank bytes
+COMMENT	$00012B5A	Final has a save game section here
+COMMENT	$00012B5A	Also list of starting blueprints
+SYMBOL	textField01	$00013F24
+SYMBOL	textField02	$00013F28
+SYMBOL	textField03	$00013F2C
+SYMBOL	textField04	$00013F30
+SYMBOL	textField05	$00013F34
+SYMBOL	textField06	$00013F38
+SYMBOL	textField07	$00013F3C
+SYMBOL	textField08	$00013F40
+SYMBOL	textField09	$00013F44
+SYMBOL	txtBuffer	$00013F48
+COMMENT	$00014A2C	Final has PANEL cheat buttons here. Elsewhere in demo.
+COMMENT	$00014A2C	Final also puts cheat strings, keycodes, flags here
+COMMENT	$000120EC	168 bytes: 14 bytes x 12 cheats, probably
+COMMENT	$00012194	PANEL
+COMMENT	$000121B4	Cheat code strings
+COMMENT	$00014BBA	Missile stats
+COMMENT	$00014C12	12th missile type: "UNKNOWN!"
+COMMENT	$00014C12	"OTHER MISSILES ARE AVAILABLE IN THE ACTUAL GAME."
+COMMENT	$00014C12	Cost 0 CR, requires 1 Selenium.
+COMMENT	$00014C12	Dummy missile type for unavailable missiles in demo.
+COMMENT	$00014e56	Differs from final here
+COMMENT	$0004e506	alien sprite list
+SYMBOL	arrShipSpriteList	$0004DB46
+SYMBOL	arrTerranShipStats00	$00014FA4
+SYMBOL	arrAlienShipStats	$000150AC
+SYMBOL	extOSD	$0001516C
+SYMBOL	extDestructor	$000151C4
+SYMBOL	extTerminator	$000151CC
+SYMBOL	extTranspBatls	$00015220
+SYMBOL	arrHPArmrValues	$00015200
+SYMBOL	arrSprHardpoints	$00015310
+SYMBOL	Blast5x5	$000155AE
+SYMBOL	Blast3x3	$000155E0
+SYMBOL	Blast2x2	$000155F2
+SYMBOL	BlastBurn	$000155FA
+COMMENT	$000154fe	Final ends in $fdfc fe00
+SYMBOL	_015566	$00015566
+COMMENT	$00015566	Unique to demo
+COMMENT	$00015592	Unique to demo
+COMMENT	$000153F6	Table used by Rigellian nuke
+COMMENT	$000011BA	d0 = random aster number 22-38
+SYMBOL	ptrHomeAst	$00016CB4
+SYMBOL	ptrCurrentAst	$00016CA8
+SYMBOL	ptrThisAstStats	$00016D28
+SYMBOL	ptrThisAstMap	$00016D1C
+SYMBOL	ptrThisAstBldg	$00016D20
+SYMBOL	ptrThisAstBldgCount	$00016D24
+COMMENT	$00001208	Bitfield 25 same as final
+COMMENT	$0000121E	Differs from final. Presumably CPU production
+SYMBOL	arrStartingOres	$00015D6C
+COMMENT	$0000125A	Starting missiles.
+SYMBOL	flagShowUI	$00002A56
+SYMBOL	flgRedraw	$0002496F
+COMMENT	$00002AD6	Final has a branch after the BSR
+COMMENT	$00002D62	Amiga key scancodes
+COMMENT	$00002DE8	Final has key V for version string here
+COMMENT	$00002E04	Final has version string here.
+SYMBOL	_StasisErr	$00003760
+COMMENT	$00003760	Stasis still here.
+SYMBOL	_PlaceBuilding	$00003768
+COMMENT	$0000377c	Population 680 instead of 684
+COMMENT	$00003860	LANDING PAD TOO NEAR EDGE OF ASTEROID!
+SYMBOL	_intCashGeneral	$00016CB8
+SYMBOL	_intCashBuilding	$00016CBC
+SYMBOL	_intCashVehicles	$00016CC0
+SYMBOL	_intCashIntel	$00016CC4
+SYMBOL	_intCashMissiles	$00016CC8
+COMMENT	$000038A8	Building Armour
+COMMENT	$000038C2	Skyscraper cheat code missing here
+COMMENT	$0000391E	CMPI.B #$01,D7
+COMMENT	$00003998	Final game checks for flash
+COMMENT	$000039E2	YOU CANNOT DEMOLISH BUILDINGS IN THIS DEMO.
+COMMENT	$000039E2	Building demolishing code is missing entirely.
+SYMBOL	_AstEngineWin		$00005a08
+SYMBOL	_BuildMissileWin	$00004af4
+SYMBOL	_BuildSattWin		$00004c94
+SYMBOL	_ColonySummaryWin	$000071da
+SYMBOL	_CommandCentWin		$0000580c
+SYMBOL	_GravityNullWin		$00005a06
+SYMBOL	_HangarWin		$00005460
+SYMBOL	_NormalBldg		$00003a8c
+SYMBOL	_OreStorageWin		$0000574a
+SYMBOL	_OreTeleportWin		$00003a8c
+SYMBOL	_PowerStatusWin		$0000749c
+SYMBOL	_ShipyardWin		$00005a0a
+SYMBOL	_DamageBldg	$00003A8E
+COMMENT	$00003AA6	Half damage with shield generator
+SYMBOL	_DestroyTriggers	$00003BF0
+SYMBOL	tblTerranBldtStats	$00013A42
+SYMBOL	_DestroyAstEngine	$00003d0c
+SYMBOL	_DestroyCommandCen	$00003c90
+SYMBOL	_DestroyGravityNull	$00003cf0
+SYMBOL	_DestroyScreenGen	$00003cfe
+SYMBOL	_DestroyShipyard	$00003d1e
+SYMBOL	_DestroyStorageFacil	$00003ca6
+SYMBOL	_DestroyStorageTower	$00003ca0
+COMMENT	$00003CCC	In final 198 -> 202
+COMMENT	$00003CDA	In final 178 -> 182
+COMMENT	$00003CE4	Final has a check to prevent going negative here
+SYMBOL	tblShipyards	$00017130
+COMMENT	$00003D7E	ADDA.L in final
+SYMBOL	_RandomlyPlaceBldg	$00003DFA
+COMMENT	$00003DFA	This is never called in the demo.
+COMMENT	$00003DFA	It's only called to place a CPU on starting or new colony.
+COMMENT	$00003DFA	But demo has fixed starting asteroid layout and no colonization
+COMMENT	$00003E8C	Skyscraper cheat code missing here.
+SYMBOL	_DisplayText	$00004038
+SYMBOL	_IntToASCII	$000041D2
+COMMENT	$0000425A	Final has a variant here which loads string buffer into A1
+COMMENT	$0000425A	This is followed by a function for making disk requestors
+COMMENT	$0000425A	and for getting the NONE string.
+SYMBOL	textcolor	$00024959
+COMMENT	$00004322	Final has an additional entry here for #$f200
+COMMENT	$00004390	Final has a safety check here for A0 being zero
+COMMENT	$000043CC	Final has a check to cap money at 9,999,999
+SYMBOL	_ErrMsgLine	$00006132
+COMMENT	$00004548	Final build localizes the cash display string here
+COMMENT	$0000456C	Final puts a currency display cap at 9,999,999 here
+SYMBOL	strClock	$00024942
+COMMENT	$00004596	
+COMMENT	$00004596	
+COMMENT	$0000459A	
+COMMENT	$000045B0	-- IN STASIS --
+SYMBOL	tmpTextcolor	$0002495A
+COMMENT	$000045E2	
+SYMBOL	tblMissileStats	$00014BBA
+COMMENT	$00004B56	140 demo, 144 final
+COMMENT	$00004B6A	demo 11 -> 10
+COMMENT	$00004BCC	
+COMMENT	$00004BD4	YOU CANNOT BUILD MISSILES IN THIS DEMO.
+COMMENT	$00004C30	demo: 0c final: 0b
+COMMENT	$00004C60	demo: 11 final: 10
+COMMENT	$00004C94	SPY SATELLITES ARE UNAVAILABLE IN THIS DEMO.
+COMMENT	$00004D4C	NO MISSILE SILOS ON ASTEROID
+COMMENT	$0000583C	
+SYMBOL	winInformation	$0002A192
+COMMENT	$00005450	001e in demo, 0014 in final (30 -> 20)
+COMMENT	$0000545E	Unpause moved to down here in final
+SYMBOL	_VoiceOrSound	$000052CE
+COMMENT	$000052CE	MOVEQ #15,D0
+SYMBOL	_MissileFireWin	$00004D32
+COMMENT	$00004D40	Final game adds a check to prevent you firing alien missiles
+COMMENT	$00004D92	
+COMMENT	$00004D92	
+COMMENT	$00004D92	
+COMMENT	$00004D92	
+COMMENT	$00004D96	
+COMMENT	$00004D96	
+COMMENT	$00004D96	
+COMMENT	$00004D96	
+COMMENT	$00005BD6	TRANSPORTER CARGO BAY FULL!!
+COMMENT	$00005CF2	NO SHIPS WILL BE BUILT IN THIS DEMO. ALSO, MORE SHIP TYPES ARE AVAILABLE IN THE ACTUAL GAME.
+COMMENT	$00006064	YOU CANNOT BUILD AN ORBITAL SPACE DOCK IN THIS DEMO. THIS ALSO MEANS YOU CANNOT BUILD THE LARGER SHIPS.
+COMMENT	$000071F4	YOU HAVE NO COLONY ON THIS ASTEROID!
+COMMENT	$00008E8E	ALERT!! SENSORS REPORT ENEMY SHIPS ENTERING SENSOR RANGE.
+COMMENT	$00008E8E	Final game doesn't have this string or this check.
+COMMENT	$00008E12	Final game has Swixaran cloaked asteroid check here
+COMMENT	$00008E12	This may have been added late in development.
+COMMENT	$00008E12	
+COMMENT	$00008E12	
+COMMENT	$00008E12	
+COMMENT	$00008E12	
+COMMENT	$00008E12	
+COMMENT	$00008E12	
+COMMENT	$00008E1E	740 instead of 750
+COMMENT	$00008E1E	Asteroid sizes are 10 bytes less in demo
+COMMENT	$00008E7A	---- Demo-only alien ship notification code
+COMMENT	$00008EA0	----
+COMMENT	$00008EB6	A SCOUT REPORTS FINDING 1 ASTEROID.
+COMMENT	$00008EC4	Final version has additional code here
+COMMENT	$00008EC4	A SCOUT REPORTS FINDING x ASTEROIDS.
+COMMENT	$00008EDA	0 CR per asteroid found. Final is 5000 CR per asteroid
+COMMENT	$00008EE0	MOVEQ #3,D4
+SYMBOL	_ShipAct01	$00008f80
+SYMBOL	_ShipAct02	$000092cc
+SYMBOL	_ShipAct03	$000093e8
+SYMBOL	_ShipAct04	$00009464
+SYMBOL	_ShipAct05	$0000949e
+SYMBOL	_ShipAct06	$00009000
+SYMBOL	_ShipAct07_LandSurf	$00009068
+SYMBOL	_ShipAct08	$000090ea
+SYMBOL	_ShipAct09_Large	$0000918e
+SYMBOL	_ShipAct0a	$00009ac4
+SYMBOL	_ShipAct0b_Burn	$00009aec
+SYMBOL	_ShipAct0c_Misl	$0000a0e8
+SYMBOL	_ShipAct0d_Expl	$00009d7a
+SYMBOL	_ShipAct0e_Misl	$0000a848
+SYMBOL	_ShipAct0f_Vortex	$0000aeb8
+SYMBOL	_ShipAct10	$0000a3ae
+SYMBOL	_ShipAct11_Large	$00009200
+SYMBOL	_ShipAct12	$0000a2a4
+SYMBOL	_ShipAct13_Scout	$00008f08
+SYMBOL	_ShipAct14_Survey	$00008f48
+SYMBOL	_ShipAct15_NewAst	$0000d896
+SYMBOL	_ShipAct16_LandPad	$00009272
+SYMBOL	_ShipAct17_Explore	$00008d50
+SYMBOL	_ShipAct18_ScoutRep	$00008eb4
+SYMBOL	_ShipAct19	$000094a8
+SYMBOL	_ShipAct1a_Ret0	$00008c62
+SYMBOL	_ShipAct1b	$00009108
+SYMBOL	_ShipAct1c_Colonize	$0000917a
+SYMBOL	_ShipAct1d	$0000ba26
+SYMBOL	_ShipAct1e	$0000baa0
+SYMBOL	_ShipAct1f_Rotate	$00009aa2
+SYMBOL	_ShipAct20_MissileHit	$0000a7dc
+SYMBOL	_ShipAct21_Shield150	$00008d46
+SYMBOL	_ShipAct22	$00011352
+SYMBOL	_ShipAct23	$00009140
+SYMBOL	_ShipAct24_MeteorHit	$0000a7a6
+SYMBOL	_ShipAct25_Destroy	$00009fec
+SYMBOL	_ShipAct26	$00008d2e
+SYMBOL	_ShipAct27	$00008eea
+SYMBOL	_ShipAct28	$00008cca
+SYMBOL	_ShipAct29_GoldVortex	$0000afe8
+SYMBOL	_ShipAct2a_ScoutSpy	$0000813c
+SYMBOL	_ShipAct2b_SpySat	$00008c66
+SYMBOL	_ShipAct2c_Remove	$0000a0b2
+COMMENT	$00008C5E	_ShipAct2d added in final game
+COMMENT	$00008C66	Spy satellite code missing
+COMMENT	$00009000	Swixaran-specific code in final
+COMMENT	$00009140	Different code for ship action 23
+COMMENT	$0000918E	TRANSPORTER HAS NOT STARTED A NEW COLONY. THIS IS UNAVAILABLE ON THIS DEMO. YOU ARE LIMITED TO ONE ASTEROID.
+COMMENT	$00009278	landing pad
+COMMENT	$00009278	Different landing code
+SYMBOL	_AddShip	$000094F4
+COMMENT	$00009546	final 48 -> 50
+COMMENT	$00009560	this 25 to 47 line is cut from the final version
+COMMENT	$0000996A	Final game has a bunch extra code here
+COMMENT	$00009BA4	Final game doubles Swixaran damage here
+COMMENT	$00009C36	HP is at 48 instead of 50 due to smaller ship structure
+COMMENT	$00009EE8	Final adds a check here to clear the Imperial Transporter's cargo bay if destroyed
+COMMENT	$00009EFE	5000 credit bounty for destroying alien transporter removed
+COMMENT	$00009F10	10000 credit bounty for destoying alien battleship removed
+COMMENT	$00009F26	47 -> 40 in final
+COMMENT	$00009F3E	Final game subtracts 1 from intTotalShips
+COMMENT	$0000A008	No bounty given in demo
+COMMENT	$0000A01A	No bounty given in demo
+SYMBOL	intCurrentAlienID	$0002B4E2
+SYMBOL	intTotalShips	$00016FEC
+COMMENT	$0000A0F0	Azx warhead 00 static inducer already in
+SYMBOL	intCometHoriz	$00016FE0
+COMMENT	$0000A1EC	Azx warhead 00
+SYMBOL	_FitRandomHP	$0000A246
+COMMENT	$0000A290	Rerolls static inducer and warp generator as in final
+COMMENT	$0000A314	ship action 3D added after this 
+COMMENT	$0000A402	Tylaran missile code
+COMMENT	$0000A468	Difference from final here
+COMMENT	$0000A51C	Tylaran skips missiles
+COMMENT	$0000A54E	55 = spy satellite already implemented
+COMMENT	$0000A56E	copy 25 to 47 only in demo
+COMMENT	$0000A626	CLR.W (10,A6) - zero coords probably
+COMMENT	$0000A722	random chance cut in final game
+COMMENT	$0000A924	Anti-missile pods have higher odds in demo
+COMMENT	$0000A924	
+COMMENT	$0000A924	
+COMMENT	$0000A924	
+
+
 
 END
+
