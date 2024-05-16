@@ -4,8 +4,11 @@ title: "CU Amiga demo text string analysis"
 categories: prototypes
 ---
 
-This is an analysis of the text strings which changed between the K240 demo and
-the full version.
+This is an analysis of the text strings which changed between the
+[K240 demo](../prototypes/cu-amiga-demo.html) and the full version.
+
+See also the full
+[demo strings list](https://github.com/tetracorp/k240/blob/main/data/gamestrings-demo.txt).
 
 1. Table of Contents
 {:toc}

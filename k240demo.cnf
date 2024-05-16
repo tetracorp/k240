@@ -67,7 +67,8 @@ CODE $00010FF4 - $000110AE
 CODE $000110C2 - $00011656
 CODE $00011658 - $000116C6
 CODE $000116F6 - $000120EC
-TEXT $000121B4 - $00012204
+TEXT $000121B4 - $00012201
+CODE $00012202 - $00012204
 CODE $00012204 - $00012204
 CODE $0002BDBC - $0002BDBC
 CODE $00024972 - $00024974
@@ -131,7 +132,7 @@ COMMENT	$000004A6	Buffer 04   8,000 chip
 COMMENT	$000004A6	-- Final build adds 1,200 chip here
 COMMENT	$000004A6	Buffer 05     128 public  
 COMMENT	$000004A6	Buffer 06      64 public  
-COMMENT	$000004A6	Buffer 07  39,000         Ships 720x52 - 37,800 (700x54) in final
+COMMENT	$000004A6	Buffer 07  39,000         Ships 750x52 - 37,800 (700x54) in final
 COMMENT	$000004A6	Buffer 08  33,600         Buildings
 COMMENT	$000004A6	-- Text strings in final
 COMMENT	$000004A6	Buffer 09  17,760         Asteroids 740x24 (18,000, 750x24 in final)
@@ -200,14 +201,15 @@ SYMBOL	textField09	$00013F44
 SYMBOL	txtBuffer	$00013F48
 COMMENT	$00014A2C	Final has PANEL cheat buttons here. Elsewhere in demo.
 COMMENT	$00014A2C	Final also puts cheat strings, keycodes, flags here
+COMMENT	$000120EC	In final game, the cheat related code is here.
 COMMENT	$000120EC	168 bytes: 14 bytes x 12 cheats, probably
-COMMENT	$00012194	PANEL
-COMMENT	$000121B4	Cheat code strings
+COMMENT	$000120EC	Followed by the PANEL cheat button layout.
+COMMENT	$000120EC	This suggests the cheats were intentionally cut from the demo build.
 COMMENT	$00014BBA	Missile stats
-COMMENT	$00014C12	12th missile type: "UNKNOWN!"
-COMMENT	$00014C12	"OTHER MISSILES ARE AVAILABLE IN THE ACTUAL GAME."
-COMMENT	$00014C12	Cost 0 CR, requires 1 Selenium.
-COMMENT	$00014C12	Dummy missile type for unavailable missiles in demo.
+COMMENT	$00014BBA	12th missile type: "UNKNOWN!"
+COMMENT	$00014BBA	"OTHER MISSILES ARE AVAILABLE IN THE ACTUAL GAME."
+COMMENT	$00014BBA	Cost 0 CR, requires 1 Selenium.
+COMMENT	$00014BBA	Dummy missile type for unavailable missiles in demo.
 COMMENT	$00014e56	Differs from final here
 COMMENT	$0004e506	alien sprite list
 SYMBOL	arrShipSpriteList	$0004DB46
@@ -425,7 +427,7 @@ COMMENT	$00009F26	47 -> 40 in final
 COMMENT	$00009F3E	Final game subtracts 1 from intTotalShips
 COMMENT	$0000A008	No bounty given in demo
 COMMENT	$0000A01A	No bounty given in demo
-SYMBOL	intCurrentAlienID	$0002B4E2
+SYMBOL	intAlienID	$0002B4E2
 SYMBOL	intTotalShips	$00016FEC
 COMMENT	$0000A0F0	Azx warhead 00 static inducer already in
 SYMBOL	intCometHoriz	$00016FE0
@@ -440,12 +442,429 @@ COMMENT	$0000A54E	55 = spy satellite already implemented
 COMMENT	$0000A56E	copy 25 to 47 only in demo
 COMMENT	$0000A626	CLR.W (10,A6) - zero coords probably
 COMMENT	$0000A722	random chance cut in final game
+SYMBOL	_MissilesPods	$0000A924
+SYMBOL	_AlienMislP	$0000A930
+SYMBOL	_CapPods	$0000A95E
+SYMBOL	_SkipPods	$0000A976
 COMMENT	$0000A924	Anti-missile pods have higher odds in demo
-COMMENT	$0000A924	
-COMMENT	$0000A924	
-COMMENT	$0000A924	
-
-
-
+COMMENT	$0000A924	Chance is based on who fired the missile, not who's shooting it down.
+COMMENT	$0000A924	Final game, Terran missile: 21% for one pod, +4% for each additional pod
+COMMENT	$0000A924	Final game, alien missile: 21% for one pod, +2% for each additional pod
+COMMENT	$0000A924	Demo, Terran missile: 31% for one pod, +8% for each additional pod
+COMMENT	$0000A924	Demo, alien missile: 31% for one pod, +4% for each additional pod
+SYMBOL	_WarheadExplosive	$0000b2a2
+SYMBOL	_WarheadAreaExpl	$0000b3c2
+SYMBOL	_WarheadNapalm	$0000b44a
+SYMBOL	_WarheadHellfire	$0000b400
+SYMBOL	_WarheadNuclear	$0000afee
+SYMBOL	_WarheadScatter	$0000aa8a
+SYMBOL	_WarheadVirus	$0000ab4e
+SYMBOL	_WarheadMega	$0000afea
+SYMBOL	_WarheadStasis	$0000afec
+SYMBOL	_WarheadVortex	$0000ae42
+SYMBOL	_WarheadAntivirus	$0000aade
+SYMBOL	_WarheadMeteor	$0000b298
+SYMBOL	_Warhead12Static	$0000aa88
+SYMBOL	_WarheadKll09	$00010766
+COMMENT	$0000AA88	Ineffective 
+COMMENT	$0000AAD2	Final just hits for 10
+COMMENT	$0000AAD2	Explosive hits one square for 10. In final it's a 4 square area.
+COMMENT	$0000AFE8	Tylaran vortex missing
+COMMENT	$0000AFEA	Mega not implemented.
+COMMENT	$0000AFEA	Unsure if it was not complete, or just commented out.
+COMMENT	$0000AFEC	Stasis not implemented.
+COMMENT	$0000AFEE	Missing Rigellian more powerful nuke.
+SYMBOL	_WarheadFlash	$0000B142	
+SYMBOL	_GroundHit	$0000B2A4
+COMMENT	$0000B3C8	This loop will run 26 times.
+COMMENT	$0000B3C8	In final game the 25 is a 26 and will run 27 times
+COMMENT	$0000B3C8	This is because ships/missiles are 54 bytes in final, 52 bytes in demo
+SYMBOL	incomingMissile	$00015AA4
+COMMENT	$00004BDE	Final has Swixaran check 5->8 damage here
+COMMENT	$0000B5B2	Telescope check missing from demo
+COMMENT	$0000B6CE	Final has an additional flash check here
+COMMENT	$0000BACC	CMPI.B #$05,(0,A0)
+COMMENT	$0000BACC	BEQ
+COMMENT	$0000BB78	Final version just calls ship action 25 destroy
+SYMBOL	arrTerranShipHP	$0000BC6C
+SYMBOL	arrAlienShipHP	$0000BCAC
+SYMBOL	_IonCannon	$0000be00
+SYMBOL	_Disruptor	$0000be62
+SYMBOL	_NapalmOrb	$0000befe
+SYMBOL	_ChaosBomb	$0000bf5e
+SYMBOL	_VortexMine	$0000bff8
+SYMBOL	_LaserCannon	$0000bdc4
+SYMBOL	_PhotonCannon	$0000bdc8
+SYMBOL	_PlasmaCannon	$0000bdcc
+SYMBOL	_StaticInducer	$0000bcf4
+SYMBOL	_WarpGenerator	$0000bd64
+SYMBOL	_Deflector	$0000bd5c
+SYMBOL	_NullHP	$0000bd62
+SYMBOL	_AlienCannon05	$0000bd7c
+SYMBOL	_AlienCannon06	$0000bd84
+SYMBOL	_AlienCannon07	$0000bd8c
+SYMBOL	_AlienStaticInd	$0000bd28
+SYMBOL	_Kll_HP11	$00011326
+SYMBOL	_TylGoldVortex12	$0000c05a
+COMMENT	$0000BCAC	Alien hardpoints
+COMMENT	$0000BCAC	Vortex Mine uses same code as Terran in demo.
+COMMENT	$0000BCAC	Missing: Rigellian powerdrain, Swix bioweapon, Swix self-destruct
+COMMENT	$0000BCAC	However, Tylaran gold Vortex is in.
+COMMENT	$0000BCAC	It suggests the Rigellian/Swixaran weapons were added very late in development
+COMMENT	$0000BCAC	This is consistent with their strings being missing in the demo data.
+COMMENT	$0000BCF4	Final version adds the missing alien hardpoints above here
+SYMBOL	intAlienCannon5Dmg	$0002B4F2
+SYMBOL	intAlienCannon6Dmg	$0002B4F6
+SYMBOL	intAlienCannon7Dmg	$0002B4F4
+COMMENT	$0000BE44	Final game adds 1 to ast[172] if d4 was not zero
+COMMENT	$0000BEA8	Final game adds 1 to ast[172] if d4 was not zero
+COMMENT	$0000BF3E	Final game adds 1 to ast[172] if d4 was not zero
+COMMENT	$0000BFA4	Final game adds 1 to ast[172] if d4 was not zero
+COMMENT	$0000BFF8	In the final game alien Vortex Mine has a 10% chance, Terran 20%
+COMMENT	$0000BFF8	In the demo they're both 20%
+COMMENT	$0000C05A	Tylaran gold vortex already added in demo
+SYMBOL	_ButtonEfect	$0000C1D4
+COMMENT	$0000C1D4	A large amount of code is added between here and button effect
+COMMENT	$0000C1D4	Handles the Kll rotating ship $41
+COMMENT	$0000C1EC	Spying button has no effect. Otherwise as Final.
+SYMBOL	_AstControlButton	$0000c3c0
+SYMBOL	_AstFieldButton	$0000c3a2
+SYMBOL	_AstPathButton	$0000c402
+SYMBOL	_AsteroidSpeedButton	$0000c40c
+SYMBOL	_AsteroidView	$0000c374
+SYMBOL	_BlueButton	$0000ca44
+SYMBOL	_DisplayButton	$0000c470
+SYMBOL	_FleetRetreatButton	$0000c2c0
+SYMBOL	_InformationButton	$0000c3ea
+SYMBOL	_MilitaryButton	$0000c3cc
+SYMBOL	_OrbitView	$0000c386
+SYMBOL	_PAFWButton	$0000c416
+SYMBOL	_PauseBtn	$0000c2b6
+SYMBOL	_ScitekWin	$0000c3b6
+SYMBOL	_TetracorpScreen	$0000c3ac
+SYMBOL	_ToggleDetPtr	$0000c420
+SYMBOL	_ToggleShipPtr	$0000c43e
+SYMBOL	_ToggleTactical	$0000c9b2
+SYMBOL	noButtonEffect	$0000c2b4
+SYMBOL	_RotateLeft	$00002e1a
+SYMBOL	_RotateRight	$00002e04
+SYMBOL	_MissileFireWin	$00004d32
+SYMBOL	_AstEngineWin	$00005a08
+SYMBOL	_BuildButton	$000048e2
+SYMBOL	_ColonySummaryWin	$000071da
+SYMBOL	_FinanceWin	$0000685c
+SYMBOL	_BlueprintsWin	$0000759a
+SYMBOL	_HotkeysWin	$0000801c
+SYMBOL	_OreSurveyWin	$00005188
+SYMBOL	_FleetWin	$00007984
+COMMENT	$0000C3C0	Spying button code goes here in final.
+COMMENT	$0000C916	MOVEQ #0,D0
+COMMENT	$0000C940	This section down to ToggleTactical is missing in the final version
+COMMENT	$0000CA90	Branches down to the move to A5
+COMMENT	$0000CB28	Spy screen code here.
+COMMENT	$0000CDBA	BRA.S
+COMMENT	$0000D30A	Final has an extra entry here for
+COMMENT	$0000D30A	<<< SELECT A SPY SATELLITE >>>
+COMMENT	$0000D9F4	COLLISION WARNING! ASTEROID IN PROXIMITY OF COLONY ASTEROID:
+SYMBOL	_PlaceEmptyAst	$0000DAE4
+SYMBOL	_AstProximity	$0000DA38
+SYMBOL	_MoveAsteroids	$0000DA72
+COMMENT	$0000DA72	TST.B	flgIceman
+COMMENT	$0000DA72	BNE - no iceman cheat
+COMMENT	$0000DAB6	Additional checks in final
+COMMENT	$0000DAB6	
+COMMENT	$0000DAB6	
+COMMENT	$0000DAB6	
+COMMENT	$0000DAB6	
+COMMENT	$0000DAB6	
+COMMENT	$0000DAB6	
+COMMENT	$0000DAB6	
+COMMENT	$0000DB62	$171 is $176 in final
+SYMBOL	tblInitOre	$00015D30
+COMMENT	$0000DE18	final puts 1 in d4 here, probably cash reward
+COMMENT	$0000DECA	Some different code here for handling fleets of destroyed asteroids
+COMMENT	$0000E13C	MOVE.B D0,flg13340
+COMMENT	$0000E15C	Code differs here in final
+SYMBOL	_DemolishAll	$0000E13C
+SYMBOL	_DestroyBldg	$0000AD8A
+COMMENT	$0000E1B0	120 damage to demolish building
+COMMENT	$0000E1F0	WELL DONE!
+COMMENT	$0000E1F0	YOU HAVE DESTROYED AN ENEMY ASTEROID!
+COMMENT	$0000E1F0	#0 in d2 instead of 100k credits in final
+COMMENT	$0000E1F0	Final has #1,d3, #0,d4 and message line here
+COMMENT	$0000E246	CONGRATULATIONS!
+COMMENT	$0000E246	YOU HAVE DESTROYED THE ENEMY. THIS IS THE END OF THIS DEMO. THANKYOU FOR PLAYING.
+COMMENT	$0000E25C	YOUR COLONY HAS BEEN DESTROYED.
+COMMENT	$0000E25C	THIS IS THE END OF THIS DEMO. THANKYOU FOR PLAYING.
+COMMENT	$0000E2C6	$121: SENSORS REPORT DISCOVERY OF A NEW ASTEROID AND HAVE NAMED IT:
+COMMENT	$0000E2D6	$134: SENSORS REPORT DISCOVERY OF AN ALIEN ASTEROID AND HAVE NAMED IT:
+COMMENT	$0000E828	Ore eater Boobytrapped asteroid
+COMMENT	$0000E90A	SF flgDSound1
+COMMENT	$0000E90A	MOVEA.L	ptrShips,A6
+COMMENT	$0000E930	BCLR #4,bFrameRule
+COMMENT	$0000E930	BCLR #3,bFrameRule
+COMMENT	$0000E930	
+COMMENT	$0000E950	
+COMMENT	$0000E948	BSR.W  _DailyMissileCon
+COMMENT	$0000E94C	
+COMMENT	$0000E94C	
+COMMENT	$0000E94C	SUBQ.B  #1
+COMMENT	$0000E94C	
+COMMENT	$0000E94C	
+COMMENT	$0000E94C	
+COMMENT	$0000E948	BSR.W  _DailySatSilo
+COMMENT	$0000E950	
+COMMENT	$0000E950	
+COMMENT	$0000E950	
+COMMENT	$0000E950	
+COMMENT	$0000E950	
+COMMENT	$0000E950	
+COMMENT	$0000E950	
+SYMBOL	_13C30	$0000E970
+SYMBOL	_UpdateClock	$0000EC7A
+SYMBOL	intWinMsg	$00016AF0
+SYMBOL	_DailyShipMove	$00011658
+SYMBOL	_DailyComet	$0000D6EE
+SYMBOL	_DailyAliBuild	$00010BB8
+SYMBOL	_DailyEvents	$0000FC66
+SYMBOL	_DailyImpTransport	$0001022A
+SYMBOL	_DailyBldgUpdate	$0000F8E2
+SYMBOL	_DailyBuilding	$0000EB32
+SYMBOL	intVictory	$00016AF2
+LABEL	_GameOver	$0000E9B4
+SYMBOL	popwarnTimer	$0002493B
+SYMBOL	intVirusCounter	$0000EB2E
+SYMBOL	_UnStasis	$0000EABC
+COMMENT	$0000EAA8	Missing a section which can disable gravity nullifier	
+SYMBOL	_Daily01Ship	$000089BE
+SYMBOL	_Daily02Ship	$000089AC
+SYMBOL	_Daily03	$0000899A
+SYMBOL	_Daily04Ast	$000087CC
+SYMBOL	_Daily05Ship	$00008996
+SYMBOL	_intCycle20	$0000EB2F
+SYMBOL	arrBuildingTrigger	$0000EBC6
+SYMBOL	_DailyBldgNull	$0000EC66
+SYMBOL	_DailyCPU	$0000EC68
+SYMBOL	_DailyGravNul	$0000EC6A
+SYMBOL	_DailyMissileSilo	$0000ECF4
+SYMBOL	_DailySeismicP	$0000EE0A
+SYMBOL	_DailyDeepMine	$0000EE6A
+SYMBOL	_DailyMine	$0000EEB4
+SYMBOL	_DailyAstEng	$0000EF32
+SYMBOL	_DailyShipyard	$0000EF8C
+SYMBOL	_DailyLandingPad	$0000EF90
+SYMBOL	_DailyLaserTurr	$0000FAE6
+SYMBOL	_DailyPlasmaTurr	$0000FAEA
+SYMBOL	_DailyPhotonTurr	$0000FAEE
+SYMBOL	_DailyAntiMisPod	$0000FB36
+SYMBOL	_DailyRepairFac	$00010458
+COMMENT	$0000EB26	Some sound code missing
+SYMBOL	_AddIncome	$0000F952
+COMMENT	$0000F952	In the final build, here adds income.
+COMMENT	$0000F952	100/colony and 2/colonist
+COMMENT	$0000F952	It checks if the asteroid has taken 20 hits from ship bombardment
+COMMENT	$0000F952	If so, it destroys a certain building...?
+COMMENT	$0000F952	Demo doesn't track bombardment.
+COMMENT	$0000F978	BSR.W  _UpdSwixWepn08
+SYMBOL	_UpdateScreenGen	$0000FBF2
+SYMBOL	_UpdateRadiation	$0000F0EE
+SYMBOL	_UpdatePopulation	$0000F138
+SYMBOL	_CalcRadiation	$0000F0C8
+SYMBOL	_UpdateAir	$0000F5F2
+SYMBOL	_UpdateFood	$0000F666
+SYMBOL	_UpdateWater	$0000F6E0
+SYMBOL	_UpdatePower	$0000F75A
+SYMBOL	_UpdateWorkers	$0000F58C
+SYMBOL	_UpdateSecurity	$0000F214
+SYMBOL	_UpdateShipyards	$0000EF8E
+SYMBOL	_RenderPAFW	$0000F994
+SYMBOL	flgBP2GMine	$00024914
+SYMBOL	flgBP2GDeepMine	$00024915
+SYMBOL	flgBPAntiMissilePod	$00024916
+SYMBOL	flgBPAntivirusMissile	$00024917
+SYMBOL	flgBPAsteroidEngines	$00024918
+SYMBOL	flgBPAstTracker	$00024919
+SYMBOL	flgBPBldgArmor	$0002491A
+SYMBOL	flgBPConstrDroids	$0002491B
+SYMBOL	flgBPDeflector	$0002491C
+SYMBOL	flgBPFBattleship	$0002491D
+SYMBOL	flgBPGravityNullifier	$0002491E
+SYMBOL	flgBPHiPowerStore	$0002491F
+SYMBOL	flgBPImpSensors	$00024920
+SYMBOL	flgBPMegaMissile	$00024921
+SYMBOL	flgBPMislBayExt	$00024922
+SYMBOL	flgBPMislGuidance	$00024923
+SYMBOL	flgBPNuclearMissile	$00024924
+SYMBOL	flgBPOreTeleporter	$00024925
+SYMBOL	flgBPPhotonTurret	$00024926
+SYMBOL	flgBPPlasmaTurret	$00024927
+SYMBOL	flgBPPowerAmplifier	$00024928
+SYMBOL	flgBPPowerplant	$00024929
+SYMBOL	flgBPRepairFacility	$0002492A
+SYMBOL	flgBPScreenGenerator	$0002492B
+SYMBOL	flgBPSeismicPenetrator	$0002492C
+SYMBOL	flgBPShield40	$0002492D
+SYMBOL	flgBPShield50	$0002492E
+SYMBOL	flgBPSolarMatrix	$0002492F
+SYMBOL	flgBPStaticInducer	$00024930
+SYMBOL	flgBPStasisMissile	$00024931
+SYMBOL	flgBPTerminator	$00024932
+SYMBOL	flgBPTurretOpt	$00024933
+SYMBOL	flgBPVirusMissile	$00024934
+SYMBOL	flgBPWarpGen	$00024935
+SYMBOL	intClockYear	$00024940
+SYMBOL	intDay	$0002493F
+SYMBOL	flgSoundEnabled	$0002494C
+SYMBOL	intEventCountdown	$00024936
+SYMBOL	intNextEvent	$00024937
+SYMBOL	intMeteorCountd	$0002493A
+COMMENT	$00024936	flgVoice:
+COMMENT	$00024936	DC.B  $ff
+COMMENT	$00016CB8	Demo starts with 2,580,000 CR general, 580,000 building/intel
+COMMENT	$00016CB8	3,740,000 total
+SYMBOL	arrHotkeys	$00016CD8
+SYMBOL	tblAsteroidMaps	$000173B0
+SYMBOL	arrButton0	$000170D4
+SYMBOL	tblOrePrice0Sel	$00016EF2
+SYMBOL	tblTransporters	$00016D4C
+SYMBOL	arrRadiation	$00016AE0
+SYMBOL	tblReinforcemt	$00016AEB
+SYMBOL	arrAstSpd	$00016150
+SYMBOL	arrPlayerAstsKnown	$00016270
+SYMBOL	arrAlienAsts	$000162D4
+SYMBOL	arrPlayerAsts	$00016338
+SYMBOL	_PlaySound	$00011E6A
+SYMBOL	_Daily08Sound	$00011CA2
+COMMENT	$00011CA0	Voice code appears around here in final game
+SYMBOL	intMagStorm	$00024938
+COMMENT	$000115D2	Telescope cheat check missing
+SYMBOL	_AlienShipBuild	$00011096
+SYMBOL	_AlienShipBuild2	$000110AE
+COMMENT	$000110AE	There are only five aliens listed.
+COMMENT	$000110AE	Some other sections already reference six aliens.
+COMMENT	$000110AE	All aliens use the same shipbuilding routine.
+SYMBOL	tblAlienMisslChance	$0002B6CE
+COMMENT	$0002B6CE	Same as Kll in final.
+SYMBOL	tblAlienShip24	$00011146
+LABEL	intTriangles	$0001116E
+COMMENT	$0001116E	Not referenced in code
+SYMBOL	_SpawnAlienShip	$00011170
+SYMBOL	_FindShipSlot	$000094BE
+SYMBOL	_AlienOSD	$000112F8
+COMMENT	$0001131C	In the demo, alien OSD has 200 armor, 2 photon, 1 plasma, deflector
+COMMENT	$0001131C	However, it is never built.
+COMMENT	$0001131C	In final, Azx builds OSD with these stats.
+SYMBOL	tblAlienBuildClusters	$0002B68E
+COMMENT	$0002B68E	Same as Kll in final.
+SYMBOL	tblAlienBldg	$0002B4FE
+COMMENT	$0002B4FE	Differences with final:
+COMMENT	$0002B4FE	Turrets use name string $00df instead of $01c9
+COMMENT	$0002B4FE	It's still TURRET, though.
+COMMENT	$0002B4FE	Demo string list also has unused TURRET1 and TURRET2.
+COMMENT	$0002B4FE	All buildings also have 00 for intel type.
+COMMENT	$0002B4FE	This is consistent with intel being added late in development.
+SYMBOL	_DailyAliScout	$00010F68
+SYMBOL	intAlienScoutFreq	$0002B4E8
+SYMBOL	intAlienNewColFreq	$0002B4EA
+SYMBOL	intAlienBuildMislFreq	$0002B4EC
+SYMBOL	intAlienBldChance	$0002B4EE
+LABEL	intAlienMislFreqOrCdn	$0002B4F0
+COMMENT	$0002B4F0	Either missile freq our countdown
+SYMBOL	intSensorRange12	$0002B4F8
+LABEL	intAlienFleetRange	$0002B4FA
+SYMBOL	intAlienTurretCool	$0002B4FC
+COMMENT	$0002B4FC	6 (most aliens). 8 in final build
+SYMBOL	bAlienSpecial	$0002B4FD
+SYMBOL	intAlienBuildTimer	$0002B4E6
+SYMBOL	intAlienBuildFreq	$0002B4E4
+COMMENT	$0002B4E4	Build freq? 40, final is 60
+SYMBOL	intAlienScoutFreq	$0002B4E6
+COMMENT	$0002B4E6	Scout freq? 20, final is 70
+SYMBOL	tblOreIncrease	$000169A6
+SYMBOL	tblScreenGen	$000169B6
+SYMBOL	arrPowerUsage	$00016A16
+SYMBOL	arrPowerfailOrder	$00016A3E
+SYMBOL	ptrHardpointB	$00016BDC
+LABEL	arrPanel	$00012194
+LABEL	flgSkyscraper	$000121B5
+COMMENT	$000121B5	Cheat code strings here
+LABEL	strEnterHelp	$000121B6
+TEXT	$000121B6 - $000121C7
+LABEL	strEnterShip	$000121C7
+COMMENT	$000121C7	Note ship 1-7 instead of 1-8
+TEXT	$000121C7 - $000121D7
+LABEL	strEnterSFX	$000121D7
+COMMENT	$000121D7	Note A-Z instead of A-U although there are not 26 sounds
+TEXT	$000121D7 - $000121E6
+COMMENT	$000121E6	Final game has enter speech string here
+LABEL	flgTelescope	$000121E6
+LABEL	flgIceman	$000121E7
+LABEL	unk121E8	$000121E8
+COMMENT	$000121E8	-1,-1,-1,0,0,0,0,0
+COMMENT	$000121E8	Final has 10 zeroes
+LABEL	str0toF	$000121F0
+LABEL	unk012201	$00012201
+LABEL	unk012202	$00012202
+TEXT	$000121F0 - $00012201
+SYMBOL	arrAlienBldgStats	$00013D58
+COMMENT	$000135D4	Whatever this is it's changed from 282 to 280 in final
+SYMBOL	_AlienMislBuild	$00011038
+COMMENT	$00011038	As final game, except missiles are 4 bytes earlier in ast struct.
+SYMBOL	_PickRandomEvent	$0000FCBA
+COMMENT	$0000FCBA	Manual code event missing
+COMMENT	$0000FCBA	Only 21 events instead of 24
+COMMENT	$0000FCBA	This is because game adds double chance of comet, more ore, reinforcements
+SYMBOL	_EventNone	$0000fcce
+SYMBOL	_EventMagStorm	$0000fd24
+SYMBOL	_EventScoutBreak	$0000fd4a
+SYMBOL	_EventRadLeak	$0000fda2
+SYMBOL	_EventSolarFlare	$0000fdbc
+SYMBOL	_EventFreakSensor	$0000fde2
+SYMBOL	_EventMoreOre	$0000fe18
+SYMBOL	_EventLessOre	$0000fe4a
+SYMBOL	_EventPlantBurnout	$0000fee0
+SYMBOL	_EventEngBurnout	$0000ff02
+SYMBOL	_EventAirFail	$0000ff24
+SYMBOL	_EventWaterFail	$0000ff40
+SYMBOL	_EventPowerFail	$0000ff5c
+SYMBOL	_EventGravVortex	$0000ff78
+SYMBOL	_EventVirusOutbr	$0000ff7a
+SYMBOL	_EventOreBribe	$0000ffb0
+SYMBOL	_EventComet	$0000ffb2
+SYMBOL	_EventReinforcem	$0000ffd6
+SYMBOL	_EventMeteors	$00010136
+SYMBOL	_EventFixedOre	$00010228
+SYMBOL	_EventNewTransp	$00010098
+COMMENT	$0000FD42	MOVEQ  #11,D4
+SYMBOL	_EventOrePrice	$000101F6
+SYMBOL	_MessageWin	$00005358
+COMMENT	$00010578	Enemy detection of fleet code missing
+COMMENT	$00010C86	BSR.W  _AzxMassDisplPod
+COMMENT	$00010C94	BSR.W  _AliAstEvacuate
+SYMBOL	_BuildCluster	$000109EA
+COMMENT	$00010D38	Full version here checks alien colony established
+COMMENT	$00010D38	ast[89] bit 6
+COMMENT	$00010D38	
+COMMENT	$00010D38	
+COMMENT	$00010D38	
+COMMENT	$00010D3C	BSR.W  _DailySpyDetect
+COMMENT	$00010D40	BSR.W  _DailyNewColony
+COMMENT	$00010D4E	
+COMMENT	$00010D4E	
+COMMENT	$00010D4E	
+SYMBOL	_DailyAliPop	$00010EA4
+SYMBOL	_DailyAliAttack	$00010582
+SYMBOL	_AlienMining	$00010FC8
+SYMBOL	_AliBuildProgress	$00010D8E
+SYMBOL	_DailyKllPop	$00010EDC
+SYMBOL	tblAlienShip24	$0002B6E4
+COMMENT	$00011698	SF a flag
+COMMENT	$00011706	MOVE.L  (26,A5),(2,A0)
+COMMENT	$00011786	SENTRY FLEET NOW MOVING TO INTERCEPT APPROACHING ENEMY FLEET.
+COMMENT	$0001177A	Final has more lines here
+COMMENT	$000117FE	Final plays voice "fleet arrived"
+COMMENT	$00011AF2	MOVE.B  intAliFlt_1F982,D4
+COMMENT	$00011AF2	BCLR    D4,flg1F983
+COMMENT	$00011B34	ALERT!! SENSORS REPORT HOSTILE ENEMY FLEET APPROACHING!
 END
 

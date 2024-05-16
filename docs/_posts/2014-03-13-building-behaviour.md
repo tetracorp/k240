@@ -23,19 +23,63 @@ ores in order until capacity is sufficient again.
 
 ![anti-missile_pod](../images/buildings/anti-missile_pod.png "anti-missile_pod"){:.right}
 
-Each incoming missile has a 21% chance to be shot down if you have one
-Anti-Missile Pod. Each additional pod increases the chance by 2%, to a maximum
-of 71% at 26 pods.
+If an asteroid has at least one Anti-Missile Pod, there is a chance to shoot
+down each incoming missile. The chance increases with the number of Anti-Missile
+Pods.
 
-However, for all aliens which have an equivalent to this building (Ore Eater's
-Defence Battery, Rigellian Defence Battery, and Swixaran Tentacular Defender),
-each additional pod increases the chance by 4%, to a maximum of 71% at 14 pods.
+The base chance to shoot down each missile is 21% for a single Anti-Missile Pod.
+Each additional Pod increases the chance by 2%, if it is fired by the alien; or
+4%, if it is fired by the player. The latter generally occurs when firing at
+aliens who have Anti-Missile equivalents (Ore Eater's Defence Battery, Rigellian
+Defence Battery, and Swixaran Tentacular Defender), but can also occur if the
+player fires against themself for some reason.
+
+The chance caps out at 71% for 26 Pods. Aliens cap out at 71% for 14
+Pod-equivalent buildings, although they will hit a soft cap before building that
+many.
+
+In the CU Amiga K240 demo, Anti-Missile Pods are more effective: 31% base,
++8%/+4% per additional, maxing out at 81%. The player would reach 71% at 11
+Pods. However, neither the player nor the alien can build them in the demo. The
+numbers are still interesting because it suggests that the building was
+intentionally nerfed late in development to make missiles harder to defend
+against.
+
+Pods|Terran missile|Alien missile|Terran (demo)|Alien (demo)
+----|------|------|------|------
+  0 |   0% |   0% |   0% |   0%
+  1 |  21% |  21% |  31% |  31%
+  2 |  25% |  23% |  39% |  35%
+  3 |  29% |  25% |  47% |  39%
+  4 |  33% |  27% |  55% |  43%
+  5 |  37% |  29% |  63% |  47%
+  6 |  41% |  31% |  71% |  51%
+  7 |  45% |  33% |  79% |  55%
+  8 |  49% |  35% |  81% |  59%
+  9 |  53% |  37% |  81% |  63%
+ 10 |  57% |  39% |  81% |  67%
+ 11 |  61% |  41% |  81% |  71%
+ 12 |  65% |  43% |  81% |  75%
+ 13 |  69% |  45% |  81% |  79%
+ 14 |  71% |  47% |  81% |  81%
+ 15 |  71% |  49% |  81% |  81%
+ 16 |  71% |  51% |  81% |  81%
+ 17 |  71% |  53% |  81% |  81%
+ 18 |  71% |  55% |  81% |  81%
+ 19 |  71% |  57% |  81% |  81%
+ 20 |  71% |  59% |  81% |  81%
+ 21 |  71% |  61% |  81% |  81%
+ 22 |  71% |  63% |  81% |  81%
+ 23 |  71% |  65% |  81% |  81%
+ 24 |  71% |  67% |  81% |  81%
+ 25 |  71% |  69% |  81% |  81%
+ 26+|  71% |  71% |  81% |  81%
 
 Anti-Missile Pods will fire at missiles that you shoot at your own asteroids,
 but will ignore Anti-Virus missile.
 
-The chance to shoot down a missile is unaffected by the rate or number of
-missiles incoming. Each missile has the same chance to be shot down, e.g.
+Note that the chance to shoot down a missile is unaffected by the rate or number
+of missiles incoming. Each missile has the same chance to be shot down, e.g.
 there's no advantage in sending cheap Explosive missiles along with a Mega
 missile to try and overwhelm the target's anti-missile defences.
 

@@ -1,5 +1,25 @@
 ; IRA V2.09 (Mar  1 2020) (c)1993-1995 Tim Ruehsen
 ; (c)2009-2015 Frank Wille, (c)2014-2017 Nicolas Bastien
+;
+; |          _  ______  _  _    ___                |
+; |         | |/ /___ \| || |  / _ \               |
+; |         | ' /  __) | || |_| | | |              |
+; |         | . \ / __/|__   _| |_| | v2.000       |
+; |     _ _ |_|\_\_____|  |_|  \___/  _    _       |
+; |  __| (_)___ __ _ ______ ___ _ __ | |__| |_  _  |
+; | / _` | (_-</ _` (_-<_-</ -_) '  \| '_ \ | || | |
+; | \__,_|_/__/\__,_/__/__/\___|_|_|_|_.__/_|\_, | |
+; |    <https://tetracorp.github.io/k240/>   |__/  |
+; 
+; K240 is copyright 1994 Gremlin Graphics.
+; This annotated disassembly is believed to constitute fair use
+; for the purpose of analysis and commentary.
+; 
+; Disassemble using this config file:
+; ira -A -keepzh -newstyle -compat=bi -config playk240 playk240.68k.asm
+; 
+; Reassemble from the source code:
+; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.68k.asm
 
 EXT_0000	EQU	$1
 ABSEXECBASE	EQU	$4
@@ -86,25 +106,6 @@ _DOSFreeSignal	EQU	-336
 	SECTION S_0,CODE
 
 SECSTRT_0:
-; |          _  ______  _  _    ___                |
-; |         | |/ /___ \| || |  / _ \               |
-; |         | ' /  __) | || |_| | | |              |
-; |         | . \ / __/|__   _| |_| | v2.000       |
-; |     _ _ |_|\_\_____|  |_|  \___/  _    _       |
-; |  __| (_)___ __ _ ______ ___ _ __ | |__| |_  _  |
-; | / _` | (_-</ _` (_-<_-</ -_) '  \| '_ \ | || | |
-; | \__,_|_/__/\__,_/__/__/\___|_|_|_|_.__/_|\_, | |
-; |    <https://tetracorp.github.io/k240/>   |__/  |
-; 
-; K240 is copyright 1994 Gremlin Graphics.
-; This annotated disassembly is believed to constitute fair use
-; for the purpose of analysis and commentary.
-; 
-; Disassemble using this config file:
-; ira -A -keepzh -newstyle -compat=bi -config playk240
-; 
-; Reassemble from the source code:
-; vasmm68k_mot -no-opt -Fhunkexe -nosym -o playk240 playk240.68k.asm
 	SF	intErr			;00000: 51f90001aad6
 	SUBA.L	A1,A1			;00006: 93c9
 	MOVEA.L	ABSEXECBASE.W,A6	;00008: 2c780004
@@ -7714,8 +7715,7 @@ ret05C46:
 	RTS				;05c46: 4e75
 	DC.W	$0009			;05c48
 unk05C4A:
-	BTST	D0,-(A0)		;05c4a: 0120
-	DC.W	$00ae			;05c4c
+	DC.L	$012000ae		;05c4a
 _05C4E:
 ; Look at asteroid
 	MOVE.B	#$01,intScreen		;05c4e: 13fc00010002e486
@@ -19216,7 +19216,12 @@ _0EC0A:
 ; Terran missile, non-Tylaran alien, not known to player
 	BEQ.W	_Done_0EE5E		;0ec28: 67000234
 _0EC2C:
-; Fired by alien, or vs Tylaran, or known to player. In other words, the player cannot fire missiles against an enemy asteroid that he has not formally discovered (usually happens when you can see an asteroid with Telescope cheat, but haven't officially sent a scout ship to find it yet). HOWEVER, Tylaran are exempt, and you can fire missiles at undiscovered Tylaran asteroids all you like.
+; Fired by alien, or vs Tylaran, or known to player.
+; In other words, the player cannot fire missiles against an enemy
+; asteroid that he has not formally discovered (usually happens when
+; you can see an asteroid with Telescope cheat, but haven't officially
+; sent a scout ship to find it yet). HOWEVER, Tylaran are exempt, and
+; you can fire missiles at undiscovered Tylaran asteroids all you like.
 	MOVE.W	(26,A0),D2		;0ec2c: 3428001a
 	MOVE.W	(28,A0),D3		;0ec30: 3628001c
 	BSR.W	_101E0			;0ec34: 610015aa
@@ -19335,7 +19340,7 @@ _0ED88:
 	MOVEQ	#6,D0			;0edaa: 7006
 	JSR	_Daily08Sound		;0edac: 4eb90001a346
 _0EDB2:
-	BSR.W	_Missiles_0F0E4		;0edb2: 61000330
+	BSR.W	_MissilesPods		;0edb2: 61000330
 	MOVEQ	#0,D0			;0edb6: 7000
 	RTS				;0edb8: 4e75
 _0EDBA:
@@ -19598,7 +19603,7 @@ _0F0DC:
 	BSR.W	_ShipAct2c_Remove	;0f0dc: 6100f7f2
 	MOVEQ	#0,D0			;0f0e0: 7000
 	RTS				;0f0e2: 4e75
-_Missiles_0F0E4:
+_MissilesPods:
 ; Incoming missiles
 ; A0 = asteroid
 ; A4 = building count
@@ -19606,15 +19611,15 @@ _Missiles_0F0E4:
 ; A6 = missile
 	SF	(26,A6)			;0f0e4: 51ee001a
 	TST.B	(21,A6)			;0f0e8: 4a2e0015
-	BMI.S	_AlienMissile_0F116	;0f0ec: 6b28
+	BMI.S	_AlienMislP		;0f0ec: 6b28
 ; Terran missile:
 ; Anti-Missile pods ignore Terran Antivirus
 	CMPI.B	#$0a,(27,A6)		;0f0ee: 0c2e000a001b
-	BEQ.S	_SkipPods_0F15A		;0f0f4: 6764
+	BEQ.S	_SkipPods		;0f0f4: 6764
 ; Terran non-Antivirus:
 	MOVEA.L	ptrThisAstBldgCount,A1	;0f0f6: 22790002ded4
 	MOVE.W	(6,A1),D1		;0f0fc: 32290006
-	BEQ.S	_SkipPods_0F15A		;0f100: 6758
+	BEQ.S	_SkipPods		;0f100: 6758
 ; if there is at least one anti-missile pod
 	MOVE.B	D1,D0			;0f102: 1001
 	ADD.B	D0,D0			;0f104: d000
@@ -19624,22 +19629,22 @@ _Missiles_0F0E4:
 	SUBQ.B	#1,D1			;0f10c: 5301
 ; d2 = 20
 ; d1 = p-1
-	BEQ.S	_CapPods_0F142		;0f10e: 6732
+	BEQ.S	_CapPods		;0f10e: 6732
 ; If there's more than one pod:
 	ASL.W	#2,D1			;0f110: e541
 	ADD.W	D1,D2			;0f112: d441
 ; d1 = (p-1)*4
 ; d2 = ((p-1)*4)+20
-	BRA.S	_CapPods_0F142		;0f114: 602c
-_AlienMissile_0F116:
+	BRA.S	_CapPods		;0f114: 602c
+_AlienMislP:
 ; Alien missiles:
 	MOVEA.L	ptrThisAstStats,A0	;0f116: 20790002ded8
 ; missile pod's powerfail - seems to be alien missiles only
 	CMPI.W	#$0005,(718,A0)		;0f11c: 0c68000502ce
-	BPL.S	_SkipPods_0F15A		;0f122: 6a36
+	BPL.S	_SkipPods		;0f122: 6a36
 	MOVEA.L	ptrThisAstBldgCount,A1	;0f124: 22790002ded4
 	MOVE.W	(6,A1),D1		;0f12a: 32290006
-	BEQ.S	_SkipPods_0F15A		;0f12e: 672a
+	BEQ.S	_SkipPods		;0f12e: 672a
 ; if there is at least one anti-missile pod
 	MOVE.B	D1,D0			;0f130: 1001
 	ADD.B	D0,D0			;0f132: d000
@@ -19649,14 +19654,14 @@ _AlienMissile_0F116:
 	SUBQ.B	#1,D1			;0f13a: 5301
 ; d2 = 20
 ; d1 = p-1
-	BEQ.S	_CapPods_0F142		;0f13c: 6704
+	BEQ.S	_CapPods		;0f13c: 6704
 	ADD.W	D1,D1			;0f13e: d241
 ; d1 = (p-1)*2
 ; ast[88] = pods*2
 ; d2 = ((pods-1)*2) + 20
 ; 20%, +2% for each pod after the first, max 70% at 26 pods
 	ADD.W	D1,D2			;0f140: d441
-_CapPods_0F142:
+_CapPods:
 ; cap D2 at 70 (26 pods?)
 	CMPI.W	#$0046,D2		;0f142: 0c420046
 	BMI.S	_0F14A			;0f146: 6b02
@@ -19693,14 +19698,14 @@ _0F14A:
 	MOVEQ	#100,D0			;0f14a: 7064
 	JSR	_RandInt		;0f14c: 4eb900000c0c
 	CMP.B	D0,D2			;0f152: b400
-	BMI.S	_SkipPods_0F15A		;0f154: 6b04
+	BMI.S	_SkipPods		;0f154: 6b04
 ; NOTE: since BMI branches on negative, it doesn't branch on zero,
 ; so a 20% chance is really a 21% chance.
 ; The chance to shoot down a missile with a pod is therefore
 ; 21% for the first pod, +2% per additional pod, max 71% at 26 pods.
 ; presumably blows up the missile
 	ST	(26,A6)			;0f156: 50ee001a
-_SkipPods_0F15A:
+_SkipPods:
 	MOVE.B	(27,A6),D0		;0f15a: 102e001b
 	CMPI.B	#$05,D0			;0f15e: 0c000005
 	BEQ.S	_Sctr_Antv		;0f162: 6706
@@ -25280,14 +25285,14 @@ _1336A:
 	MOVE.W	#$00fb,intOutroMsg	;13392: 33fc00fb0002defc
 	MOVE.L	#strOutro3MGL,ptrOutroImg ;1339a: 23fc0001ae9e0002defe
 _133A4:
-	MOVE.B	#$04,intAlienColonies	;133a4: 13fc00040002df05
+	MOVE.B	#$04,intVictory		;133a4: 13fc00040002df05
 	RTS				;133ac: 4e75
 _133AE:
 	TST.B	D2			;133ae: 4a02
 	BNE.S	ret133CC		;133b0: 661a
 	MOVE.W	#$00fa,intOutroMsg	;133b2: 33fc00fa0002defc
 	MOVE.L	#strOutro2MGL,ptrOutroImg ;133ba: 23fc0001ae840002defe
-	MOVE.B	#$04,intAlienColonies	;133c4: 13fc00040002df05
+	MOVE.B	#$04,intVictory		;133c4: 13fc00040002df05
 ret133CC:
 	RTS				;133cc: 4e75
 _133CE:
@@ -25974,9 +25979,9 @@ _13BC8:
 	BSR.W	_DailyMissileCon	;13be0: 610003b0
 	BSR.W	_DailySatSilo		;13be4: 61000480
 	BSR.W	_DailyEvents		;13be8: 610018ae
-	TST.B	intAlienColonies	;13bec: 4a390002df05
+	TST.B	intVictory		;13bec: 4a390002df05
 	BEQ.S	_13C04			;13bf2: 6710
-	SUBQ.B	#1,intAlienColonies	;13bf4: 53390002df05
+	SUBQ.B	#1,intVictory		;13bf4: 53390002df05
 	BNE.S	_13C04			;13bfa: 6608
 	MOVE.B	#$0a,intNewScreen	;13bfc: 13fc000a0002e488
 _13C04:
@@ -28793,7 +28798,7 @@ loop15AAA:
 	BMI.S	_15B18			;15ac6: 6b50
 	MOVEA.L	A0,A6			;15ac8: 2c48
 	MOVE.B	#$0b,(27,A6)		;15aca: 1d7c000b001b
-	JSR	_Missiles_0F0E4		;15ad0: 4eb90000f0e4
+	JSR	_MissilesPods		;15ad0: 4eb90000f0e4
 	MOVE.B	(8,A6),D0		;15ad6: 102e0008
 	MOVEQ	#70,D1			;15ada: 7246
 	CMPI.B	#$2d,D0			;15adc: 0c00002d
@@ -40664,7 +40669,7 @@ intCurrentAlienID:
 	DS.W	1			;2df02
 flgUnknown61:
 	DS.B	1			;2df04
-intAlienColonies:
+intVictory:
 	DS.B	1			;2df05
 ptr2DF06:
 	DS.L	64			;2df06

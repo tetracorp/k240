@@ -11,8 +11,8 @@ The March 1994 issue of CU Amiga Magazine came with coverdisk 77, an exclusive
 demo version of K240. It provides an insight into the state of development of
 the game as it neared completion, and has some interesting quirks.
 
-A more thorough comparison between the demo version and the full release is
-intended at some point in future.
+This article brlefly describes the demo's release and goes into detail on how it
+differs from the finished release.
 
 1. Table of Contents
 {:toc}
@@ -99,6 +99,9 @@ ship sprites, mouse pointers, window frames, fleet icons, and the alien building
 and ship sprites (which represent the Kll-Kp-Qua). Even the sprite for the
 unused Terran ship called the Orbital Shuttle is there.
 
+Sprites for the different alien ships and buildings are of course absent, since
+the demo lacks the external alien data files.
+
 ### Sci-Tek background
 
 | Demo | Full game |
@@ -156,38 +159,105 @@ However, code for at least several cheats is observed to be missing in the demo.
 There is no check for the `SKYSCRAPER` instant building flag, no code which adds
 50 population as per `LEMINGS`, no code which inverts the blueprint list as
 `WIDGET`, no code which adds 100,000 credits as `LOADSADOSH`, and none which
-adds missiles as `ICBM`. The key scancode sequences for these cheats are
+adds missiles as `ICBM`. The key scancode sequences for these cheats are also
 missing.
 
 ### Missiles
 
-Stasis and Mega missiles are non-functional.
+Explosive missiles strike only a single square. In the final game they strike
+four.
 
-You can't normally acquire these missiles in the demo, since missile
-construction is disabled, and you don't start with any Stasis, Mega, Nuclear, or
-Anti-Virus. However, if you add them with a memory editor, Mega and Stasis have
-no effect when they land. Nuclear and Anti-Virus seem to work more or less
-normally.
+Stasis and Mega missile have no effect. Although the code is missing, there are
+references elsewhere in the code, such as the Ore Eaters exploding abandoned
+asteroid flag which calls Mega. This suggests they may have been edited out. You
+can't normally acquire these missiles in the demo, since you don't start with
+any.
+
+You also don't start with Nuclear or Anti-Virus, although the code for these
+works normally if you cheat one in.
 
 ### Missing features
 
 Several major gameplay options are missing from the demo. Some of these are
-intentional limitations, but many probably reflect the unfinished state of the
+intentional limitations, but many reflect the unfinished state of the
 game at this point. (Aspiring game developers should remember Hofstadter's Law:
 It always takes longer than you expect, even when you take into account
 Hofstadter's Law.)
 
 Missing features include demolishing buildings, intercepting fleets, building
 missiles, building ships, building an Orbital Space Dock, building or launching
-satellites, Intelligence reports, establishing new colonies, loading or onto a
+satellites, Intelligence reports, establishing new colonies, loading ore onto a
 Transporter, selling ore to the Imperial Transporter, buying blueprints, gaining
 money based on colonist count, loading and saving the game.
 
 Only one alien is available. The voice sounds and intro are not available,
 although this should be obvious given that the demo fits on a single disk
-instead of three.
+instead of three. Voice-specific code is missing from the game entirely. There
+are no strings for French or German translations.
 
-### Gameplay differences
+### Buildings
+
+The CPU's output does not deplete over time.
+
+Anti-Missile Pods have a higher chance to shoot down missiles. In the final game
+it's 21% for the first Pod and +2% for each additional Pod (or +4% for Terran
+missiles, i.e. firing missiles at yourself or at an alien with Anti-Missile
+tech). In the demo, it's 31% for the first Pod and +4% for each additional Pod
+(+8% for Terran missiles). The final game caps out at 70%, while in the demo
+it's 80%. It's a moot point, since neither you nor the enemy can build them.
+
+The code for missile, satellite, ship, and space dock construction are missing
+entirely.
+
+Naturally, since you can't purchase blueprints, there are several buildings that
+you can't build. However, some of them would still work if you cheated them in.
+The Seismic Penetrator still works, although you can't build one in the demo and
+your asteroid never starts with any Traxium or Nexos. Gravity Nullifier and
+Asteroid Engines will still consume power, and shut down in a power shortage.
+
+### Random events
+
+The Comet, More Ore, and Reinforcements random events have the standard chance,
+instead of double chance as in the final game.
+
+The Gravitation Vortex event is removed. The text for the event still appears in
+the game strings. This may be because you can't build Asteroid Engines or
+Gravity Nullifier, so you have no way of handling this event. The dummy entry
+for the event still appears, but it does nothing.
+
+The Ore Bribe event and Fixed Ore Price event are removed the same way. This is
+likely because you can't sell ore in the demo.
+
+### Aliens
+
+A lot of code for alien-specific abilities is missing. This includes the
+Swixaran vulnerability to fire, the Swixaran cloaking device, the Rigellian and
+Swixaran unique ship hardpoints, the Rigellian more powerful Nuclear, the
+Rigellian asteroid-wide Shield Generator, and the Ax'Zilanth carefully measured
+missile response. Swixaran and Rigellian building name strings are also missing.
+
+There are some instances where alien-specific code seems to have been
+intentionally cut or commented out for the demo. For example, in the code which
+handles alien asteroids leaving the edge of the screen, there is a specific
+check for the Ax'Zilanth Mass Displacement Podule, so that the asteroid can
+teleport to save itself. However, the line which calls the teleport is
+conspicuously missing from the demo.
+
+Several jump tables for alien-specific code list five aliens, not six. The order
+of the Swixarans and Rigellians are reversed in the list, also. Many jump tables
+also link to the same code for all aliens; e.g. only the shipbuilding code for
+the first alien is there, and all five listed aliens are coded to use the same
+one. The code for the other aliens' versions is missing.
+
+The alien Vortex Mine has a 20% hit chance, same as the Terran version. In the
+full version, it's 10%.
+
+The Ax'Zilanth Static Inducer missile has no effect. Most unique alien missiles
+have no effect.
+
+Aliens never colonize new asteroids.
+
+### Other gameplay differences
 
 You receive a notification when an enemy ship enters sensor range. The full game
 has a voice clip for this (`enemyves.mgl` or "enemy vessel detected"), but it's
@@ -202,7 +272,13 @@ missiles. You start with a large amount of money, some of which has already been
 distributed into Construction and Intelligence, although Construction is the
 only thing you can spend money on in the demo.
 
-You can see the enemy asteroid surface without a spy satellite.
+However, you can't gain money by any means. You can't sell ore, don't receive
+income from colonists, don't get bounties for discovering asteroids or
+destroying large ships or alien colonies, and the ore bribe event has been
+removed.
+
+You can see the enemy asteroid surface without a spy satellite. This may be
+because the Intel system was added late in development.
 
 ### Bugs
 
@@ -211,3 +287,25 @@ lets you re-open the missile window while they're firing and increase the number
 of missiles above 20.
 
 Darkened window backgrounds disappear before the window does.
+
+Some alien ship graphics glitch out. Pictured below, the blue shape in the
+bottom left quadrant is one glitched ship, and the bright vertical line on the
+right is another.
+
+![K240 demo graphical glitches](../images/k240-demo-bug1.png "K240 demo graphical glitches")<br>Graphical glitches.
+{:.center}
+
+### Asteroid maps
+
+Asteroid map 0, the player's first colony, is a different shape entirely, based
+on asteroid map 15. Asteroid map 1, the alien's first colony, is the map used as
+the player colony in the final game, with slight changes.
+
+Asteroid maps 9 and 12 are slightly different.
+
+### Technical differences
+
+Ships take up 52 bytes each instead of 54. The buffer can store 750 ships
+instead of 700 as in the final game.
+
+Asteroids take up 740 bytes instead of 750.
