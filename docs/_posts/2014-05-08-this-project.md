@@ -19,9 +19,10 @@ general, such as its release history.
 
 As of April 2023, the game has been explored and analyzed thoroughly, and all of
 the questions have been answered. Thanks to everyone who helped make this
-possible. There are still a few unknown variables and I could still delve a
-little deeper into the CU Amiga demo build, but I'm officially marking the
-project complete.
+possible. There are still a few unknown variables, and bugs are still
+occasionally filed at the
+[issue tracker](https://github.com/tetracorp/k240/issues), but other than that
+I'm effectively marking the project complete.
 
 Where to from here? Contributor drDragonSmoke has released
 [K240-Bugfix](https://github.com/drDragonSmoke/K240-Bugfix), a build which fixes 

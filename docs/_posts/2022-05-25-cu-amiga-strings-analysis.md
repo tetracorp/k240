@@ -127,7 +127,7 @@ demo and final release, or which were not added until the final release.
 | 552 |    | LINE: |
 | 553 |    | WORD: |
 | 554 |    | FLEET IS NOT ORBITTING THE CURRENT ASTEROID! |
-| 561 | CR: 3740000 | CD: xxxxxxx |
+| 561 | CR: xxxxxxx | CD: xxxxxxx |
 | 564 | TETRACORP SYSTEMS STATUS..... | SPEECH: ACTIVATED. |
 | 565 |    | SPEECH: DEACTIVATED. |
 | 568 | SORRY, THIS OPTION IS NOT AVAILABLE \nON THIS DEMO. PLEASE BUY THE GAME. | SAVE GAME FACILITY...\n\nINSERT SAVE DISK IN DRIVE DF0:\nPRESS LEFT MOUSE BUTTON WHEN READY... |
@@ -283,10 +283,7 @@ mentioned in the game manual.
 for when ordering a fleet to guard an asteroid they aren't at.
 
 561
-: Abbreviation for credits changed from "CR" to "CD". Note that the demo
-hardcodes the starting text string as 3,740,000, which is also the default
-starting money in the demo. The full game just replaces them with the letter
-"x", since it's changed when the game begins anyway.
+: Abbreviation for credits changed from "CR" to "CD".
 
 564, 565
 : Enabling and disabling speech. The string in this approximate location
