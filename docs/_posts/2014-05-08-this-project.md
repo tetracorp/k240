@@ -82,7 +82,7 @@ Some helpful methods to make sense of this include:
 known price of a ship. This makes it easy to zero in on code relating
 to certain functions.
 2. Find-replacing variable names throughout the code and adding comments
-once a fuction has been understood. This sometimes makes other parts clearer.
+once a function has been understood. This sometimes makes other parts clearer.
 3. Identifying the random number generator function. This is typically
 used to "roll dice" or simulate chance, and makes it very easy to zero
 in on game rules.

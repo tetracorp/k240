@@ -219,7 +219,7 @@ Amiga icon file.
 
 ### k240\_3:Install-k240, Install-k240.info
 
-K240 hard disk install script, written by Graeme Ing. Based on the _Heroquest 2:
+K240 hard disk install script, written by Graeme Ing. Based on the _HeroQuest 2:
 Legacy of Sorasil_ HD installer script by Kevin Dudley. It won't install unless
 you have at least 2,100,000 bytes free. The .info file is its icon, which
 launches it with the included Installer program.
@@ -306,7 +306,7 @@ Speech audio files. Compressed in MGL format.
 | `RESOURCE.MGL` | "Resource deficiency"            |
 | `SCREPORT.MGL` | "Scout report"                   |
 | `SECREP.MGL`   | "Security report"                |
-| `welcome.mgl`  | "Welcomt to Sci-Tek"             |
+| `welcome.mgl`  | "Welcome to Sci-Tek"             |
 
 ### Save game format
 

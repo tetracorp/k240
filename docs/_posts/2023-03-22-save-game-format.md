@@ -436,7 +436,7 @@ is the format for the ship data structure. (Not fully discovered yet.)
 | 122    | 22     | Missiles launching            | 
 | 144    | 22     | Missile build queue           | 
 | 166    | 2      | Total launching               | 
-| 168    | 1      | Sattelites in silo?           | 
+| 168    | 1      | Satellites in silo?           | 
 | 169    | 1      | Satellites launching?         | 
 | 170    | 1      | Satellite build queue         | 
 | 171    | 1      |                               | 

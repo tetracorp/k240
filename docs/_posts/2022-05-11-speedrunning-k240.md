@@ -46,7 +46,7 @@ You still need to defeat all the other Swixaran asteroids to win, however.
 
 As speedrunners tend to prefer whichever metric results in the lowest time, I
 imagine the Any% run begins when you click to continue on the Last Minute Intel
-screen, and ends when the win screen graphic apears. By this metric, the de
+screen, and ends when the win screen graphic appears. By this metric, the de
 facto initial record holder is 
 [Thiima's 2009 run](https://www.youtube.com/watch?v=Oc7zqEgF4ko&list=PL04BD4BBE079FF6AD&index=1)
 at 1h 57m 2s.

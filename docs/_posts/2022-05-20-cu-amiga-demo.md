@@ -11,7 +11,7 @@ The March 1994 issue of CU Amiga Magazine came with coverdisk 77, an exclusive
 demo version of K240. It provides an insight into the state of development of
 the game as it neared completion, and has some interesting quirks.
 
-This article brlefly describes the demo's release and goes into detail on how it
+This article briefly describes the demo's release and goes into detail on how it
 differs from the finished release.
 
 1. Table of Contents
@@ -148,7 +148,7 @@ did exist at this point in development and were merely stripped from the demo:
   appears in the demo. This is the list of extracted buttons for the `PANEL`
   cheat found in the full game. This also tells us that the PANEL layout was
   complete by this point.
-- There is a conspicious gap in the code where the key scancodes for the cheat
+- There is a conspicuous gap in the code where the key scancodes for the cheat
   codes are normally located, including a 168-byte run of zeroes which would be
   consistent with 14 bytes for each of 12 cheat codes. This may suggest that all
   twelve cheat codes were present at this point, and similarity might be noted

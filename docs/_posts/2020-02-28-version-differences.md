@@ -262,7 +262,7 @@ March 1994, so that the magazines could review the game in time for their May
 completed until 20 May 1994, and magazines released their May issues in April.
 
 Only a tiny number of review copies were distributed, and the fate of the disks
-after the magaziness closed down is unknown&mdash;if you have a copy, please
+after the magazines closed down is unknown&mdash;if you have a copy, please
 [respond to the ticket](https://github.com/tetracorp/k240/issues/4) on the
 project issue tracker, as you'd be a major help to the project.
 

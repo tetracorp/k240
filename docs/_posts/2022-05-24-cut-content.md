@@ -118,7 +118,7 @@ Kll-Kp-Qua Science Hive
 : ![Science Hive](../images/alien_bldg/kll_science_hive.gif "science hive"){:.left}
 The game code says that this operates the same as the Data Hive, which helps to
 spot spy satellites. However, none of the building clusters include it, so it
-wll never be built. One of the clusters attempts to build a non-existent
+will never be built. One of the clusters attempts to build a non-existent
 building in the Anti-Missile Pod slot, so it may be that the Science Hive was
 meant to take that slot, although it could also be that Anti-Missile Pods were
 removed to make the first alien easier.

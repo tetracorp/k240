@@ -192,7 +192,7 @@ was probably added quite late.
 
 272
 : Text used when a colony has been destroyed by a Mega missile - "BY A DEEP
-SPACE MISSILE" in the demo, but "BLOWN TO PIECES!" This makes it ambigious how
+SPACE MISSILE" in the demo, but "BLOWN TO PIECES!" This makes it ambiguous how
 the colony was destroyed. This might be because one of the Swixaran large ships
 has a self-destruct hardpoint that works as a Mega missile.
 
@@ -238,7 +238,7 @@ asteroid but the C.P.U. hasn't finished building yet.
 
 412
 : One of several notices that a feature is unavailable in the demo. This is the
-blueprint "[PURCHASED]" text, but it's been repurposed to notify the player tha
+blueprint "[PURCHASED]" text, but it's been repurposed to notify the player that
 the feature has been disabled.
 
 451, 452, 453, 454, 455, 456 458, 479, 480, 481, 482

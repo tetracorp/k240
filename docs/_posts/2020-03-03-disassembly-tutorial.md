@@ -46,7 +46,7 @@ probably data being misinterpreted as code. Also, `EXT_` declarations often
 suggest data misinterpreted as code.
 
 You don't need a perfect disassembly just to analyze and understand the code,
-but the closer you can get, the better. It helps if you intend on modifying nad
+but the closer you can get, the better. It helps if you intend on modifying and
 reassembling the program.
 
 There are some other well-known tools, though I haven't used them for this

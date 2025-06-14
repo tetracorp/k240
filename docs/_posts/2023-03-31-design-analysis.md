@@ -64,7 +64,7 @@ The fundamental failure of K240 as an RTS is its tactical controls.
 
 _Dune II_, _Command & Conquer_, and _StarCraft_ all take place on a
 two-dimensional plane, with most combat involving ground-based units. When a
-player clicks to select a unit's destination, the spot selected is unambigious.
+player clicks to select a unit's destination, the spot selected is unambiguous.
 
 However, K240 takes place in what is nominally three-dimensional space, with
 all combat taking place between spaceships. It is therefore not possible to
@@ -96,7 +96,7 @@ numbers of ships to defeat the enemy by brute force.
 
 ### User interface
 
-K240 featured an innovative and miniminalist user interface. There was no
+K240 featured an innovative and minimalist user interface. There was no
 established user interface standard for this type of game yet, and many strategy
 players enjoyed learning complex new games by reading by reading a large manual,
 which in K240's case was over 28,000 words for the English version alone.

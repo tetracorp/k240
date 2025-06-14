@@ -341,7 +341,7 @@ Each Ax'Zilanth colony considers starting a new colony every 35 days. The
 colonization countdown freezes if there is no Strategy Control. The initial
 colony takes 80 days to activate, and each new colony takes 40 days to activate.
 
-A colony ship carries 100 population, altough this does not decrease the
+A colony ship carries 100 population, although this does not decrease the
 population on the asteroid.
 
 A new colony builds the following cluster of buildings:
@@ -427,7 +427,7 @@ instances. If an asteroid is about to move off the edge of the screen, and it is
 not affected by a gravity nullifier effect, it will teleport. It will also
 teleport to avoid an asteroid collision, if necessary; however, only if it
 cannot resolve the collision by firing a Mega missile (i.e. it has no Mega, no
-missile silos, or the colliding asteroid is an Ax'zilant colony). A Mass
+missile silos, or the colliding asteroid is an Ax'zilanth colony). A Mass
 Displacement Podule is required on the teleporting asteroid in these
 circumstances.
 

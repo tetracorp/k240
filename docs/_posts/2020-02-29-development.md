@@ -282,7 +282,7 @@ from the installer for _HeroQuest II: Legacy of Sorasil_ (1994)).
 A lot of unique development information is revealed in an in-depth
 [preview](http://amr.abime.net/review_29004) in the March 1994 issue of CU
 Amiga. Tony Dillon drove to Sheffield to interview Graeme Ing in person,
-something CU Amiga often did, alllowing them access to some unique information,
+something CU Amiga often did, allowing them access to some unique information,
 in this including case sprite sheets and the intro graphics.
 
 Something interesting appears in the screenshot of the alien load screen. We see
@@ -372,7 +372,7 @@ and the old sprite for the Environment Control (the white building at the
 right).
 
 Reviews of K240 in the Amiga press were positive. CU Amiga rated it 91%,
-receiving the CU Screen Star award for games recieving 85-92%, though missing
+receiving the CU Screen Star award for games receiving 85-92%, though missing
 out on the ultimate Super Star award. The One Amiga rated it 90%; Amiga Format
 84%; and Amiga Power 83%.
 
@@ -432,7 +432,7 @@ assuming it began as soon as the Amiga version of _K240_ was finished.
 Graeme Ing, sole programmer on _K240_, went on to work on a number of other
 titles, including _Newman/Haas IndyCar featuring Nigel Mansell_ for Sega Mega
 Drive, _Shadow Fighter_ (1995),_Normality_ (1996), _EverQuest_ (1999),
-_Everquest II_ (2004), and the _Star Wars: Galaxies_ series.
+_EverQuest II_ (2004), and the _Star Wars: Galaxies_ series.
 
 Pete Daniels, K240's artist and co-designer, went on to work on games including
 _World Championship Snooker 2004_ (2004), _Kinect Sports: Rivals_, and _Sea of

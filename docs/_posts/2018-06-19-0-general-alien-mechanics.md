@@ -149,7 +149,7 @@ build missiles.
 Aliens usually select their missile targets randomly from the Terran colonies
 known to them. The timing and circumstances under which missiles are fired
 varies by alien. Many aliens will intentionally fire a Mega missile against an
-incoming terran asteroid to prevent a collision.
+incoming Terran asteroid to prevent a collision.
 
 The selection of missiles varies. Some will fire a random selection of missiles,
 while other aliens have specific sets of missiles which are fired in certain

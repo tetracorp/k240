@@ -212,7 +212,7 @@ described in the manual).
 ![powerplant](../images/buildings/powerplant.png "powerplant"){:.right}
 
 Un-mined Asteros depletes at a rate of one unit per four days, _even_ if no
-Powerplants hae been built. This is probably a bug, although it could be
+Powerplants have been built. This is probably a bug, although it could be
 interpreted as representing the half-life of a radioactive element.
 
 Powerplants run on un-mined ore _in the asteroid_, not in storage. As long as
