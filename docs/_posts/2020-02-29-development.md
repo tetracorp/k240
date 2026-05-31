@@ -244,7 +244,7 @@ shields). It describes a count of 7 ship types, one short of the final game. I
 suspect the ship missing at this point (Aug 1993) is the Orbital Space Dock, the
 name string for which appears much later in the strings list than the rest. The
 NASA cheat code string in the CU Amiga demo reads "ENTER SHIP 1-7" rather than
-"ENTER SHIP 1-8", so the OSD may well have been added after August 1993.  It's
+"ENTER SHIP 1-8", so the OSD may well have been added after August 1993. It's
 entirely possible that the space dock was inspired by _Star Trek: Deep Space
 Nine_, the first episode of which aired in the UK for the first time on 1 August
 1993.
@@ -299,15 +299,27 @@ version of the game code than the final retail release, and presumably a similar
 state to that described in the magazine issue. Given publication deadlines for
 the March issue of CU Amiga, the demo was probably completed in January 1994,
 February at the latest. We can't tell exact dates from disk analysis as the
-filenames are dated 1978, meaning the disk was prepared on an Amiga without 
+filenames are dated 1978, meaning the disk was prepared on an Amiga without a
+battery-backed clock.
 
-More analysis of the demo executable needs to be done to determine what features
-already existed in that version.
+Analysis of the
+[demo version](https://tetracorp.github.io/k240/prototypes/cu-amiga-demo.html)
+suggests various small changes were made in the last months of development. The
+code for certain major features like ship construction is missing entirely,
+although it's likely that these were simply omitted from the build.
 
 The CU Amiga demo's win screen promises a release in March 1994, which it would
 also miss. A possible reason for the delay is that Ing also worked on other
 games for Gremlin in 1993 and 1994, including CD development for the CD32 ports
 of _Striker_ and _Zool_.
+
+To get a sense of development costs, some general industry statistics appeared
+in the July 1994 issue of _The One Amiga_, pp.32-33, "Fantastic Facts", which
+interviewed Gremlin's Steve McKevitt and others. It was average for an Amiga
+game at this time to cost around £65,000 to develop, and £35,000 in marketing.
+Game packaging cost as much as £2.75 for games with big manuals. Typical sales
+figures were 20,000 to 25,000, with the company earning about £10 per copy sold.
+5,000 sales would be considered a failure, and 50,000 a major hit.
 
 ### Publication
 
@@ -328,21 +340,31 @@ Due to how close it was to the deadline, Mark Glossop had to personally deliver
 the master floppies to the disk duplication company in Burnley or thereabouts
 (some 65 miles or so from Sheffield), signing off on the game as bug free. A
 run of 30,000 copies was produced. (It is uncertain whether Glossop is referring
-to the v1.886 release or the v2.000 release here.)
+to the v1.886 release or the v2.000 release here, though probably the former;
+according to _The One Amiga_'s July 1994 issue, 30,000 was a reasonable sales
+target for an Amiga game at this time.)
 
-K240, presumably, was released shortly thereafter.
+K240 was released shortly thereafter, presumably between Monday, 23 May 1994,
+and Wednesday, 25 May 1994.
 
-A copy of the game was quickly acquired by someone credited as "Troops & Troll"
-and provided to pirate groups TRSI & Zenith (TRZ), who quickly stripped the
-manual copy-protection from the game (a two-byte change) and released a pirate
-copy on 26 May 1994. In other words, the game was cracked not within six days
-of going on sale, but within six days of the finished build.
+A copy of the game was quickly acquired by a person or persons credited as
+"Troops & Troll" and provided to pirate groups TRSI & Zenith (TRZ), who quickly
+stripped the manual copy-protection from the game (a two-byte change) and
+released a pirate copy on 26 May 1994. In other words, the game was cracked not
+within six days of going on sale, but within six days of the finished build.
 
-A second build of the game, v2.000, was completed on Tuesday, 7 June 1994
-at 11:15 am. Lead programmer Graeme Ing recalls that it was produced to fix
-bugs. Analysis of the game shows that the only substantive change was to fix
-the [fleet bug](../game-mechanics/bugs.html),
-a random crash which sometimes occurred when moving fleets.
+A second build of the game, v2.000, was completed on Tuesday, 7 June 1994 at
+11:15 am. Lead programmer Graeme Ing recalls that it was produced to fix bugs.
+Analysis of the game shows that, other than updating the version string, the
+only change was to fix the [fleet bug](../game-mechanics/bugs.html), a random
+crash which sometimes occurred when moving fleets.
+
+A print run was evidently made with the new build. This featured white disk
+printing instead of orange (perhaps intentionally, to make it easier to tell the
+versions apart), a flyer advertising a tutorial VHS tape, stickers on the box
+noting high magazine review scores, and a card offering a contest entry. This
+print run appears to have been smaller, perhaps 10,000 or less, and replacement
+copies of disk 2 were also offered to customers.
 
 Patrick Phelan is credited with providing the game's music. However, K240 has no
 music. [Leave a reply](https://github.com/tetracorp/k240/issues/5)

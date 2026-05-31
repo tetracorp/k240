@@ -234,15 +234,29 @@ tracker.
 
 ### Physical media differences
 
-Some K240 disks have the label printed in orange, while others are printed in
-white. Based on photos of copies of the game on eBay and elsewhere, the "white"
-disks were accompanied with the K240 tutorial VHS flyer and a Gremlin prize draw
-entry card, and their boxes had stickers attached advertising high review scores
-(CU Amiga 91%, The One 90%). Both versions were widely available.
+Some K240 disks have the label printed in orange, while others were printed in
+white. Based on the appearance of copies sold on eBay over several years, the
+white disks were from a second, smaller print run. The change was probably made
+to differentiate the original version 1.886 from the patched version 2.000.
 
-The most plausible explanation is that the white-label disks are from a second
-print run. I have a hypothesis that all orange disks are v1.886, while white
-disks are v2.000.
+The white-label copies were accompanied by a flyer advertising a K240 tutorial
+VHS tape and a Gremlin prize draw entry card. Their boxes typically also had
+stickers attached advertising high review scores (CU Amiga 91%, The One 90%).
+
+Additionally, in 2026 a copy of K240 appeared on eBay with an orange disk 1 and
+3, but a white disk 2. This is consistent with the information that customers
+were able to return their faulty disk for a replacement; only the main game
+executable on disk 2 was changed with version 2.000. It would have been
+logistically easy to mail out new disks instead of having a technician update
+each faulty disk on an Amiga computer.
+
+The white label disks appear to be significantly less common, which is
+consistent with them being a later print run. According to director Mark
+Glossop, a print run was 30,000 copies was produced; this may refer to the
+original orange label version. According to _The One Amiga_ July 1994,
+30,000 was a moderate sales target for the Amiga at that time. At a rough
+estimate, then, the white label version probably had fewer than 10,000 copies
+printed.
 
 The Polish release of the game was published by a separate company, Licomp, and
 had its own unique [box art](https://hol.abime.net/2543/boxscan) as a result,
